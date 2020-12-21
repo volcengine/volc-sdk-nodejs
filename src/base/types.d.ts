@@ -70,6 +70,9 @@ declare namespace ServiceType {
      * openpai host default is 'http'
      */
     protocol?: string;
+    /**
+     * default open api version of this service
+     */
     defaultVersion?: string;
   }
   interface Options extends OptionsBase {
@@ -81,9 +84,17 @@ declare namespace ServiceType {
     query?: any;
   }
   interface CreateAPIParams {
-    Action: string;
+    /**
+     * OpenAPI Version. If not provide, will use service defaultVersion.
+     */
     Version?: string;
+    /**
+     * http method like GET POST PUT
+     */
     method: string;
+    /**
+     * body content type. support: json urlencode form-data
+     */
     contentType: "json" | "urlencode" | "form-data";
   }
 }

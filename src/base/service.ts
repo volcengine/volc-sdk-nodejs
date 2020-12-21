@@ -39,6 +39,13 @@ export default class Service {
   setHost = (host: string) => {
     this.options.host = host;
   };
+  /**
+   * create api function
+   * @param Action OpenAPI Action
+   * @param createParams.Version OpenAPI Version. If not provide, will use service defaultVersion.
+   * @param createParams.method http method like GET POST PUT
+   * @param createParams.contentType body content type. support: json urlencode form-data
+   */
   createAPI<RequstData, Result>(Action: string, createParams?: ServiceType.CreateAPIParams) {
     const { Version, method = "GET", contentType } = createParams || {};
     return (

@@ -29,6 +29,10 @@ export class IamService extends Service {
     });
   }
   ListUsers = this.createAPI<ListPrams, ListUserResult>("ListUsers");
+  UpdateUser = this.createAPI<ListPrams, ListUserResult>("UpdateUser", {
+    method: "POST",
+    contentType: "urlencode",
+  });
 }
 
 export const defaultService = new IamService();
