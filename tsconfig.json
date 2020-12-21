@@ -1,0 +1,27 @@
+{
+    "compilerOptions": {
+        "baseUrl": ".",
+        "outDir": "lib",
+        "module": "commonjs",
+        "target": "es2017",
+        "lib": ["es6", "dom", "es2017"],
+        "sourceMap": true,
+        "allowJs": false,
+        "moduleResolution": "node",
+        "rootDir": "src",
+        "forceConsistentCasingInFileNames": true,
+        "noImplicitReturns": true,
+        "noImplicitThis": true,
+        "noImplicitAny": false,
+        "strictNullChecks": true,
+        "suppressImplicitAnyIndexErrors": true,
+        "noUnusedLocals": true,
+        "importHelpers": true,
+        "esModuleInterop": true,
+        "declaration": true,
+        "downlevelIteration": true,
+        "resolveJsonModule": true,
+        "types": ["jest", "node"]
+    },
+    "exclude": ["node_modules", "lib", "test"]
+}
