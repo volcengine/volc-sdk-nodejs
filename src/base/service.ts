@@ -1,9 +1,15 @@
 import Signer from "./sign";
 import fetch from "./fetch";
-import { RequestInit } from "node-fetch";
-import qs from "querystring";
+import { AxiosRequestConfig } from "axios";
 import { packageName } from "./utils";
 import FormData from "form-data";
+import {
+  OpenApiResponse,
+  ServiceOptions,
+  CreateAPIParams,
+  FetchParams,
+  ServiceOptionsBase,
+} from "./types";
 
 const defaultOptions = {
   host: "open.volcengineapi.com",
@@ -11,14 +17,14 @@ const defaultOptions = {
   protocol: "https:",
 };
 export default class Service {
-  constructor(options: ServiceType.Options) {
+  constructor(options: ServiceOptions) {
     this.options = {
       ...defaultOptions,
       ...options,
     };
   }
 
-  private options: ServiceType.Options;
+  private options: ServiceOptions;
 
   setAccessKeyId = (accessKeyId: string) => {
     this.options.accessKeyId = accessKeyId;
@@ -46,12 +52,12 @@ export default class Service {
    * @param createParams.method http method like GET POST PUT
    * @param createParams.contentType body content type. support: json urlencode form-data
    */
-  createAPI<RequstData, Result>(Action: string, createParams?: ServiceType.CreateAPIParams) {
+  createAPI<RequstData, Result>(Action: string, createParams?: CreateAPIParams) {
     const { Version, method = "GET", contentType } = createParams || {};
     return (
       requestData: RequstData,
-      params?: ServiceType.FetchParams & RequestInit,
-      options?: ServiceType.OptionsBase
+      params?: FetchParams & AxiosRequestConfig,
+      options?: ServiceOptionsBase
     ) => {
       const requestParams = {
         ...params,
@@ -68,7 +74,7 @@ export default class Service {
               ...requestParams.headers,
               "content-type": "application-json",
             };
-            requestParams.body = JSON.stringify(requestData);
+            requestParams.data = requestData;
             break;
           }
           case "urlencode": {
@@ -76,6 +82,7 @@ export default class Service {
             Object.keys(requestData).forEach(key => {
               body.append(key, requestData[key]);
             });
+            requestParams.data = body;
             break;
           }
           case "form-data": {
@@ -87,6 +94,7 @@ export default class Service {
               ...requestParams.headers,
               "content-type": "application/form-data",
             };
+            requestParams.data = body;
             break;
           }
           default: {
@@ -98,14 +106,14 @@ export default class Service {
     };
   }
   fetchOpenAPI<Result>(
-    params: ServiceType.FetchParams & RequestInit,
-    options?: ServiceType.OptionsBase
+    params: FetchParams & AxiosRequestConfig,
+    options?: ServiceOptionsBase
   ): Promise<OpenApiResponse<Result>> {
     const realOptions = {
       ...this.options,
       ...options,
     };
-    const requestInit = {
+    const requestInit: any = {
       pathname: "/",
       ...params,
       params: {
@@ -116,18 +124,17 @@ export default class Service {
       region: realOptions.region || defaultOptions.region,
       method: params.method || "GET",
     };
+    if (requestInit.data) {
+      requestInit.body = requestInit.data;
+    }
     const signer = new Signer(requestInit, realOptions.serviceName);
     const { accessKeyId, secretAccessKey, sessionToken } = realOptions;
     if (!accessKeyId || !secretAccessKey) {
       throw new Error(`[${packageName}] accessKeyId and secretAccessKey is necessary`);
     }
     signer.addAuthorization({ accessKeyId, secretAccessKey, sessionToken });
-    let uri = `${realOptions.protocol || defaultOptions.protocol}//${realOptions.host ||
+    const uri = `${realOptions.protocol || defaultOptions.protocol}//${realOptions.host ||
       defaultOptions.host}${requestInit.pathname}`;
-    const queryString = qs.stringify(requestInit.params, undefined, undefined, {
-      encodeURIComponent: v => v,
-    });
-    if (queryString) uri += "?" + queryString;
     return fetch(uri, requestInit);
   }
 }

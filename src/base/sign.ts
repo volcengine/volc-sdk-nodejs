@@ -1,5 +1,7 @@
 import hmacSHA256 from "crypto-js/hmac-sha256";
 import SHA256 from "crypto-js/sha256";
+import { RequestObj, SignerOptions, Credentials } from "./types";
+import FormData from "form-data";
 
 const util = {
   crypto: {
@@ -75,11 +77,11 @@ const queryParamsToString = params =>
  * @api private
  */
 export default class Signer {
-  request: SignerType.RequestObj;
+  request: RequestObj;
   serviceName: string;
   signatureCache: boolean;
   bodySha256?: string;
-  constructor(request: SignerType.RequestObj, serviceName: string, options?: SignerType.Options) {
+  constructor(request: RequestObj, serviceName: string, options?: SignerOptions) {
     this.request = request;
     this.request.headers = request.headers || {};
     this.serviceName = serviceName;
@@ -87,13 +89,13 @@ export default class Signer {
     this.bodySha256 = options.bodySha256;
   }
 
-  addAuthorization(credentials: SignerType.Credentials, date?: Date): void {
+  addAuthorization(credentials: Credentials, date?: Date): void {
     const datetime = this.iso8601(date).replace(/[:\-]|\.\d{3}/g, "");
     this.addHeaders(credentials, datetime);
     this.request.headers["Authorization"] = this.authorization(credentials, datetime);
   }
 
-  addHeaders(credentials: SignerType.Credentials, datetime: string) {
+  addHeaders(credentials: Credentials, datetime: string) {
     this.request.headers[constant.dateHeader] = datetime;
     if (credentials.sessionToken) {
       this.request.headers[constant.tokenHeader] = credentials.sessionToken;
@@ -103,6 +105,8 @@ export default class Signer {
       if (typeof body !== "string") {
         if (body instanceof URLSearchParams) {
           body = body.toString();
+        } else if (body instanceof FormData) {
+          body = String(body.getBuffer());
         } else {
           body = JSON.stringify(body);
         }
@@ -112,7 +116,7 @@ export default class Signer {
     }
   }
 
-  authorization(credentials: SignerType.Credentials, datetime: string) {
+  authorization(credentials: Credentials, datetime: string) {
     const parts: string[] = [];
     const credString = this.credentialString(datetime);
     parts.push(`${constant.algorithm} Credential=${credentials.accessKeyId}/${credString}`);
@@ -121,7 +125,7 @@ export default class Signer {
     return parts.join(", ");
   }
 
-  signature(credentials: SignerType.Credentials, datetime: string) {
+  signature(credentials: Credentials, datetime: string) {
     const signingKey = this.getSigningKey(
       credentials,
       datetime.substr(0, 8),
@@ -226,17 +230,8 @@ export default class Signer {
     return date.toISOString().replace(/\.\d{3}Z$/, "Z");
   }
 
-  getSigningKey(
-    credentials: SignerType.Credentials,
-    date: string,
-    region: string,
-    service: string
-  ) {
-    // const credsIdentifier = crypto.hmac(credentials.secretAccessKey, credentials.accessKeyId, 'base64');
-    // const cacheKey = [credsIdentifier, date, region, service].join('_');
-
+  getSigningKey(credentials: Credentials, date: string, region: string, service: string) {
     const kDate = util.crypto.hmac(`${constant.kDatePrefix}${credentials.secretAccessKey}`, date);
-    // debugger;
     const kRegion = util.crypto.hmac(kDate, region);
     const kService = util.crypto.hmac(kRegion, service);
 
