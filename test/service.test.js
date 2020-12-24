@@ -1,46 +1,68 @@
 import Service from "../lib/base/service";
 import { reponseSchemaValidate } from "./schema/response";
+import _get from "lodash.get";
 
 if (!process.env.AccessKeyId || !process.env.SecretAccessKey) {
   throw new Error("process.env.AccessKeyId and process.env.SecretAccessKey is required");
 }
-
-const iamService = new Service({
+const defaultConfig = {
   protocol: "http:",
   host: "volcengineapi-boe.byted.org",
   serviceName: "iam",
   accessKeyId: process.env.AccessKeyId,
   secretAccessKey: process.env.SecretAccessKey,
-});
-test("fetchOpenAPI", async () => {
-  const response = await iamService.fetchOpenAPI({
-    Action: "ListUsers",
-    Version: "2018-01-01",
+  defaultVersion: "2018-01-01",
+};
+const iamService = new Service(defaultConfig);
+
+test("get open api", async () => {
+  const response = await iamService.createAPI("ListUsers", {
+    method: "GET",
+  })({
+    Limit: 5,
   });
   const validateResult = reponseSchemaValidate(response);
   expect(validateResult).toBe(true);
+  expect(_get(response, "ResponseMetadata.Error")).toBe(undefined);
+  expect(_get(response, "Result.Limit")).toBe(5);
 });
-test("default params", async () => {
-  const service = new Service({
-    serviceName: "iam",
-    accessKeyId: process.env.AccessKeyId,
-    secretAccessKey: process.env.SecretAccessKey,
+test("post json open api", async () => {
+  const response = await iamService.createAPI("ListUsers", {
+    method: "POST",
+    contentType: "json",
+  })({
+    Limit: 5,
   });
-  let error;
-  try {
-    const response = await service.fetchOpenAPI({
-      Action: "ListUsers",
-      Version: "2018-01-01",
-    });
-    const validateResult = reponseSchemaValidate(response);
-    expect(validateResult).toBe(true);
-  } catch (e) {
-    error = e;
-  }
-  expect(error).toBe(undefined);
+  const validateResult = reponseSchemaValidate(response);
+  expect(validateResult).toBe(true);
+  expect(_get(response, "ResponseMetadata.Error")).toBe(undefined);
 });
 
-test("without accessKeyId", async () => {
+test("post urlencode open api", async () => {
+  const response = await iamService.createAPI("ListUsers", {
+    method: "POST",
+    contentType: "urlencode",
+  })({
+    Limit: 5,
+  });
+  const validateResult = reponseSchemaValidate(response);
+  expect(validateResult).toBe(true);
+  expect(_get(response, "ResponseMetadata.Error")).toBe(undefined);
+});
+
+test("post form-data open api", async () => {
+  const response = await iamService.createAPI("ListUsers", {
+    method: "POST",
+    contentType: "form-data",
+  })({
+    Limit: 5,
+  });
+  const validateResult = reponseSchemaValidate(response);
+  expect(validateResult).toBe(true);
+  expect(_get(response, "ResponseMetadata.Error")).toBe(undefined);
+});
+
+test("default params check without accessKeyId", async () => {
   const service = new Service({
     serviceName: "iam",
   });

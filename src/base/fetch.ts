@@ -1,5 +1,6 @@
 import fetch, { RequestInit } from "node-fetch";
 import { createDebug } from "./utils";
+// import createHttpProxyAgent from "http-proxy-agent";
 
 const debug = createDebug("fetch");
 
@@ -12,6 +13,7 @@ export default async function request<Result>(
   const reqOption: RequestInit = {
     timeout: 5000,
     ...reqInfo,
+    // agent: createHttpProxyAgent("http://127.0.0.1:8888"),
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
       ...headers,
