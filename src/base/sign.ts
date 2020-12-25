@@ -217,9 +217,6 @@ export default class Signer {
   }
 
   isSignableHeader(key: string) {
-    if (key.toLowerCase().indexOf("x-amz-") === 0) {
-      return true;
-    }
     return unsignableHeaders.indexOf(key) < 0;
   }
 
