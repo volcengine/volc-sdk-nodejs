@@ -5,6 +5,8 @@
   "main": "lib/index.js",
   "scripts": {
     "build": "rm -rf lib && tsc",
+    "dev": "tsc --watch",
+    "dev:proxy": "VOLC_PORXY_PORT=8888 yarn dev",
     "test": "yarn build && jest --env=node"
   },
   "repository": {
