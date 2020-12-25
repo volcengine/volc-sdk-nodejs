@@ -17,7 +17,7 @@ export default async function request<Result>(
     proxy: process.env.VOLC_PORXY_PORT
       ? {
           protocol: "http",
-          host: "127.0.0.1",
+          host: process.env.VOLC_PORXY_HOST || "127.0.0.1",
           port: +process.env.VOLC_PORXY_PORT,
         }
       : undefined,
