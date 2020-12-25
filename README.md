@@ -1,5 +1,5 @@
 # Volcano Engine OpenAPI sdk
-[中文文档](./README.cn.md)
+[中文文档](/volcengine/volc-sdk-nodejs/blob/master/README_zh.md)
 ## Module installation
 ```
 // use npm
