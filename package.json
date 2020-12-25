@@ -5,6 +5,7 @@
   "main": "lib/index.js",
   "scripts": {
     "build": "rm -rf lib && tsc",
+    "lint": "eslint . --ext ts --fix --quiet",
     "dev": "tsc --watch",
     "dev:proxy": "VOLC_PROXY_PORT=8888 yarn dev",
     "test": "yarn build && jest --env=node"
@@ -17,6 +18,8 @@
   "license": "ISC",
   "devDependencies": {
     "@babel/preset-typescript": "^7.12.7",
+    "@commitlint/cli": "^11.0.0",
+    "@commitlint/config-conventional": "^11.0.0",
     "@types/ajv": "^1.0.0",
     "@types/crypto-js": "^4.0.1",
     "@types/debug": "^4.1.5",
@@ -31,6 +34,7 @@
     "eslint-plugin-jest": "^22.6.4",
     "eslint-plugin-prettier": "^3.1.0",
     "eslint-plugin-react": "^7.18.3",
+    "husky": "^4.3.6",
     "jest": "^26.6.3",
     "lodash.merge": "^4.6.2",
     "typescript": "^4.1.3"
@@ -41,5 +45,11 @@
     "debug": "^4.3.1",
     "form-data": "^3.0.0",
     "lodash.get": "^4.4.2"
+  },
+  "husky": {
+    "hooks": {
+      "commit-msg": "commitlint -e $GIT_PARAMS",
+      "pre-commit": "yarn lint"
+    }
   }
 }
