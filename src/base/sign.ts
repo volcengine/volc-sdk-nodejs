@@ -1,5 +1,7 @@
 import hmacSHA256 from "crypto-js/hmac-sha256";
 import SHA256 from "crypto-js/sha256";
+import { RequestObj, SignerOptions, Credentials } from "./types";
+import FormData from "form-data";
 
 const util = {
   crypto: {
@@ -48,7 +50,6 @@ const uriEscape = str => {
 
 const queryParamsToString = params =>
   Object.keys(params)
-    .sort()
     .map(key => {
       const val = params[key];
       if (typeof val === "undefined" || val === null) {
@@ -75,25 +76,38 @@ const queryParamsToString = params =>
  * @api private
  */
 export default class Signer {
-  request: SignerType.RequestObj;
+  request: RequestObj;
   serviceName: string;
   signatureCache: boolean;
   bodySha256?: string;
-  constructor(request: SignerType.RequestObj, serviceName: string, options?: SignerType.Options) {
+  constructor(request: RequestObj, serviceName: string, options?: SignerOptions) {
     this.request = request;
     this.request.headers = request.headers || {};
     this.serviceName = serviceName;
     options = options || {};
     this.bodySha256 = options.bodySha256;
+    this.request.params = this.sortParams(this.request.params);
   }
 
-  addAuthorization(credentials: SignerType.Credentials, date?: Date): void {
+  sortParams(params) {
+    const newParams = {};
+    if (params) {
+      Object.keys(params)
+        .sort()
+        .map(key => {
+          newParams[key] = params[key];
+        });
+    }
+    return newParams;
+  }
+
+  addAuthorization(credentials: Credentials, date?: Date): void {
     const datetime = this.iso8601(date).replace(/[:\-]|\.\d{3}/g, "");
     this.addHeaders(credentials, datetime);
     this.request.headers["Authorization"] = this.authorization(credentials, datetime);
   }
 
-  addHeaders(credentials: SignerType.Credentials, datetime: string) {
+  addHeaders(credentials: Credentials, datetime: string) {
     this.request.headers[constant.dateHeader] = datetime;
     if (credentials.sessionToken) {
       this.request.headers[constant.tokenHeader] = credentials.sessionToken;
@@ -103,6 +117,8 @@ export default class Signer {
       if (typeof body !== "string") {
         if (body instanceof URLSearchParams) {
           body = body.toString();
+        } else if (body instanceof FormData) {
+          body = String(body.getBuffer());
         } else {
           body = JSON.stringify(body);
         }
@@ -112,16 +128,17 @@ export default class Signer {
     }
   }
 
-  authorization(credentials: SignerType.Credentials, datetime: string) {
+  authorization(credentials: Credentials, datetime: string) {
     const parts: string[] = [];
     const credString = this.credentialString(datetime);
     parts.push(`${constant.algorithm} Credential=${credentials.accessKeyId}/${credString}`);
     parts.push(`SignedHeaders=${this.signedHeaders()}`);
+    parts.push(`SignedQueries=${this.signedQueries()}`);
     parts.push(`Signature=${this.signature(credentials, datetime)}`);
     return parts.join(", ");
   }
 
-  signature(credentials: SignerType.Credentials, datetime: string) {
+  signature(credentials: Credentials, datetime: string) {
     const signingKey = this.getSigningKey(
       credentials,
       datetime.substr(0, 8),
@@ -147,7 +164,8 @@ export default class Signer {
 
     parts.push(this.request.method.toUpperCase());
     parts.push(pathname);
-    parts.push(queryParamsToString(this.request.params) || "");
+    const queryString = queryParamsToString(this.request.params) || "";
+    parts.push(queryString);
     parts.push(`${this.canonicalHeaders()}\n`);
     parts.push(this.signedHeaders());
     parts.push(this.hexEncodedBodyHash());
@@ -193,6 +211,10 @@ export default class Signer {
     return keys.sort().join(";");
   }
 
+  signedQueries() {
+    return Object.keys(this.request.params).join(";");
+  }
+
   credentialString(datetime: string) {
     return this.createScope(datetime.substr(0, 8), this.request.region, this.serviceName);
   }
@@ -213,9 +235,6 @@ export default class Signer {
   }
 
   isSignableHeader(key: string) {
-    if (key.toLowerCase().indexOf("x-amz-") === 0) {
-      return true;
-    }
     return unsignableHeaders.indexOf(key) < 0;
   }
 
@@ -226,17 +245,8 @@ export default class Signer {
     return date.toISOString().replace(/\.\d{3}Z$/, "Z");
   }
 
-  getSigningKey(
-    credentials: SignerType.Credentials,
-    date: string,
-    region: string,
-    service: string
-  ) {
-    // const credsIdentifier = crypto.hmac(credentials.secretAccessKey, credentials.accessKeyId, 'base64');
-    // const cacheKey = [credsIdentifier, date, region, service].join('_');
-
+  getSigningKey(credentials: Credentials, date: string, region: string, service: string) {
     const kDate = util.crypto.hmac(`${constant.kDatePrefix}${credentials.secretAccessKey}`, date);
-    // debugger;
     const kRegion = util.crypto.hmac(kDate, region);
     const kService = util.crypto.hmac(kRegion, service);
 

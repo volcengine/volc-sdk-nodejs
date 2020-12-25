@@ -20,8 +20,11 @@
         "esModuleInterop": true,
         "declaration": true,
         "downlevelIteration": true,
-        "resolveJsonModule": true,
+        "resolveJsonModule": false,
         "types": ["jest", "node"]
     },
-    "exclude": ["node_modules", "lib", "test"]
+    "include": [
+        "src/**/*"
+    ],
+    "exclude": ["node_modules", "lib", "test", "**/demo.ts"]
 }

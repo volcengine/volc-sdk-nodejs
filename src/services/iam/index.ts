@@ -1,5 +1,7 @@
-import Service from "../base/service";
-interface ListPrams {
+import Service from "../../base/service";
+import { ServiceOptions } from "../../base/types";
+
+interface ListParams {
   Limit?: number;
   Offset?: number;
   Query?: string;
@@ -21,14 +23,14 @@ interface ListUserResult {
   UserMetadata: User[];
 }
 export class IamService extends Service {
-  constructor(options?: ServiceType.Options) {
+  constructor(options?: ServiceOptions) {
     super({
       ...options,
       defaultVersion: "2018-01-01",
       serviceName: "iam",
     });
   }
-  ListUsers = this.createAPI<ListPrams, ListUserResult>("ListUsers");
+  ListUsers = this.createAPI<ListParams, ListUserResult>("ListUsers");
 }
 
 export const defaultService = new IamService();

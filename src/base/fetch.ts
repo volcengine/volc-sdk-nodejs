@@ -1,25 +1,35 @@
-import fetch, { RequestInit } from "node-fetch";
-import { createDebug } from "./utils";
+import axios, { AxiosRequestConfig } from "axios";
+import { createDebug, packageVersion } from "./utils";
+import { OpenApiResponse } from "./types";
 
 const debug = createDebug("fetch");
+const ua = `volc-sdk-nodejs/v${packageVersion}`;
 
 export default async function request<Result>(
   url: string,
-  reqInfo: RequestInit
+  reqInfo: AxiosRequestConfig
 ): Promise<OpenApiResponse<Result>> {
   const { headers = {} } = reqInfo;
-  const uri = url.trim();
-  const reqOption: RequestInit = {
+  const reqOption: AxiosRequestConfig = {
+    url: url.trim(),
     timeout: 5000,
     ...reqInfo,
+    proxy: process.env.VOLC_PROXY_PORT
+      ? {
+          protocol: "http",
+          host: process.env.VOLC_PROXY_HOST || "127.0.0.1",
+          port: +process.env.VOLC_PROXY_PORT,
+        }
+      : undefined,
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
       ...headers,
+      "User-Agent": ua,
     },
   };
-  debug("fetch begin. uri: %s, options: %j", uri, reqOption);
-  const res = await fetch(uri, reqOption);
-  const text = await res.text();
-  debug("fetch end. headers: %j response: %s", res.headers.raw(), text);
-  return JSON.parse(text);
+  debug("fetch begin. options: %j", reqOption);
+  const res = await axios(reqOption);
+  const body = res.data;
+  debug("fetch end. headers: %j response: %j", res.headers, body);
+  return body;
 }

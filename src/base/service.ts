@@ -1,9 +1,16 @@
 import Signer from "./sign";
 import fetch from "./fetch";
-import { RequestInit } from "node-fetch";
-import qs from "querystring";
+import { AxiosRequestConfig } from "axios";
 import { packageName } from "./utils";
 import FormData from "form-data";
+import qs from "querystring";
+import {
+  OpenApiResponse,
+  ServiceOptions,
+  CreateAPIParams,
+  FetchParams,
+  ServiceOptionsBase,
+} from "./types";
 
 const defaultOptions = {
   host: "open.volcengineapi.com",
@@ -11,14 +18,14 @@ const defaultOptions = {
   protocol: "https:",
 };
 export default class Service {
-  constructor(options: ServiceType.Options) {
+  constructor(options: ServiceOptions) {
     this.options = {
       ...defaultOptions,
       ...options,
     };
   }
 
-  private options: ServiceType.Options;
+  private options: ServiceOptions;
 
   setAccessKeyId = (accessKeyId: string) => {
     this.options.accessKeyId = accessKeyId;
@@ -39,12 +46,61 @@ export default class Service {
   setHost = (host: string) => {
     this.options.host = host;
   };
-  createAPI<RequstData, Result>(Action: string, createParams?: ServiceType.CreateAPIParams) {
-    const { Version, method = "GET", contentType } = createParams || {};
+  /**
+   * create json api
+   * @param Action OpenAPI Action
+   * @param createParams.Version OpenAPI Version. If not provide, will use service defaultVersion.
+   * @param createParams.method http method default is POST. You can also use 'PUT'
+   * @param createParams.contentType body content type. support: json urlencode form-data. default is json.
+   */
+  createJSONAPI(Action: string, createParams?: CreateAPIParams) {
+    return this.createAPI(Action, {
+      method: "POST",
+      contentType: "json",
+      ...createParams,
+    });
+  }
+  /**
+   * create urlencode api
+   * @param Action OpenAPI Action
+   * @param createParams.Version OpenAPI Version. If not provide, will use service defaultVersion.
+   * @param createParams.method http method default is POST. You can also use 'PUT'
+   * @param createParams.contentType body content type. support: json urlencode form-data. default is urlencode.
+   */
+  createUrlEncodeAPI(Action: string, createParams?: CreateAPIParams) {
+    return this.createAPI(Action, {
+      method: "POST",
+      contentType: "urlencode",
+      ...createParams,
+    });
+  }
+  /**
+   * create form-data api
+   * @param Action OpenAPI Action
+   * @param createParams.Version OpenAPI Version. If not provide, will use service defaultVersion.
+   * @param createParams.method http method default is POST. You can also use 'PUT'
+   * @param createParams.contentType body content type. support: json urlencode form-data. default is form-data.
+   */
+  createFormDataAPI(Action: string, createParams?: CreateAPIParams) {
+    return this.createAPI(Action, {
+      method: "POST",
+      contentType: "form-data",
+      ...createParams,
+    });
+  }
+  /**
+   * create api function
+   * @param Action OpenAPI Action
+   * @param createParams.Version OpenAPI Version. If not provide, will use service defaultVersion.
+   * @param createParams.method http method like GET POST PUT
+   * @param createParams.contentType body content type. support: json urlencode form-data. default is urlencode.
+   */
+  createAPI<RequstData, Result>(Action: string, createParams?: CreateAPIParams) {
+    const { Version, method = "GET", contentType = "urlencode" } = createParams || {};
     return (
       requestData: RequstData,
-      params?: ServiceType.FetchParams & RequestInit,
-      options?: ServiceType.OptionsBase
+      params?: FetchParams & AxiosRequestConfig,
+      options?: ServiceOptionsBase
     ) => {
       const requestParams = {
         ...params,
@@ -61,7 +117,7 @@ export default class Service {
               ...requestParams.headers,
               "content-type": "application-json",
             };
-            requestParams.body = JSON.stringify(requestData);
+            requestParams.data = requestData;
             break;
           }
           case "urlencode": {
@@ -69,6 +125,7 @@ export default class Service {
             Object.keys(requestData).forEach(key => {
               body.append(key, requestData[key]);
             });
+            requestParams.data = body;
             break;
           }
           case "form-data": {
@@ -80,6 +137,7 @@ export default class Service {
               ...requestParams.headers,
               "content-type": "application/form-data",
             };
+            requestParams.data = body;
             break;
           }
           default: {
@@ -91,14 +149,14 @@ export default class Service {
     };
   }
   fetchOpenAPI<Result>(
-    params: ServiceType.FetchParams & RequestInit,
-    options?: ServiceType.OptionsBase
+    params: FetchParams & AxiosRequestConfig,
+    options?: ServiceOptionsBase
   ): Promise<OpenApiResponse<Result>> {
     const realOptions = {
       ...this.options,
       ...options,
     };
-    const requestInit = {
+    const requestInit: any = {
       pathname: "/",
       ...params,
       params: {
@@ -109,6 +167,9 @@ export default class Service {
       region: realOptions.region || defaultOptions.region,
       method: params.method || "GET",
     };
+    if (requestInit.data) {
+      requestInit.body = requestInit.data;
+    }
     const signer = new Signer(requestInit, realOptions.serviceName);
     const { accessKeyId, secretAccessKey, sessionToken } = realOptions;
     if (!accessKeyId || !secretAccessKey) {
@@ -121,6 +182,9 @@ export default class Service {
       encodeURIComponent: v => v,
     });
     if (queryString) uri += "?" + queryString;
-    return fetch(uri, requestInit);
+    return fetch(uri, {
+      ...requestInit,
+      params: undefined,
+    });
   }
 }
