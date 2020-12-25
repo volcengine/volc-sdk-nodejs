@@ -1,4 +1,5 @@
 # Volcano Engine OpenAPI sdk
+[中文文档](./README.cn.md)
 ## Module installation
 ```
 // use npm
