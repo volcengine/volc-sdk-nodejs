@@ -3,6 +3,7 @@ import fetch from "./fetch";
 import { AxiosRequestConfig } from "axios";
 import { packageName } from "./utils";
 import FormData from "form-data";
+import qs from "querystring";
 import {
   OpenApiResponse,
   ServiceOptions,
@@ -175,8 +176,15 @@ export default class Service {
       throw new Error(`[${packageName}] accessKeyId and secretAccessKey is necessary`);
     }
     signer.addAuthorization({ accessKeyId, secretAccessKey, sessionToken });
-    const uri = `${realOptions.protocol || defaultOptions.protocol}//${realOptions.host ||
+    let uri = `${realOptions.protocol || defaultOptions.protocol}//${realOptions.host ||
       defaultOptions.host}${requestInit.pathname}`;
-    return fetch(uri, requestInit);
+    const queryString = qs.stringify(requestInit.params, undefined, undefined, {
+      encodeURIComponent: v => v,
+    });
+    if (queryString) uri += "?" + queryString;
+    return fetch(uri, {
+      ...requestInit,
+      params: undefined,
+    });
   }
 }

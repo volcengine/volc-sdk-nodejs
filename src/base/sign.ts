@@ -50,7 +50,6 @@ const uriEscape = str => {
 
 const queryParamsToString = params =>
   Object.keys(params)
-    .sort()
     .map(key => {
       const val = params[key];
       if (typeof val === "undefined" || val === null) {
@@ -87,6 +86,19 @@ export default class Signer {
     this.serviceName = serviceName;
     options = options || {};
     this.bodySha256 = options.bodySha256;
+    this.request.params = this.sortParams(this.request.params);
+  }
+
+  sortParams(params) {
+    const newParams = {};
+    if (params) {
+      Object.keys(params)
+        .sort()
+        .map(key => {
+          newParams[key] = params[key];
+        });
+    }
+    return newParams;
   }
 
   addAuthorization(credentials: Credentials, date?: Date): void {
@@ -121,6 +133,7 @@ export default class Signer {
     const credString = this.credentialString(datetime);
     parts.push(`${constant.algorithm} Credential=${credentials.accessKeyId}/${credString}`);
     parts.push(`SignedHeaders=${this.signedHeaders()}`);
+    parts.push(`SignedQueries=${this.signedQueries()}`);
     parts.push(`Signature=${this.signature(credentials, datetime)}`);
     return parts.join(", ");
   }
@@ -151,7 +164,8 @@ export default class Signer {
 
     parts.push(this.request.method.toUpperCase());
     parts.push(pathname);
-    parts.push(queryParamsToString(this.request.params) || "");
+    const queryString = queryParamsToString(this.request.params) || "";
+    parts.push(queryString);
     parts.push(`${this.canonicalHeaders()}\n`);
     parts.push(this.signedHeaders());
     parts.push(this.hexEncodedBodyHash());
@@ -195,6 +209,10 @@ export default class Signer {
       }
     });
     return keys.sort().join(";");
+  }
+
+  signedQueries() {
+    return Object.keys(this.request.params).join(";");
   }
 
   credentialString(datetime: string) {

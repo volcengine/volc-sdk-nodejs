@@ -14,11 +14,11 @@ export default async function request<Result>(
     url: url.trim(),
     timeout: 5000,
     ...reqInfo,
-    proxy: process.env.VOLC_PORXY_PORT
+    proxy: process.env.VOLC_PROXY_PORT
       ? {
           protocol: "http",
-          host: process.env.VOLC_PORXY_HOST || "127.0.0.1",
-          port: +process.env.VOLC_PORXY_PORT,
+          host: process.env.VOLC_PROXY_HOST || "127.0.0.1",
+          port: +process.env.VOLC_PROXY_PORT,
         }
       : undefined,
     headers: {
