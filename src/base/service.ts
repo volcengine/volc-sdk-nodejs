@@ -46,14 +46,56 @@ export default class Service {
     this.options.host = host;
   };
   /**
+   * create json api
+   * @param Action OpenAPI Action
+   * @param createParams.Version OpenAPI Version. If not provide, will use service defaultVersion.
+   * @param createParams.method http method default is POST. You can also use 'PUT'
+   * @param createParams.contentType body content type. support: json urlencode form-data. default is json.
+   */
+  createJSONAPI(Action: string, createParams?: CreateAPIParams) {
+    return this.createAPI(Action, {
+      method: "POST",
+      contentType: "json",
+      ...createParams,
+    });
+  }
+  /**
+   * create urlencode api
+   * @param Action OpenAPI Action
+   * @param createParams.Version OpenAPI Version. If not provide, will use service defaultVersion.
+   * @param createParams.method http method default is POST. You can also use 'PUT'
+   * @param createParams.contentType body content type. support: json urlencode form-data. default is urlencode.
+   */
+  createUrlEncodeAPI(Action: string, createParams?: CreateAPIParams) {
+    return this.createAPI(Action, {
+      method: "POST",
+      contentType: "urlencode",
+      ...createParams,
+    });
+  }
+  /**
+   * create form-data api
+   * @param Action OpenAPI Action
+   * @param createParams.Version OpenAPI Version. If not provide, will use service defaultVersion.
+   * @param createParams.method http method default is POST. You can also use 'PUT'
+   * @param createParams.contentType body content type. support: json urlencode form-data. default is form-data.
+   */
+  createFormDataAPI(Action: string, createParams?: CreateAPIParams) {
+    return this.createAPI(Action, {
+      method: "POST",
+      contentType: "form-data",
+      ...createParams,
+    });
+  }
+  /**
    * create api function
    * @param Action OpenAPI Action
    * @param createParams.Version OpenAPI Version. If not provide, will use service defaultVersion.
    * @param createParams.method http method like GET POST PUT
-   * @param createParams.contentType body content type. support: json urlencode form-data
+   * @param createParams.contentType body content type. support: json urlencode form-data. default is urlencode.
    */
   createAPI<RequstData, Result>(Action: string, createParams?: CreateAPIParams) {
-    const { Version, method = "GET", contentType } = createParams || {};
+    const { Version, method = "GET", contentType = "urlencode" } = createParams || {};
     return (
       requestData: RequstData,
       params?: FetchParams & AxiosRequestConfig,
