@@ -1,4 +1,5 @@
 import Ajv from "ajv";
+import merge from "lodash.merge";
 const ajv = new Ajv();
 
 export const reponseSchema = {
@@ -23,13 +24,13 @@ export const reponseSchema = {
   required: ["ResponseMetadata"],
 };
 export function createResponseSchema(resultSchema) {
-  return {
-    ...resultSchema,
+  return merge({}, reponseSchema, {
+    type: "object",
     properties: {
-      ...resultSchema.properties,
       Result: resultSchema,
     },
-  };
+    required: ["ResponseMetadata", "Result"],
+  });
 }
 
 export const reponseSchemaValidate = ajv.compile(reponseSchema);

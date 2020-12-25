@@ -3064,6 +3064,11 @@ lodash.get@^4.4.2:
   resolved "http://bnpm.byted.org/lodash.get/-/lodash.get-4.4.2.tgz#2d177f652fa31e939b4438d5341499dfa3825e99"
   integrity sha1-LRd/ZS+jHpObRDjVNBSZ36OCXpk=
 
+lodash.merge@^4.6.2:
+  version "4.6.2"
+  resolved "http://bnpm.byted.org/lodash.merge/-/lodash.merge-4.6.2.tgz#558aa53b43b661e1925a0afdfa36a9a1085fe57a"
+  integrity sha1-VYqlO0O2YeGSWgr9+japoQhf5Xo=
+
 lodash.sortby@^4.7.0:
   version "4.7.0"
   resolved "http://bnpm.byted.org/lodash.sortby/-/lodash.sortby-4.7.0.tgz#edd14c824e2cc9c1e0b0a1b42bb5210516a42438"
