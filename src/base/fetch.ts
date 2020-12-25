@@ -30,6 +30,6 @@ export default async function request<Result>(
   debug("fetch begin. options: %j", reqOption);
   const res = await axios(reqOption);
   const body = res.data;
-  debug("fetch end. headers: %j response: %s", res.headers, body);
+  debug("fetch end. headers: %j response: %j", res.headers, body);
   return body;
 }
