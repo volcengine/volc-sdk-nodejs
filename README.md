@@ -17,7 +17,7 @@ const iamService = iam.defaultService;
 
 // set aksk
 iamService.setAccessKeyId(AccessKeyId);
-iamService.setSecretAccessKey(SecretAccessKey);
+iamService.setSecretKey(SecretKey);
 // If you use sts to request, you need to set up `SessionToken` after aksk is set
 iamService.setSessionToken(SessionToken);
 ```
@@ -32,14 +32,14 @@ Take the ListUsers API of the iam service as an example
 ```
 import { iam } from'@volcengine/openapi';
 
-async main(AccessKeyId, SecretAccessKey) {
+async main(AccessKeyId, SecretKey) {
    // Use the default service instance. You can also create a new instance.
    // `const iamService = new iam.IamService();`
    const iamService = iam.defaultService;
 
    // set aksk
    iamService.setAccessKeyId(AccessKeyId);
-   iamService.setSecretAccessKey(SecretAccessKey);
+   iamService.setSecretKey(SecretKey);
   
    // Request OpenAPI
    const usersResponse = await iamService.ListUsers({

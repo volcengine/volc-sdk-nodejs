@@ -14,19 +14,19 @@ export function getDefaultOption() {
     protocol: "https:",
     // Read aksk by environment variables
     accessKeyId: process.env.VOLC_ACCESSKEY,
-    secretAccessKey: process.env.VOLC_SECRETKEY,
+    secretKey: process.env.VOLC_SECRETKEY,
   };
   try {
     // Read aksk from ~/.volc/config. Priority is lower than environment variables
-    if (process.env.HOME && !(defaultOptions.accessKeyId && defaultOptions.secretAccessKey)) {
+    if (process.env.HOME && !(defaultOptions.accessKeyId && defaultOptions.secretKey)) {
       const homeConfigPath = path.resolve(process.env.HOME, ".volc/config");
       if (fs.existsSync(homeConfigPath)) {
         const configData = JSON.parse(fs.readFileSync(homeConfigPath, { encoding: "utf-8" }));
         if (!defaultOptions.accessKeyId && configData.ak) {
           defaultOptions.accessKeyId = configData.ak;
         }
-        if (!defaultOptions.secretAccessKey && configData.sk) {
-          defaultOptions.secretAccessKey = configData.sk;
+        if (!defaultOptions.secretKey && configData.sk) {
+          defaultOptions.secretKey = configData.sk;
         }
       }
     }

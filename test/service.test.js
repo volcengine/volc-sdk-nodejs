@@ -62,7 +62,7 @@ test("default params check without accessKeyId", async () => {
     serviceName: "iam",
   });
   service.setAccessKeyId("");
-  service.setSecretAccessKey("");
+  service.setSecretKey("");
   let error;
   try {
     await service.fetchOpenAPI({

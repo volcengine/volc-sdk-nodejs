@@ -27,8 +27,8 @@ export default class Service {
     this.options.accessKeyId = accessKeyId;
   };
 
-  setSecretAccessKey = (secretAccessKey: string) => {
-    this.options.secretAccessKey = secretAccessKey;
+  setSecretKey = (secretKey: string) => {
+    this.options.secretKey = secretKey;
   };
 
   setSessionToken = (sessionToken: string) => {
@@ -167,11 +167,11 @@ export default class Service {
       requestInit.body = requestInit.data;
     }
     const signer = new Signer(requestInit, realOptions.serviceName);
-    const { accessKeyId, secretAccessKey, sessionToken } = realOptions;
-    if (!accessKeyId || !secretAccessKey) {
-      throw new Error(`[${packageName}] accessKeyId and secretAccessKey is necessary`);
+    const { accessKeyId, secretKey, sessionToken } = realOptions;
+    if (!accessKeyId || !secretKey) {
+      throw new Error(`[${packageName}] accessKeyId and secretKey is necessary`);
     }
-    signer.addAuthorization({ accessKeyId, secretAccessKey, sessionToken });
+    signer.addAuthorization({ accessKeyId, secretKey, sessionToken });
     let uri = `${realOptions.protocol || defaultOptions.protocol}//${realOptions.host ||
       defaultOptions.host}${requestInit.pathname}`;
     const queryString = qs.stringify(requestInit.params, undefined, undefined, {

@@ -246,7 +246,7 @@ export default class Signer {
   }
 
   getSigningKey(credentials: Credentials, date: string, region: string, service: string) {
-    const kDate = util.crypto.hmac(`${constant.kDatePrefix}${credentials.secretAccessKey}`, date);
+    const kDate = util.crypto.hmac(`${constant.kDatePrefix}${credentials.secretKey}`, date);
     const kRegion = util.crypto.hmac(kDate, region);
     const kService = util.crypto.hmac(kRegion, service);
 

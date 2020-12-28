@@ -17,7 +17,7 @@ const iamService = iam.defaultService;
 
 // 设置aksk
 iamService.setAccessKeyId(AccessKeyId);
-iamService.setSecretAccessKey(SecretAccessKey);
+iamService.setSecretKey(SecretKey);
 // 如果使用sts进行请求，设置完成aksk之后还需要设置一下`SessionToken`
 iamService.setSessionToken(SessionToken);
 ```
@@ -32,14 +32,14 @@ VOLC_ACCESSKEY="your ak" VOLC_SECRETKEY="your sk"
 ```
 import { iam } from '@volcengine/openapi';
 
-async main(AccessKeyId, SecretAccessKey) {
+async main(AccessKeyId, SecretKey) {
   // 使用默认的service实例。你也可以创建一个新实例。
   // `const iamService = new iam.IamService();`
   const iamService = iam.defaultService;
 
   // 设置aksk
   iamService.setAccessKeyId(AccessKeyId);
-  iamService.setSecretAccessKey(SecretAccessKey);
+  iamService.setSecretKey(SecretKey);
   
   // 请求预定义的OpenAPI
   const usersResponse = await iamService.ListUsers({

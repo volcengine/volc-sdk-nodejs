@@ -31,7 +31,7 @@ export interface STS {
    */
   ExpiredTime: string | number;
   AccessKeyId: string;
-  SecretAccessKey: string;
+  SecretKey: string;
   SessionToken: string;
 }
 export interface RequestObj {
@@ -47,12 +47,12 @@ export interface SignerOptions {
 }
 export interface CredentialsBase {
   accessKeyId?: string;
-  secretAccessKey?: string;
+  secretKey?: string;
   sessionToken?: string;
 }
 export interface Credentials extends CredentialsBase {
   accessKeyId: string;
-  secretAccessKey: string;
+  secretKey: string;
 }
 export interface ServiceOptionsBase extends CredentialsBase {
   /**
