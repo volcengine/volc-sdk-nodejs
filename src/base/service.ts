@@ -16,6 +16,9 @@ const defaultOptions = {
   host: "open.volcengineapi.com",
   region: "cn-north-1",
   protocol: "https:",
+  // aksk by env
+  accessKeyId: process.env.VOLC_ACCESSKEY,
+  secretAccessKey: process.env.VOLC_SECRETKEY,
 };
 export default class Service {
   constructor(options: ServiceOptions) {

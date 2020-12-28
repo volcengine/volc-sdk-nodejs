@@ -8,13 +8,32 @@ npm install @volcengine/openapi
 // use yarn
 yarn add @volcengine/openapi
 ```
-## AKSK setting and request OpenAPI
+## AKSK settings
+Use api to setup aksk
+```
+// Use the default service instance. You can also create a new instance.
+// `const iamService = new iam.IamService();`
+const iamService = iam.defaultService;
+
+// set aksk
+iamService.setAccessKeyId(AccessKeyId);
+iamService.setSecretAccessKey(SecretAccessKey);
+// If you use sts to request, you need to set up `SessionToken` after aksk is set
+iamService.setSessionToken(SessionToken);
+```
+
+Set AK SK using environment variables
+```
+VOLC_ACCESSKEY="your ak" VOLC_SECRETKEY="your sk"
+```
+
+## Request OpenAPI
 Take the ListUsers API of the iam service as an example
 ```
 import { iam } from'@volcengine/openapi';
 
 async main(AccessKeyId, SecretAccessKey) {
-   // Using the default service instance. You can also create a new instance 
+   // Use the default service instance. You can also create a new instance.
    // `const iamService = new iam.IamService();`
    const iamService = iam.defaultService;
 
@@ -22,15 +41,10 @@ async main(AccessKeyId, SecretAccessKey) {
    iamService.setAccessKeyId(AccessKeyId);
    iamService.setSecretAccessKey(SecretAccessKey);
   
-   // request OpenAPI
+   // Request OpenAPI
    const usersResponse = await iamService.ListUsers({
      Limit: 10,
      Offset: 0,
    });
 }
-```
-
-If you use sts to request, you need to set up `SessionToken` after aksk is set
-```
-iamService.setSessionToken(SessionToken);
 ```
