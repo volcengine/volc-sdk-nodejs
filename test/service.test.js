@@ -2,15 +2,10 @@ import Service from "../lib/base/service";
 import { reponseSchemaValidate } from "./schema/response";
 import _get from "lodash.get";
 
-if (!process.env.AccessKeyId || !process.env.SecretAccessKey) {
-  throw new Error("process.env.AccessKeyId and process.env.SecretAccessKey is required");
-}
 const defaultConfig = {
   protocol: "http:",
   host: "volcengineapi-boe.byted.org",
   serviceName: "iam",
-  accessKeyId: process.env.AccessKeyId,
-  secretAccessKey: process.env.SecretAccessKey,
   defaultVersion: "2018-01-01",
 };
 const iamService = new Service(defaultConfig);
@@ -66,6 +61,8 @@ test("default params check without accessKeyId", async () => {
   const service = new Service({
     serviceName: "iam",
   });
+  service.setAccessKeyId("");
+  service.setSecretAccessKey("");
   let error;
   try {
     await service.fetchOpenAPI({

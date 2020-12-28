@@ -1,7 +1,7 @@
 import Signer from "./sign";
 import fetch from "./fetch";
 import { AxiosRequestConfig } from "axios";
-import { packageName } from "./utils";
+import { packageName, getDefaultOption } from "./utils";
 import FormData from "form-data";
 import qs from "querystring";
 import {
@@ -12,14 +12,7 @@ import {
   ServiceOptionsBase,
 } from "./types";
 
-const defaultOptions = {
-  host: "open.volcengineapi.com",
-  region: "cn-north-1",
-  protocol: "https:",
-  // aksk by env
-  accessKeyId: process.env.VOLC_ACCESSKEY,
-  secretAccessKey: process.env.VOLC_SECRETKEY,
-};
+const defaultOptions = getDefaultOption();
 export default class Service {
   constructor(options: ServiceOptions) {
     this.options = {
