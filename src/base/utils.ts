@@ -22,11 +22,11 @@ export function getDefaultOption() {
       const homeConfigPath = path.resolve(process.env.HOME, ".volc/config");
       if (fs.existsSync(homeConfigPath)) {
         const configData = JSON.parse(fs.readFileSync(homeConfigPath, { encoding: "utf-8" }));
-        if (!defaultOptions.accessKeyId && configData.ak) {
-          defaultOptions.accessKeyId = configData.ak;
+        if (!defaultOptions.accessKeyId && configData.VOLC_ACCESSKEY) {
+          defaultOptions.accessKeyId = configData.VOLC_ACCESSKEY;
         }
-        if (!defaultOptions.secretKey && configData.sk) {
-          defaultOptions.secretKey = configData.sk;
+        if (!defaultOptions.secretKey && configData.VOLC_SECRETKEY) {
+          defaultOptions.secretKey = configData.VOLC_SECRETKEY;
         }
       }
     }
