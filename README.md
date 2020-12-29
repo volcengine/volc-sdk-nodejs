@@ -9,7 +9,7 @@ npm install @volcengine/openapi
 yarn add @volcengine/openapi
 ```
 ## AKSK settings
-Use api to setup aksk
+### 1. Use api
 ```
 // Use the default service instance. You can also create a new instance.
 // `const iamService = new iam.IamService();`
@@ -22,9 +22,15 @@ iamService.setSecretKey(SecretKey);
 iamService.setSessionToken(SessionToken);
 ```
 
-Set AK SK using environment variables
+### 2. Environment variables
 ```
 VOLC_ACCESSKEY="your ak" VOLC_SECRETKEY="your sk"
+```
+
+### 3. Configuration files
+Put it in `~/.volc/config` in json format, the format is:
+```
+{"VOLC_ACCESSKEY":"your ak","VOLC_SECRETKEY":"your sk"}
 ```
 
 ## Request OpenAPI

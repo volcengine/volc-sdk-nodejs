@@ -9,7 +9,7 @@ yarn add @volcengine/openapi
 ```
 
 ## AKSK设置
-使用api设置aksk
+### 1. 使用api设置aksk
 ```
 // 使用默认的service实例。你也可以创建一个新实例。
 // `const iamService = new iam.IamService();`
@@ -22,9 +22,15 @@ iamService.setSecretKey(SecretKey);
 iamService.setSessionToken(SessionToken);
 ```
 
-使用环境变量设置AK SK
+### 2. 使用环境变量设置AK SK
 ```
 VOLC_ACCESSKEY="your ak" VOLC_SECRETKEY="your sk"
+```
+
+### 3. 使用配置文件
+以json格式放在`~/.volc/config`中，格式为：
+```
+{"VOLC_ACCESSKEY":"your ak","VOLC_SECRETKEY":"your sk"}
 ```
 
 ## 接口调用
