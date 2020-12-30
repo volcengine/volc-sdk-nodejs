@@ -1,11 +1,11 @@
 import { iam } from "@volcengine/openapi";
 
-export async function main(AccessKeyId, SecretAccessKey, SessionToken) {
+export async function main(AccessKeyId, SecretKey, SessionToken) {
   // 使用默认的service实例 也可以创建一个新实例 const iamService = new iam.IamService();
   const iamService = iam.defaultService;
   // 设置aksk
   iamService.setAccessKeyId(AccessKeyId);
-  iamService.setSecretAccessKey(SecretAccessKey);
+  iamService.setSecretKey(SecretKey);
   if (SessionToken) {
     // 使用sts请求时 设置SessionToken
     iamService.setSessionToken(SessionToken);

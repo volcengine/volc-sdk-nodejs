@@ -1,7 +1,7 @@
 import Signer from "./sign";
 import fetch from "./fetch";
 import { AxiosRequestConfig } from "axios";
-import { packageName } from "./utils";
+import { packageName, getDefaultOption } from "./utils";
 import FormData from "form-data";
 import qs from "querystring";
 import {
@@ -12,11 +12,7 @@ import {
   ServiceOptionsBase,
 } from "./types";
 
-const defaultOptions = {
-  host: "open.volcengineapi.com",
-  region: "cn-north-1",
-  protocol: "https:",
-};
+const defaultOptions = getDefaultOption();
 export default class Service {
   constructor(options: ServiceOptions) {
     this.options = {
@@ -31,8 +27,8 @@ export default class Service {
     this.options.accessKeyId = accessKeyId;
   };
 
-  setSecretAccessKey = (secretAccessKey: string) => {
-    this.options.secretAccessKey = secretAccessKey;
+  setSecretKey = (secretKey: string) => {
+    this.options.secretKey = secretKey;
   };
 
   setSessionToken = (sessionToken: string) => {
@@ -171,11 +167,11 @@ export default class Service {
       requestInit.body = requestInit.data;
     }
     const signer = new Signer(requestInit, realOptions.serviceName);
-    const { accessKeyId, secretAccessKey, sessionToken } = realOptions;
-    if (!accessKeyId || !secretAccessKey) {
-      throw new Error(`[${packageName}] accessKeyId and secretAccessKey is necessary`);
+    const { accessKeyId, secretKey, sessionToken } = realOptions;
+    if (!accessKeyId || !secretKey) {
+      throw new Error(`[${packageName}] accessKeyId and secretKey is necessary`);
     }
-    signer.addAuthorization({ accessKeyId, secretAccessKey, sessionToken });
+    signer.addAuthorization({ accessKeyId, secretKey, sessionToken });
     let uri = `${realOptions.protocol || defaultOptions.protocol}//${realOptions.host ||
       defaultOptions.host}${requestInit.pathname}`;
     const queryString = qs.stringify(requestInit.params, undefined, undefined, {
