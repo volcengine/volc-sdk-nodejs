@@ -2,8 +2,6 @@ import { Service } from "../lib";
 import { listUserReponseSchemaValidate } from "./schema/iam";
 
 const defaultConfig = {
-  protocol: "http:",
-  host: "volcengineapi-boe.byted.org",
   serviceName: "iam",
   defaultVersion: "2018-01-01",
 };
