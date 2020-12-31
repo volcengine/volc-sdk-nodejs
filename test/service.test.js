@@ -3,8 +3,6 @@ import { reponseSchemaValidate } from "./schema/response";
 import _get from "lodash.get";
 
 const defaultConfig = {
-  protocol: "http:",
-  host: "volcengineapi-boe.byted.org",
   serviceName: "iam",
   defaultVersion: "2018-01-01",
 };
