@@ -12,7 +12,7 @@ export default async function request<Result>(
   const { headers = {} } = reqInfo;
   const reqOption: AxiosRequestConfig = {
     url: url.trim(),
-    timeout: 5000,
+    timeout: 10000,
     ...reqInfo,
     proxy: process.env.VOLC_PROXY_PORT
       ? {

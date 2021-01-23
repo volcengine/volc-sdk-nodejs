@@ -94,4 +94,8 @@ export interface CreateAPIParams {
    * body content type. support: json urlencode form-data
    */
   contentType: "json" | "urlencode" | "form-data";
+  /**
+   * keys in query
+   */
+  queryKeys?: string[];
 }
