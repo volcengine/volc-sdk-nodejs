@@ -1,7 +1,6 @@
 import Service from "../../base/service";
 import { ServiceOptions, OpenApiResponse } from "../../base/types";
 import fs from "fs";
-// import fetch, { Response } from 'node-fetch';
 import axios, { ResponseType, AxiosPromise } from "axios";
 import {
   ApplyImageUploadParams,
