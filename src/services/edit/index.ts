@@ -12,9 +12,10 @@ import {
 export class EditService extends Service {
   constructor(options?: ServiceOptions) {
     super({
-      ...options,
       defaultVersion: "2018-01-01",
       serviceName: "edit",
+      host: 'vedit.volcengineapi.com',
+      ...options,
     });
   }
   SubmitDirectEditTaskAsync = this.createAPI<
