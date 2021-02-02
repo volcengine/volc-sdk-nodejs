@@ -7,7 +7,7 @@ import {
   DirectEditResult,
   SubmitTemplateTaskAsyncParams,
   SubmitTemplateTaskAsyncResult,
-} from './types';
+} from "./types";
 
 export class EditService extends Service {
   constructor(options?: ServiceOptions) {
@@ -17,9 +17,18 @@ export class EditService extends Service {
       serviceName: "edit",
     });
   }
-  SubmitDirectEditTaskAsync = this.createAPI<SubmitDirectEditTaskAsyncParams, SubmitDirectEditTaskAsyncResult>("SubmitDirectEditTaskAsync", { method: 'POST', contentType: 'json' });
-  GetDirectEditResult = this.createAPI<GetDirectEditResultParams, DirectEditResult[]>("GetDirectEditResult", { method: 'POST', contentType: 'json' });
-  SubmitTemplateTaskAsync = this.createAPI<SubmitTemplateTaskAsyncParams, SubmitTemplateTaskAsyncResult>("SubmitTemplateTaskAsync", { method: 'POST', contentType: 'json' });
+  SubmitDirectEditTaskAsync = this.createAPI<
+    SubmitDirectEditTaskAsyncParams,
+    SubmitDirectEditTaskAsyncResult
+  >("SubmitDirectEditTaskAsync", { method: "POST", contentType: "json" });
+  GetDirectEditResult = this.createAPI<GetDirectEditResultParams, DirectEditResult[]>(
+    "GetDirectEditResult",
+    { method: "POST", contentType: "json" }
+  );
+  SubmitTemplateTaskAsync = this.createAPI<
+    SubmitTemplateTaskAsyncParams,
+    SubmitTemplateTaskAsyncResult
+  >("SubmitTemplateTaskAsync", { method: "POST", contentType: "json" });
 }
 
 export const defaultService = new EditService();

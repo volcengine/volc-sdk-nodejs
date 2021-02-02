@@ -92,13 +92,14 @@ export default class Service {
    * @param createParams.contentType body content type. support: json urlencode form-data. default is urlencode.
    */
   createAPI<RequstData, Result>(Action: string, createParams?: CreateAPIParams) {
-    const { Version, method = "GET", contentType = "urlencode" } = createParams || {};
+    const { Version, method = "GET", contentType = "urlencode", queryKeys = [] } =
+      createParams || {};
     return (
       requestData: RequstData,
       params?: FetchParams & AxiosRequestConfig,
       options?: ServiceOptionsBase
     ) => {
-      const requestParams = {
+      const requestParams: FetchParams & AxiosRequestConfig = {
         ...params,
         method,
         Action,
@@ -107,6 +108,12 @@ export default class Service {
       if (method === "GET") {
         requestParams.query = requestData;
       } else {
+        requestParams.query = {
+          ...queryKeys.reduce((res, key) => {
+            return requestData[key] !== undefined ? { ...res, [key]: requestData[key] } : res;
+          }, {}),
+          ...(params?.query ?? {}),
+        };
         switch (contentType) {
           case "json": {
             requestParams.headers = {
@@ -118,7 +125,7 @@ export default class Service {
           }
           case "urlencode": {
             const body = new URLSearchParams();
-            Object.keys(requestData).forEach(key => {
+            Object.keys(requestData).forEach((key) => {
               body.append(key, requestData[key]);
             });
             requestParams.data = body;
@@ -126,7 +133,7 @@ export default class Service {
           }
           case "form-data": {
             const body = new FormData();
-            Object.keys(requestData).forEach(key => {
+            Object.keys(requestData).forEach((key) => {
               body.append(key, requestData[key]);
             });
             requestParams.headers = {
@@ -172,10 +179,11 @@ export default class Service {
       throw new Error(`[${packageName}] accessKeyId and secretKey is necessary`);
     }
     signer.addAuthorization({ accessKeyId, secretKey, sessionToken });
-    let uri = `${realOptions.protocol || defaultOptions.protocol}//${realOptions.host ||
-      defaultOptions.host}${requestInit.pathname}`;
+    let uri = `${realOptions.protocol || defaultOptions.protocol}//${
+      realOptions.host || defaultOptions.host
+    }${requestInit.pathname}`;
     const queryString = qs.stringify(requestInit.params, undefined, undefined, {
-      encodeURIComponent: v => v,
+      encodeURIComponent: (v) => v,
     });
     if (queryString) uri += "?" + queryString;
     return fetch(uri, {
