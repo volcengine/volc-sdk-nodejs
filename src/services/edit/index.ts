@@ -14,7 +14,7 @@ export class EditService extends Service {
     super({
       defaultVersion: "2018-01-01",
       serviceName: "edit",
-      host: 'vedit.volcengineapi.com',
+      host: "vedit.volcengineapi.com",
       ...options,
     });
   }
