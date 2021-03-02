@@ -26,6 +26,7 @@ export default async function request<Result>(
       ...headers,
       "User-Agent": ua,
     },
+    validateStatus: null,
   };
   debug("fetch begin. options: %j", reqOption);
   const res = await axios(reqOption);
