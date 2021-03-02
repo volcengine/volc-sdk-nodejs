@@ -125,7 +125,7 @@ export default class Service {
           }
           case "urlencode": {
             const body = new URLSearchParams();
-            Object.keys(requestData).forEach(key => {
+            Object.keys(requestData).forEach((key) => {
               body.append(key, requestData[key]);
             });
             requestParams.data = body;
@@ -133,7 +133,7 @@ export default class Service {
           }
           case "form-data": {
             const body = new FormData();
-            Object.keys(requestData).forEach(key => {
+            Object.keys(requestData).forEach((key) => {
               body.append(key, requestData[key]);
             });
             requestParams.headers = {
