@@ -179,11 +179,10 @@ export default class Service {
       throw new Error(`[${packageName}] accessKeyId and secretKey is necessary`);
     }
     signer.addAuthorization({ accessKeyId, secretKey, sessionToken });
-    let uri = `${realOptions.protocol || defaultOptions.protocol}//${realOptions.host ||
-      defaultOptions.host}${requestInit.pathname}`;
-    const queryString = qs.stringify(requestInit.params, undefined, undefined, {
-      encodeURIComponent: v => v,
-    });
+    let uri = `${realOptions.protocol || defaultOptions.protocol}//${
+      realOptions.host || defaultOptions.host
+    }${requestInit.pathname}`;
+    const queryString = qs.stringify(requestInit.params);
     if (queryString) uri += "?" + queryString;
     return fetch(uri, {
       ...requestInit,
