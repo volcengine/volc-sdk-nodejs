@@ -31,26 +31,19 @@ const constant = {
   contentSha256Header: "X-Content-Sha256",
   kDatePrefix: "",
 };
-const uriEscape = str => {
+const uriEscape = (str) => {
   try {
     return encodeURIComponent(str)
       .replace(/[^A-Za-z0-9_.~\-%]+/g, escape)
-      .replace(
-        /[*]/g,
-        ch =>
-          `%${ch
-            .charCodeAt(0)
-            .toString(16)
-            .toUpperCase()}`
-      );
+      .replace(/[*]/g, (ch) => `%${ch.charCodeAt(0).toString(16).toUpperCase()}`);
   } catch (e) {
     return "";
   }
 };
 
-const queryParamsToString = params =>
+const queryParamsToString = (params) =>
   Object.keys(params)
-    .map(key => {
+    .map((key) => {
       const val = params[key];
       if (typeof val === "undefined" || val === null) {
         return;
@@ -62,15 +55,12 @@ const queryParamsToString = params =>
       }
 
       if (Array.isArray(val)) {
-        return `${escapedKey}=${val
-          .map(uriEscape)
-          .sort()
-          .join(`&${escapedKey}=`)}`;
+        return `${escapedKey}=${val.map(uriEscape).sort().join(`&${escapedKey}=`)}`;
       }
 
       return `${escapedKey}=${uriEscape(val)}`;
     })
-    .filter(v => v)
+    .filter((v) => v)
     .join("&");
 /**
  * @api private
@@ -94,7 +84,7 @@ export default class Signer {
     if (params) {
       Object.keys(params)
         .sort()
-        .map(key => {
+        .map((key) => {
           newParams[key] = params[key];
         });
     }
@@ -174,12 +164,12 @@ export default class Signer {
 
   canonicalHeaders() {
     const headers: [string, string][] = [];
-    Object.keys(this.request.headers).forEach(key => {
+    Object.keys(this.request.headers).forEach((key) => {
       headers.push([key, this.request.headers[key]]);
     });
     headers.sort((a, b) => (a[0].toLowerCase() < b[0].toLowerCase() ? -1 : 1));
     const parts: string[] = [];
-    headers.forEach(item => {
+    headers.forEach((item) => {
       const key = item[0].toLowerCase();
       if (this.isSignableHeader(key)) {
         const value = item[1];
@@ -202,7 +192,7 @@ export default class Signer {
 
   signedHeaders() {
     const keys: string[] = [];
-    Object.keys(this.request.headers).forEach(key => {
+    Object.keys(this.request.headers).forEach((key) => {
       key = key.toLowerCase();
       if (this.isSignableHeader(key)) {
         keys.push(key);
