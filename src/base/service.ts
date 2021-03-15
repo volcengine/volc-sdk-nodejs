@@ -136,10 +136,6 @@ export default class Service {
             Object.keys(requestData).forEach((key) => {
               body.append(key, requestData[key]);
             });
-            requestParams.headers = {
-              ...requestParams.headers,
-              "content-type": "application/form-data",
-            };
             requestParams.data = body;
             break;
           }
