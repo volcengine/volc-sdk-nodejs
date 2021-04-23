@@ -118,7 +118,7 @@ export default class Service {
           case "json": {
             requestParams.headers = {
               ...requestParams.headers,
-              "content-type": "application-json",
+              "content-type": "application/json; charset=utf-8",
             };
             requestParams.data = requestData;
             break;
