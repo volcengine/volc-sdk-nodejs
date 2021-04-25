@@ -1,5 +1,8 @@
 Change log
 
+2021-03-02 Bumped to version v1.0.5
+- Fix json content type bug.
+
 2021-03-02 Bumped to version v1.0.4
 - Fix nodejs sign bug.
 
