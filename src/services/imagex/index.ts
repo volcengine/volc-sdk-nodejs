@@ -15,6 +15,7 @@ import {
   DeleteImageUploadFilesResult,
   UploadImagesOption,
 } from "./types";
+import { SecurityToken2 } from "../../base/types";
 
 export class ImagexService extends Service {
   constructor(options?: ServiceOptions) {
@@ -107,6 +108,26 @@ export class ImagexService extends Service {
       );
     }
     await Promise.all(promiseArray);
+  };
+  GetUploadAuth = (serviceIds: string[] = []): SecurityToken2 => {
+    return this.GetUploadAuthWithExpire(serviceIds, 60 * 60 * 1000);
+  };
+
+  GetUploadAuthWithExpire = (serviceIds: string[] = [], expire?: number): SecurityToken2 => {
+    const policy = {
+      Statement: [
+        {
+          Effect: "Allow",
+          Action: ["ImageX:ApplyImageUpload", "ImageX:CommitImageUpload"],
+          Resource: serviceIds.length
+            ? serviceIds
+                .map((serviceId) => `trn:ImageX:*:*:ServiceId/${serviceId}`)
+                .concat("trn:ImageX:*:*:StoreKeys/*")
+            : ["*"],
+        },
+      ],
+    };
+    return this.signSts2(policy, expire);
   };
 }
 
