@@ -14,8 +14,15 @@ import {
   DeleteImageUploadFilesParams,
   DeleteImageUploadFilesResult,
   UploadImagesOption,
+  GetUploadAuthParams,
 } from "./types";
 import { SecurityToken2 } from "../../base/types";
+
+const defaultUploadAuthParams: GetUploadAuthParams = {
+  serviceIds: [],
+  storeKeys: [],
+  expire: 60 * 60 * 1000,
+};
 
 export class ImagexService extends Service {
   constructor(options?: ServiceOptions) {
@@ -108,27 +115,23 @@ export class ImagexService extends Service {
       );
     }
     await Promise.all(promiseArray);
-  };
-  GetUploadAuth = (serviceIds: string[] = []): SecurityToken2 => {
-    return this.GetUploadAuthWithExpire(serviceIds, 60 * 60 * 1000);
-  };
+  }
 
-  GetUploadAuthWithExpire = (serviceIds: string[] = [], expire?: number): SecurityToken2 => {
+  GetUploadAuth = (options?: GetUploadAuthParams): SecurityToken2 => {
+    const { serviceIds, storeKeys, expire } = options ?? defaultUploadAuthParams;
+    const serviceIdPolicy = serviceIds?.length ? serviceIds.map((serviceId) => `trn:ImageX:*:*:ServiceId/${serviceId}`) : ['trn:ImageX:*:*:ServiceId/*'];
+    const storeKeysPolicy = storeKeys?.length ? storeKeys.map(storeKey => `trn:ImageX:*:*:StoreKeys/${storeKey}`) : ['trn:ImageX:*:*:StoreKeys/*'];
     const policy = {
       Statement: [
         {
           Effect: "Allow",
           Action: ["ImageX:ApplyImageUpload", "ImageX:CommitImageUpload"],
-          Resource: serviceIds.length
-            ? serviceIds
-                .map((serviceId) => `trn:ImageX:*:*:ServiceId/${serviceId}`)
-                .concat("trn:ImageX:*:*:StoreKeys/*")
-            : ["*"],
+          Resource: [...serviceIdPolicy, ...storeKeysPolicy],
         },
       ],
     };
-    return this.signSts2(policy, expire);
-  };
+    return this.signSts2(policy, expire ?? 60 * 60 * 1000);
+  }
 }
 
 export const defaultService = new ImagexService();
