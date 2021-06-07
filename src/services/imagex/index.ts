@@ -115,12 +115,16 @@ export class ImagexService extends Service {
       );
     }
     await Promise.all(promiseArray);
-  }
+  };
 
   GetUploadAuth = (options?: GetUploadAuthParams): SecurityToken2 => {
     const { serviceIds, storeKeys, expire } = options ?? defaultUploadAuthParams;
-    const serviceIdPolicy = serviceIds?.length ? serviceIds.map((serviceId) => `trn:ImageX:*:*:ServiceId/${serviceId}`) : ['trn:ImageX:*:*:ServiceId/*'];
-    const storeKeysPolicy = storeKeys?.length ? storeKeys.map(storeKey => `trn:ImageX:*:*:StoreKeys/${storeKey}`) : ['trn:ImageX:*:*:StoreKeys/*'];
+    const serviceIdPolicy = serviceIds?.length
+      ? serviceIds.map((serviceId) => `trn:ImageX:*:*:ServiceId/${serviceId}`)
+      : ["trn:ImageX:*:*:ServiceId/*"];
+    const storeKeysPolicy = storeKeys?.length
+      ? storeKeys.map((storeKey) => `trn:ImageX:*:*:StoreKeys/${storeKey}`)
+      : ["trn:ImageX:*:*:StoreKeys/*"];
     const policy = {
       Statement: [
         {
@@ -131,7 +135,7 @@ export class ImagexService extends Service {
       ],
     };
     return this.signSts2(policy, expire ?? 60 * 60 * 1000);
-  }
+  };
 }
 
 export const defaultService = new ImagexService();
