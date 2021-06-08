@@ -4,15 +4,30 @@ import { AxiosRequestConfig } from "axios";
 import { packageName, getDefaultOption } from "./utils";
 import FormData from "form-data";
 import qs from "querystring";
+import * as sts2 from "./sts2";
 import {
   OpenApiResponse,
   ServiceOptions,
   CreateAPIParams,
   FetchParams,
   ServiceOptionsBase,
+  Policy,
+  SecurityToken2,
 } from "./types";
 
 const defaultOptions = getDefaultOption();
+const defaultPolicy = {
+  Statement: [
+    {
+      Effect: "Allow",
+      Action: ["*"],
+      Resource: ["*"],
+    },
+  ],
+};
+
+const defaultExpire = 60 * 60 * 1000;
+
 export default class Service {
   constructor(options: ServiceOptions) {
     this.options = {
@@ -184,5 +199,42 @@ export default class Service {
       ...requestInit,
       params: undefined,
     });
+  }
+  /**
+   * get temporary ak sk
+   * @param  {Policy|number} inlinePolicy? permission policy
+   * @param  {number} expire? expires in milliseconds
+   * @returns {SecurityToken2} object containing temporary ak/sk
+   */
+  signSts2(inlinePolicy?: Policy | number, expire?: number): SecurityToken2 {
+    if (!inlinePolicy) inlinePolicy = defaultPolicy;
+    if (typeof inlinePolicy === "number") {
+      expire = inlinePolicy;
+      inlinePolicy = defaultPolicy;
+    }
+    if (!expire) expire = defaultExpire;
+    if (typeof expire !== "number") {
+      throw new Error("SignSts2 second parameter must be a number");
+    }
+
+    const now = Date.now();
+    const CurrentTime = new Date(now).toISOString();
+    const timeInMilles = now + expire;
+    const timeInSeconds = parseInt((timeInMilles / 1000).toFixed(0));
+    const ExpiredTime = new Date(timeInMilles).toISOString();
+
+    const { AccessKeyId, SecretAccessKey } = sts2.CreateTempAKSK();
+    const sts = { AccessKeyId, SecretAccessKey };
+
+    const innerToken = sts2.CreateInnerToken(this.options, sts, inlinePolicy, timeInSeconds);
+    const SessionToken = "STS2" + sts2.base64(JSON.stringify(innerToken));
+
+    return {
+      CurrentTime,
+      ExpiredTime,
+      SessionToken,
+      AccessKeyId,
+      SecretAccessKey,
+    };
   }
 }

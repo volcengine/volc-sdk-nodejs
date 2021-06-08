@@ -101,3 +101,9 @@ export interface UploadImagesOption {
   files: string[] | NodeJS.ReadableStream[] | ArrayBuffer[] | ArrayBufferView[];
   fileKeys?: string[];
 }
+
+export interface GetUploadAuthParams {
+  serviceIds?: string[];
+  expire?: number;
+  storeKeys: string[];
+}

@@ -33,4 +33,7 @@ export async function main(AccessKeyId, SecretKey, SessionToken) {
       StoreUri: 'image StoreUri',
     }
   });
+
+  // 生成临时上传密钥
+  imagexService.GetUploadAuth();
 }

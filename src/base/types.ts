@@ -99,3 +99,31 @@ export interface CreateAPIParams {
    */
   queryKeys?: string[];
 }
+
+export interface Statement {
+  Effect: string;
+  Action: string[];
+  Resource: string[];
+  Condition?: string;
+}
+
+export interface Policy {
+  Statement: Statement[];
+}
+
+export interface SecurityToken2 {
+  AccessKeyId: string;
+  SecretAccessKey: string;
+  CurrentTime?: string;
+  ExpiredTime?: string;
+  SessionToken?: string;
+}
+
+export interface InnerToken {
+  LTAccessKeyId: string;
+  AccessKeyId: string;
+  SignedSecretAccessKey: string;
+  ExpiredTime: number;
+  PolicyString: string;
+  Signature: string;
+}
