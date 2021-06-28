@@ -246,4 +246,404 @@ export const validateProjectNamespaceDetail = ajv.compile(
     },
   })
 );
+
 export const validateProjectNamespaceCreate = ajv.compile(createSuccessSchema());
+
+export const validateProjectNamespaceSources = ajv.compile(
+  createListSchema({
+    data: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          id: {
+            type: "number",
+          },
+          lang: {
+            type: "string",
+          },
+          keyText: {
+            type: "string",
+          },
+          content: {
+            type: "string",
+          },
+          tagName: {
+            type: "string",
+          },
+          lengthLimit: {
+            type: "number",
+          },
+          distributeStatus: {
+            type: "number",
+          },
+          translatedStatus: {
+            type: "number",
+          },
+          textExtra: {
+            type: ["null", "object"],
+          },
+          taskId: {
+            type: "number",
+          },
+          approvalStatus: {
+            type: "number",
+          },
+          createdAt: {
+            type: "string",
+          },
+          updatedAt: {
+            type: "string",
+          },
+          operatorId: {
+            type: "number",
+          },
+          commentary: {
+            type: "string",
+          },
+        },
+      },
+    },
+  })
+);
+
+export const validateProjectNamespaceSourceDetail = ajv.compile(
+  createDataSchema({
+    type: "object",
+    properties: {
+      id: {
+        type: "number",
+      },
+      lang: {
+        type: "string",
+      },
+      keyText: {
+        type: "string",
+      },
+      content: {
+        type: "string",
+      },
+      tagName: {
+        type: "string",
+      },
+      lengthLimit: {
+        type: "number",
+      },
+      distributeStatus: {
+        type: "number",
+      },
+      translatedStatus: {
+        type: "number",
+      },
+      textExtra: {
+        type: ["null", "object"],
+      },
+      taskId: {
+        type: "number",
+      },
+      approvalStatus: {
+        type: "number",
+      },
+      createdAt: {
+        type: "string",
+      },
+      updatedAt: {
+        type: "string",
+      },
+      operatorId: {
+        type: "number",
+      },
+      commentary: {
+        type: "string",
+      },
+    },
+  })
+);
+
+export const validateProjectNamespaceSourceUpdate = ajv.compile(createSuccessSchema());
+export const validateProjectNamespaceSourceAdd = ajv.compile(createSuccessSchema());
+export const validateProjectNamespaceSourceDeleteByKeys = ajv.compile(createSuccessSchema());
+export const validateProjectNamespaceSourceDeleteByIds = ajv.compile(createSuccessSchema());
+
+export const validateProjectNamespaceTargets = ajv.compile(
+  createListSchema({
+    data: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          id: {
+            type: "number",
+          },
+          sourceTextId: {
+            type: "number",
+          },
+          namespaceId: {
+            type: "number",
+          },
+          lang: {
+            type: "string",
+          },
+          keyText: {
+            type: "string",
+          },
+          content: {
+            type: "string",
+          },
+          distributed: {
+            type: "number",
+          },
+          tagName: {
+            type: "string",
+          },
+          textExtra: {
+            type: ["null", "object"],
+          },
+          createdAt: {
+            type: "string",
+          },
+          updatedAt: {
+            type: "string",
+          },
+          operatorId: {
+            type: "number",
+          },
+        },
+      },
+    },
+  })
+);
+
+export const validateProjectNamespaceTargetUpdate = ajv.compile(createSuccessSchema());
+export const validateProjectNamespaceTargetDeleteById = ajv.compile(createSuccessSchema());
+
+export const validateProjectTasks = ajv.compile(
+  createListSchema({
+    data: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          taskId: {
+            type: "number",
+          },
+          taskName: {
+            type: "string",
+          },
+          syncNamespaces: {
+            type: "array",
+          },
+          createdAt: {
+            type: "string",
+          },
+          updatedAt: {
+            type: "string",
+          },
+          creatorId: {
+            type: "number",
+          },
+        },
+      },
+    },
+  })
+);
+
+export const validateProjectTaskDetail = ajv.compile(
+  createDataSchema({
+    type: "object",
+    properties: {
+      taskId: {
+        type: "number",
+      },
+      taskName: {
+        type: "string",
+      },
+      syncNamespaces: {
+        type: "array",
+      },
+      createdAt: {
+        type: "string",
+      },
+      updatedAt: {
+        type: "string",
+      },
+      creatorId: {
+        type: "number",
+      },
+    },
+  })
+);
+
+export const validateProjectTaskCreate = ajv.compile(
+  createDataSchema({
+    type: "object",
+    properties: {
+      taskId: {
+        type: "number",
+      },
+    },
+  })
+);
+
+
+export const validateProjectTaskSources = ajv.compile(
+  createListSchema({
+    data: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          id: {
+            type: "number",
+          },
+          lang: {
+            type: "string",
+          },
+          keyText: {
+            type: "string",
+          },
+          content: {
+            type: "string",
+          },
+          tagName: {
+            type: "string",
+          },
+          lengthLimit: {
+            type: "number",
+          },
+          distributeStatus: {
+            type: "number",
+          },
+          translatedStatus: {
+            type: "number",
+          },
+          textExtra: {
+            type: ["null", "object"],
+          },
+          taskId: {
+            type: "number",
+          },
+          approvalStatus: {
+            type: "number",
+          },
+          createdAt: {
+            type: "string",
+          },
+          updatedAt: {
+            type: "string",
+          },
+          operatorId: {
+            type: "number",
+          },
+          commentary: {
+            type: "string",
+          },
+        },
+      },
+    },
+  })
+);
+
+export const validateProjectTaskSourceDetail = ajv.compile(
+  createDataSchema({
+    type: "object",
+    properties: {
+      id: {
+        type: "number",
+      },
+      lang: {
+        type: "string",
+      },
+      keyText: {
+        type: "string",
+      },
+      content: {
+        type: "string",
+      },
+      tagName: {
+        type: "string",
+      },
+      lengthLimit: {
+        type: "number",
+      },
+      distributeStatus: {
+        type: "number",
+      },
+      translatedStatus: {
+        type: "number",
+      },
+      textExtra: {
+        type: ["null", "object"],
+      },
+      taskId: {
+        type: "number",
+      },
+      approvalStatus: {
+        type: "number",
+      },
+      createdAt: {
+        type: "string",
+      },
+      updatedAt: {
+        type: "string",
+      },
+      operatorId: {
+        type: "number",
+      },
+      commentary: {
+        type: "string",
+      },
+    },
+  })
+);
+
+export const validateProjectTaskSourceUpdate = ajv.compile(createSuccessSchema());
+export const validateProjectTaskSourceAdd = ajv.compile(createSuccessSchema());
+export const validateProjectTaskSourceDeleteByKeys = ajv.compile(createSuccessSchema());
+export const validateProjectTaskSourceDeleteByIds = ajv.compile(createSuccessSchema());
+
+export const validateProjectTaskTargets = ajv.compile(
+  createListSchema({
+    data: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          id: {
+            type: "number",
+          },
+          sourceTextId: {
+            type: "number",
+          },
+          lang: {
+            type: "string",
+          },
+          keyText: {
+            type: "string",
+          },
+          content: {
+            type: "string",
+          },
+          tagName: {
+            type: "string",
+          },
+          textExtra: {
+            type: ["null", "object"],
+          },
+          createdAt: {
+            type: "string",
+          },
+          updatedAt: {
+            type: "string",
+          },
+          operatorId: {
+            type: "number",
+          },
+        },
+      },
+    },
+  })
+);
+
+export const validateProjectTaskTargetUpdate = ajv.compile(createSuccessSchema());
+export const validateProjectTaskTargetDeleteById = ajv.compile(createSuccessSchema());
