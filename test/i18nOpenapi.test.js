@@ -28,6 +28,16 @@ import {
   validateProjectTaskTargets,
   validateProjectTaskTargetUpdate,
   validateProjectTaskTargetDeleteById,
+  validateProjectTerms,
+  validateProjectTermDetail,
+  validateProjectTermTargetAdd,
+  validateProjectTermTargetUpdate,
+  validateProjectTermTargetDelete,
+  validateProjectTermSourceAdd,
+  validateProjectTermSourceUpdate,
+  validateProjectTermSourceDelete,
+  validateProjectDistributions,
+  validateProjectDistributionsRelease,
 } from "./schema/i18nOpenapi";
 
 const i18nOpenapiService = i18nOpenapi.defaultService;
@@ -375,5 +385,115 @@ test("i18nOpenapi:ProjectTaskTargetDeleteById", async () => {
   });
 
   const validateResult = validateProjectTaskTargetDeleteById(response);
+  expect(validateResult).toBe(true);
+});
+
+test("i18nOpenapi:ProjectTerms", async () => {
+  const response = await i18nOpenapiService.ProjectTerms({
+    projectId: 3546,
+    limit: 1,
+  });
+
+  const validateResult = validateProjectTerms(response);
+  expect(validateResult).toBe(true);
+});
+
+test("i18nOpenapi:ProjectTermDetail", async () => {
+  const response = await i18nOpenapiService.ProjectTermDetail({
+    projectId: 3546,
+    sourceTermId: 62841,
+  });
+
+  const validateResult = validateProjectTermDetail(response);
+  expect(validateResult).toBe(true);
+});
+
+test("i18nOpenapi:ProjectTermTargetAdd", async () => {
+  const response = await i18nOpenapiService.ProjectTermTargetAdd({
+    projectId: 3546,
+    sourceTermId: 62841,
+    locale: "ar",
+    term: "我是api 增加的印尼",
+  });
+
+  const validateResult = validateProjectTermTargetAdd(response);
+  expect(validateResult).toBe(true);
+});
+
+test("i18nOpenapi:ProjectTermTargetUpdate", async () => {
+  const response = await i18nOpenapiService.ProjectTermTargetUpdate({
+    projectId: 3546,
+    sourceTermId: 62841,
+    term: "我是api 更新的英语12",
+    termId: 391224,
+  });
+
+  const validateResult = validateProjectTermTargetUpdate(response);
+  expect(validateResult).toBe(true);
+});
+
+test("i18nOpenapi:ProjectTermTargetDelete", async () => {
+  const response = await i18nOpenapiService.ProjectTermTargetDelete({
+    projectId: 3546,
+    sourceTermId: 62842,
+  });
+
+  const validateResult = validateProjectTermTargetDelete(response);
+  expect(validateResult).toBe(true);
+});
+
+test("i18nOpenapi:ProjectTermSourceAdd", async () => {
+  const response = await i18nOpenapiService.ProjectTermSourceAdd({
+    projectId: 3546,
+    description: "我的描述",
+    term: `我是 sdk 单测新增${Date.now()}`,
+  });
+
+  const validateResult = validateProjectTermSourceAdd(response);
+  expect(validateResult).toBe(true);
+});
+
+test("i18nOpenapi:ProjectTermSourceUpdate", async () => {
+  const response = await i18nOpenapiService.ProjectTermSourceUpdate({
+    projectId: 3546,
+    description: `我的sdk 更新描述 ${Date.now()}`,
+    term: `我是api 更新的 sdk ${Date.now()}`,
+    sourceTermId: 62843,
+  });
+
+  const validateResult = validateProjectTermSourceUpdate(response);
+  expect(validateResult).toBe(true);
+});
+
+test("i18nOpenapi:ProjectTermSourceDelete", async () => {
+  const response = await i18nOpenapiService.ProjectTermSourceDelete({
+    projectId: 3546,
+    sourceTermIds: [627971],
+  });
+
+  const validateResult = validateProjectTermSourceDelete(response);
+  expect(validateResult).toBe(true);
+});
+
+test("i18nOpenapi:ProjectDistributions", async () => {
+  const response = await i18nOpenapiService.ProjectDistributions({
+    projectId: 3546,
+    namespaceId: 37848,
+    locale: "en",
+  });
+
+  const validateResult = validateProjectDistributions(response);
+  expect(validateResult).toBe(true);
+});
+
+test("i18nOpenapi:ProjectDistributionsRelease", async () => {
+  const response = await i18nOpenapiService.ProjectDistributionsRelease({
+    projectId: 3546,
+    namespaceId: 37848,
+    locale: "en",
+    keys: ["tasksync", "plural_task", "plural", "apiupdate"],
+  });
+
+  const validateResult = validateProjectDistributionsRelease(response);
   expect(validateResult).toBe(true);
 });

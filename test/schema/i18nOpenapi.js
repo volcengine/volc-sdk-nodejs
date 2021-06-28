@@ -485,7 +485,6 @@ export const validateProjectTaskCreate = ajv.compile(
   })
 );
 
-
 export const validateProjectTaskSources = ajv.compile(
   createListSchema({
     data: {
@@ -647,3 +646,146 @@ export const validateProjectTaskTargets = ajv.compile(
 
 export const validateProjectTaskTargetUpdate = ajv.compile(createSuccessSchema());
 export const validateProjectTaskTargetDeleteById = ajv.compile(createSuccessSchema());
+
+export const validateProjectTerms = ajv.compile(
+  createListSchema({
+    data: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          id: {
+            type: "number",
+          },
+          locale: {
+            type: "string",
+          },
+          term: {
+            type: "string",
+          },
+          description: {
+            type: "string",
+          },
+          isApplyAll: {
+            type: "boolean",
+          },
+          createdAt: {
+            type: "string",
+          },
+          updatedAt: {
+            type: "string",
+          },
+          operatorId: {
+            type: "number",
+          },
+          creatorId: {
+            type: "number",
+          },
+          targetTerms: {
+            type: "array",
+          },
+        },
+      },
+    },
+  })
+);
+
+export const validateProjectTermDetail = ajv.compile(
+  createDataSchema({
+    type: "object",
+    properties: {
+      id: {
+        type: "number",
+      },
+      locale: {
+        type: "string",
+      },
+      term: {
+        type: "string",
+      },
+      description: {
+        type: "string",
+      },
+      isApplyAll: {
+        type: "boolean",
+      },
+      createdAt: {
+        type: "string",
+      },
+      updatedAt: {
+        type: "string",
+      },
+      operatorId: {
+        type: "number",
+      },
+      creatorId: {
+        type: "number",
+      },
+      targetTerms: {
+        type: "array",
+      },
+    },
+  })
+);
+
+export const validateProjectTermTargetAdd = ajv.compile(createSuccessSchema());
+export const validateProjectTermTargetUpdate = ajv.compile(createSuccessSchema());
+export const validateProjectTermTargetDelete = ajv.compile(createSuccessSchema());
+export const validateProjectTermSourceAdd = ajv.compile(
+  createDataSchema({
+    type: "object",
+    properties: {
+      termId: {
+        type: "number",
+      },
+    },
+  })
+  );
+
+export const validateProjectTermSourceUpdate = ajv.compile(createSuccessSchema());
+export const validateProjectTermSourceDelete = ajv.compile(createSuccessSchema());
+
+export const validateProjectDistributions = ajv.compile(
+  createListSchema({
+    data: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          key: {
+            type: "string",
+          },
+          sourceText: {
+            type: "string",
+          },
+          newTranslateText: {
+            type: "string",
+          },
+          oldTranslateText: {
+            type: "string",
+          },
+          status: {
+            type: "number",
+          },
+          targetTextId: {
+            type: "number",
+          },
+          sourceTextId: {
+            type: "number",
+          },
+          tagName: {
+            type: "string",
+          },
+          updatedAt: {
+            type: "string",
+          },
+          operatorId: {
+            type: "number",
+          },
+        },
+      },
+    },
+  })
+);
+
+export const validateProjectDistributionsRelease = ajv.compile(createSuccessSchema());

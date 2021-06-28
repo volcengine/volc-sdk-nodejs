@@ -81,6 +81,10 @@ import {
   ProjectTermSourceUpdateResult,
   ProjectTermSourceDeleteParams,
   ProjectTermSourceDeleteResult,
+  ProjectDistributionsParams,
+  ProjectDistributionsResult,
+  ProjectDistributionsReleaseParams,
+  ProjectDistributionsReleaseResult,
 } from "./types";
 
 export class i18nOpenapiService extends Service {
@@ -328,6 +332,17 @@ export class i18nOpenapiService extends Service {
     ProjectTermSourceDeleteParams,
     ProjectTermSourceDeleteResult
   >("ProjectTermSourceDelete", {
+    method: "POST",
+    contentType: "json",
+  });
+
+  ProjectDistributions = this.createAPI<ProjectDistributionsParams, ProjectDistributionsResult>(
+    "ProjectDistributions"
+  );
+  ProjectDistributionsRelease = this.createAPI<
+    ProjectDistributionsReleaseParams,
+    ProjectDistributionsReleaseResult
+  >("ProjectDistributionsRelease", {
     method: "POST",
     contentType: "json",
   });

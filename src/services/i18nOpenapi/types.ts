@@ -476,10 +476,10 @@ export interface ProjectTermSourceDeleteParams extends IProjectParams {
 
 export interface ProjectTermSourceDeleteResult extends IBaseResult {}
 
-// export interface ProjectDistributionsParams extends IProjectParams { }
+export interface ProjectDistributionsParams extends IProjectParams { }
 
-// export interface ProjectDistributionsResult extends IBaseResult { }
+export interface ProjectDistributionsResult extends IBaseResult { }
 
-// export interface ProjectDistributionsReleaseParams extends IProjectParams { }
+export interface ProjectDistributionsReleaseParams extends IProjectParams { }
 
-// export interface ProjectDistributionsReleaseResult extends IBaseResult { }
+export interface ProjectDistributionsReleaseResult extends IBaseResult { }
