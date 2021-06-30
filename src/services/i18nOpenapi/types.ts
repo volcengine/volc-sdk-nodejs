@@ -22,7 +22,6 @@ interface IDownloadParams {
 }
 
 interface IBaseResult {
-  apiVersion: string;
   message?: string;
 }
 interface IListResult extends IBaseResult {

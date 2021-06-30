@@ -4,12 +4,7 @@ import merge from "lodash.merge";
 
 const baseReponseSchema = {
   type: "object",
-  properties: {
-    apiVersion: {
-      type: "string",
-    },
-  },
-  required: ["apiVersion"],
+  properties: {},
 };
 
 function createListSchema(resultSchema) {
@@ -32,7 +27,7 @@ function createListSchema(resultSchema) {
         },
       },
     },
-    required: ["data", "total", "pagination", "apiVersion"],
+    required: ["data", "total", "pagination"],
   });
 }
 
@@ -42,7 +37,7 @@ function createDataSchema(resultSchema) {
     properties: {
       data: resultSchema,
     },
-    required: ["data", "apiVersion"],
+    required: ["data"],
   });
 }
 
@@ -54,7 +49,7 @@ function createSuccessSchema() {
         type: "string",
       },
     },
-    required: ["message", "apiVersion"],
+    required: ["message"],
   });
 }
 
