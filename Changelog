@@ -1,5 +1,9 @@
 Change log
 
+2021-03-02 Bumped to version v1.0.6
+- 支持下发ststoken.
+- 新增imagex获取临时上传token接口. 
+
 2021-03-02 Bumped to version v1.0.5
 - Fix json content type bug.
 
