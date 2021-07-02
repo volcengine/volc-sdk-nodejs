@@ -53,6 +53,21 @@ function createSuccessSchema() {
   });
 }
 
+function createFailSchema() {
+  return merge({}, baseReponseSchema, {
+    type: "object",
+    properties: {
+      message: {
+        type: "string",
+      },
+      code: {
+        type: "number",
+      },
+    },
+    required: ["message", "code"],
+  });
+}
+
 export const validateProjects = ajv.compile(
   createListSchema({
     data: {

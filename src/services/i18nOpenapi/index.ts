@@ -124,10 +124,7 @@ export class i18nOpenapiService extends Service {
   ProjectNamespaceSources = this.createAPI<
     ProjectNamespaceSourcesParams,
     ProjectNamespaceSourcesResult
-  >("ProjectNamespaceSources", {
-    method: "POST",
-    contentType: "json",
-  });
+  >("ProjectNamespaceSources");
 
   ProjectNamespaceSourceDetail = this.createAPI<
     ProjectNamespaceSourceDetailParams,
@@ -208,11 +205,7 @@ export class i18nOpenapiService extends Service {
   );
 
   ProjectTaskSources = this.createAPI<ProjectTaskSourcesParams, ProjectTaskSourcesResult>(
-    "ProjectTaskSources",
-    {
-      method: "POST",
-      contentType: "json",
-    }
+    "ProjectTaskSources"
   );
 
   ProjectTaskSourceDetail = this.createAPI<
