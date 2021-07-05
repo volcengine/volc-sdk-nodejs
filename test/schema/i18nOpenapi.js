@@ -667,9 +667,6 @@ export const validateProjectTerms = ajv.compile(
           id: {
             type: "number",
           },
-          locale: {
-            type: "string",
-          },
           term: {
             type: "string",
           },
