@@ -41,7 +41,7 @@ const uriEscape = (str) => {
   }
 };
 
-const queryParamsToString = (params) =>
+export const queryParamsToString = (params) =>
   Object.keys(params)
     .map((key) => {
       const val = params[key];
@@ -144,7 +144,6 @@ export default class Signer {
     parts.push(datetime);
     parts.push(this.credentialString(datetime));
     parts.push(this.hexEncodedHash(this.canonicalString()).toString());
-
     return parts.join("\n");
   }
 

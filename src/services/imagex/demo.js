@@ -36,4 +36,11 @@ export async function main(AccessKeyId, SecretKey, SessionToken) {
 
   // 生成临时上传密钥
   imagexService.GetUploadAuth();
+
+  //获取上传图片的签名URL
+  imagexService.GetUploadAuthToken({
+    ServiceId: "your service id",
+    // 默认900 (15min)
+    "X-Expires": "60",
+  });
 }
