@@ -107,3 +107,8 @@ export interface GetUploadAuthParams {
   expire?: number;
   storeKeys: string[];
 }
+
+export interface GetUploadAuthTokenParams {
+  ServiceId: string;
+  "X-Expires": number;
+}

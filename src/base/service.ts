@@ -57,6 +57,13 @@ export default class Service {
   setHost = (host: string) => {
     this.options.host = host;
   };
+
+  getSessionToken = () => this.options.sessionToken;
+
+  getAccessKeyId = () => this.options.accessKeyId;
+
+  getSecretKey = () => this.options.secretKey;
+
   /**
    * create json api
    * @param Action OpenAPI Action

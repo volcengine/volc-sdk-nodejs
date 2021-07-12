@@ -1,5 +1,5 @@
 import Service from "../../base/service";
-import { ServiceOptions, OpenApiResponse } from "../../base/types";
+import { ServiceOptions, OpenApiResponse, FetchParams } from "../../base/types";
 import fs from "fs";
 import axios, { ResponseType, AxiosPromise } from "axios";
 import {
@@ -15,8 +15,11 @@ import {
   DeleteImageUploadFilesResult,
   UploadImagesOption,
   GetUploadAuthParams,
+  GetUploadAuthTokenParams,
 } from "./types";
 import { SecurityToken2 } from "../../base/types";
+import Signer, { queryParamsToString } from "../../base/sign";
+import { getDefaultOption } from "../../base/utils";
 
 const defaultUploadAuthParams: GetUploadAuthParams = {
   serviceIds: [],
@@ -38,12 +41,20 @@ export class ImagexService extends Service {
   );
   CommitImageUpload = this.createAPI<CommitImageUploadParams, CommitImageUploadResult>(
     "CommitImageUpload",
-    { method: "POST", contentType: "json", queryKeys: ["ServiceId"] }
+    {
+      method: "POST",
+      contentType: "json",
+      queryKeys: ["ServiceId"],
+    }
   );
   UpdateImageUploadFiles = this.createAPI<
     UpdateImageUploadFilesParams,
     UpdateImageUploadFilesResult
-  >("UpdateImageUploadFiles", { method: "POST", contentType: "json", queryKeys: ["ServiceId"] });
+  >("UpdateImageUploadFiles", {
+    method: "POST",
+    contentType: "json",
+    queryKeys: ["ServiceId"],
+  });
   PreviewImageUploadFile = this.createAPI<
     PreviewImageUploadFileParams,
     PreviewImageUploadFileResult
@@ -51,7 +62,11 @@ export class ImagexService extends Service {
   DeleteImageUploadFiles = this.createAPI<
     DeleteImageUploadFilesParams,
     DeleteImageUploadFilesResult
-  >("DeleteImageUploadFiles", { method: "POST", contentType: "json", queryKeys: ["ServiceId"] });
+  >("DeleteImageUploadFiles", {
+    method: "POST",
+    contentType: "json",
+    queryKeys: ["ServiceId"],
+  });
 
   UploadImages = async (
     option: UploadImagesOption
@@ -135,6 +150,92 @@ export class ImagexService extends Service {
       ],
     };
     return this.signSts2(policy, expire ?? 60 * 60 * 1000);
+  };
+
+  GetUploadAuthToken = (query: GetUploadAuthTokenParams): string => {
+    const applyUploadToken = this._signUrl({
+      method: "GET",
+      params: { Action: "ApplyImageUpload", Version: "2018-08-01", ...query },
+    });
+
+    const commitUploadToken = this._signUrl({
+      method: "POST",
+      params: { Action: "CommitImageUpload", Version: "2018-08-01", ...query },
+    });
+
+    const tokens = {
+      Version: "v1",
+      ApplyUploadToken: applyUploadToken,
+      CommitUploadToken: commitUploadToken,
+    };
+
+    const tokensJson = JSON.stringify(tokens).replace("\\u0026", "&");
+
+    return Buffer.from(tokensJson).toString("base64");
+  };
+
+  private _signUrl = (options: {
+    method: string;
+    params: FetchParams & GetUploadAuthTokenParams;
+    serviceName?: string;
+  }) => {
+    const { region } = getDefaultOption();
+    const sessionToken = this.getSessionToken();
+    const accessKeyId = this.getAccessKeyId();
+    const secretKey = this.getSecretKey();
+
+    if (!accessKeyId || !secretKey) {
+      throw new Error("accessKeyId or secretKey is invalid");
+    }
+
+    const { params, method = "GET", serviceName = "ImageX" } = options;
+
+    // 使用临时的一个signer来转换utc时间，因为实际上使用signer需要传入params字段
+    const date = new Signer({ method: "", region: "" }, "ImageX")
+      .iso8601(new Date())
+      .replace(/[:\-]|\.\d{3}/g, "");
+
+    const credentialScope = [date.substr(0, 8), region, serviceName, "request"].join("/");
+    const signedHeaders = "";
+
+    const paramsMap: any = {
+      "X-Date": date,
+      "X-NotSignBody": "",
+      "X-Credential": accessKeyId + "/" + credentialScope,
+      "X-Algorithm": "HMAC-SHA256",
+      "X-SignedHeaders": signedHeaders,
+      "X-SignedQueries": "",
+      ...params,
+    };
+
+    const sortedQueryMap = Object.keys(paramsMap)
+      .sort()
+      .reduce((map, curKey) => {
+        map[curKey] = paramsMap[curKey];
+        return map;
+      }, {});
+
+    if (sessionToken) {
+      paramsMap["X-Security-Token"] = sessionToken;
+    }
+
+    paramsMap["X-SignedQueries"] = Object.keys(sortedQueryMap).join(";");
+
+    const signer = new Signer(
+      {
+        region,
+        method,
+        pathname: "/",
+        params: paramsMap,
+      },
+      "ImageX"
+    );
+
+    const signature = signer.signature({ accessKeyId, secretKey }, date);
+
+    paramsMap["X-Signature"] = signature.toString();
+
+    return queryParamsToString(paramsMap);
   };
 }
 
