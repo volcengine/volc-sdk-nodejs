@@ -1,5 +1,8 @@
 Change log
 
+2021-07-15 Bumped to version v1.0.8
+- 增加 i18n OpenAPI
+
 2021-07-12 Bumped to version v1.0.7
 - 增加imagex签名算法.
 
