@@ -44,6 +44,22 @@ const i18nOpenapiService = i18nOpenapi.defaultService;
 
 process.env.VOLC_HOST && i18nOpenapiService.setHost(process.env.VOLC_HOST);
 
+const commonProjectQuery = {
+  projectId: 3622,
+};
+
+const commonNamespaceQuery = {
+  namespaceId: 38157,
+};
+
+const commonTaskQuery = {
+  taskId: 20282082,
+};
+
+const commonTermQuery = {
+  sourceTermId: 62855,
+};
+
 test("i18nOpenapi:Projects", async () => {
   const response = await i18nOpenapiService.Projects();
   const validateResult = validateProjects(response);
@@ -52,7 +68,7 @@ test("i18nOpenapi:Projects", async () => {
 
 test("i18nOpenapi:ProjectDetail", async () => {
   const response = await i18nOpenapiService.ProjectDetail({
-    projectId: 3546,
+    ...commonProjectQuery,
   });
   const validateResult = validateProjectDetail(response);
   expect(validateResult).toBe(true);
@@ -60,7 +76,7 @@ test("i18nOpenapi:ProjectDetail", async () => {
 
 test("i18nOpenapi:ProjectUsers", async () => {
   const response = await i18nOpenapiService.ProjectUsers({
-    projectId: 3546,
+    ...commonProjectQuery,
   });
   const validateResult = validateProjectUsers(response);
   expect(validateResult).toBe(true);
@@ -68,8 +84,8 @@ test("i18nOpenapi:ProjectUsers", async () => {
 
 test("i18nOpenapi:ProjectUserRole", async () => {
   const response = await i18nOpenapiService.ProjectUserRole({
-    projectId: 3546,
-    userId: 14193,
+    ...commonProjectQuery,
+    userId: 1000840,
   });
   const validateResult = validateProjectUserRole(response);
   expect(validateResult).toBe(true);
@@ -77,7 +93,7 @@ test("i18nOpenapi:ProjectUserRole", async () => {
 
 test("i18nOpenapi:ProjectNamespaces", async () => {
   const response = await i18nOpenapiService.ProjectNamespaces({
-    projectId: 3546,
+    ...commonProjectQuery,
   });
   const validateResult = validateProjectNamespaces(response);
   expect(validateResult).toBe(true);
@@ -85,8 +101,8 @@ test("i18nOpenapi:ProjectNamespaces", async () => {
 
 test("i18nOpenapi:ProjectNamespaceDetail", async () => {
   const response = await i18nOpenapiService.ProjectNamespaceDetail({
-    projectId: 3546,
-    namespaceId: 37848,
+    ...commonProjectQuery,
+    ...commonNamespaceQuery,
   });
   const validateResult = validateProjectNamespaceDetail(response);
   expect(validateResult).toBe(true);
@@ -94,8 +110,8 @@ test("i18nOpenapi:ProjectNamespaceDetail", async () => {
 
 test("i18nOpenapi:ProjectNamespaceCreate", async () => {
   const response = await i18nOpenapiService.ProjectNamespaceCreate({
-    projectId: 3546,
-    name: `创建空间_来自node SDK 单元测试${Date.now()}`,
+    ...commonProjectQuery,
+    name: `create_node_SDK_test${Date.now()}`,
     description: "我是描述",
   });
   const validateResult = validateProjectNamespaceCreate(response);
@@ -104,8 +120,8 @@ test("i18nOpenapi:ProjectNamespaceCreate", async () => {
 
 test("i18nOpenapi:ProjectNamespaceSources", async () => {
   const response = await i18nOpenapiService.ProjectNamespaceSources({
-    projectId: 3546,
-    namespaceId: 37848,
+    ...commonProjectQuery,
+    ...commonNamespaceQuery,
   });
   const validateResult = validateProjectNamespaceSources(response);
   expect(validateResult).toBe(true);
@@ -113,9 +129,9 @@ test("i18nOpenapi:ProjectNamespaceSources", async () => {
 
 test("i18nOpenapi:ProjectNamespaceSourceDetail", async () => {
   const response = await i18nOpenapiService.ProjectNamespaceSourceDetail({
-    projectId: 3546,
-    namespaceId: 37848,
-    sourceId: 6610441,
+    ...commonProjectQuery,
+    ...commonNamespaceQuery,
+    sourceId: 6762260,
   });
   const validateResult = validateProjectNamespaceSourceDetail(response);
   expect(validateResult).toBe(true);
@@ -123,10 +139,10 @@ test("i18nOpenapi:ProjectNamespaceSourceDetail", async () => {
 
 test("i18nOpenapi:ProjectNamespaceSourceUpdate", async () => {
   const response = await i18nOpenapiService.ProjectNamespaceSourceUpdate({
-    projectId: 3546,
-    sourceId: 6610468,
-    content: "我是api更新源文案112233 1\u000b\u000b\u000b2",
-    namespaceId: 37848,
+    ...commonProjectQuery,
+    sourceId: 6762260,
+    content: "i am api update 111 1\u000b\u000b\u000b2",
+    ...commonNamespaceQuery,
     lengthLimit: 99,
     commentary: "我是api 更新的注释",
   });
@@ -136,8 +152,8 @@ test("i18nOpenapi:ProjectNamespaceSourceUpdate", async () => {
 
 test("i18nOpenapi:ProjectNamespaceSourceAdd", async () => {
   const response = await i18nOpenapiService.ProjectNamespaceSourceAdd({
-    projectId: 3546,
-    namespaceId: 37848,
+    ...commonProjectQuery,
+    ...commonNamespaceQuery,
     texts: [
       {
         key: `sdk add text${Date.now()}`,
@@ -163,8 +179,8 @@ test("i18nOpenapi:ProjectNamespaceSourceAdd", async () => {
 
 test("i18nOpenapi:ProjectNamespaceSourceDeleteByKeys", async () => {
   const response = await i18nOpenapiService.ProjectNamespaceSourceDeleteByKeys({
-    projectId: 3546,
-    namespaceId: 37848,
+    ...commonProjectQuery,
+    ...commonNamespaceQuery,
     textKeys: ["api_add", "api_add_plural"],
   });
   const validateResult = validateProjectNamespaceSourceDeleteByKeys(response);
@@ -173,8 +189,8 @@ test("i18nOpenapi:ProjectNamespaceSourceDeleteByKeys", async () => {
 
 test("i18nOpenapi:ProjectNamespaceSourceDeleteByIds", async () => {
   const response = await i18nOpenapiService.ProjectNamespaceSourceDeleteByIds({
-    projectId: 3546,
-    namespaceId: 37848,
+    ...commonProjectQuery,
+    ...commonNamespaceQuery,
     textIds: [6610504, 6610503],
   });
   const validateResult = validateProjectNamespaceSourceDeleteByIds(response);
@@ -183,8 +199,8 @@ test("i18nOpenapi:ProjectNamespaceSourceDeleteByIds", async () => {
 
 test("i18nOpenapi:ProjectNamespaceTargets", async () => {
   const response = await i18nOpenapiService.ProjectNamespaceTargets({
-    projectId: 3546,
-    namespaceId: 37848,
+    ...commonProjectQuery,
+    ...commonNamespaceQuery,
     limit: 2,
     locale: "en",
   });
@@ -195,19 +211,19 @@ test("i18nOpenapi:ProjectNamespaceTargets", async () => {
 
 test("i18nOpenapi:ProjectNamespaceTargetUpdate", async () => {
   const response = await i18nOpenapiService.ProjectNamespaceTargetUpdate({
-    projectId: 3546,
-    namespaceId: 37848,
+    ...commonProjectQuery,
+    ...commonNamespaceQuery,
     targets: [
       {
         key: "apiupdate",
-        content: "我是api 更新的 翻译111",
+        content: "i am api update 111",
         locale: "en",
       },
       {
         locale: "en",
         key: "plural",
-        one: "我是个api 更新的 one1",
-        other: "我是个api 更新的 other1",
+        one: "i am api update one",
+        other: "i am api update other",
       },
     ],
   });
@@ -218,8 +234,8 @@ test("i18nOpenapi:ProjectNamespaceTargetUpdate", async () => {
 
 test("i18nOpenapi:ProjectNamespaceTargetDeleteById", async () => {
   const response = await i18nOpenapiService.ProjectNamespaceTargetDeleteById({
-    projectId: 3546,
-    namespaceId: 37848,
+    ...commonProjectQuery,
+    ...commonNamespaceQuery,
     "targetTextId": 33039439
   });
 
@@ -229,7 +245,7 @@ test("i18nOpenapi:ProjectNamespaceTargetDeleteById", async () => {
 
 test("i18nOpenapi:ProjectTasks", async () => {
   const response = await i18nOpenapiService.ProjectTasks({
-    projectId: 3546,
+    ...commonProjectQuery,
   });
 
   const validateResult = validateProjectTasks(response);
@@ -238,8 +254,8 @@ test("i18nOpenapi:ProjectTasks", async () => {
 
 test("i18nOpenapi:ProjectTaskDetail", async () => {
   const response = await i18nOpenapiService.ProjectTaskDetail({
-    projectId: 3546,
-    taskId: 17348437,
+    ...commonProjectQuery,
+    ...commonTaskQuery,
   });
 
   const validateResult = validateProjectTaskDetail(response);
@@ -248,9 +264,9 @@ test("i18nOpenapi:ProjectTaskDetail", async () => {
 
 test("i18nOpenapi:ProjectTaskCreate", async () => {
   const response = await i18nOpenapiService.ProjectTaskCreate({
-    projectId: 3546,
+    ...commonProjectQuery,
     name: `sdk 单测创建的任务${Date.now()}`,
-    syncNamespaces: [37848],
+    syncNamespaces: [commonNamespaceQuery.namespaceId],
   });
 
   const validateResult = validateProjectTaskCreate(response);
@@ -259,8 +275,8 @@ test("i18nOpenapi:ProjectTaskCreate", async () => {
 
 test("i18nOpenapi:ProjectTaskSources", async () => {
   const response = await i18nOpenapiService.ProjectTaskSources({
-    projectId: 3546,
-    taskId: 17348437,
+    ...commonProjectQuery,
+    ...commonTaskQuery,
   });
 
   const validateResult = validateProjectTaskSources(response);
@@ -269,9 +285,9 @@ test("i18nOpenapi:ProjectTaskSources", async () => {
 
 test("i18nOpenapi:ProjectTaskSourceDetail", async () => {
   const response = await i18nOpenapiService.ProjectTaskSourceDetail({
-    projectId: 3546,
-    taskId: 17348437,
-    sourceId: 6610442,
+    ...commonProjectQuery,
+    ...commonTaskQuery,
+    sourceId: 6762263,
   });
 
   const validateResult = validateProjectTaskSourceDetail(response);
@@ -280,12 +296,12 @@ test("i18nOpenapi:ProjectTaskSourceDetail", async () => {
 
 test("i18nOpenapi:ProjectTaskSourceUpdate", async () => {
   const response = await i18nOpenapiService.ProjectTaskSourceUpdate({
-    projectId: 3546,
-    taskId: 17348437,
+    ...commonProjectQuery,
+    ...commonTaskQuery,
     content: "我是api更新源文案 1\u000b\u000b\u000b2",
     commentary: "我是api更新任务 注释111",
     lengthLimit: 100,
-    sourceId: 6610442,
+    sourceId: 6762263,
   });
 
   const validateResult = validateProjectTaskSourceUpdate(response);
@@ -294,8 +310,8 @@ test("i18nOpenapi:ProjectTaskSourceUpdate", async () => {
 
 test("i18nOpenapi:ProjectTaskSourceAdd", async () => {
   const response = await i18nOpenapiService.ProjectTaskSourceAdd({
-    projectId: 3546,
-    taskId: 17348437,
+    ...commonProjectQuery,
+    ...commonTaskQuery,
     texts: [
       {
         key: `sdk add text for task${Date.now()}`,
@@ -322,8 +338,8 @@ test("i18nOpenapi:ProjectTaskSourceAdd", async () => {
 
 test("i18nOpenapi:ProjectTaskSourceDeleteByKeys", async () => {
   const response = await i18nOpenapiService.ProjectTaskSourceDeleteByKeys({
-    projectId: 3546,
-    taskId: 17348437,
+    ...commonProjectQuery,
+    ...commonTaskQuery,
     textKeys: ["api_add", "api_add_plural"],
   });
 
@@ -333,8 +349,8 @@ test("i18nOpenapi:ProjectTaskSourceDeleteByKeys", async () => {
 
 test("i18nOpenapi:ProjectTaskSourceDeleteByIds", async () => {
   const response = await i18nOpenapiService.ProjectTaskSourceDeleteByIds({
-    projectId: 3546,
-    taskId: 17348437,
+    ...commonProjectQuery,
+    ...commonTaskQuery,
     textKeys: ["api_add", "api_add_plural"],
   });
 
@@ -344,8 +360,8 @@ test("i18nOpenapi:ProjectTaskSourceDeleteByIds", async () => {
 
 test("i18nOpenapi:ProjectTaskTargets", async () => {
   const response = await i18nOpenapiService.ProjectTaskTargets({
-    projectId: 3546,
-    taskId: 17348437,
+    ...commonProjectQuery,
+    ...commonTaskQuery,
     limit: 1,
     locale: "en",
   });
@@ -356,8 +372,8 @@ test("i18nOpenapi:ProjectTaskTargets", async () => {
 
 test("i18nOpenapi:ProjectTaskTargetUpdate", async () => {
   const response = await i18nOpenapiService.ProjectTaskTargetUpdate({
-    projectId: 3546,
-    taskId: 17348437,
+    ...commonProjectQuery,
+    ...commonTaskQuery,
     targets: [
       {
         key: "tasksync",
@@ -379,8 +395,8 @@ test("i18nOpenapi:ProjectTaskTargetUpdate", async () => {
 
 test("i18nOpenapi:ProjectTaskTargetDeleteById", async () => {
   const response = await i18nOpenapiService.ProjectTaskTargetDeleteById({
-    projectId: 3546,
-    taskId: 17348437,
+    ...commonProjectQuery,
+    ...commonTaskQuery,
     targetTextId: 33039704,
   });
 
@@ -390,7 +406,7 @@ test("i18nOpenapi:ProjectTaskTargetDeleteById", async () => {
 
 test("i18nOpenapi:ProjectTerms", async () => {
   const response = await i18nOpenapiService.ProjectTerms({
-    projectId: 3546,
+    ...commonProjectQuery,
     limit: 1,
   });
 
@@ -400,8 +416,8 @@ test("i18nOpenapi:ProjectTerms", async () => {
 
 test("i18nOpenapi:ProjectTermDetail", async () => {
   const response = await i18nOpenapiService.ProjectTermDetail({
-    projectId: 3546,
-    sourceTermId: 62841,
+    ...commonProjectQuery,
+    ...commonTermQuery,
   });
 
   const validateResult = validateProjectTermDetail(response);
@@ -410,8 +426,8 @@ test("i18nOpenapi:ProjectTermDetail", async () => {
 
 test("i18nOpenapi:ProjectTermTargetAdd", async () => {
   const response = await i18nOpenapiService.ProjectTermTargetAdd({
-    projectId: 3546,
-    sourceTermId: 62841,
+    ...commonProjectQuery,
+    ...commonTermQuery,
     locale: "ar",
     term: "我是api 增加的印尼",
   });
@@ -422,8 +438,8 @@ test("i18nOpenapi:ProjectTermTargetAdd", async () => {
 
 test("i18nOpenapi:ProjectTermTargetUpdate", async () => {
   const response = await i18nOpenapiService.ProjectTermTargetUpdate({
-    projectId: 3546,
-    sourceTermId: 62841,
+    ...commonProjectQuery,
+    ...commonTermQuery,
     term: "我是api 更新的英语12",
     termId: 391224,
   });
@@ -434,7 +450,7 @@ test("i18nOpenapi:ProjectTermTargetUpdate", async () => {
 
 test("i18nOpenapi:ProjectTermTargetDelete", async () => {
   const response = await i18nOpenapiService.ProjectTermTargetDelete({
-    projectId: 3546,
+    ...commonProjectQuery,
     sourceTermId: 62842,
   });
 
@@ -444,7 +460,7 @@ test("i18nOpenapi:ProjectTermTargetDelete", async () => {
 
 test("i18nOpenapi:ProjectTermSourceAdd", async () => {
   const response = await i18nOpenapiService.ProjectTermSourceAdd({
-    projectId: 3546,
+    ...commonProjectQuery,
     description: "我的描述",
     term: `我是 sdk 单测新增${Date.now()}`,
   });
@@ -455,7 +471,7 @@ test("i18nOpenapi:ProjectTermSourceAdd", async () => {
 
 test("i18nOpenapi:ProjectTermSourceUpdate", async () => {
   const response = await i18nOpenapiService.ProjectTermSourceUpdate({
-    projectId: 3546,
+    ...commonProjectQuery,
     description: `我的sdk 更新描述 ${Date.now()}`,
     term: `我是api 更新的 sdk ${Date.now()}`,
     sourceTermId: 62843,
@@ -467,7 +483,7 @@ test("i18nOpenapi:ProjectTermSourceUpdate", async () => {
 
 test("i18nOpenapi:ProjectTermSourceDelete", async () => {
   const response = await i18nOpenapiService.ProjectTermSourceDelete({
-    projectId: 3546,
+    ...commonProjectQuery,
     sourceTermIds: [627971],
   });
 
@@ -477,8 +493,8 @@ test("i18nOpenapi:ProjectTermSourceDelete", async () => {
 
 test("i18nOpenapi:ProjectDistributions", async () => {
   const response = await i18nOpenapiService.ProjectDistributions({
-    projectId: 3546,
-    namespaceId: 37848,
+    ...commonProjectQuery,
+    ...commonNamespaceQuery,
     locale: "en",
   });
 
@@ -488,8 +504,8 @@ test("i18nOpenapi:ProjectDistributions", async () => {
 
 test("i18nOpenapi:ProjectDistributionsRelease", async () => {
   const response = await i18nOpenapiService.ProjectDistributionsRelease({
-    projectId: 3546,
-    namespaceId: 37848,
+    ...commonProjectQuery,
+    ...commonNamespaceQuery,
     locale: "en",
     keys: ["tasksync", "plural_task", "plural", "apiupdate"],
   });
