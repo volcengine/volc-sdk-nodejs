@@ -1,5 +1,8 @@
 Change log
 
+2021-08-06 Bumped to version v1.0.9
+- 增加 i18n unit test
+
 2021-07-15 Bumped to version v1.0.8
 - 增加 i18n OpenAPI
 
