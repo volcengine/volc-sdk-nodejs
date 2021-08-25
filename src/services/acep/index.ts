@@ -25,14 +25,12 @@ export class ACEPService extends Service {
     "PodStart", {
         method: "POST",
         contentType: "json",
-    // queryKeys: ["ServiceId"],
     }
   );
   PodStop = this.createAPI<IPodStopParams, IPodStopResult>(
     "PodStop", {
         method: "POST",
         contentType: "json",
-    // queryKeys: ["ServiceId"],
     }
   );
 }
