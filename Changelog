@@ -1,5 +1,8 @@
 Change log
 
+2021-08-26 Bumped to version v1.0.10
+- 添加云游戏相关 api
+
 2021-08-06 Bumped to version v1.0.9
 - 增加 i18n unit test
 
