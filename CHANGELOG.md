@@ -1,4 +1,5 @@
-Change log
+2021-09-13 Bumped to version v1.1.0
+- 添加rtc api
 
 2021-08-26 Bumped to version v1.0.10
 - 添加云游戏相关 api
@@ -10,11 +11,11 @@ Change log
 - 增加 i18n OpenAPI
 
 2021-07-12 Bumped to version v1.0.7
-- 增加imagex签名算法.
+- 增加 imagex 签名算法.
 
 2021-03-02 Bumped to version v1.0.6
-- 支持下发ststoken.
-- 新增imagex获取临时上传token接口. 
+- 支持下发 ststoken.
+- 新增 imagex 获取临时上传token接口. 
 
 2021-03-02 Bumped to version v1.0.5
 - Fix json content type bug.
