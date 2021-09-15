@@ -1,3 +1,6 @@
+2021-09-15 Bumped to version v1.1.1
+- 添加 `openAPI` 签名方法和使用文档
+
 2021-09-13 Bumped to version v1.1.0
 - 添加rtc api
 

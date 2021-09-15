@@ -1,16 +1,20 @@
-# Volcano Engine OpenAPI sdk
-[中文文档](./README_zh.md)
-## Module installation
-```
-// use npm
-npm install @volcengine/openapi
+# Volcano Engine OpenAPI node sdk
 
-// use yarn
-yarn add @volcengine/openapi
+[中文文档](./README_zh.md)
+
+## Installation
+```shell
+npm install -S @volcengine/openapi
 ```
-## AKSK settings
-### 1. Use api
-```
+
+## Basic Usage
+
+### 1. Setting OpenAPI service's AK&SK
+
+Available in three settings
+
+#### 1. Use API to set AK&SK
+```ts
 // Use the default service instance. You can also create a new instance.
 // `const iamService = new iam.IamService();`
 const iamService = iam.defaultService;
@@ -22,23 +26,25 @@ iamService.setSecretKey(SecretKey);
 iamService.setSessionToken(SessionToken);
 ```
 
-### 2. Environment variables
-```
+#### 2. Use environment variables to set AK & SK
+```shell
 VOLC_ACCESSKEY="your ak" VOLC_SECRETKEY="your sk"
 ```
 
-### 3. Configuration files
+#### 3. Use configuration file
 Put it in `~/.volc/config` in json format, the format is:
 ```
 {"VOLC_ACCESSKEY":"your ak","VOLC_SECRETKEY":"your sk"}
 ```
 
 ## Request OpenAPI
+
 Take the ListUsers API of the iam service as an example
-```
+
+```ts
 import { iam } from'@volcengine/openapi';
 
-async main(AccessKeyId, SecretKey) {
+async function main(AccessKeyId, SecretKey) {
    // Use the default service instance. You can also create a new instance.
    // `const iamService = new iam.IamService();`
    const iamService = iam.defaultService;
@@ -53,4 +59,30 @@ async main(AccessKeyId, SecretKey) {
      Offset: 0,
    });
 }
+```
+
+## OpenAPI signature method
+
+```ts
+import {Signer} from '@volcengine/openapi';
+
+// http request data
+const openApiRequestData: RequestObj = {
+    region: 'cn-north-1',
+    method: 'GET',
+    // [optional] http request url query
+    params: {},
+    // http request headers
+    headers: {},
+    // [optional] http request body
+    body: "",
+}
+
+const signer = new Signer(openApiRequestData, "iam");
+
+// sign
+signer.addAuthorization({accessKeyId, secretKey, sessionToken});
+
+// Print signed headers
+console.log(openApiRequestData.headers);
 ```
