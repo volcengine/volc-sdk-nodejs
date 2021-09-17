@@ -1,15 +1,19 @@
-# 火山引擎OpenAPI sdk
-## 模块安装
-```
-// 使用npm
-npm install @volcengine/openapi
+# 火山引擎 OpenAPI node sdk
 
-// 使用yarn 
-yarn add @volcengine/openapi
+## 安装
+
+```shell
+npm install -S @volcengine/openapi
 ```
 
-## AKSK设置
-### 1. 使用api设置aksk
+## 基本用法
+
+### 1. 配置 OpenAPI 服务的 AK&SK
+
+提供三种设置方式
+
+#### 1. 使用 API 设置 AK&SK
+
 ```
 // 使用默认的service实例。你也可以创建一个新实例。
 // `const iamService = new iam.IamService();`
@@ -22,19 +26,24 @@ iamService.setSecretKey(SecretKey);
 iamService.setSessionToken(SessionToken);
 ```
 
-### 2. 使用环境变量设置AK SK
+#### 2. 使用环境变量设置 AK&SK
+
 ```
 VOLC_ACCESSKEY="your ak" VOLC_SECRETKEY="your sk"
 ```
 
-### 3. 使用配置文件
+#### 3. 使用配置文件
+
 以json格式放在`~/.volc/config`中，格式为：
+
 ```
 {"VOLC_ACCESSKEY":"your ak","VOLC_SECRETKEY":"your sk"}
 ```
 
-## 接口调用
-以调用iam服务的ListUsers API为例
+## 2. 接口调用
+
+以调用`iam`服务的`ListUsers` API为例
+
 ```
 import { iam } from '@volcengine/openapi';
 
@@ -53,4 +62,30 @@ async main(AccessKeyId, SecretKey) {
     Offset: 0,
   });
 }
+```
+
+## OpenAPI 签名方法
+
+```ts
+import {Signer} from '@volcengine/openapi';
+
+// 请求数据
+const openApiRequestData: RequestObj = {
+    region: 'cn-north-1',
+    method: 'GET',
+    // [可选] http request url query
+    params: {},
+    // http request headers
+    headers: {},
+    // [可选] http request body
+    body: "",
+}
+
+const signer = new Signer(openApiRequestData, "iam");
+
+// 签名
+signer.addAuthorization({accessKeyId, secretKey, sessionToken});
+
+// 打印签名后的 headers
+console.log(openApiRequestData.headers);
 ```
