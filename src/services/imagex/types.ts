@@ -105,7 +105,7 @@ export interface UploadImagesOption {
 export interface GetUploadAuthParams {
   serviceIds?: string[];
   expire?: number;
-  storeKeys: string[];
+  storeKeys?: string[];
 }
 
 export interface GetUploadAuthTokenParams {
