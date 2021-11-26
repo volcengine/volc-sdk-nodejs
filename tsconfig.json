@@ -16,7 +16,7 @@
         "strictNullChecks": true,
         "suppressImplicitAnyIndexErrors": true,
         "noUnusedLocals": true,
-        "importHelpers": true,
+        "importHelpers": false,
         "esModuleInterop": true,
         "declaration": true,
         "downlevelIteration": true,
