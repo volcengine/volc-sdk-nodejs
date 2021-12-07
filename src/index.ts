@@ -6,5 +6,6 @@ import * as edit from "./services/edit";
 import * as i18nOpenapi from "./services/i18nOpenapi";
 import * as acep from "./services/acep";
 import * as rtcOpenapi from "./services/rtc";
+import * as vodOpenapi from "./services/vod";
 
-export { Service, Signer, iam, imagex, edit, i18nOpenapi, acep, rtcOpenapi };
+export { Service, Signer, iam, imagex, edit, i18nOpenapi, acep, rtcOpenapi, vodOpenapi };
