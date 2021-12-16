@@ -1,3 +1,8 @@
+2021-12-16 Bumped to version v1.1.2
+- 调整GetUploadAuth参数storeKeys为非必填项
+- 修复js项目缺少tslib的问题
+- 增加点播sdk
+
 2021-09-15 Bumped to version v1.1.1
 - 添加 `openAPI` 签名方法和使用文档
 
