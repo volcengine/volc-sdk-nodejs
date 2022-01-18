@@ -17,8 +17,8 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@babel/preset-typescript": "^7.12.7",
     "@babel/preset-env": "^7.16.4",
+    "@babel/preset-typescript": "^7.12.7",
     "@commitlint/cli": "^11.0.0",
     "@commitlint/config-conventional": "^11.0.0",
     "@types/ajv": "^1.0.0",
@@ -43,6 +43,7 @@
   },
   "dependencies": {
     "axios": "^0.21.1",
+    "crc": "^4.1.0",
     "crypto-js": "^4.0.0",
     "debug": "^4.3.1",
     "form-data": "^3.0.0",

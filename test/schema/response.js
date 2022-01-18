@@ -2,6 +2,41 @@ import Ajv from "ajv";
 import merge from "lodash.merge";
 const ajv = new Ajv();
 
+const responseErrorSchema = {
+  additionalProperties: true,
+  properties: {
+    ResponseMetadata: {
+      additionalProperties: true,
+      properties: {
+        RequestId: {
+          type: "string",
+        },
+        Service: {
+          type: "string",
+        },
+        Error: {
+          properties: {
+            Code: {
+              type: "string",
+            },
+            Message: {
+              type: "string",
+            },
+            CodeN: {
+              type: "number",
+            },
+          },
+          type: "object",
+        },
+      },
+      type: "object",
+      required: ["RequestId", "Service"],
+    },
+  },
+  required: ["ResponseMetadata"],
+  type: "object",
+};
+export const responseErrorSchemaValidate = ajv.compile(responseErrorSchema);
 export const reponseSchema = {
   type: "object",
   properties: {
