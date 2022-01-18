@@ -1,3 +1,6 @@
+2022-01-18 Bumped to version v1.1.3
+- 增加一些点播 API
+
 2021-12-16 Bumped to version v1.1.2
 - 调整GetUploadAuth参数storeKeys为非必填项
 - 修复js项目缺少tslib的问题
