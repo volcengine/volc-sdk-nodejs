@@ -1,3 +1,6 @@
+2022-03-31 Bumped to version v1.1.4
+- 增加版权声明文件
+
 2022-01-18 Bumped to version v1.1.3
 - 增加一些点播 API
 
