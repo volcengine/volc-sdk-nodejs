@@ -4,7 +4,14 @@ import protobuf from "protobufjs";
 import LZ4 from "lz4";
 import path from "path";
 import { getDefaultOption } from "../../base/utils";
-import { Protocol, TlsCreateAPIParams, TlsServiceOptions } from "./types";
+import {
+  IPutLogsReq,
+  IPutLogsResp,
+  LogGroupList,
+  Protocol,
+  TlsCreateAPIParams,
+  TlsServiceOptions,
+} from "./types";
 
 const TIMEOUT = 100000;
 
@@ -36,7 +43,7 @@ export default class Service {
 
   setSessionToken = (sessionToken: string) => (this.options.sessionToken = sessionToken);
 
-  static async fetch(uri: string, requestObj: any) {
+  static async fetch<Result>(uri: string, requestObj: any): Promise<Result> {
     const res = await axios({
       url: uri,
       timeout: TIMEOUT,
@@ -48,7 +55,7 @@ export default class Service {
   /**
    * transfer json to protobuf buffer
    */
-  static async objToProtoBuffer(obj) {
+  static async objToProtoBuffer(obj: LogGroupList) {
     const root = await protobuf.load(path.join(__dirname, "./tls.proto"));
     const type = root.lookupType("pb.LogGroupList");
     const errMsg = type.verify(obj);
@@ -65,9 +72,9 @@ export default class Service {
     return output;
   }
 
-  createAPI(Path: string, createParams?: TlsCreateAPIParams) {
+  createAPI<RequestData, Result>(Path: string, createParams?: TlsCreateAPIParams) {
     const { method = "GET", version: versionFromParam } = createParams || {};
-    return async (requestData, config?: AxiosRequestConfig) => {
+    return async (requestData: RequestData, config?: AxiosRequestConfig) => {
       const {
         accessKeyId,
         secretKey,
@@ -102,12 +109,12 @@ export default class Service {
       }
       const signer = new Signer(requestObj, serviceName as string);
       signer.addAuthorization({ accessKeyId, secretKey, sessionToken });
-      return Service.fetch(`${protocol}//${host}/${Path}`.trim(), requestObj);
+      return Service.fetch<Result>(`${protocol}//${host}/${Path}`.trim(), requestObj);
     };
   }
 
   createPutLogsAPI(Path: string) {
-    return async (requestData, config?: AxiosRequestConfig) => {
+    return async (requestData: IPutLogsReq, config?: AxiosRequestConfig): Promise<IPutLogsResp> => {
       const { LogGroupList, CompressType, TopicId, HashKey } = requestData;
       if (!LogGroupList) throw new Error(`LogGroupList is necessary`);
 
