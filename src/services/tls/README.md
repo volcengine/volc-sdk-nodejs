@@ -209,7 +209,6 @@
 
 ### Rule
 ```typescript
-  // 创建采集配置
   interface IDaoKubernetesRule {
     /** 通过Pod名称指定待采集的容器，支持正则匹配。例如设置为"PodNameRegex":"^(nginx-log-demo.*)$"，表示匹配以nginx-log-demo开头的Pod下的所有容器。 */
     ExcludePodLabelRegex?: Record<string, string>;
@@ -379,6 +378,7 @@
     /** 用户自定义的采集规则: 用户自定义的采集规则必须是一个Json格式的字符串。 */
     UserDefineRule?: string;
   }
+  // 创建采集配置
   tlsOpenapiService.CreateRule(IRuleCreateReq);
 
   // 删除采集配置
@@ -386,7 +386,6 @@
     RuleId: "规则ID",
   });
 
-  // 修改采集配置
   interface IRuleModifyReq {
     /** 容器采集规则 */
     ContainerRule?: IDaoContainerRule;
@@ -438,6 +437,7 @@
     /** 用户自定义的采集规则: 用户自定义的采集规则必须是一个Json格式的字符串。 */
     UserDefineRule?: string;
   }
+  // 修改采集配置
   tlsOpenapiService.ModifyRule(IRuleModifyReq);
 
   // 获取采集配置
@@ -445,7 +445,6 @@
     RuleId: "规则ID",
   });
 
-  // 获取采集配置列表
   interface IDescribeRulesReq {
     /** 采集配置所属于的项目的ID。 */
     ProjectId: string;
@@ -462,27 +461,29 @@
     /** 页大小，默认为20，最大值为100。 */
     PageSize?: number;
   }
+  // 获取采集配置列表
   tlsOpenapiService.DescribeRules(IDescribeRulesReq);
 
-  // 采集配置绑定机器组
+  
   interface IRuleBindRuleReq {
     /** 机器组的ID列表。 */
     HostGroupIds: Array<string>;
     /** 采集配置的ID。 */
     RuleId: string;
   }
+  // 采集配置绑定机器组
   tlsOpenapiService.ApplyRuleToHostGroups(IRuleBindRuleReq);
 
-  // 采集配置解绑机器组
+  
   interface IRuleUnbindRuleReq {
     /** 机器组的ID列表。 */
     HostGroupIds: Array<string>;
     /** 采集配置的ID。 */
     RuleId: string;
   }
+  // 采集配置解绑机器组
   tlsOpenapiService.DeleteRuleFromHostGroups(IRuleUnbindRuleReq);
 
-  // 获取机器组采集配置列表
   interface IDescribeHostGroupRulesReq {
     /** 机器组的ID。 */
     HostGroupId?: string;
@@ -491,13 +492,13 @@
     /** 页大小。 */
     PageSize?: number;
   }
+  // 获取机器组采集配置列表
   tlsOpenapiService.DescribeHostGroupRules(IDescribeHostGroupRulesReq);
 ```
 
 ### HostGroup
 ```typescript
 
-  // 创建机器组
   interface IHost_groupCreateReq {
     /** 是否支持自动更新 */
     AutoUpdate?: boolean;
@@ -514,6 +515,7 @@
     /** 升级开始时间 */
     UpdateStartTime?: string;
   }
+  // 创建机器组
   tlsOpenapiService.CreateHostGroup(IHost_groupCreateReq);
 
   // 删除机器组
@@ -521,7 +523,6 @@
     HostGroupId: "机器组ID",
   });
 
-  // 修改机器组
   interface IHost_groupModifyReq {
     /** 是否支持自动更新 */
     AutoUpdate?: boolean;
@@ -540,6 +541,7 @@
     /** 升级开始时间 */
     UpdateStartTime?: string;
   }
+  // 修改机器组
   tlsOpenapiService.ModifyHostGroup(IHost_groupModifyReq);
 
   // 获取机器组信息
@@ -547,7 +549,6 @@
     HostGroupId: "机器组ID",
   });
 
-  // 获取机器组列表
   interface IDescribeHostGroupsReq {
     /** 机器组的Id，可支持模糊查询。 */
     HostGroupId?: string;
@@ -560,6 +561,7 @@
     /** 单页最大机器组数量。 */
     PageSize?: number;
   }
+  // 获取机器组列表
   tlsOpenapiService.DescribeHostGroups(IDescribeHostGroupsReq);
 
 ```
@@ -567,7 +569,6 @@
 ### Host
 ```typescript
 
-  // 获取机器列表
   interface IDescribeHostsReq {
     /** 机器组的Id。 */
     HostGroupId: string;
@@ -580,6 +581,7 @@
     /** 单页最大HostGroup数量。 */
     PageSize?: number;
   }
+  // 获取机器列表
   tlsOpenapiService.DescribeHosts(IDescribeHostsReq);
 
   // 删除机器
@@ -615,8 +617,6 @@
     Type: string;
   }
   
-  
-  // 创建告警策略
   interface IAlarm_policyCreateReq {
     /** 告警策略名称。
      - 同一个日志项目下，告警策略名称不可重复。
@@ -643,6 +643,7 @@
     /** 用户自定义告警内容 */
     UserDefineMsg?: string;
   }
+  // 创建告警策略
   tlsOpenapiService.CreateAlarm(IAlarm_policyCreateReq);
 
   // 删除告警策略
@@ -650,7 +651,6 @@
     AlarmId: "告警策略ID",
   });
 
-  // 获取告警策略列表
   interface IDescribeAlarmsReq {
     /** 项目id */
     ProjectId: string;
@@ -669,9 +669,9 @@
     /** 是否开启告警策略 */
     Status?: string;
   }
+  // 获取告警策略列表
   tlsOpenapiService.DescribeAlarms(IDescribeAlarmsReq);
 
-  // 修改告警策略
   interface IAlarm_policyModifyReq {
     /** 告警策略Id */
     AlarmId: string;
@@ -699,9 +699,9 @@
     /** 用户自定义告警内容 */
     UserDefineMsg?: string;
   }
+  // 修改告警策略
   tlsOpenapiService.ModifyAlarm(IAlarm_policyModifyReq);
 
-  // 创建告警通知组
   interface IAlarm_notice_groupReceiver {
     /** 允许接收信息的开始时间。 */
     EndTime: string;
@@ -726,6 +726,7 @@
     /** 告警对应的通知列表，最少1一个，最大支持10个。 */
     Receivers: Array<IAlarm_notice_groupReceiver>;
   }
+  // 创建告警通知组
   tlsOpenapiService.CreateAlarmNotifyGroup(IAlarm_notice_groupCreateReq);
 
   // 删除告警通知组
@@ -733,7 +734,6 @@
     AlarmNotifyGroupId: "告警通知组ID",
   });
 
-  // 修改告警通知组
   interface IAlarm_notice_groupModifyReq {
     /** 通知组id */
     AlarmNotifyGroupId: string;
@@ -748,9 +748,9 @@
     /** 告警对应的通知列表。 */
     Receivers?: Array<IAlarm_notice_groupReceiver>;
   }
+  // 修改告警通知组
   tlsOpenapiService.ModifyAlarmNotifyGroup(IAlarm_notice_groupModifyReq);
 
-  // 获取告警通知组列表
   interface IDescribeNotifyGroupReq {
     /** 告警通知组名称 */
     AlarmNotifyGroupName?: string;
@@ -763,12 +763,12 @@
     /** 页面大小 */
     PageSize?: number;
   }
+  // 获取告警通知组列表
   tlsOpenapiService.DescribeAlarmNotifyGroups(IDescribeNotifyGroupReq);
 ```
 
 ### Log
 ```typescript
-  // 搜索日志
   interface IIndexSearchLogsReq {
     /** 翻页加载更多日志时使用，透传上次返回的context值，获取后续的日志内容。 */
     Context?: string;
@@ -788,9 +788,9 @@
     /** 要检索的日志主题ID。 */
     TopicId: string;
   }
+  // 搜索日志
   tlsOpenapiService.SearchLogs(IIndexSearchLogsReq);
 
-  // 上传日志
   interface IPutLogsReq {
     /** 日志主题id */
     TopicId: string;
@@ -798,5 +798,6 @@
     HashKey?: string;
     LogGroupList: Buffer; // 如果是上传的json对象，则需要调用 TlsService.objToProtoBuffer换成buffer
   }
+  // 上传日志
   defaultService.PutLogs(IPutLogsReq);
 ```
