@@ -7,5 +7,17 @@ import * as i18nOpenapi from "./services/i18nOpenapi";
 import * as acep from "./services/acep";
 import * as rtcOpenapi from "./services/rtc";
 import * as vodOpenapi from "./services/vod";
+import * as tlsOpenapi from "./services/tls";
 
-export { Service, Signer, iam, imagex, edit, i18nOpenapi, acep, rtcOpenapi, vodOpenapi };
+export {
+  Service,
+  Signer,
+  iam,
+  imagex,
+  edit,
+  i18nOpenapi,
+  acep,
+  rtcOpenapi,
+  vodOpenapi,
+  tlsOpenapi,
+};
