@@ -3,6 +3,7 @@ node_modules
 .eslintrc.js
 .gitignore
 .commitlintrc
+.idea
 babel.config.js
 tsconfig.json
 src
