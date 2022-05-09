@@ -1,3 +1,7 @@
+2022-05-12 Bumped to version v1.2.0
+- 增加 tls api
+- 修复 formdata 签名问题
+
 2022-03-31 Bumped to version v1.1.4
 - 增加版权声明文件
 

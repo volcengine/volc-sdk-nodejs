@@ -1,5 +1,6 @@
 import hmacSHA256 from "crypto-js/hmac-sha256";
 import SHA256 from "crypto-js/sha256";
+import CryptoJS from "crypto-js/core";
 import { RequestObj, SignerOptions, Credentials } from "./types";
 import FormData from "form-data";
 
@@ -10,7 +11,7 @@ const util = {
     },
 
     sha256: function sha256(data) {
-      return SHA256(data);
+      return Buffer.isBuffer(data) ? SHA256(arrayBufferToWordArray(data)) : SHA256(data);
     },
   },
 };
@@ -108,7 +109,7 @@ export default class Signer {
         if (body instanceof URLSearchParams) {
           body = body.toString();
         } else if (body instanceof FormData) {
-          body = String(body.getBuffer());
+          body = body.getBuffer();
         } else {
           body = JSON.stringify(body);
         }
@@ -247,4 +248,13 @@ export default class Signer {
   createScope(date: string, region: string, serviceName: string) {
     return [date.substr(0, 8), region, serviceName, constant.v4Identifier].join("/");
   }
+}
+
+function arrayBufferToWordArray(buf: Buffer) {
+  const i8a = new Uint8Array(buf);
+  const a: number[] = [];
+  for (let i = 0; i < i8a.length; i += 4) {
+    a.push((i8a[i] << 24) | (i8a[i + 1] << 16) | (i8a[i + 2] << 8) | i8a[i + 3]);
+  }
+  return CryptoJS.lib.WordArray.create(a, i8a.length);
 }

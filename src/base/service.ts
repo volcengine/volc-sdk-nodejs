@@ -159,6 +159,11 @@ export default class Service {
               body.append(key, requestData[key]);
             });
             requestParams.data = body;
+            const formDataHeaders = body.getHeaders() || {};
+            requestParams.headers ||= {};
+            Object.keys(formDataHeaders).forEach((key) => {
+              requestParams.headers[key] = formDataHeaders[key];
+            });
             break;
           }
           default: {
