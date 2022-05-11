@@ -172,12 +172,12 @@ interface ITerm {
   creatorId: number;
   targetTerms: ITermTarget[];
 }
-export interface ProjectsParams extends IListParams {}
+export type ProjectsParams = IListParams;
 
 export interface ProjectsResult extends IListResult {
   data: IProject[];
 }
-export interface ProjectDetailParams extends IProjectParams {}
+export type ProjectDetailParams = IProjectParams;
 
 export interface ProjectDetailResult extends IBaseResult {
   data: IProject;
@@ -201,7 +201,7 @@ export interface ProjectNamespacesParams extends IProjectParams, IListParams {}
 export interface ProjectNamespacesResult extends IListResult {
   data: INamespace[];
 }
-export interface ProjectNamespaceDetailParams extends INamespaceParams {}
+export type ProjectNamespaceDetailParams = INamespaceParams;
 
 export interface ProjectNamespaceDetailResult extends IBaseResult {
   data: INamespace;
@@ -211,7 +211,7 @@ export interface ProjectNamespaceCreateParams extends IProjectParams {
   description: string;
 }
 
-export interface ProjectNamespaceCreateResult extends IBaseResult {}
+export type ProjectNamespaceCreateResult = IBaseResult;
 export interface ProjectNamespaceSourcesParams extends INamespaceParams {
   sourceIds?: number[];
   keyTexts?: string[];
@@ -236,14 +236,14 @@ export interface ProjectNamespaceSourceDetailResult extends IBaseResult {
 }
 export interface ProjectNamespaceSourceDownloadParams extends INamespaceParams, IDownloadParams {}
 
-export interface ProjectNamespaceSourceDownloadResult extends IBaseResult {}
+export type ProjectNamespaceSourceDownloadResult = IBaseResult;
 export interface ProjectNamespaceSourceUpdateParams extends INamespaceParams {
   sourceId: number;
   content?: string;
   lengthLimit?: number;
   commentary?: string;
 }
-export interface ProjectNamespaceSourceUpdateResult extends IBaseResult {}
+export type ProjectNamespaceSourceUpdateResult = IBaseResult;
 
 export interface ProjectNamespaceSourceAddParams extends INamespaceParams {
   texts: {
@@ -258,19 +258,19 @@ export interface ProjectNamespaceSourceAddParams extends INamespaceParams {
   }[];
 }
 
-export interface ProjectNamespaceSourceAddResult extends IBaseResult {}
+export type ProjectNamespaceSourceAddResult = IBaseResult;
 
 export interface ProjectNamespaceSourceDeleteByKeysParams extends INamespaceParams {
   textKeys: string[];
 }
 
-export interface ProjectNamespaceSourceDeleteByKeysResult extends IBaseResult {}
+export type ProjectNamespaceSourceDeleteByKeysResult = IBaseResult;
 
 export interface ProjectNamespaceSourceDeleteByIdsParams extends INamespaceParams {
   textIds: number[];
 }
 
-export interface ProjectNamespaceSourceDeleteByIdsResult extends IBaseResult {}
+export type ProjectNamespaceSourceDeleteByIdsResult = IBaseResult;
 
 export interface ProjectNamespaceTargetsParams extends INamespaceParams, IListParams {}
 
@@ -279,7 +279,7 @@ export interface ProjectNamespaceTargetsResult extends IBaseResult {
 }
 export interface ProjectNamespaceTargetDownloadParams extends INamespaceParams, IDownloadParams {}
 
-export interface ProjectNamespaceTargetDownloadResult extends IBaseResult {}
+export type ProjectNamespaceTargetDownloadResult = IBaseResult;
 
 export interface ProjectNamespaceTargetUpdateParams extends INamespaceParams {
   targets: {
@@ -295,21 +295,21 @@ export interface ProjectNamespaceTargetUpdateParams extends INamespaceParams {
   }[];
 }
 
-export interface ProjectNamespaceTargetUpdateResult extends IBaseResult {}
+export type ProjectNamespaceTargetUpdateResult = IBaseResult;
 
 export interface ProjectNamespaceTargetDeleteByIdParams extends INamespaceParams {
   targetTextId: number;
 }
 
-export interface ProjectNamespaceTargetDeleteByIdResult extends IBaseResult {}
+export type ProjectNamespaceTargetDeleteByIdResult = IBaseResult;
 
-export interface ProjectTasksParams extends IProjectParams {}
+export type ProjectTasksParams = IProjectParams;
 
 export interface ProjectTasksResult extends IListResult {
   data: ITask[];
 }
 
-export interface ProjectTaskDetailParams extends ITaskParams {}
+export type ProjectTaskDetailParams = ITaskParams;
 
 export interface ProjectTaskDetailResult extends IBaseResult {
   data: ITask;
@@ -320,7 +320,7 @@ export interface ProjectTaskCreateParams extends IProjectParams {
   syncNamespaces: number[];
 }
 
-export interface ProjectTaskCreateResult extends IBaseResult {}
+export type ProjectTaskCreateResult = IBaseResult;
 
 export interface ProjectTaskSourcesParams extends ITaskParams {
   sourceIds?: number[];
@@ -348,7 +348,7 @@ export interface ProjectTaskSourceDetailResult extends IBaseResult {
 
 export interface ProjectTaskSourceDownloadParams extends ITaskParams, IDownloadParams {}
 
-export interface ProjectTaskSourceDownloadResult extends IBaseResult {}
+export type ProjectTaskSourceDownloadResult = IBaseResult;
 
 export interface ProjectTaskSourceUpdateParams extends ITaskParams {
   sourceId: number;
@@ -357,7 +357,7 @@ export interface ProjectTaskSourceUpdateParams extends ITaskParams {
   commentary?: string;
 }
 
-export interface ProjectTaskSourceUpdateResult extends IBaseResult {}
+export type ProjectTaskSourceUpdateResult = IBaseResult;
 
 export interface ProjectTaskSourceAddParams extends ITaskParams {
   texts: {
@@ -372,19 +372,19 @@ export interface ProjectTaskSourceAddParams extends ITaskParams {
   }[];
 }
 
-export interface ProjectTaskSourceAddResult extends IBaseResult {}
+export type ProjectTaskSourceAddResult = IBaseResult;
 
 export interface ProjectTaskSourceDeleteByKeysParams extends ITaskParams {
   textKeys: string[];
 }
 
-export interface ProjectTaskSourceDeleteByKeysResult extends IBaseResult {}
+export type ProjectTaskSourceDeleteByKeysResult = IBaseResult;
 
 export interface ProjectTaskSourceDeleteByIdsParams extends ITaskParams {
   textIds: number[];
 }
 
-export interface ProjectTaskSourceDeleteByIdsResult extends IBaseResult {}
+export type ProjectTaskSourceDeleteByIdsResult = IBaseResult;
 
 export interface ProjectTaskTargetsParams extends ITaskParams, IListParams {}
 
@@ -406,19 +406,19 @@ export interface ProjectTaskTargetUpdateParams extends ITaskParams {
   }[];
 }
 
-export interface ProjectTaskTargetUpdateResult extends IBaseResult {}
+export type ProjectTaskTargetUpdateResult = IBaseResult;
 
 export interface ProjectTaskTargetDownloadParams extends ITaskParams, IDownloadParams {}
 
-export interface ProjectTaskTargetDownloadResult extends IBaseResult {}
+export type ProjectTaskTargetDownloadResult = IBaseResult;
 
 export interface ProjectTaskTargetDeleteByIdParams extends ITaskParams {
   targetTextId: number;
 }
 
-export interface ProjectTaskTargetDeleteByIdResult extends IBaseResult {}
+export type ProjectTaskTargetDeleteByIdResult = IBaseResult;
 
-export interface ProjectTermsParams extends IProjectParams {}
+export type ProjectTermsParams = IProjectParams;
 
 export interface ProjectTermsResult extends IBaseResult {
   data: ITerm[];
@@ -438,7 +438,7 @@ export interface ProjectTermTargetAddParams extends IProjectParams {
   term: string;
 }
 
-export interface ProjectTermTargetAddResult extends IBaseResult {}
+export type ProjectTermTargetAddResult = IBaseResult;
 
 export interface ProjectTermTargetUpdateParams extends IProjectParams {
   sourceTermId: number;
@@ -446,20 +446,20 @@ export interface ProjectTermTargetUpdateParams extends IProjectParams {
   termId: number;
 }
 
-export interface ProjectTermTargetUpdateResult extends IBaseResult {}
+export type ProjectTermTargetUpdateResult = IBaseResult;
 
 export interface ProjectTermTargetDeleteParams extends IProjectParams {
   sourceTermId: number;
 }
 
-export interface ProjectTermTargetDeleteResult extends IBaseResult {}
+export type ProjectTermTargetDeleteResult = IBaseResult;
 
 export interface ProjectTermSourceAddParams extends IProjectParams {
   description: string;
   term: string;
 }
 
-export interface ProjectTermSourceAddResult extends IBaseResult {}
+export type ProjectTermSourceAddResult = IBaseResult;
 
 export interface ProjectTermSourceUpdateParams extends IProjectParams {
   description: string;
@@ -467,18 +467,18 @@ export interface ProjectTermSourceUpdateParams extends IProjectParams {
   sourceTermId: number;
 }
 
-export interface ProjectTermSourceUpdateResult extends IBaseResult {}
+export type ProjectTermSourceUpdateResult = IBaseResult;
 
 export interface ProjectTermSourceDeleteParams extends IProjectParams {
   sourceTermIds: number[];
 }
 
-export interface ProjectTermSourceDeleteResult extends IBaseResult {}
+export type ProjectTermSourceDeleteResult = IBaseResult;
 
-export interface ProjectDistributionsParams extends IProjectParams { }
+export type ProjectDistributionsParams = IProjectParams;
 
-export interface ProjectDistributionsResult extends IBaseResult { }
+export type ProjectDistributionsResult = IBaseResult;
 
-export interface ProjectDistributionsReleaseParams extends IProjectParams { }
+export type ProjectDistributionsReleaseParams = IProjectParams;
 
-export interface ProjectDistributionsReleaseResult extends IBaseResult { }
+export type ProjectDistributionsReleaseResult = IBaseResult;

@@ -196,6 +196,12 @@ export default class Service {
     if (requestInit.data) {
       requestInit.body = requestInit.data;
     }
+    // normalize query
+    for (const [key, val] of Object.entries(requestInit.params)) {
+      if (val === undefined || val === null) {
+        requestInit.params[key] = "";
+      }
+    }
     const signer = new Signer(requestInit, realOptions.serviceName);
     const { accessKeyId, secretKey, sessionToken } = realOptions;
     if (!accessKeyId || !secretKey) {
