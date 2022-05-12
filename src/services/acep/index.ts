@@ -9,7 +9,6 @@ import {
   IPodStopResult,
 } from "./types";
 
-
 export class ACEPService extends Service {
   constructor(options?: ServiceOptions) {
     super({
@@ -18,21 +17,15 @@ export class ACEPService extends Service {
       serviceName: "ACEP",
     });
   }
-  GetListPod = this.createAPI<IGetListPodParams, IListPodResult>(
-      "ListPod"
-  );
-  PodStart = this.createAPI<IPodStartParams, IPodStartResult>(
-    "PodStart", {
-        method: "POST",
-        contentType: "json",
-    }
-  );
-  PodStop = this.createAPI<IPodStopParams, IPodStopResult>(
-    "PodStop", {
-        method: "POST",
-        contentType: "json",
-    }
-  );
+  GetListPod = this.createAPI<IGetListPodParams, IListPodResult>("ListPod");
+  PodStart = this.createAPI<IPodStartParams, IPodStartResult>("PodStart", {
+    method: "POST",
+    contentType: "json",
+  });
+  PodStop = this.createAPI<IPodStopParams, IPodStopResult>("PodStop", {
+    method: "POST",
+    contentType: "json",
+  });
 }
 
 export const defaultService = new ACEPService();

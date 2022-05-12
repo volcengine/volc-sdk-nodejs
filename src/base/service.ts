@@ -159,6 +159,11 @@ export default class Service {
               body.append(key, requestData[key]);
             });
             requestParams.data = body;
+            const formDataHeaders = body.getHeaders() || {};
+            requestParams.headers ||= {};
+            Object.keys(formDataHeaders).forEach((key) => {
+              requestParams.headers[key] = formDataHeaders[key];
+            });
             break;
           }
           default: {
@@ -190,6 +195,12 @@ export default class Service {
     };
     if (requestInit.data) {
       requestInit.body = requestInit.data;
+    }
+    // normalize query
+    for (const [key, val] of Object.entries(requestInit.params)) {
+      if (val === undefined || val === null) {
+        requestInit.params[key] = "";
+      }
     }
     const signer = new Signer(requestInit, realOptions.serviceName);
     const { accessKeyId, secretKey, sessionToken } = realOptions;
