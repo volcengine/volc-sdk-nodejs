@@ -29,6 +29,7 @@ module.exports = {
     "@typescript-eslint/explicit-member-accessibility": "off",
     "@typescript-eslint/no-unused-vars": "error",
     "@typescript-eslint/camelcase": "off",
+    "@typescript-eslint/no-empty-interface": "warn",
     "@typescript-eslint/explicit-module-boundary-types": "off",
     "prettier/prettier": ["error", { trailingComma: "es5", printWidth: 100 }],
     "linebreak-style": ["error", "unix"],

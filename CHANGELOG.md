@@ -1,3 +1,6 @@
+2022-05-13 Bumped to version v1.2.1
+- fix ts compile error
+
 2022-05-12 Bumped to version v1.2.0
 - 增加 tls api
 - 修复 formdata 签名问题
