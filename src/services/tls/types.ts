@@ -869,6 +869,10 @@ export interface IAlarm_policyModifyReq {
 
 export type IAlarm_policyModifyResp = { [key: string]: any };
 
+export interface IAlarm_notice_groupCreateResp {
+  AlarmNotifyGroupId: string;
+}
+
 export interface IAlarm_notice_groupCreateReq {
   /** 告警通知组名称。
    - 同一个账户下，通知组名称不可重复。

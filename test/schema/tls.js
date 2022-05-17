@@ -681,3 +681,200 @@ export const ruleHostGroupValidate = {
   bind: ajv.compile(getSchema(null)),
   unbound: ajv.compile(getSchema(null)),
 };
+
+const notifyGroupReceiverSchema = {
+  EndTime: {
+    type: "string",
+  },
+  ReceiverChannels: {
+    type: "array",
+    items: {
+      type: "string",
+    },
+  },
+  ReceiverNames: {
+    type: "array",
+    items: {
+      type: "string",
+    },
+  },
+  ReceiverType: {
+    type: "string",
+  },
+  StartTime: {
+    type: "string",
+  },
+};
+
+const notifyGroupInfoSechema = {
+  AlarmNotifyGroupId: {
+    type: "string",
+  },
+  AlarmNotifyGroupName: {
+    type: "string",
+  },
+  CreateTime: {
+    type: "string",
+  },
+  ModifyTime: {
+    type: "string",
+  },
+  NotifyType: {
+    type: "array",
+    items: {
+      type: "string",
+    },
+  },
+  Receivers: {
+    type: "array",
+    items: {
+      type: "object",
+      properties: {
+        ...notifyGroupReceiverSchema,
+      },
+    },
+  },
+};
+
+const queryRequestSchema = {
+  EndTimeOffset: {
+    type: "number",
+  },
+  Number: {
+    type: "number",
+  },
+  Query: {
+    type: "string",
+  },
+  StartTimeOffset: {
+    type: "number",
+  },
+  TopicId: {
+    type: "string",
+  },
+  TopicName: {
+    type: "string",
+  },
+};
+
+const requestCycleSchema = {
+  Time: {
+    type: "number",
+  },
+  Type: {
+    type: "string",
+  },
+};
+
+const alarmSchema = {
+  AlarmId: {
+    type: "string",
+  },
+  AlarmName: {
+    type: "string",
+  },
+  AlarmNotifyGroup: {
+    type: "array",
+    items: {
+      type: "object",
+      properties: {
+        ...notifyGroupInfoSechema,
+      },
+    },
+  },
+  AlarmPeriod: {
+    type: "number",
+  },
+  Condition: {
+    type: "string",
+  },
+  CreateTime: {
+    type: "string",
+  },
+  ModifyTime: {
+    type: "string",
+  },
+  ProjectId: {
+    type: "string",
+  },
+  QueryRequest: {
+    type: "array",
+    items: {
+      type: "object",
+      properties: {
+        ...queryRequestSchema,
+      },
+    },
+  },
+  RequestCycle: {
+    type: "object",
+    properties: {
+      ...requestCycleSchema,
+    },
+  },
+  Status: {
+    type: "boolean",
+  },
+  TriggerPeriod: {
+    type: "number",
+  },
+  UserDefineMsg: {
+    type: "string",
+  },
+};
+
+export const alarmValidate = {
+  create: ajv.compile(
+    getSchema({
+      AlarmId: {
+        type: "string",
+      },
+    })
+  ),
+  createNotifyGroup: ajv.compile(
+    getSchema({
+      AlarmNotifyGroupId: {
+        type: "string",
+      },
+    })
+  ),
+  modify: ajv.compile(getSchema(null)),
+  modifyNotifyGroup: ajv.compile(getSchema(null)),
+
+  list: ajv.compile(
+    getSchema({
+      Total: {
+        type: "number",
+      },
+      Alarms: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            ...alarmSchema,
+          },
+        },
+      },
+    })
+  ),
+
+  notifyGroupList: ajv.compile(
+    getSchema({
+      Total: {
+        type: "number",
+      },
+      AlarmNotifyGroups: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            ...notifyGroupInfoSechema,
+          },
+        },
+      },
+    })
+  ),
+
+  delete: ajv.compile(getSchema(null)),
+  deleteNotifyGroup: ajv.compile(getSchema(null)),
+};

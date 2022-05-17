@@ -1,5 +1,6 @@
 import { tlsOpenapi } from "../lib";
 import {
+  alarmValidate,
   hostGroupValidate,
   indexValidate,
   logsValidate,
@@ -15,9 +16,9 @@ const tlsOpenapiService = tlsOpenapi.defaultService;
 process.env.TLS_HOST && tlsOpenapiService.setHost(process.env.TLS_HOST);
 
 const Region = process.env.Region;
-
-process.env.VOLC_ACCESSKEY && tlsOpenapiService.setAccessKeyId(process.env.VOLC_ACCESSKEY);
-process.env.VOLC_SECRETKEY && tlsOpenapiService.setSecretKey(process.env.VOLC_SECRETKEY);
+//
+//process.env.VOLC_ACCESSKEY && tlsOpenapiService.setAccessKeyId(process.env.VOLC_ACCESSKEY);
+//process.env.VOLC_SECRETKEY && tlsOpenapiService.setSecretKey(process.env.VOLC_SECRETKEY);
 
 const commonQuery = {
   PageNumber: 1,
@@ -220,7 +221,7 @@ describe("tlsOpenapi test", () => {
       Ttl: 1,
     });
 
-    const shardsList = tlsOpenapiService.DescribeShards({
+    const shardsList = await tlsOpenapiService.DescribeShards({
       TopicId: topicCreated.TopicId,
       PageNumber: 1,
       PageSize: 20,
@@ -287,44 +288,6 @@ describe("tlsOpenapi test", () => {
     });
   });
 
-  test("tlsOpenapi:HostGroup", async () => {
-    const hostGroupCreated = await tlsOpenapiService.CreateHostGroup({
-      HostGroupName: `tls-nodejs-sdk-test-create-host-group-${`${Math.random()}`.replace(".", "")}`,
-      HostGroupType: "Label",
-      HostIdentifier: "none",
-    });
-    expect(hostGroupValidate.create(hostGroupCreated)).toBe(true);
-
-    const hostGroupDetail = await tlsOpenapiService.DescribeHostGroup({
-      HostGroupId: hostGroupCreated.HostGroupId,
-    });
-    expect(hostGroupValidate.detail(hostGroupDetail)).toBe(true);
-
-    const hostGroupModified = tlsOpenapiService.ModifyHostGroup({
-      HostGroupId: hostGroupCreated.HostGroupId,
-      HostGroupName: `tls-nodejs-sdk-test-modify-host-group-${`${Math.random()}`.replace(".", "")}`,
-      HostGroupType: "Label",
-    });
-    expect(hostGroupValidate.modify(hostGroupModified)).toBe(true);
-
-    const hostGroupDeleted = tlsOpenapiService.DeleteHostGroup({
-      HostGroupId: hostGroupCreated.HostGroupId,
-    });
-    expect(hostGroupValidate.delete(hostGroupDeleted)).toBe(true);
-
-    const hostGroupList = tlsOpenapiService.DescribeHostGroups({
-      PageNumber: 1,
-      PageSize: 20,
-    });
-    expect(hostGroupValidate.list(hostGroupList)).toBe(true);
-
-    const hostGroupRuleList = tlsOpenapiService.DescribeHostGroupRules({
-      PageNumber: 1,
-      PageSize: 20,
-    });
-    expect(hostGroupValidate.ruleList(hostGroupRuleList)).toBe(true);
-  });
-
   test("tlsOpenapi:RuleHostGroup", async () => {
     const projectCreated = await tlsOpenapiService.CreateProject({
       ProjectName: `tls-nodejs-sdk-test-topic-project-${`${Math.random()}`.replace(".", "")}`,
@@ -350,13 +313,13 @@ describe("tlsOpenapi test", () => {
       HostIdentifier: "none",
     });
 
-    const ruleBound = tlsOpenapiService.ApplyRuleToHostGroups({
+    const ruleBound = await tlsOpenapiService.ApplyRuleToHostGroups({
       HostGroupIds: [hostGroupCreated.HostGroupId],
       RuleId: ruleCreated.RuleId,
     });
     expect(ruleHostGroupValidate.bind(ruleBound)).toBe(true);
 
-    const ruleUnbound = tlsOpenapiService.DeleteRuleFromHostGroups({
+    const ruleUnbound = await tlsOpenapiService.DeleteRuleFromHostGroups({
       HostGroupIds: [hostGroupCreated.HostGroupId],
       RuleId: ruleCreated.RuleId,
     });
@@ -368,6 +331,145 @@ describe("tlsOpenapi test", () => {
     await tlsOpenapiService.DeleteRule({
       RuleId: ruleCreated.RuleId,
     });
+    await tlsOpenapiService.DeleteTopic({
+      TopicId: topicCreated.TopicId,
+    });
+    await tlsOpenapiService.DeleteProject({
+      ProjectId: projectCreated.ProjectId,
+    });
+  });
+
+  test("tlsOpenapi:HostGroup", async () => {
+    const hostGroupCreated = await tlsOpenapiService.CreateHostGroup({
+      HostGroupName: `tls-nodejs-sdk-test-create-host-group-${`${Math.random()}`.replace(".", "")}`,
+      HostGroupType: "Label",
+      HostIdentifier: "none",
+    });
+    expect(hostGroupValidate.create(hostGroupCreated)).toBe(true);
+
+    const hostGroupDetail = await tlsOpenapiService.DescribeHostGroup({
+      HostGroupId: hostGroupCreated.HostGroupId,
+    });
+    expect(hostGroupValidate.detail(hostGroupDetail)).toBe(true);
+
+    const hostGroupModified = await tlsOpenapiService.ModifyHostGroup({
+      HostGroupId: hostGroupCreated.HostGroupId,
+      HostGroupName: `tls-nodejs-sdk-test-modify-host-group-${`${Math.random()}`.replace(".", "")}`,
+      HostGroupType: "Label",
+      HostIdentifier: "none1",
+    });
+    expect(hostGroupValidate.modify(hostGroupModified)).toBe(true);
+
+    const hostGroupRuleList = await tlsOpenapiService.DescribeHostGroupRules({
+      HostGroupId: hostGroupCreated.HostGroupId,
+      PageNumber: 1,
+      PageSize: 20,
+    });
+    expect(hostGroupValidate.ruleList(hostGroupRuleList)).toBe(true);
+
+    const hostGroupDeleted = await tlsOpenapiService.DeleteHostGroup({
+      HostGroupId: hostGroupCreated.HostGroupId,
+    });
+    expect(hostGroupValidate.delete(hostGroupDeleted)).toBe(true);
+
+    const hostGroupList = await tlsOpenapiService.DescribeHostGroups({
+      PageNumber: 1,
+      PageSize: 20,
+    });
+    expect(hostGroupValidate.list(hostGroupList)).toBe(true);
+  });
+
+  test("tlsOpenapi:Alarm", async () => {
+    const projectCreated = await tlsOpenapiService.CreateProject({
+      ProjectName: `tls-nodejs-sdk-test-alarm-project-${`${Math.random()}`.replace(".", "")}`,
+      Region,
+    });
+
+    const topicCreated = await tlsOpenapiService.CreateTopic({
+      ProjectId: projectCreated.ProjectId,
+      ShardCount: 1,
+      TopicName: `tls-nodejs-sdk-test-topic-${`${Math.random()}`.replace(".", "")}`,
+      Ttl: 1,
+    });
+
+    const alarmNotifyGroupCreated = await tlsOpenapiService.CreateAlarmNotifyGroup({
+      AlarmNotifyGroupName: `tls-nodejs-sdk-test-create-alarm-notify-group-${`${Math.random().toFixed(
+        8
+      )}`.replace(".", "")}`,
+      NotifyType: ["Trigger"],
+      Receivers: [
+        {
+          EndTime: "10:00:00",
+          StartTime: "08:00:00",
+          ReceiverChannels: ["Sms"],
+          ReceiverNames: ["test-wzx"],
+          ReceiverType: "User",
+        },
+      ],
+    });
+
+    expect(alarmValidate.createNotifyGroup(alarmNotifyGroupCreated)).toBe(true);
+
+    const alarmCreated = await tlsOpenapiService.CreateAlarm({
+      AlarmName: `tls-nodejs-sdk-test-create-alarm-${`${Math.random()}`.replace(".", "")}`,
+      AlarmNotifyGroup: [alarmNotifyGroupCreated.AlarmNotifyGroupId],
+      AlarmPeriod: 10,
+      Condition: "$1.count>=100",
+      ProjectId: projectCreated.ProjectId,
+      QueryRequest: [
+        {
+          EndTimeOffset: -10,
+          Number: 1,
+          Query: "level:error | select count(*) as errCount",
+          StartTimeOffset: -20,
+          TopicId: topicCreated.TopicId,
+        },
+      ],
+      RequestCycle: {
+        Time: 19,
+        Type: "Period",
+      },
+      Status: true,
+      TriggerPeriod: 3,
+      UserDefineMsg: "测试告警",
+    });
+
+    alarmValidate.create(alarmCreated);
+
+    const alarmModified = await tlsOpenapiService.ModifyAlarm({
+      AlarmId: alarmCreated.AlarmId,
+      UserDefineMsg: "告警测试",
+    });
+    alarmValidate.modify(alarmModified);
+
+    const notifyGroupsModified = await tlsOpenapiService.ModifyAlarmNotifyGroup({
+      AlarmNotifyGroupId: alarmNotifyGroupCreated.AlarmNotifyGroupId,
+    });
+    alarmValidate.modifyNotifyGroup(notifyGroupsModified);
+
+    const alarmList = await tlsOpenapiService.DescribeAlarms({
+      ProjectId: projectCreated.ProjectId,
+      PageNumber: 1,
+      PageSize: 20,
+    });
+    alarmValidate.list(alarmList);
+
+    const notifyGroupList = await tlsOpenapiService.DescribeAlarmNotifyGroups({
+      PageNumber: 1,
+      PageSize: 20,
+    });
+    alarmValidate.notifyGroupList(notifyGroupList);
+
+    const alarmDeleted = await tlsOpenapiService.DeleteAlarm({
+      AlarmId: alarmCreated.AlarmId,
+    });
+    alarmValidate.delete(alarmDeleted);
+
+    const notifyGroupDeleted = await tlsOpenapiService.DeleteAlarmNotifyGroup({
+      AlarmNotifyGroupId: alarmNotifyGroupCreated.AlarmNotifyGroupId,
+    });
+    alarmValidate.deleteNotifyGroup(notifyGroupDeleted);
+
     await tlsOpenapiService.DeleteTopic({
       TopicId: topicCreated.TopicId,
     });

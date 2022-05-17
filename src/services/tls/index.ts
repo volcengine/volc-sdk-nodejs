@@ -1,6 +1,7 @@
 import Base from "./service";
 import {
   IAlarm_notice_groupCreateReq,
+  IAlarm_notice_groupCreateResp,
   IAlarm_notice_groupDeleteReq,
   IAlarm_notice_groupDeleteResp,
   IAlarm_notice_groupDescribeResp,
@@ -199,7 +200,7 @@ export class TlsService extends Base {
   DeleteRuleFromHostGroups = this.createAPI<IRuleUnbindRuleReq, IRuleUnbindRuleResp>(
     "DeleteRuleFromHostGroups",
     {
-      method: "DELETE",
+      method: "PUT",
     }
   );
 
@@ -266,7 +267,7 @@ export class TlsService extends Base {
 
   CreateAlarmNotifyGroup = this.createAPI<
     IAlarm_notice_groupCreateReq,
-    IProjectDescribeProjectsResp
+    IAlarm_notice_groupCreateResp
   >("CreateAlarmNotifyGroup", {
     method: "POST",
   });
