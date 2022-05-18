@@ -1,19 +1,19 @@
 import Base from "./service";
 import {
-  IAlarm_notice_groupCreateReq,
-  IAlarm_notice_groupCreateResp,
-  IAlarm_notice_groupDeleteReq,
-  IAlarm_notice_groupDeleteResp,
-  IAlarm_notice_groupDescribeResp,
-  IAlarm_notice_groupModifyReq,
-  IAlarm_notice_groupModifyResp,
-  IAlarm_policyCreateReq,
-  IAlarm_policyCreateResp,
-  IAlarm_policyDeleteReq,
-  IAlarm_policyDeleteResp,
-  IAlarm_policyDescribeResp,
-  IAlarm_policyModifyReq,
-  IAlarm_policyModifyResp,
+  IAlarmNoticeGroupCreateReq,
+  IAlarmNoticeGroupCreateResp,
+  IAlarmNoticeGroupDeleteReq,
+  IAlarmNoticeGroupDeleteResp,
+  IAlarmNoticeGroupDescribeResp,
+  IAlarmNoticeGroupModifyReq,
+  IAlarmNoticeGroupModifyResp,
+  IAlarmPolicyCreateReq,
+  IAlarmPolicyCreateResp,
+  IAlarmPolicyDeleteReq,
+  IAlarmPolicyDeleteResp,
+  IAlarmPolicyDescribeResp,
+  IAlarmPolicyModifyReq,
+  IAlarmPolicyModifyResp,
   IDescribeAlarmsReq,
   IDescribeHostGroupReq,
   IDescribeHostGroupRulesReq,
@@ -29,18 +29,18 @@ import {
   IDescribeTopicReq,
   IDescribeTopicsReq,
   IEsclientResult,
-  IHost_groupCreateReq,
-  IHost_groupCreateResp,
-  IHost_groupDeleteReq,
-  IHost_groupDeleteResp,
-  IHost_groupDescribeAllResp,
-  IHost_groupDescribeHostGroupRulesResp,
-  IHost_groupDescribeResp,
-  IHost_groupModifyReq,
-  IHost_groupModifyResp,
   IHostDeleteReq,
   IHostDeleteResp,
   IHostDescribeAllResp,
+  IHostGroupCreateReq,
+  IHostGroupCreateResp,
+  IHostGroupDeleteReq,
+  IHostGroupDeleteResp,
+  IHostGroupDescribeAllResp,
+  IHostGroupDescribeHostGroupRulesResp,
+  IHostGroupDescribeResp,
+  IHostGroupModifyReq,
+  IHostGroupModifyResp,
   IIndexCreateReq,
   IIndexCreateResp,
   IIndexDeleteReq,
@@ -206,26 +206,26 @@ export class TlsService extends Base {
 
   // host group
   // 机器组
-  CreateHostGroup = this.createAPI<IHost_groupCreateReq, IHost_groupCreateResp>("CreateHostGroup", {
+  CreateHostGroup = this.createAPI<IHostGroupCreateReq, IHostGroupCreateResp>("CreateHostGroup", {
     method: "POST",
   });
 
-  DeleteHostGroup = this.createAPI<IHost_groupDeleteReq, IHost_groupDeleteResp>("DeleteHostGroup", {
+  DeleteHostGroup = this.createAPI<IHostGroupDeleteReq, IHostGroupDeleteResp>("DeleteHostGroup", {
     method: "DELETE",
   });
 
-  ModifyHostGroup = this.createAPI<IHost_groupModifyReq, IHost_groupModifyResp>("ModifyHostGroup", {
+  ModifyHostGroup = this.createAPI<IHostGroupModifyReq, IHostGroupModifyResp>("ModifyHostGroup", {
     method: "PUT",
   });
 
-  DescribeHostGroup = this.createAPI<IDescribeHostGroupReq, IHost_groupDescribeResp>(
+  DescribeHostGroup = this.createAPI<IDescribeHostGroupReq, IHostGroupDescribeResp>(
     "DescribeHostGroup",
     {
       method: "GET",
     }
   );
 
-  DescribeHostGroups = this.createAPI<IDescribeHostGroupsReq, IHost_groupDescribeAllResp>(
+  DescribeHostGroups = this.createAPI<IDescribeHostGroupsReq, IHostGroupDescribeAllResp>(
     "DescribeHostGroups",
     {
       method: "GET",
@@ -242,53 +242,53 @@ export class TlsService extends Base {
 
   DescribeHostGroupRules = this.createAPI<
     IDescribeHostGroupRulesReq,
-    IHost_groupDescribeHostGroupRulesResp
+    IHostGroupDescribeHostGroupRulesResp
   >("DescribeHostGroupRules", {
     method: "GET",
   });
 
   // alarm
   // 告警
-  CreateAlarm = this.createAPI<IAlarm_policyCreateReq, IAlarm_policyCreateResp>("CreateAlarm", {
+  CreateAlarm = this.createAPI<IAlarmPolicyCreateReq, IAlarmPolicyCreateResp>("CreateAlarm", {
     method: "POST",
   });
 
-  DeleteAlarm = this.createAPI<IAlarm_policyDeleteReq, IAlarm_policyDeleteResp>("DeleteAlarm", {
+  DeleteAlarm = this.createAPI<IAlarmPolicyDeleteReq, IAlarmPolicyDeleteResp>("DeleteAlarm", {
     method: "DELETE",
   });
 
-  DescribeAlarms = this.createAPI<IDescribeAlarmsReq, IAlarm_policyDescribeResp>("DescribeAlarms", {
+  DescribeAlarms = this.createAPI<IDescribeAlarmsReq, IAlarmPolicyDescribeResp>("DescribeAlarms", {
     method: "GET",
   });
 
-  ModifyAlarm = this.createAPI<IAlarm_policyModifyReq, IAlarm_policyModifyResp>("ModifyAlarm", {
+  ModifyAlarm = this.createAPI<IAlarmPolicyModifyReq, IAlarmPolicyModifyResp>("ModifyAlarm", {
     method: "PUT",
   });
 
-  CreateAlarmNotifyGroup = this.createAPI<
-    IAlarm_notice_groupCreateReq,
-    IAlarm_notice_groupCreateResp
-  >("CreateAlarmNotifyGroup", {
-    method: "POST",
-  });
+  CreateAlarmNotifyGroup = this.createAPI<IAlarmNoticeGroupCreateReq, IAlarmNoticeGroupCreateResp>(
+    "CreateAlarmNotifyGroup",
+    {
+      method: "POST",
+    }
+  );
 
-  DeleteAlarmNotifyGroup = this.createAPI<
-    IAlarm_notice_groupDeleteReq,
-    IAlarm_notice_groupDeleteResp
-  >("DeleteAlarmNotifyGroup", {
-    method: "DELETE",
-  });
+  DeleteAlarmNotifyGroup = this.createAPI<IAlarmNoticeGroupDeleteReq, IAlarmNoticeGroupDeleteResp>(
+    "DeleteAlarmNotifyGroup",
+    {
+      method: "DELETE",
+    }
+  );
 
-  ModifyAlarmNotifyGroup = this.createAPI<
-    IAlarm_notice_groupModifyReq,
-    IAlarm_notice_groupModifyResp
-  >("ModifyAlarmNotifyGroup", {
-    method: "PUT",
-  });
+  ModifyAlarmNotifyGroup = this.createAPI<IAlarmNoticeGroupModifyReq, IAlarmNoticeGroupModifyResp>(
+    "ModifyAlarmNotifyGroup",
+    {
+      method: "PUT",
+    }
+  );
 
   DescribeAlarmNotifyGroups = this.createAPI<
     IDescribeNotifyGroupReq,
-    IAlarm_notice_groupDescribeResp
+    IAlarmNoticeGroupDescribeResp
   >("DescribeAlarmNotifyGroups", {
     method: "GET",
   });

@@ -499,7 +499,7 @@
 ### HostGroup
 ```typescript
 
-  interface IHost_groupCreateReq {
+  interface IHostGroupCreateReq {
     /** 是否支持自动更新 */
     AutoUpdate?: boolean;
     /** 机器组的名称。 */
@@ -516,14 +516,14 @@
     UpdateStartTime?: string;
   }
   // 创建机器组
-  tlsOpenapiService.CreateHostGroup(IHost_groupCreateReq);
+  tlsOpenapiService.CreateHostGroup(IHostGroupCreateReq);
 
   // 删除机器组
   tlsOpenapiService.DeleteHostGroup({
     HostGroupId: "机器组ID",
   });
 
-  interface IHost_groupModifyReq {
+  interface IHostGroupModifyReq {
     /** 是否支持自动更新 */
     AutoUpdate?: boolean;
     /** 机器组Id。 */
@@ -542,7 +542,7 @@
     UpdateStartTime?: string;
   }
   // 修改机器组
-  tlsOpenapiService.ModifyHostGroup(IHost_groupModifyReq);
+  tlsOpenapiService.ModifyHostGroup(IHostGroupModifyReq);
 
   // 获取机器组信息
   tlsOpenapiService.DescribeHostGroup({
@@ -617,7 +617,7 @@
     Type: string;
   }
   
-  interface IAlarm_policyCreateReq {
+  interface IAlarmPolicyCreateReq {
     /** 告警策略名称。
      - 同一个日志项目下，告警策略名称不可重复。
      - 只能包括小写字母、数字、-
@@ -644,7 +644,7 @@
     UserDefineMsg?: string;
   }
   // 创建告警策略
-  tlsOpenapiService.CreateAlarm(IAlarm_policyCreateReq);
+  tlsOpenapiService.CreateAlarm(IAlarmPolicyCreateReq);
 
   // 删除告警策略
   tlsOpenapiService.DeleteAlarm({
@@ -672,7 +672,7 @@
   // 获取告警策略列表
   tlsOpenapiService.DescribeAlarms(IDescribeAlarmsReq);
 
-  interface IAlarm_policyModifyReq {
+  interface IAlarmPolicyModifyReq {
     /** 告警策略Id */
     AlarmId: string;
     /** 告警策略名称。
@@ -700,9 +700,9 @@
     UserDefineMsg?: string;
   }
   // 修改告警策略
-  tlsOpenapiService.ModifyAlarm(IAlarm_policyModifyReq);
+  tlsOpenapiService.ModifyAlarm(IAlarmPolicyModifyReq);
 
-  interface IAlarm_notice_groupReceiver {
+  interface IAlarmNoticeGroupReceiver {
     /** 允许接收信息的开始时间。 */
     EndTime: string;
     /** 通知接收渠道，暂仅支持Email和Sms。Email-邮件；Sms-短信。 */
@@ -714,7 +714,7 @@
     /** 允许接收信息的开始时间。 */
     StartTime: string;
   }
-  interface IAlarm_notice_groupCreateReq {
+  interface IAlarmNoticeGroupCreateReq {
     /** 告警通知组名称。
      - 同一个账户下，通知组名称不可重复。
      - 只能包括小写字母、数字、-。
@@ -724,17 +724,17 @@
     /** 告警通知的类型。可选值，选择一个或者多个：Trigger-告警触发;Recovery-告警恢复。 */
     NotifyType: Array<string>;
     /** 告警对应的通知列表，最少1一个，最大支持10个。 */
-    Receivers: Array<IAlarm_notice_groupReceiver>;
+    Receivers: Array<IAlarmNoticeGroupReceiver>;
   }
   // 创建告警通知组
-  tlsOpenapiService.CreateAlarmNotifyGroup(IAlarm_notice_groupCreateReq);
+  tlsOpenapiService.CreateAlarmNotifyGroup(IAlarmNoticeGroupCreateReq);
 
   // 删除告警通知组
   tlsOpenapiService.DeleteAlarmNotifyGroup({
     AlarmNotifyGroupId: "告警通知组ID",
   });
 
-  interface IAlarm_notice_groupModifyReq {
+  interface IAlarmNoticeGroupModifyReq {
     /** 通知组id */
     AlarmNotifyGroupId: string;
     /** 告警通知组名称。
@@ -746,10 +746,10 @@
     /** 告警通知的类型。可选值，选择一个或者多个：Trigger-告警触发;Recovery-告警恢复。 */
     NotifyType?: Array<string>;
     /** 告警对应的通知列表。 */
-    Receivers?: Array<IAlarm_notice_groupReceiver>;
+    Receivers?: Array<IAlarmNoticeGroupReceiver>;
   }
   // 修改告警通知组
-  tlsOpenapiService.ModifyAlarmNotifyGroup(IAlarm_notice_groupModifyReq);
+  tlsOpenapiService.ModifyAlarmNotifyGroup(IAlarmNoticeGroupModifyReq);
 
   interface IDescribeNotifyGroupReq {
     /** 告警通知组名称 */
