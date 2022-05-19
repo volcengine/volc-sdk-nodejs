@@ -592,7 +592,7 @@ export interface IRuleUnbindRuleReq {
 }
 export type IRuleUnbindRuleResp = { [key: string]: any };
 
-export interface IHost_groupCreateReq {
+export interface IHostGroupCreateReq {
   /** 是否支持自动更新 */
   AutoUpdate?: boolean;
   /** 机器组的名称。 */
@@ -609,17 +609,17 @@ export interface IHost_groupCreateReq {
   UpdateStartTime?: string;
 }
 
-export interface IHost_groupCreateResp {
+export interface IHostGroupCreateResp {
   HostGroupId: string;
 }
 
-export interface IHost_groupDeleteReq {
+export interface IHostGroupDeleteReq {
   /** 机器组的Id。 */
   HostGroupId: string;
 }
-export type IHost_groupDeleteResp = { [key: string]: any };
+export type IHostGroupDeleteResp = { [key: string]: any };
 
-export interface IHost_groupModifyReq {
+export interface IHostGroupModifyReq {
   /** 是否支持自动更新 */
   AutoUpdate?: boolean;
   /** 机器组Id。 */
@@ -638,7 +638,7 @@ export interface IHost_groupModifyReq {
   UpdateStartTime?: string;
 }
 
-export type IHost_groupModifyResp = { [key: string]: any };
+export type IHostGroupModifyResp = { [key: string]: any };
 
 export interface IDescribeHostGroupReq {
   /** 机器组Id */
@@ -651,13 +651,13 @@ export interface IHostHostInfo {
   LogCollectorVersion?: string;
 }
 
-export interface IHost_groupHostGroupHostsRulesInfo {
+export interface IHostGroupHostGroupHostsRulesInfo {
   HostGroupInfo?: IRestHostGroupInfo;
   HostInfos?: Array<IHostHostInfo>;
   RuleInfos?: Array<IRuleRuleInfo>;
 }
-export interface IHost_groupDescribeResp {
-  HostGroupHostsRulesInfo: IHost_groupHostGroupHostsRulesInfo;
+export interface IHostGroupDescribeResp {
+  HostGroupHostsRulesInfo: IHostGroupHostGroupHostsRulesInfo;
 }
 
 export interface IDescribeHostGroupsReq {
@@ -673,8 +673,8 @@ export interface IDescribeHostGroupsReq {
   PageSize?: number;
 }
 
-export interface IHost_groupDescribeAllResp {
-  HostGroupHostsRulesInfos: Array<IHost_groupHostGroupHostsRulesInfo>;
+export interface IHostGroupDescribeAllResp {
+  HostGroupHostsRulesInfos: Array<IHostGroupHostGroupHostsRulesInfo>;
   Total: number;
 }
 
@@ -712,7 +712,7 @@ export interface IDescribeHostGroupRulesReq {
   /** 页大小。 */
   PageSize?: number;
 }
-export interface IHost_groupDescribeHostGroupRulesResp {
+export interface IHostGroupDescribeHostGroupRulesResp {
   RuleInfos: Array<IRuleRuleInfo>;
   Total: number;
 }
@@ -739,7 +739,7 @@ export interface IDaoRequestCycle {
   Type: string;
 }
 
-export interface IAlarm_policyCreateReq {
+export interface IAlarmPolicyCreateReq {
   /** 告警策略名称。
    - 同一个日志项目下，告警策略名称不可重复。
    - 只能包括小写字母、数字、-
@@ -766,16 +766,16 @@ export interface IAlarm_policyCreateReq {
   UserDefineMsg?: string;
 }
 
-export interface IAlarm_policyCreateResp {
+export interface IAlarmPolicyCreateResp {
   AlarmId: string;
 }
 
-export interface IAlarm_policyDeleteReq {
+export interface IAlarmPolicyDeleteReq {
   /** 创建时返回的告警策略id */
   AlarmId: string;
 }
 
-export type IAlarm_policyDeleteResp = { [key: string]: any };
+export type IAlarmPolicyDeleteResp = { [key: string]: any };
 
 export interface IDescribeAlarmsReq {
   /** 项目id */
@@ -796,7 +796,7 @@ export interface IDescribeAlarmsReq {
   Status?: string;
 }
 
-export interface IAlarm_notice_groupReceiver {
+export interface IAlarmNoticeGroupReceiver {
   /** 允许接收信息的开始时间。 */
   EndTime: string;
   /** 通知接收渠道，暂仅支持Email和Sms。Email-邮件；Sms-短信。 */
@@ -809,19 +809,19 @@ export interface IAlarm_notice_groupReceiver {
   StartTime: string;
 }
 
-export interface IAlarm_notice_groupNotifyGroupsInfo {
+export interface IAlarmNoticeGroupNotifyGroupsInfo {
   AlarmNotifyGroupId?: string;
   AlarmNotifyGroupName?: string;
   CreateTime?: string;
   ModifyTime?: string;
   NotifyType?: Array<string>;
-  Receivers?: Array<IAlarm_notice_groupReceiver>;
+  Receivers?: Array<IAlarmNoticeGroupReceiver>;
 }
 
 export interface IAlarm_policyQueryResp {
   AlarmId: string;
   AlarmName: string;
-  AlarmNotifyGroup: Array<IAlarm_notice_groupNotifyGroupsInfo>;
+  AlarmNotifyGroup: Array<IAlarmNoticeGroupNotifyGroupsInfo>;
   AlarmPeriod: number;
   Condition: string;
   CreateTime: string;
@@ -834,12 +834,12 @@ export interface IAlarm_policyQueryResp {
   UserDefineMsg: string;
 }
 
-export interface IAlarm_policyDescribeResp {
+export interface IAlarmPolicyDescribeResp {
   Alarms: Array<IAlarm_policyQueryResp>;
   Total: number;
 }
 
-export interface IAlarm_policyModifyReq {
+export interface IAlarmPolicyModifyReq {
   /** 告警策略Id */
   AlarmId: string;
   /** 告警策略名称。
@@ -867,9 +867,13 @@ export interface IAlarm_policyModifyReq {
   UserDefineMsg?: string;
 }
 
-export type IAlarm_policyModifyResp = { [key: string]: any };
+export type IAlarmPolicyModifyResp = { [key: string]: any };
 
-export interface IAlarm_notice_groupCreateReq {
+export interface IAlarmNoticeGroupCreateResp {
+  AlarmNotifyGroupId: string;
+}
+
+export interface IAlarmNoticeGroupCreateReq {
   /** 告警通知组名称。
    - 同一个账户下，通知组名称不可重复。
    - 只能包括小写字母、数字、-。
@@ -879,7 +883,7 @@ export interface IAlarm_notice_groupCreateReq {
   /** 告警通知的类型。可选值，选择一个或者多个：Trigger-告警触发;Recovery-告警恢复。 */
   NotifyType: Array<string>;
   /** 告警对应的通知列表，最少1一个，最大支持10个。 */
-  Receivers: Array<IAlarm_notice_groupReceiver>;
+  Receivers: Array<IAlarmNoticeGroupReceiver>;
 }
 
 export interface IProjectDescribeProjectsResp {
@@ -887,14 +891,14 @@ export interface IProjectDescribeProjectsResp {
   Total: number;
 }
 
-export interface IAlarm_notice_groupDeleteReq {
+export interface IAlarmNoticeGroupDeleteReq {
   /** 创建时返回的NotifyGroupId */
   AlarmNotifyGroupId: string;
 }
 
-export type IAlarm_notice_groupDeleteResp = { [key: string]: any };
+export type IAlarmNoticeGroupDeleteResp = { [key: string]: any };
 
-export interface IAlarm_notice_groupModifyReq {
+export interface IAlarmNoticeGroupModifyReq {
   /** 通知组id */
   AlarmNotifyGroupId: string;
   /** 告警通知组名称。
@@ -906,10 +910,10 @@ export interface IAlarm_notice_groupModifyReq {
   /** 告警通知的类型。可选值，选择一个或者多个：Trigger-告警触发;Recovery-告警恢复。 */
   NotifyType?: Array<string>;
   /** 告警对应的通知列表。 */
-  Receivers?: Array<IAlarm_notice_groupReceiver>;
+  Receivers?: Array<IAlarmNoticeGroupReceiver>;
 }
 
-export type IAlarm_notice_groupModifyResp = { [key: string]: any };
+export type IAlarmNoticeGroupModifyResp = { [key: string]: any };
 
 export interface IDescribeNotifyGroupReq {
   /** 告警通知组名称 */
@@ -923,8 +927,8 @@ export interface IDescribeNotifyGroupReq {
   /** 页面大小 */
   PageSize?: number;
 }
-export interface IAlarm_notice_groupDescribeResp {
-  AlarmNotifyGroups: Array<IAlarm_notice_groupNotifyGroupsInfo>;
+export interface IAlarmNoticeGroupDescribeResp {
+  AlarmNotifyGroups: Array<IAlarmNoticeGroupNotifyGroupsInfo>;
   Total: number;
 }
 
