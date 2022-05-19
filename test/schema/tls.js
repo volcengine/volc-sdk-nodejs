@@ -819,7 +819,7 @@ const alarmSchema = {
     type: "number",
   },
   UserDefineMsg: {
-    type: "string",
+    type: ["string", "object"],
   },
 };
 
