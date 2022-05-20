@@ -1,3 +1,6 @@
+2022-05-19 Bumped to version v1.2.2
+- fix tls service issue
+
 2022-05-13 Bumped to version v1.2.1
 - fix ts compile error
 
