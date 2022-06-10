@@ -415,7 +415,7 @@ const extractRule = {
 };
 
 const ruleInfo = {
-  containerRule: {
+  ContainerRule: {
     type: "object",
     properties: {
       ...containerRule,
@@ -470,7 +470,7 @@ const ruleInfo = {
     type: "string",
   },
   UserDefineRule: {
-    type: "string",
+    type: ["string", "object"],
   },
 };
 
