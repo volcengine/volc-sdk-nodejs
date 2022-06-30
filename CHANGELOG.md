@@ -1,3 +1,6 @@
+2022-06-30 Bumped to version v1.2.3
+- fix tls installation issue
+
 2022-05-19 Bumped to version v1.2.2
 - fix tls service issue
 
