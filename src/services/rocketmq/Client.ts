@@ -1,3 +1,4 @@
+import { v4 as uuidv4 } from "uuid";
 import { sendRequest, SendRequestOptions } from "./utils/request";
 import { ClientOptions, ProducerOptions, ConsumerOptions } from "./types";
 import { Consumer } from "./Consumer";
@@ -5,6 +6,8 @@ import { Producer } from "./Producer";
 import { MQError } from "./utils/error";
 
 const SDK_VERSION = "0.0.1";
+
+const HEART_BEAT_CYCLE = 30000;
 
 interface RequestOption<Req> extends Omit<SendRequestOptions<Req>, "url"> {
   path: string;
@@ -30,6 +33,10 @@ export class Client {
     return SDK_VERSION;
   }
 
+  get HEART_BEAT_CYCLE() {
+    return HEART_BEAT_CYCLE;
+  }
+
   createProducer(options: ProducerOptions) {
     if (!options) {
       throw new MQError("Please pass the options of producer");
@@ -44,10 +51,10 @@ export class Client {
     return new Consumer(this, options);
   }
 
-  async request<Req, Resp = void>(options: RequestOption<Req>): Promise<Resp> {
+  async _request<Req, Resp = void>(options: RequestOption<Req>): Promise<Resp> {
     const { path, headers = {} } = options;
     const url = `${this._endpoint}/${path}`;
-    const auth = this.sign();
+    const auth = this._sign();
 
     const res = await sendRequest({
       ...options,
@@ -58,8 +65,13 @@ export class Client {
     return res;
   }
 
-  sign(): string {
+  _sign(): string {
     // TODO: 改成真实签名
     return this._endpoint + this._accessKeyId + this._secretAccessKey;
+  }
+
+  _createRequestId() {
+    const requestId = uuidv4();
+    return requestId;
   }
 }

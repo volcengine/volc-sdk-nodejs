@@ -1,33 +1,31 @@
-import { v4 as uuidv4 } from "uuid";
 import { Client } from "./Client";
-import {
-  ProducerOptions,
-  ProducerStatus,
-  ProducerType,
-  ProducerCloseOptions,
-  ProducerConnectOptions,
-  PublishMessageOptions,
-} from "./types";
+import { ProducerOptions, ProducerStatus, ProducerType, PublishMessageOptions } from "./types";
 import { MQError } from "./utils/error";
 import * as v1 from "./ protocol/v1";
-import { isString } from "./utils/common";
+import { isString, Queue, Resolver } from "./utils/common";
+import { Worker } from "./Worker";
 
-export class Producer {
+// const CLOSEABLE_STATUS: ProducerStatus[] = ["idle", "running"];
+
+// const CONNECTABLE_STATUS: ProducerStatus[] = ["initialized", "connectFailed", "closed"];
+
+export interface MessageQueueItem {
+  messageOptions: PublishMessageOptions;
+  resolver: Resolver<v1.SendResult>;
+}
+
+export class Producer extends Worker {
   // config
-  private _client: Client;
-
   private _producerType: ProducerType;
 
-  private _topic: string[];
-
-  private _group: string;
-
-  private _sequential: boolean;
+  private _order: boolean;
 
   // running
   private _status: ProducerStatus;
 
-  private _clientToken: string | undefined = undefined;
+  private _messageQueue = new Queue<MessageQueueItem>();
+
+  private _closeResolver: Resolver | null = null;
 
   constructor(client: Client, options: ProducerOptions) {
     if (!client) {
@@ -38,7 +36,7 @@ export class Producer {
     }
     // Create normal producers by default.
     // Allow to send message to all topic by default.
-    const { producerType = "producer", topic = "*", group, sequential = false } = options;
+    const { producerType = "producer", topic = "*", group, order = false } = options;
 
     if (!isString(topic) && topic.length === 0) {
       throw new MQError("Please set at least one topic for producer");
@@ -48,96 +46,110 @@ export class Producer {
       throw new MQError("options.group is required when creating a t-producer");
     }
 
-    this._client = client;
+    super(client, {
+      type: producerType,
+      topic: isString(topic) ? [topic] : topic,
+      group: group || "", // Empty group for normal producer by default
+    });
+
     this._producerType = producerType;
-    this._topic = isString(topic) ? [topic] : topic;
-    this._group = group || ""; // set empty string for normal producer group
-    this._sequential = sequential;
+    this._order = order;
     this._status = "initialized";
   }
 
-  private connectable() {
-    const status = this._status;
-    return status === "initialized" || status === "closed" || status === "connectFailed";
-  }
-
-  private closeable() {
-    const status = this._status;
-    return status === "idle" || status === "running";
-  }
-
-  private publishable() {
-    const status = this._status;
-    return status === "idle" || status === "running";
-  }
-
-  private getRequestId() {
-    const requestId = uuidv4();
-    return requestId;
-  }
-
-  async connect(properties: ProducerConnectOptions = {}) {
-    if (!this.connectable()) {
-      return;
-    }
-    const requestId = this.getRequestId();
+  async connect() {
+    const requestId = this._client._createRequestId();
     try {
-      const res = await this._client.request<v1.OpenReq, v1.OpenResp>({
-        method: "POST",
-        path: "/v1/clients",
-        data: {
-          requestId,
-          clientVersion: this._client.VERSION,
-          type: this._producerType,
-          topics: this._topic,
-          group: this._group,
-          properties: properties as any,
-          clientToken: this._clientToken,
-        },
+      const res = await this._connectRequest(requestId, {
+        order: String(this._order), // order type
       });
       this._clientToken = res.clientToken;
       this._status = "idle";
+      this._startHeartBeat();
     } catch (error) {
       this._status = "connectFailed";
       throw new MQError(`Producer connect failed, requestId: ${requestId}`);
     }
   }
 
-  async publishMessage(options: PublishMessageOptions) {
-    if (!this.publishable()) {
-      return;
+  async close(): Promise<void> {
+    const prevStatus = this._status;
+    // Set the status to closing to prevent sending new messages
+    this._status = "closing";
+    // Wait for all messages in the queue to be sent successfully
+    if (prevStatus === "running") {
+      this._closeResolver = new Resolver();
+      await this._closeResolver.promise;
     }
+    // Only after all messages be sent successfully can stop the hear beat
+    this._stopHeartBeat();
 
-    // TODO: publish message
-    // console.log(options, this._sequential);
+    const requestId = this._client._createRequestId();
+    try {
+      await this._closeRequest(requestId, {});
+      this._status = "closed";
+    } catch (error) {
+      this._status = "connectFailed";
+      throw new MQError(`Producer close failed, requestId: ${requestId}`);
+    }
   }
 
-  async close(properties: ProducerCloseOptions = {}) {
-    if (!this.closeable()) {
-      return;
-    }
-    const prevStatus = this._status;
-    this._status = "closing";
-
-    if (prevStatus === "running") {
-      // TODO: await queue clean resolver
+  async publishMessage(options: PublishMessageOptions): Promise<v1.SendResult> {
+    if (this._order) {
+      return this._publishMessageRequest(options);
     }
 
-    const requestId = this.getRequestId();
+    const resolver = new Resolver<v1.SendResult>();
+    this._messageQueue.add({ messageOptions: options, resolver });
+
+    if (this._status !== "running") {
+      this._startSend();
+    }
+
+    return resolver.promise;
+  }
+
+  private async _startSend() {
+    this._status = "running";
+
+    while (this._messageQueue.count > 0) {
+      const currentMessage = this._messageQueue.peek();
+      if (!currentMessage) {
+        continue;
+      }
+      try {
+        const res = await this._publishMessageRequest(currentMessage.messageOptions);
+        currentMessage.resolver.resolve(res);
+      } catch (error) {
+        currentMessage.resolver.reject(error);
+      }
+      this._messageQueue.remove();
+    }
+
+    this._status = "idle";
+
+    if (this._closeResolver) {
+      this._closeResolver.resolve();
+      this._closeResolver = null;
+    }
+  }
+
+  private async _publishMessageRequest(options: PublishMessageOptions): Promise<v1.SendResult> {
+    const { topic, body, tags = [], shardingKey = "", keys = [], properties = {} } = options;
+    const requestId = this._client._createRequestId();
     try {
-      await this._client.request<v1.CloseReq, void>({
-        method: "delete",
-        path: `/v1/clients/${this._clientToken}`,
+      const res = await this._client._request<v1.SendReq, v1.SendResp>({
+        method: "POST",
+        path: "/v1/messages",
         data: {
           requestId,
           clientToken: this._clientToken as string,
-          properties: properties as any,
+          message: { topic, body, tags, shardingKey, keys, properties },
         },
       });
-      this._status = "closed";
+      return res.result;
     } catch (error) {
-      // Keep closing when error
-      throw new MQError(`Producer close failed, requestId: ${requestId}`);
+      throw new MQError(`Publish message failed, requestId: ${requestId}`);
     }
   }
 }

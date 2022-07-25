@@ -2,7 +2,6 @@ import http from "http";
 import { Method } from "axios";
 
 // -------------client------------
-
 /** Client config */
 export interface ClientOptions {
   endpoint: string;
@@ -28,6 +27,7 @@ export type ProducerStatus =
   | "idle"
   | "running"
   | "closing"
+  | "closeFailed"
   | "closed";
 
 export interface ProducerOptions {
@@ -37,24 +37,20 @@ export interface ProducerOptions {
    */
   producerType?: ProducerType;
   /**
-   * Topics available for producer. All topics by default
+   * Topics available for producer. All topics by default.
    * @default "*"
    */
   topic?: string[] | string;
   /**
-   * Group ID, required when creating a t-producer
+   * Group ID, required when creating a t-producer.
    */
   group?: string;
   /**
    * Send message sequentially.
    * @default false
    */
-  sequential?: boolean;
+  order?: boolean;
 }
-
-export interface ProducerConnectOptions {}
-
-export interface ProducerCloseOptions {}
 
 export interface PublishMessageOptions {
   topic: string;
@@ -62,11 +58,42 @@ export interface PublishMessageOptions {
   tags?: string[];
   shardingKey?: string;
   keys?: string[];
-  properties?: any;
+  properties?: Record<string, string>;
 }
 
 // -------------consumer------------
+export type ConsumerStatus =
+  | "initialized"
+  | "connecting"
+  | "connectFailed"
+  | "idle"
+  | "running"
+  | "stopped"
+  | "closing"
+  | "closeFailed"
+  | "closed";
+
 export interface ConsumerOptions {
-  topic?: string[];
-  group?: string;
+  /**
+   * Group ID for consumer.
+   */
+  group: string;
+  /**
+   * Topic for consumer.
+   */
+  topic?: string | string[];
+  /**
+   * Limit number of messages per poll.
+   * @default 10
+   */
+  maxMessageNumber?: number;
+  /**
+   * Duration for waiting message.
+   * @default 3000
+   */
+  maxWaitTimeMs?: number;
+}
+
+export interface ConsumerRunOptions {
+  eachMessage: () => Promise<boolean>;
 }

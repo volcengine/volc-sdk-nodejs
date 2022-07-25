@@ -10,6 +10,7 @@ export interface OpenReq {
   clientToken?: string;
   requestId: string;
   type: string;
+  reuseConnection: boolean;
 }
 
 export interface OpenRespResult {
