@@ -68,6 +68,9 @@ export default class Service {
   static LZ4Compress(input) {
     let output = Buffer.alloc(LZ4.encodeBound(input.length));
     const compressedSize = LZ4.encodeBlock(input, output);
+    if (!compressedSize) {
+      throw new Error("no need to compress");
+    }
     output = output.slice(0, compressedSize);
     return output;
   }
@@ -120,7 +123,15 @@ export default class Service {
 
       // transfer json to compressed protobuf buffer
       const pbMessage = LogGroupList;
-      const output = CompressType === "lz4" ? Service.LZ4Compress(pbMessage) : pbMessage;
+      let lz4CompressFailed = false;
+      let output = pbMessage;
+      if (CompressType === "lz4") {
+        try {
+          output = Service.LZ4Compress(pbMessage);
+        } catch (err) {
+          lz4CompressFailed = true;
+        }
+      }
 
       const {
         accessKeyId,
@@ -144,7 +155,7 @@ export default class Service {
           ...config?.headers,
           "x-tls-apiversion": version,
           "content-type": "application/x-protobuf",
-          "x-tls-compresstype": CompressType || "",
+          "x-tls-compresstype": !lz4CompressFailed ? CompressType : "",
           "x-tls-hashkey": HashKey || "",
           "x-tls-bodyrawsize": pbMessage.length,
         },
