@@ -8,6 +8,7 @@ import * as acep from "./services/acep";
 import * as rtcOpenapi from "./services/rtc";
 import * as vodOpenapi from "./services/vod";
 import * as tlsOpenapi from "./services/tls";
+import * as liveOpenapi from "./services/live";
 
 export {
   Service,
@@ -20,4 +21,5 @@ export {
   rtcOpenapi,
   vodOpenapi,
   tlsOpenapi,
+  liveOpenapi,
 };
