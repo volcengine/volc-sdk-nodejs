@@ -1,3 +1,8 @@
+2022-08-04 Bumped to version v1.3.0
+- add live api
+- add RTC readme file
+
+
 2022-06-30 Bumped to version v1.2.3
 - fix tls installation issue
 
