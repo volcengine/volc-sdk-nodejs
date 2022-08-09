@@ -160,6 +160,9 @@ export default class Service {
           "x-tls-bodyrawsize": pbMessage.length,
         },
       };
+      if (!requestObj.headers["x-tls-compresstype"]) {
+        delete requestObj.headers["x-tls-compresstype"];
+      }
       requestObj.body = output;
       requestObj.data = output;
       requestObj.params = {
