@@ -66,7 +66,11 @@ export class Consumer extends Worker {
     this._status = "running";
 
     while (this._status === "running") {
-      console.log(this._maxMessageNumber, this._maxWaitTimeMs, eachMessage);
+      const res = await this._pullMessageRequest();
+      const messages = res.messages || [];
+      if (messages.length === 0) continue;
+
+      messages.forEach(eachMessage);
     }
   }
 
@@ -76,5 +80,24 @@ export class Consumer extends Worker {
 
   private async _pullMessageRequest() {
     const requestId = this._client._createRequestId();
+    try {
+      const res = await this._client._request<v1.ConsumeReq, v1.ConsumeResp>({
+        method: "POST",
+        path: `/v1/group/${this._group}/messages`,
+        data: {
+          requestId,
+          clientToken: this._clientToken as string,
+          maxMessageNumber: this._maxMessageNumber,
+          maxWaitTimeMs: this._maxWaitTimeMs,
+        },
+      });
+      return res.result;
+    } catch (error) {
+      throw new MQError(`Pull message failed, requestId: ${requestId}`);
+    }
+  }
+
+  private async ackMessage(msg: v1.ConsumeMessage) {
+    // TOSO:
   }
 }

@@ -2,6 +2,23 @@
 /* tslint-disable */
 /* eslint-disable */
 
+export  enum RequestType { 
+    
+  Open = "Open", 
+  
+  Close = "Close", 
+  
+  Heartbeat = "Heartbeat", 
+  
+  Send = "Send", 
+  
+  Consume = "Consume", 
+  
+  Ack = "Ack", 
+  
+  ConsumerGroupInfo = "ConsumerGroupInfo" 
+}
+
 export interface OpenReq {
   clientVersion: string;
   properties: Record<string, string>;
@@ -10,10 +27,10 @@ export interface OpenReq {
   clientToken?: string;
   requestId: string;
   type: string;
-  reuseConnection: boolean;
 }
 
 export interface OpenRespResult {
+  /** 前端精度问题，改成了string,原来类型为i64这里预期返回java里的System.currentTimestamp()毫秒级别时间戳 */
   clientToken: string;
   nextHeartbeatDeadline: string;
 }
@@ -40,11 +57,12 @@ export interface CloseReq {
 
 export interface SendMessage {
   topic: string;
-  tags: string[];
-  shardingKey: string;
-  keys: string[];
-  properties: Record<string, string>;
+  tags?: string;
+  shardingKey?: string;
+  keys?: string[];
+  properties?: Record<string, string>;
   body: string;
+  delayTimeLevel?: number;
 }
 
 export interface SendReq {
@@ -55,6 +73,7 @@ export interface SendReq {
 
 export interface MessageMeta {
   topic: string;
+  /** 前端精度问题从i64改成了string这里对应类型是64位整形 */
   queueId: number;
   queueOffset: string;
   /** onlytransactionalmessagehasmsgHandle */
@@ -79,16 +98,21 @@ export interface ConsumeReq {
 }
 
 export interface ConsumeMessage {
+  /** 前端精度问题，这里预期是32位整形 */
   topic: string;
-  queueId: number;
+  /** 前端精度问题，这里预期是64位整形 */
+  queueId: string;
+  /** 前端精度问题，这里预期是64位整形，表示毫秒级别时间戳 */
   queueOffset: string;
   bornTimeStamp: string;
+  /** 前端精度问题，这里预期是64位整形，表示毫秒级别时间戳 */
   bornHost: string;
   storeTimeStamp: string;
   msgId: string;
   reconsumeTimes: number;
+  /** 每条消息实际只有一个tag */
   keys: string[];
-  tags: string[];
+  tags: string;
   properties: Record<string, string>;
   body: string;
   bodyCRC: string;

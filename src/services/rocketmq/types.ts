@@ -1,5 +1,6 @@
 import http from "http";
 import { Method } from "axios";
+import { ConsumeMessage } from "./ protocol/v1";
 
 // -------------client------------
 /** Client config */
@@ -18,7 +19,6 @@ export interface ClientRequestOption<Req> {
 }
 
 // -------------producer------------
-export type ProducerType = "producer" | "t-producer";
 
 export type ProducerStatus =
   | "initialized"
@@ -32,32 +32,22 @@ export type ProducerStatus =
 
 export interface ProducerOptions {
   /**
-   * Producer type, producer or t-producer.
-   * @default "producer"
-   */
-  producerType?: ProducerType;
-  /**
    * Topics available for producer. All topics by default.
    * @default "*"
    */
   topic?: string[] | string;
   /**
-   * Group ID, required when creating a t-producer.
+   * Group ID
    */
   group?: string;
-  /**
-   * Send message sequentially.
-   * @default false
-   */
-  order?: boolean;
 }
 
 export interface PublishMessageOptions {
   topic: string;
-  body: string;
-  tags?: string[];
   shardingKey?: string;
+  tags?: string;
   keys?: string[];
+  body: string;
   properties?: Record<string, string>;
 }
 
@@ -81,7 +71,11 @@ export interface ConsumerOptions {
   /**
    * Topic for consumer.
    */
-  topic?: string | string[];
+  topic: string;
+  /**
+   * @default '*'
+   */
+  tag?: string;
   /**
    * Limit number of messages per poll.
    * @default 10
@@ -95,5 +89,5 @@ export interface ConsumerOptions {
 }
 
 export interface ConsumerRunOptions {
-  eachMessage: () => Promise<boolean>;
+  eachMessage: (message: ConsumeMessage) => Promise<boolean>;
 }
