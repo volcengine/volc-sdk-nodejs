@@ -3,6 +3,7 @@ import { ProducerOptions, ProducerStatus, PublishMessageOptions } from "./types"
 import { MQError } from "./utils/error";
 import * as v1 from "./ protocol/v1";
 import { isString, Resolver } from "./utils/common";
+import { MQAgent } from "./utils/agent";
 import { Worker } from "./Worker";
 
 export interface MessageQueueItem {
@@ -12,6 +13,8 @@ export interface MessageQueueItem {
 
 export class Producer extends Worker {
   private _status: ProducerStatus;
+
+  private _producerAgent = new MQAgent({ maxSockets: 1 });
 
   constructor(client: Client, options: ProducerOptions) {
     if (!client) {
@@ -80,6 +83,7 @@ export class Producer extends Worker {
           clientToken: this._clientToken as string,
           message: { topic, body, tags, shardingKey, keys, properties },
         },
+        httpAgent: this._producerAgent,
       });
       return res.result;
     } catch (error) {

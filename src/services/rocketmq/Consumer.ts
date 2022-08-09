@@ -1,9 +1,10 @@
 import * as v1 from "./ protocol/v1";
 import { Worker } from "./Worker";
 import { Client } from "./Client";
-import { ConsumerOptions, ConsumerStatus, ConsumerRunOptions } from "./types";
+import { ConsumerOptions, ConsumerStatus, ConsumerRunOptions, ACKMessagesOptions } from "./types";
 import { MQError } from "./utils/error";
 import { isString } from "./utils/common";
+import { MQAgent } from "./utils/agent";
 
 export class Consumer extends Worker {
   //config
@@ -13,6 +14,8 @@ export class Consumer extends Worker {
 
   // running
   private _status: ConsumerStatus;
+
+  private _consumerAgent = new MQAgent({ maxSockets: 1 });
 
   constructor(client: Client, options: ConsumerOptions) {
     if (!client) {
@@ -70,7 +73,24 @@ export class Consumer extends Worker {
       const messages = res.messages || [];
       if (messages.length === 0) continue;
 
-      messages.forEach(eachMessage);
+      // consume message
+      const runResult = await Promise.all(
+        messages.map(async (msg) => {
+          try {
+            const msgResult = await eachMessage(msg);
+            return { handle: msg.msgHandle, succeed: msgResult };
+          } catch (error) {
+            // ack filed when  error
+            return { handle: msg.msgHandle, succeed: false };
+          }
+        })
+      );
+
+      // ack message
+      await this._ackMessagesRequest({
+        acks: runResult.filter((item) => item.succeed).map((item) => item.handle),
+        nacks: runResult.filter((item) => !item.succeed).map((item) => item.handle),
+      });
     }
   }
 
@@ -90,6 +110,7 @@ export class Consumer extends Worker {
           maxMessageNumber: this._maxMessageNumber,
           maxWaitTimeMs: this._maxWaitTimeMs,
         },
+        httpAgent: this._consumerAgent,
       });
       return res.result;
     } catch (error) {
@@ -97,7 +118,24 @@ export class Consumer extends Worker {
     }
   }
 
-  private async ackMessage(msg: v1.ConsumeMessage) {
-    // TOSO:
+  private async _ackMessagesRequest(options: ACKMessagesOptions) {
+    const { acks, nacks = [] } = options;
+    const requestId = this._client._createRequestId();
+    try {
+      const res = await this._client._request<v1.AckReq, v1.AckResp>({
+        method: "DELETE",
+        path: `/v1/group/{groupName}/msghandles`,
+        data: {
+          requestId,
+          clientToken: this._clientToken as string,
+          acks,
+          nacks,
+        },
+        httpAgent: this._consumerAgent,
+      });
+      return res.result;
+    } catch (error) {
+      throw new MQError(`ACK message failed, requestId: ${requestId}`);
+    }
   }
 }

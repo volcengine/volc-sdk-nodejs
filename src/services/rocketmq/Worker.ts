@@ -1,6 +1,7 @@
 import { Client } from "./Client";
 import * as v1 from "./ protocol/v1";
 import { MQError } from "./utils/error";
+import { MQAgent } from "./utils/agent";
 
 export type WorkerType = "consumer" | "producer" | "t-producer";
 
@@ -37,6 +38,8 @@ export abstract class Worker {
 
   private _heartBeatTimer: NodeJS.Timeout | null = null;
 
+  private _workerAgent = new MQAgent({ maxSockets: 1 });
+
   constructor(client: Client, options: WorkerOptions) {
     const { type, topic, group } = options;
     this._client = client;
@@ -71,6 +74,7 @@ export abstract class Worker {
           requestId,
           clientToken: this._clientToken,
         },
+        httpAgent: this._workerAgent,
       });
     } catch (error) {
       console.error(new MQError(`Heart beat failed, requestId: ${requestId}`));
@@ -94,6 +98,7 @@ export abstract class Worker {
         },
         clientToken: this._clientToken,
       },
+      httpAgent: this._workerAgent,
     });
     return res;
   }
@@ -107,6 +112,7 @@ export abstract class Worker {
         clientToken: this._clientToken as string,
         properties: properties,
       },
+      httpAgent: this._workerAgent,
     });
     return res;
   }

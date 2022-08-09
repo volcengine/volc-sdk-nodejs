@@ -91,3 +91,8 @@ export interface ConsumerOptions {
 export interface ConsumerRunOptions {
   eachMessage: (message: ConsumeMessage) => Promise<boolean>;
 }
+
+export interface ACKMessagesOptions {
+  acks: string[];
+  nacks?: string[];
+}
