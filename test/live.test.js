@@ -1,10 +1,12 @@
 import { liveOpenapi } from "../lib";
-import { GetCasterUserTokenSchemaValidate } from "./schema/live";
+import { GetCasterPlayerUserTokenSchemaValidate } from "./schema/live";
 
-const liveCasterService = liveOpenapi.LiveCasterService;
-
-test("live:GetCasterUserToken", async () => {
-  const response = await liveCasterService.GetCasterUserToken();
-  const validateResult = GetCasterUserTokenSchemaValidate(response);
+test("live:GetCasterPlayerUserToken", async () => {
+  const liveCasterService = new liveOpenapi.liveCasterService({
+    accessKeyId: "test",
+    secretKey: "test",
+  });
+  const response = liveCasterService.GetCasterPlayerUserToken();
+  const validateResult = GetCasterPlayerUserTokenSchemaValidate(response);
   expect(validateResult).toBe(true);
 });
