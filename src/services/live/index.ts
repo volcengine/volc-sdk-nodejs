@@ -1,6 +1,6 @@
 import Service from "../../base/service";
 import { ServiceOptionsBase } from "../../base/types";
-import { CasterAction } from "./const";
+import { CasterPlayerAction } from "./const";
 
 export class LiveCasterService extends Service {
   constructor(options?: ServiceOptionsBase) {
@@ -12,12 +12,12 @@ export class LiveCasterService extends Service {
     });
   }
 
-  GetCasterUserToken = () => {
+  GetCasterPlayerUserToken = () => {
     const policy = {
       Statement: [
         {
           Effect: "Allow",
-          Action: [...CasterAction],
+          Action: [...CasterPlayerAction],
           Resource: ["*"],
         },
       ],

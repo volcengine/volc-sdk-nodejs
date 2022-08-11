@@ -1,7 +1,7 @@
 import Ajv from "ajv";
 const ajv = new Ajv();
 
-export const GetCasterUserTokenSchemaValidate = ajv.compile({
+export const GetCasterPlayerUserTokenSchemaValidate = ajv.compile({
   type: "object",
   properties: {
     AccessKeyId: {
