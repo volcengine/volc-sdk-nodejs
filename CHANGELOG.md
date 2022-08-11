@@ -1,3 +1,7 @@
+2022-08-10 Bumped to version v1.4.0
+- tls: 修复 lz4 在数据很小时，不压缩的问题
+- live: casterplayer token
+
 2022-08-04 Bumped to version v1.3.0
 - add live api
 - add RTC readme file
