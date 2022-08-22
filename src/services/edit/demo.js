@@ -20,7 +20,7 @@ export async function main(AccessKeyId, SecretKey, SessionToken) {
     Version: "2018-01-01",
     method: 'POST',
     headers: {
-      "content-type": "application-json",
+      "content-type": "application/json",
     },
     data: {
       ReqIds: ['xxxxxx'],
