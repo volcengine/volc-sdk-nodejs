@@ -1,7 +1,6 @@
 import { livesaasOpenapi } from "@volcengine/openapi";
 
 export async function main(AccessKeyId, SecretKey) {
-  debugger
   const livesaasService = new livesaasOpenapi.LivesaasService({
     accessKeyId: AccessKeyId,
     secretKey: SecretKey,

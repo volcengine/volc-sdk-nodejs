@@ -1,13 +1,13 @@
 import Service from "../../base/service";
 import { ServiceOptionsBase } from "../../base/types";
-import { LivesaasUploadAction } from "./const";
+import { LivesaasUploadAction, Domain } from "./const";
 
 export class LivesaasService extends Service {
   constructor(options?: ServiceOptionsBase) {
     super({
-      host: "livesaas.volcengineapi.com",
+      host: Domain[options?.region || "ap-singapore-1"],
       serviceName: "livesaas",
-      defaultVersion: "2018-01-01",
+      defaultVersion: "2019-10-10",
       ...options,
     });
   }
