@@ -1,25 +1,25 @@
-import axios, { AxiosError, Method } from "axios";
-import http from "http";
+import axios, { AxiosError, AxiosRequestConfig } from "axios";
 import { MQError } from "./error";
 
-export interface SendRequestOptions<D = any> {
-  method: Method;
-  url: string;
-  data?: D;
-  headers?: any;
-  httpAgent?: http.Agent;
-}
+export type SendRequestOptions = AxiosRequestConfig;
 
 export async function sendRequest(options: SendRequestOptions) {
-  const { method, url, data, headers = {}, httpAgent } = options;
+  const { data } = options;
+
   try {
-    const result = await axios({ method, url, headers, data, httpAgent });
+    const result = await axios(options);
+
     return result.data;
   } catch (error) {
     const response = (error as AxiosError).response;
-    const message = response?.statusText || "unknown request error";
     const status = response?.status;
-    const data = response?.data;
-    throw new MQError(message, { type: "REQUEST_ERROR", payload: { status, data } });
+    const respData = response?.data;
+
+    const message = respData?.msg || response?.statusText || error.message;
+
+    throw new MQError(message, {
+      type: "REQUEST_ERROR",
+      cause: { status, params: data, response: respData },
+    });
   }
 }

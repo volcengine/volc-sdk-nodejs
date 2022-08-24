@@ -1,81 +1,43 @@
-import http from "http";
-import { Method } from "axios";
 import { ConsumeMessage } from "./ protocol/v1";
+import { MessageProperties } from "./Producer";
 
-// -------------client------------
-/** Client config */
+/** Client  */
 export interface ClientOptions {
   endpoint: string;
-  accessKeyId: string;
-  secretAccessKey: string;
+  instanceId: string;
+  accessKey: string;
+  secretKey: string;
 }
 
-/** Config of client's request method */
-export interface ClientRequestOption<Req> {
-  method: Method;
-  path: string;
-  data?: Req;
-  httpAgent?: http.Agent;
-}
-
-// -------------producer------------
-
-export type ProducerStatus =
+export type BaseStatus =
   | "initialized"
   | "connecting"
   | "connectFailed"
-  | "idle"
-  | "running"
+  | "connected"
   | "closing"
   | "closeFailed"
   | "closed";
 
-export interface ProducerOptions {
-  /**
-   * Topics available for producer. All topics by default.
-   * @default "*"
-   */
-  topic?: string[] | string;
-  /**
-   * Group ID
-   */
-  group?: string;
-}
+/** producer */
+export type ProducerStatus = BaseStatus;
 
 export interface PublishMessageOptions {
   topic: string;
   shardingKey?: string;
-  tags?: string;
+  tag?: string;
   keys?: string[];
   body: string;
-  properties?: Record<string, string>;
+  messageProperties?: MessageProperties;
 }
 
-// -------------consumer------------
-export type ConsumerStatus =
-  | "initialized"
-  | "connecting"
-  | "connectFailed"
-  | "idle"
-  | "running"
-  | "stopped"
-  | "closing"
-  | "closeFailed"
-  | "closed";
+/** Consumer */
+export type ConsumerStatus = BaseStatus | "running" | "stopping";
 
 export interface ConsumerOptions {
   /**
    * Group ID for consumer.
    */
   group: string;
-  /**
-   * Topic for consumer.
-   */
-  topic: string;
-  /**
-   * @default '*'
-   */
-  tag?: string;
   /**
    * Limit number of messages per poll.
    * @default 10
@@ -86,6 +48,16 @@ export interface ConsumerOptions {
    * @default 3000
    */
   maxWaitTimeMs?: number;
+  /**
+   * Polling request interval (MS).
+   * @default 0
+   */
+  pollingInterval?: number;
+}
+
+export interface ConsumerSubscribeOption {
+  topic: string;
+  tag?: string;
 }
 
 export interface ConsumerRunOptions {

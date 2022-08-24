@@ -1,27 +1,29 @@
-export function isString(v: any): v is string {
-  return typeof v === "string";
+import { MQError } from "./error";
+import { LogLevel } from "./logger";
+
+export function requiredCheck<T>(obj: T, keys: Array<keyof T>): string[] {
+  const fields: string[] = [];
+  for (const key of keys) {
+    if (obj[key] === undefined) {
+      fields.push(key as string);
+    }
+  }
+  return fields;
 }
 
-export class Queue<T> {
-  private readonly _queue: Array<T> = [];
+export function isMQError(error: any): error is MQError {
+  return error instanceof MQError;
+}
 
-  constructor() {}
-
-  peek() {
-    return this._queue[0] || null;
+export function getLogLevel() {
+  const level = Number(process.env.MQ_LOG_LEVEL);
+  if (Number.isNaN(level)) {
+    return LogLevel.INFO;
   }
-
-  remove() {
-    return this._queue.shift() || null;
+  if (level < LogLevel.DEBUG || level > LogLevel.ERROR) {
+    return LogLevel.INFO;
   }
-
-  add(element: T) {
-    this._queue.push(element);
-  }
-
-  get count() {
-    return this._queue.length;
-  }
+  return level;
 }
 
 export class Resolver<R = void> {
@@ -37,4 +39,8 @@ export class Resolver<R = void> {
       this.reject = rj;
     });
   }
+}
+
+export function sleep(time: number) {
+  return new Promise((rs) => setTimeout(rs, time));
 }

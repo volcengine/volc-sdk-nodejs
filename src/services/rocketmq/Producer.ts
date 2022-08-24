@@ -1,93 +1,107 @@
 import { Client } from "./Client";
-import { ProducerOptions, ProducerStatus, PublishMessageOptions } from "./types";
+import { ProducerStatus, PublishMessageOptions } from "./types";
 import { MQError } from "./utils/error";
 import * as v1 from "./ protocol/v1";
-import { isString, Resolver } from "./utils/common";
+import { isMQError } from "./utils/common";
 import { MQAgent } from "./utils/agent";
 import { Worker } from "./Worker";
 
-export interface MessageQueueItem {
-  messageOptions: PublishMessageOptions;
-  resolver: Resolver<v1.SendResult>;
+export class MessageProperties {
+  properties: Record<string, string>;
+  constructor() {
+    this.properties = {};
+  }
+
+  delayAfter(second: number) {
+    this.properties["__DELAY_AFTER"] = String(second);
+  }
+
+  delayAt(timeStamp: number) {
+    this.properties["__DELAY_AT"] = String(timeStamp);
+  }
+
+  putProperty(key: string, value: string) {
+    this.properties[key] = value;
+  }
 }
 
 export class Producer extends Worker {
-  private _status: ProducerStatus;
+  protected _status: ProducerStatus;
 
-  private _producerAgent = new MQAgent({ maxSockets: 1 });
+  private _producerAgent: MQAgent;
 
-  constructor(client: Client, options: ProducerOptions) {
-    if (!client) {
-      throw new MQError("Please pass the client instance of producer");
-    }
-    if (!options) {
-      throw new MQError("Please pass the config of producer");
-    }
-    // Allow to send message to all topic by default.
-    const { topic = "*", group } = options;
+  constructor(client: Client) {
+    if (!client) throw new MQError("Please pass the client instance of producer");
 
-    if (!isString(topic) && topic.length === 0) {
-      throw new MQError("Please set at least one topic for producer");
-    }
+    super(client, { type: "producer" });
 
-    super(client, {
-      type: "producer",
-      topic: isString(topic) ? [topic] : topic,
-      group: group || "", // Empty group for normal producer by default
-    });
-
+    this._producerAgent = new MQAgent({ maxSockets: 1 });
     this._status = "initialized";
   }
 
-  async connect() {
-    const requestId = this._client._createRequestId();
-    try {
-      const res = await this._connectRequest(requestId, {});
-      this._clientToken = res.clientToken;
-      this._status = "idle";
-      this._startHeartBeat();
-    } catch (error) {
-      this._status = "connectFailed";
-      throw new MQError(`Producer connect failed, requestId: ${requestId}`);
-    }
+  connect() {
+    return this._connect({ properties: {} });
   }
 
-  async close(): Promise<void> {
-    // Set the status to closing to prevent sending new messages
-    this._status = "closing";
-    this._stopHeartBeat();
-
-    const requestId = this._client._createRequestId();
-    try {
-      await this._closeRequest(requestId, {});
-      this._status = "closed";
-    } catch (error) {
-      this._status = "connectFailed";
-      throw new MQError(`Producer close failed, requestId: ${requestId}`);
-    }
+  async close() {
+    return this._close();
   }
 
   async publishMessage(options: PublishMessageOptions): Promise<v1.SendResult> {
-    return this._publishMessageRequest(options);
+    if (!options) {
+      throw new MQError(`[RocketMQ-node-sdk] please pass the message option`);
+    }
+
+    if (!options.topic) {
+      throw new MQError(`[RocketMQ-node-sdk] topic can not be empty`);
+    }
+
+    if (options.body === undefined) {
+      throw new MQError(`[RocketMQ-node-sdk] body is necessary`);
+    }
+
+    if (this._status !== "connected") {
+      throw new MQError(
+        `[RocketMQ-node-sdk] Can not publish message when producer's status is ${this._status}`
+      );
+    }
+
+    try {
+      const startTime = Date.now();
+      const res = await this._publishMessageRequest(options);
+      this._logger.debug(`Publish message succeed.`, {
+        timeSpent: Date.now() - startTime,
+        payload: options,
+      });
+      return res;
+    } catch (error) {
+      const msg = `Producer publish message failed: ${error.message}`;
+      this._logger.error(msg, { payload: isMQError(error) ? error.cause : undefined });
+
+      throw new MQError(msg);
+    }
   }
 
   private async _publishMessageRequest(options: PublishMessageOptions): Promise<v1.SendResult> {
-    const { topic, body, tags, shardingKey = "", keys, properties = {} } = options;
-    const requestId = this._client._createRequestId();
-    try {
-      const res = await this._client._request<v1.SendReq, v1.SendResp>({
-        method: "POST",
-        path: "/v1/messages",
-        data: {
-          requestId,
-          clientToken: this._clientToken as string,
-          message: { topic, body, tags, shardingKey, keys, properties },
+    const { topic, body, tag, shardingKey = "", keys, messageProperties } = options;
+
+    const res = await this._client._request<v1.SendReq, v1.SendResp>({
+      method: "POST",
+      path: "/v1/messages",
+      data: {
+        clientToken: this._clientToken as string,
+        message: {
+          topic: this._client.getTopicId(topic),
+          body,
+          tag,
+          shardingKey,
+          keys,
+          properties: messageProperties?.properties || {},
         },
-        httpAgent: this._producerAgent,
-      });
-      return res.result;
-    } catch (error) {
-      throw new MQError(`Publish message failed, requestId: ${requestId}`);
-    }
+      },
+      httpAgent: this._producerAgent,
+    });
+
+    return res.result;
   }
 }

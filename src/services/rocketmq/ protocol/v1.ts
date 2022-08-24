@@ -22,11 +22,11 @@ export  enum RequestType {
 export interface OpenReq {
   clientVersion: string;
   properties: Record<string, string>;
-  topics: string[];
-  group: string;
-  clientToken?: string;
   requestId: string;
   type: string;
+  clientToken?: string;
+  group?: string;
+  subscriptions?: Record<string, string>;
 }
 
 export interface OpenRespResult {
@@ -36,7 +36,6 @@ export interface OpenRespResult {
 }
 
 export interface OpenResp {
-  clientToken: string;
   requestId: string;
   code: string;
   msg: string;
@@ -57,12 +56,11 @@ export interface CloseReq {
 
 export interface SendMessage {
   topic: string;
-  tags?: string;
+  tag?: string;
   shardingKey?: string;
   keys?: string[];
   properties?: Record<string, string>;
   body: string;
-  delayTimeLevel?: number;
 }
 
 export interface SendReq {
@@ -74,7 +72,7 @@ export interface SendReq {
 export interface MessageMeta {
   topic: string;
   /** 前端精度问题从i64改成了string这里对应类型是64位整形 */
-  queueId: number;
+  queueId: string;
   queueOffset: string;
   /** onlytransactionalmessagehasmsgHandle */
   msgId: string;
@@ -112,7 +110,7 @@ export interface ConsumeMessage {
   reconsumeTimes: number;
   /** 每条消息实际只有一个tag */
   keys: string[];
-  tags: string;
+  tag: string;
   properties: Record<string, string>;
   body: string;
   bodyCRC: string;

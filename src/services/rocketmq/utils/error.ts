@@ -2,17 +2,19 @@ export type ErrorType = "NORMAL_ERROR" | "REQUEST_ERROR";
 
 export interface MQErrorConfig {
   type?: ErrorType;
-  payload?: any;
+  cause?: any;
 }
 
 export class MQError extends Error {
   type: ErrorType;
-  payload: any;
 
-  constructor(message: string, config?: MQErrorConfig) {
-    super(`[rocketmq-node-sdk] ${message}`);
-    const { type = "NORMAL_ERROR", payload } = config || {};
+  cause: any;
+
+  constructor(e: any, config?: MQErrorConfig) {
+    const { type = "NORMAL_ERROR", cause } = config || {};
+    super(e);
+
     this.type = type;
-    this.payload = payload;
+    this.cause = cause;
   }
 }

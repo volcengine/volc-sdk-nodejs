@@ -10,7 +10,8 @@
     "lint": "eslint . --ext ts --fix --quiet",
     "dev": "tsc --watch",
     "dev:proxy": "VOLC_PROXY_PORT=8888 yarn dev",
-    "test": "yarn build && jest --env=node"
+    "test": "yarn build && jest --env=node",
+    "test-mq": "jest ./test/rocketmq.test.js --env=node "
   },
   "repository": {
     "type": "git",
