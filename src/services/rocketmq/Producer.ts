@@ -43,7 +43,7 @@ export class Producer extends Worker {
     return this._connect({ properties: {} });
   }
 
-  async close() {
+  close() {
     return this._close();
   }
 

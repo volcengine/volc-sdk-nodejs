@@ -125,8 +125,9 @@ export class Consumer extends Worker {
         const startTime = Date.now();
         const res = await this._pullMessageRequest();
         messages = res.messages || [];
-        this._logger.debug(`Pull message succeed, message count: ${messages.length}`, {
+        this._logger.debug(`Pull message succeed.`, {
           timeSpent: Date.now() - startTime,
+          payload: { messageCount: messages.length },
         });
       } catch (error) {
         this._logger.error(`Pull message failed: ${error.message}`, {
@@ -161,9 +162,7 @@ export class Consumer extends Worker {
           acks: runResult.filter((item) => item.succeed).map((item) => item.handle),
           nacks: runResult.filter((item) => !item.succeed).map((item) => item.handle),
         });
-        this._logger.debug(`ACK message succeed`, {
-          timeSpent: Date.now() - startTime,
-        });
+        this._logger.debug(`ACK message succeed`, { timeSpent: Date.now() - startTime });
       } catch (error) {
         this._logger.error(`ACK message failed: ${error.message}`, {
           payload: isMQError(error) ? error.cause : undefined,

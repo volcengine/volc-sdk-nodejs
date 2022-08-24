@@ -37,6 +37,9 @@ export abstract class Worker {
 
   private _workerAgent: MQAgent;
 
+  // Be used to reconnect
+  private _connectOption: ConnectOptions | null = null;
+
   constructor(client: Client, options: WorkerOptions) {
     const { type } = options;
 
@@ -69,6 +72,8 @@ export abstract class Worker {
         `[RocketMQ-node-sdk] Can not connect when ${this._workerType}'s status is ${this._status}`
       );
     }
+
+    this._connectOption = options;
 
     const { subscriptions, group, properties } = options;
 
@@ -107,9 +112,7 @@ export abstract class Worker {
       this._status = "connectFailed";
 
       const msg = `Connect failed: ${error.message}`;
-      this._logger.error(msg, {
-        payload: isMQError(error) ? error.cause : undefined,
-      });
+      this._logger.error(msg, { payload: isMQError(error) ? error.cause : undefined });
 
       throw new MQError(`[RocketMQ-node-sdk] ${msg}`);
     }
@@ -137,18 +140,26 @@ export abstract class Worker {
       this._stopHeartBeat();
       this._status = "closed";
 
-      this._logger.info("Close succeed.", { payload: { clientToken: this._clientToken } });
+      this._logger.info("Close succeed.", {
+        payload: { clientToken: this._clientToken },
+      });
     } catch (error) {
       this._status = "closeFailed";
-
       const msg = `Close failed: ${error.message}`;
+
       this._logger.error(msg, { payload: isMQError(error) ? error.cause : undefined });
 
       throw new MQError(`[RocketMQ-node-sdk] ${msg}`);
     }
   }
 
-  protected _reconnect() {}
+  protected async _reconnect() {
+    this._status = "connectFailed";
+    this._logger.info("Reconnecting.", { payload: { clientToken: this._clientToken } });
+    if (this._connectOption) {
+      await this._connect(this._connectOption);
+    }
+  }
 
   private async _heartBeat() {
     if (!this._clientToken) {
@@ -162,17 +173,15 @@ export abstract class Worker {
         httpAgent: this._workerAgent,
         timeout: (this._sessionTimeout / 2) * 1000,
       });
-      this._logger.debug(`Heart beat succeed`, {
-        payload: { clientToken: this._clientToken },
-      });
+      this._logger.debug(`Heart beat succeed`, { payload: { clientToken: this._clientToken } });
     } catch (error) {
       this._logger.error(`Heart beat failed: ${error.message}`, {
         payload: isMQError(error) ? error.cause : undefined,
       });
-      // TODO: 重链接逻辑
-      /**
-       * if(404) reconnect, define a status named 'reconnecting' ?
-       */
+
+      if (isMQError(error) && error.cause?.status === 404) {
+        this._reconnect();
+      }
     }
   }
 }

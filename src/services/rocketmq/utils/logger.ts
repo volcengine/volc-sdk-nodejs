@@ -1,3 +1,5 @@
+import dayjs from "dayjs";
+
 export type LogType = "ERROR" | "INFO" | "WARN" | "DEBUG";
 
 export enum LogLevel {
@@ -64,7 +66,9 @@ export default class Logger {
     const { logType } = config;
     const { timeSpent, payload } = params;
 
-    const msgList: string[] = [new Date().toLocaleString(), logType, `[${this._namespace}]`];
+    const timeNow = dayjs().format("YYYY-MM-DD HH:mm:ss");
+
+    const msgList: string[] = [timeNow, logType, `[${this._namespace}]`];
 
     if (msg) msgList.push(msg);
     if (timeSpent !== undefined) msgList.push(`${timeSpent}ms`);
@@ -74,6 +78,6 @@ export default class Logger {
   }
 
   private _print(msg) {
-    console.info(msg);
+    console.log(msg); // eslint-disable-line
   }
 }
