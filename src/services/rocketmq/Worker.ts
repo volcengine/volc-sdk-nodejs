@@ -31,8 +31,6 @@ export abstract class Worker {
 
   protected _logger: Logger;
 
-  private _sessionTimeout: number;
-
   private _heartBeatTimer: NodeJS.Timeout | null = null;
 
   private _workerAgent: MQAgent;
@@ -46,7 +44,6 @@ export abstract class Worker {
     this._client = client;
     this._workerType = type;
     this._workerAgent = new MQAgent({ maxSockets: 1 });
-    this._sessionTimeout = this._client.SESSION_TIMEOUT;
     this._logger = new Logger({
       namespace: this._workerType,
       logLevel: getLogLevel(),
@@ -55,7 +52,7 @@ export abstract class Worker {
 
   protected _startHeartBeat() {
     this._stopHeartBeat();
-    const interval = (this._sessionTimeout / 2) * 1000;
+    const interval = this._client.HEART_BEAT_CYCLE;
     this._heartBeatTimer = setInterval(() => this._heartBeat(), interval);
   }
 
@@ -90,7 +87,7 @@ export abstract class Worker {
           group,
           properties: {
             ...properties,
-            session_timeout: String(this._sessionTimeout),
+            session_timeout: String(this._client.SESSION_TIMEOUT),
           },
         },
         httpAgent: this._workerAgent,
@@ -171,7 +168,6 @@ export abstract class Worker {
         path: "/v1/heartbeats",
         data: { clientToken: this._clientToken },
         httpAgent: this._workerAgent,
-        timeout: (this._sessionTimeout / 2) * 1000,
       });
       this._logger.debug(`Heart beat succeed`, { payload: { clientToken: this._clientToken } });
     } catch (error) {

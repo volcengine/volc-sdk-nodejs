@@ -102,7 +102,7 @@ export class Consumer extends Worker {
 
     const { eachMessage } = options;
 
-    if (!options.eachMessage) {
+    if (!eachMessage) {
       throw new MQError("[RocketMQ-node-sdk] eachMessage is necessary");
     }
 
