@@ -142,7 +142,7 @@ export class Consumer extends Worker {
         });
       } catch (error) {
         if (isNeedReconnectError(error)) {
-          this._logger.error(`Lost connection when consuming message: ${error.message}`);
+          this._logger.debug(`Lost connection when consuming message: ${error.message}`);
           this._reconnect(); // 开始重新连接
           await this._waitReconnectIfNecessary(); // 等待重连成功后才进入下一次轮询
           continue;

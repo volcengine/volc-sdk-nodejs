@@ -173,7 +173,7 @@ export abstract class Worker {
       await this._heartBeatRequest();
       this._logger.debug("Heart beat succeed.", { payload: { clientToken: this._clientToken } });
     } catch (error) {
-      this._logger.warn(`Heart beat failed: ${error.message}`, {
+      this._logger.error(`Heart beat failed: ${error.message}`, {
         payload: isMQError(error) ? error.cause : undefined,
       });
     }
