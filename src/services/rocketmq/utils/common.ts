@@ -31,8 +31,12 @@ export class Resolver<R = void> {
 }
 
 export function isNeedReconnectError(err: any): boolean {
-  if (isMQError(err)) {
-    return err.cause?.response?.code === ErrorCode.ClientNotFound;
+  if (isMQError(err) && err.type === "REQUEST_ERROR") {
+    const cause = err.cause;
+    // 两种情况需要重连
+    // 1. 没有状态码， 说明有网络问题
+    // 2. 有状态码，但是code是ClientNotFound 说明token已经失效
+    return !cause?.status || cause?.response?.code === ErrorCode.ClientNotFound;
   } else {
     return false;
   }

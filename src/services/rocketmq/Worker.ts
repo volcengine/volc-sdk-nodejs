@@ -4,7 +4,7 @@ import { MQAgent } from "./utils/agent";
 import Logger from "./utils/logger";
 import { MQError, isMQError } from "./utils/error";
 import { WorkerStatus } from "./types";
-import { Resolver } from "./utils/common";
+import { Resolver, sleep } from "./utils/common";
 
 export type WorkerType = "consumer" | "producer";
 
@@ -136,22 +136,29 @@ export abstract class Worker {
     this._reconnectResolver = new Resolver();
 
     // 开始不断尝试重连
-    try {
-      this._logger.info("Reconnecting.", { payload: { prevClientToken: this._clientToken } });
+    // 仅仅在 connected状态才不断尝试重连，防止关闭后循环依然在执行
+    while (this._workerStatus === "connected") {
+      try {
+        this._logger.info("Reconnecting.", { payload: { prevClientToken: this._clientToken } });
 
-      const res = await this._connectRequest(this._connectOption as ConnectOptions);
-      this._clientToken = res.result.clientToken;
+        const res = await this._connectRequest(this._connectOption as ConnectOptions);
+        this._clientToken = res.result.clientToken;
 
-      this._logger.info("Reconnect succeed.", { payload: { clientToken: this._clientToken } });
+        this._logger.info("Reconnect succeed.", { payload: { clientToken: this._clientToken } });
 
-      // 重连后要解决
-      this._reconnectResolver?.resolve();
-      this._reconnectResolver = null;
-    } catch (error) {
-      this._logger.error(`Reconnect Failed: ${error.message}`, {
-        payload: isMQError(error) ? error.cause : undefined,
-      });
+        break;
+      } catch (error) {
+        this._logger.error(`Reconnect Failed: ${error.message}`, {
+          payload: isMQError(error) ? error.cause : undefined,
+        });
+      }
+
+      await sleep(10000); // 10秒重试一次
     }
+
+    // 重连后要解决
+    this._reconnectResolver?.resolve();
+    this._reconnectResolver = null;
   }
 
   protected _waitReconnectIfNecessary() {

@@ -77,8 +77,10 @@ export class Producer extends Worker {
       return res;
     } catch (error) {
       if (isNeedReconnectError(error)) {
+        this._logger.error(`Lost connection when publishing message: ${error.message}`);
         this._reconnect();
-        return this.publishMessage(options); // 开启重连后，将当前消息重发，并返回给调用方
+        // 开启重连后，将当前消息重发，并返回给调用方
+        return this.publishMessage(options);
       }
       const msg = `Producer publish message failed: ${error.message}`;
       this._logger.error(msg, {
