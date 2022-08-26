@@ -1,5 +1,5 @@
 import { Client } from "./Client";
-import { ProducerStatus, PublishMessageOptions } from "./types";
+import { PublishMessageOptions } from "./types";
 import { MQError } from "./utils/error";
 import * as v1 from "./ protocol/v1";
 import { isMQError } from "./utils/common";
@@ -26,8 +26,6 @@ export class MessageProperties {
 }
 
 export class Producer extends Worker {
-  protected _status: ProducerStatus;
-
   private _producerAgent: MQAgent;
 
   constructor(client: Client) {
@@ -36,7 +34,6 @@ export class Producer extends Worker {
     super(client, { type: "producer" });
 
     this._producerAgent = new MQAgent({ maxSockets: 1 });
-    this._status = "initialized";
   }
 
   connect() {
@@ -56,13 +53,13 @@ export class Producer extends Worker {
       throw new MQError(`[RocketMQ-node-sdk] topic can not be empty`);
     }
 
-    if (options.body === undefined) {
-      throw new MQError(`[RocketMQ-node-sdk] body is necessary`);
+    if (!options.body) {
+      throw new MQError(`[RocketMQ-node-sdk] body can not be empty`);
     }
 
-    if (this._status !== "connected") {
+    if (this._workerStatus !== "connected") {
       throw new MQError(
-        `[RocketMQ-node-sdk] Can not publish message when producer's status is ${this._status}`
+        `[RocketMQ-node-sdk] Can not publish message when producer's status is ${this._workerStatus}`
       );
     }
 

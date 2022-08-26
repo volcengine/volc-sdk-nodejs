@@ -4,11 +4,9 @@ import { MQAgent } from "./utils/agent";
 import { getLogLevel, isMQError } from "./utils/common";
 import Logger from "./utils/logger";
 import { MQError } from "./utils/error";
-import { ProducerStatus, ConsumerStatus } from "./types";
+import { WorkerStatus } from "./types";
 
 export type WorkerType = "consumer" | "producer";
-
-export type WorkerStatus = ProducerStatus | ConsumerStatus;
 
 export interface WorkerOptions {
   type: WorkerType;
@@ -23,7 +21,7 @@ const closeableStatus: WorkerStatus[] = ["connected", "closeFailed"];
 export abstract class Worker {
   protected _workerType: WorkerType;
 
-  protected _status: WorkerStatus;
+  protected _workerStatus: WorkerStatus;
 
   protected _client: Client;
 
@@ -34,8 +32,9 @@ export abstract class Worker {
   private _heartBeatTimer: NodeJS.Timeout | null = null;
 
   private _workerAgent: MQAgent;
-
-  // Be used to reconnect
+  /**
+   * 保存链接时的选项，用于重连
+   */
   private _connectOption: ConnectOptions | null = null;
 
   constructor(client: Client, options: WorkerOptions) {
@@ -44,10 +43,13 @@ export abstract class Worker {
     this._client = client;
     this._workerType = type;
     this._workerAgent = new MQAgent({ maxSockets: 1 });
+
     this._logger = new Logger({
       namespace: this._workerType,
       logLevel: getLogLevel(),
     });
+
+    this._workerStatus = "initialized";
   }
 
   protected _startHeartBeat() {
@@ -64,49 +66,29 @@ export abstract class Worker {
   }
 
   protected async _connect(options: ConnectOptions) {
-    if (!connectableStatus.includes(this._status)) {
+    if (!connectableStatus.includes(this._workerStatus)) {
       throw new MQError(
-        `[RocketMQ-node-sdk] Can not connect when ${this._workerType}'s status is ${this._status}`
+        `[RocketMQ-node-sdk] Can not connect when ${this._workerType}'s status is ${this._workerStatus}`
       );
     }
 
+    // 保存option 以便重连时使用
     this._connectOption = options;
 
-    const { subscriptions, group, properties } = options;
-
     try {
-      this._status = "connecting";
-      const res = await this._client._request<v1.OpenReq, v1.OpenResp>({
-        method: "POST",
-        path: "/v1/clients",
-        data: {
-          type: this._workerType,
-          clientVersion: this._client.VERSION,
-          clientToken: this._clientToken, // It may be a reconnection request.
-          subscriptions,
-          group,
-          properties: {
-            ...properties,
-            session_timeout: String(this._client.SESSION_TIMEOUT),
-          },
-        },
-        httpAgent: this._workerAgent,
-      });
+      this._workerStatus = "connecting";
+
+      const res = await this._connectRequest(options);
 
       this._clientToken = res.result.clientToken;
       this._startHeartBeat();
-      this._status = "connected";
+      this._workerStatus = "connected";
 
       this._logger.info("Connect succeed.", {
-        payload: {
-          clientToken: this._clientToken,
-          subscriptions,
-          group,
-          properties,
-        },
+        payload: { clientToken: this._clientToken, ...options },
       });
     } catch (error) {
-      this._status = "connectFailed";
+      this._workerStatus = "connectFailed";
 
       const msg = `Connect failed: ${error.message}`;
       this._logger.error(msg, { payload: isMQError(error) ? error.cause : undefined });
@@ -116,32 +98,27 @@ export abstract class Worker {
   }
 
   protected async _close() {
-    if (!closeableStatus.includes(this._status)) {
+    if (!closeableStatus.includes(this._workerStatus)) {
       throw new MQError(
-        `[RocketMQ-node-sdk] Can not close when ${this._workerType}'s status is ${this._status}`
+        `[RocketMQ-node-sdk] Can not close when ${this._workerType}'s status is ${this._workerStatus}`
       );
     }
+
     try {
-      this._status = "closing";
-      await this._client._request<v1.CloseReq, void>({
-        method: "delete",
-        path: `/v1/clients/${this._clientToken}`,
-        data: {
-          clientToken: this._clientToken as string,
-          properties: {},
-        },
-        httpAgent: this._workerAgent,
-      });
+      this._workerStatus = "closing";
+
+      await this._closeRequest();
 
       this._clientToken = undefined;
+      this._connectOption = null;
       this._stopHeartBeat();
-      this._status = "closed";
+      this._workerStatus = "closed";
 
       this._logger.info("Close succeed.", {
         payload: { clientToken: this._clientToken },
       });
     } catch (error) {
-      this._status = "closeFailed";
+      this._workerStatus = "closeFailed";
       const msg = `Close failed: ${error.message}`;
 
       this._logger.error(msg, { payload: isMQError(error) ? error.cause : undefined });
@@ -151,33 +128,82 @@ export abstract class Worker {
   }
 
   protected async _reconnect() {
-    this._status = "connectFailed";
-    this._logger.info("Reconnecting.", { payload: { clientToken: this._clientToken } });
-    if (this._connectOption) {
-      await this._connect(this._connectOption);
+    try {
+      this._logger.info("Reconnecting.", { payload: { prevClientToken: this._clientToken } });
+
+      const res = await this._connectRequest(this._connectOption as ConnectOptions);
+      this._clientToken = res.result.clientToken;
+
+      this._logger.info("Reconnection succeed.", { payload: { clientToken: this._clientToken } });
+    } catch (error) {
+      this._logger.error(`Reconnection Failed: ${error.message}`, {
+        payload: isMQError(error) ? error.cause : undefined,
+      });
     }
   }
 
   private async _heartBeat() {
-    if (!this._clientToken) {
-      return;
-    }
     try {
-      await this._client._request<v1.HeartbeatReq, void>({
-        method: "POST",
-        path: "/v1/heartbeats",
-        data: { clientToken: this._clientToken },
-        httpAgent: this._workerAgent,
-      });
-      this._logger.debug(`Heart beat succeed`, { payload: { clientToken: this._clientToken } });
+      await this._heartBeatRequest();
+      this._logger.debug("Heart beat succeed.", { payload: { clientToken: this._clientToken } });
     } catch (error) {
       this._logger.error(`Heart beat failed: ${error.message}`, {
         payload: isMQError(error) ? error.cause : undefined,
       });
+      // 仅仅在发生404时才调用重连。
+      // 其他错误（如超时）可以忽略，链接有可能被下一次心跳找回来
+      const shouldReconnect = isMQError(error) && error.cause?.status === 404;
 
-      if (isMQError(error) && error.cause?.status === 404) {
+      if (shouldReconnect) {
         this._reconnect();
+      } else {
+        this._logger.error("Waiting for the next heart beat.");
       }
     }
+  }
+
+  private _connectRequest(options: ConnectOptions) {
+    const { subscriptions, group, properties } = options;
+
+    return this._client._request<v1.OpenReq, v1.OpenResp>({
+      method: "POST",
+      path: "/v1/clients",
+      data: {
+        type: this._workerType,
+        clientVersion: this._client.VERSION,
+        clientToken: this._clientToken, // It is may be a reconnection request.
+        subscriptions,
+        group,
+        properties: {
+          ...properties,
+          session_timeout: String(this._client.SESSION_TIMEOUT),
+        },
+      },
+      httpAgent: this._workerAgent,
+    });
+  }
+
+  private _closeRequest() {
+    return this._client._request<v1.CloseReq, void>({
+      method: "delete",
+      path: `/v1/clients/${this._clientToken}`,
+      data: {
+        clientToken: this._clientToken as string,
+        properties: {},
+      },
+      httpAgent: this._workerAgent,
+    });
+  }
+
+  private _heartBeatRequest() {
+    if (!this._clientToken) {
+      return;
+    }
+    return this._client._request<v1.HeartbeatReq, void>({
+      method: "POST",
+      path: "/v1/heartbeats",
+      data: { clientToken: this._clientToken },
+      httpAgent: this._workerAgent,
+    });
   }
 }

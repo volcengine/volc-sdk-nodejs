@@ -9,7 +9,7 @@ export interface ClientOptions {
   secretKey: string;
 }
 
-export type BaseStatus =
+export type WorkerStatus =
   | "initialized"
   | "connecting"
   | "connectFailed"
@@ -19,8 +19,6 @@ export type BaseStatus =
   | "closed";
 
 /** producer */
-export type ProducerStatus = BaseStatus;
-
 export interface PublishMessageOptions {
   topic: string;
   shardingKey?: string;
@@ -29,9 +27,6 @@ export interface PublishMessageOptions {
   body: string;
   messageProperties?: MessageProperties;
 }
-
-/** Consumer */
-export type ConsumerStatus = BaseStatus | "running" | "stopping";
 
 export interface ConsumerOptions {
   /**

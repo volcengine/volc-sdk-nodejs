@@ -8,11 +8,11 @@ import { MQError } from "./utils/error";
 import { requiredCheck } from "./utils/common";
 
 const SDK_VERSION = "0.0.1";
-// second
+// client 对应session超时时间
 const SESSION_TIMEOUT = 60;
 
-// ms
-const HEART_BEAT_CYCLE = 10000;
+// 心跳触发周期
+const HEART_BEAT_CYCLE = 15000;
 
 const SERVICE_NAME = "rocketmq";
 

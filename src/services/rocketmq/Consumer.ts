@@ -2,7 +2,6 @@ import * as v1 from "./ protocol/v1";
 import { Worker } from "./Worker";
 import { Client } from "./Client";
 import {
-  ConsumerStatus,
   ConsumerOptions,
   ConsumerRunOptions,
   ACKMessagesOptions,
@@ -13,21 +12,34 @@ import { MQError } from "./utils/error";
 import { MQAgent } from "./utils/agent";
 
 export class Consumer extends Worker {
+  /**
+   * 消费组
+   */
   private _group: string;
-
+  /**
+   * 订阅的Topic和tag
+   */
   private _subscriptions: Record<string, string>;
-
+  /**
+   * 单次拉取消息最大数量
+   */
   private _maxMessageNumber: number;
-
+  /**
+   * 单次拉取消息最大等待时长
+   */
   private _maxWaitTimeMs: number;
-
+  /**
+   * 轮询间隔
+   */
   private _pollingInterval: number;
 
   private _consumerAgent: MQAgent;
 
-  protected _status: ConsumerStatus;
-
   private _consumeResolver: Resolver | null;
+  /**
+   * 是否正在轮询
+   */
+  private _running: boolean;
 
   constructor(client: Client, options: ConsumerOptions) {
     if (!client) throw new MQError("Please pass the client instance of consumer");
@@ -50,7 +62,7 @@ export class Consumer extends Worker {
     this._maxWaitTimeMs = maxWaitTimeMs;
     this._pollingInterval = pollingInterval;
     this._consumerAgent = new MQAgent({ maxSockets: 1 });
-    this._status = "initialized";
+    this._running = false;
   }
 
   get groupId() {
@@ -106,19 +118,21 @@ export class Consumer extends Worker {
       throw new MQError("[RocketMQ-node-sdk] eachMessage is necessary");
     }
 
-    if (this._status !== "connected") {
+    if (this._workerStatus !== "connected") {
       throw new MQError(
-        `[RocketMQ-node-sdk] Can not run consumer when consumer's status is ${this._status}`
+        `[RocketMQ-node-sdk] Can not run consumer when consumer's status is ${this._workerStatus}`
       );
     }
 
-    this._status = "running";
+    this._running = true;
 
-    while (this._status === "running") {
-      // When start a consumption processes, consume resolver must be created
+    while (this._running) {
+      // 开始轮询前创建一个resolver
       this._consumeResolver = new Resolver();
 
-      await sleep(this._pollingInterval);
+      if (this._pollingInterval) {
+        await sleep(this._pollingInterval);
+      }
 
       let messages: v1.ConsumeMessage[] = [];
       try {
@@ -135,52 +149,46 @@ export class Consumer extends Worker {
         });
       }
 
-      if (messages.length === 0) {
-        // No message pulled down, resolve and continue
-        this._consumeResolver.resolve();
-        this._consumeResolver = null;
-        continue;
+      if (messages.length > 0) {
+        // consume message
+        const runResult = await Promise.all(
+          messages.map(async (msg) => {
+            try {
+              const msgResult = await eachMessage(msg);
+              return { handle: msg.msgHandle, succeed: msgResult };
+            } catch (error) {
+              // ack filed when  error
+              return { handle: msg.msgHandle, succeed: false };
+            }
+          })
+        );
+
+        // ack message
+        try {
+          const startTime = Date.now();
+          await this._ackMessagesRequest({
+            acks: runResult.filter((item) => item.succeed).map((item) => item.handle),
+            nacks: runResult.filter((item) => !item.succeed).map((item) => item.handle),
+          });
+          this._logger.debug(`ACK message succeed`, { timeSpent: Date.now() - startTime });
+        } catch (error) {
+          this._logger.error(`ACK message failed: ${error.message}`, {
+            payload: isMQError(error) ? error.cause : undefined,
+          });
+        }
       }
 
-      // consume message
-      const runResult = await Promise.all(
-        messages.map(async (msg) => {
-          try {
-            const msgResult = await eachMessage(msg);
-            return { handle: msg.msgHandle, succeed: msgResult };
-          } catch (error) {
-            // ack filed when  error
-            return { handle: msg.msgHandle, succeed: false };
-          }
-        })
-      );
-
-      // ack message
-      try {
-        const startTime = Date.now();
-        await this._ackMessagesRequest({
-          acks: runResult.filter((item) => item.succeed).map((item) => item.handle),
-          nacks: runResult.filter((item) => !item.succeed).map((item) => item.handle),
-        });
-        this._logger.debug(`ACK message succeed`, { timeSpent: Date.now() - startTime });
-      } catch (error) {
-        this._logger.error(`ACK message failed: ${error.message}`, {
-          payload: isMQError(error) ? error.cause : undefined,
-        });
-      }
-
-      // After all consumption processes are completed, resolved
+      // 当次轮询结束后要解决resolver
       this._consumeResolver.resolve();
       this._consumeResolver = null;
     }
   }
 
   async stop() {
-    this._status = "stopping";
+    this._running = false;
     if (this._consumeResolver) {
       await this._consumeResolver.promise;
     }
-    this._status = "connected";
   }
 
   private async _pullMessageRequest() {
