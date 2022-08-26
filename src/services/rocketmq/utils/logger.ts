@@ -11,7 +11,6 @@ export enum LogLevel {
 
 export interface LoggerConfig {
   namespace: string;
-  logLevel?: LogLevel;
 }
 
 export interface LogParams {
@@ -28,10 +27,10 @@ export default class Logger {
   private _logLevel: LogLevel;
 
   constructor(config: LoggerConfig) {
-    const { namespace, logLevel } = config;
+    const { namespace } = config;
 
     this._namespace = namespace;
-    this._logLevel = logLevel ?? LogLevel.INFO;
+    this._logLevel = this.getLogLevel();
   }
 
   error(msg: string, params: LogParams = {}) {
@@ -79,5 +78,16 @@ export default class Logger {
 
   private _print(msg) {
     console.log(msg); // eslint-disable-line
+  }
+
+  private getLogLevel() {
+    const level = Number(process.env.MQ_LOG_LEVEL);
+    if (Number.isNaN(level)) {
+      return LogLevel.INFO;
+    }
+    if (level < LogLevel.DEBUG || level > LogLevel.ERROR) {
+      return LogLevel.INFO;
+    }
+    return level;
   }
 }

@@ -1,9 +1,8 @@
 import { Client } from "./Client";
 import * as v1 from "./ protocol/v1";
 import { MQAgent } from "./utils/agent";
-import { getLogLevel, isMQError } from "./utils/common";
 import Logger from "./utils/logger";
-import { MQError } from "./utils/error";
+import { MQError, isMQError } from "./utils/error";
 import { WorkerStatus } from "./types";
 
 export type WorkerType = "consumer" | "producer";
@@ -44,17 +43,14 @@ export abstract class Worker {
     this._workerType = type;
     this._workerAgent = new MQAgent({ maxSockets: 1 });
 
-    this._logger = new Logger({
-      namespace: this._workerType,
-      logLevel: getLogLevel(),
-    });
+    this._logger = new Logger({ namespace: this._workerType });
 
     this._workerStatus = "initialized";
   }
 
   protected _startHeartBeat() {
     this._stopHeartBeat();
-    const interval = this._client.HEART_BEAT_CYCLE;
+    const interval = (this._client.SESSION_TIMEOUT * 1000) / 2;
     this._heartBeatTimer = setInterval(() => this._heartBeat(), interval);
   }
 
@@ -147,18 +143,9 @@ export abstract class Worker {
       await this._heartBeatRequest();
       this._logger.debug("Heart beat succeed.", { payload: { clientToken: this._clientToken } });
     } catch (error) {
-      this._logger.error(`Heart beat failed: ${error.message}`, {
+      this._logger.warn(`Heart beat failed: ${error.message}`, {
         payload: isMQError(error) ? error.cause : undefined,
       });
-      // 仅仅在发生404时才调用重连。
-      // 其他错误（如超时）可以忽略，链接有可能被下一次心跳找回来
-      const shouldReconnect = isMQError(error) && error.cause?.status === 404;
-
-      if (shouldReconnect) {
-        this._reconnect();
-      } else {
-        this._logger.error("Waiting for the next heart beat.");
-      }
     }
   }
 

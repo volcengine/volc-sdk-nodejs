@@ -7,8 +7,8 @@ import {
   ACKMessagesOptions,
   ConsumerSubscribeOption,
 } from "./types";
-import { requiredCheck, isMQError, Resolver, sleep } from "./utils/common";
-import { MQError } from "./utils/error";
+import { requiredCheck, Resolver, sleep } from "./utils/common";
+import { MQError, isMQError } from "./utils/error";
 import { MQAgent } from "./utils/agent";
 
 export class Consumer extends Worker {

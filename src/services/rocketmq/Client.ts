@@ -11,9 +11,6 @@ const SDK_VERSION = "0.0.1";
 // client 对应session超时时间
 const SESSION_TIMEOUT = 60;
 
-// 心跳触发周期
-const HEART_BEAT_CYCLE = 15000;
-
 const SERVICE_NAME = "rocketmq";
 
 interface ClientRequestOption<Req> extends Omit<SendRequestOptions, "url" | "data"> {
@@ -58,10 +55,6 @@ export class Client {
 
   get SESSION_TIMEOUT() {
     return SESSION_TIMEOUT;
-  }
-
-  get HEART_BEAT_CYCLE() {
-    return HEART_BEAT_CYCLE;
   }
 
   createProducer() {

@@ -1,5 +1,6 @@
-import { MQError } from "./error";
-import { LogLevel } from "./logger";
+export function sleep(time: number) {
+  return new Promise((rs) => setTimeout(rs, time));
+}
 
 export function requiredCheck<T>(obj: T, keys: Array<keyof T>): string[] {
   const fields: string[] = [];
@@ -9,21 +10,6 @@ export function requiredCheck<T>(obj: T, keys: Array<keyof T>): string[] {
     }
   }
   return fields;
-}
-
-export function isMQError(error: any): error is MQError {
-  return error instanceof MQError;
-}
-
-export function getLogLevel() {
-  const level = Number(process.env.MQ_LOG_LEVEL);
-  if (Number.isNaN(level)) {
-    return LogLevel.INFO;
-  }
-  if (level < LogLevel.DEBUG || level > LogLevel.ERROR) {
-    return LogLevel.INFO;
-  }
-  return level;
 }
 
 export class Resolver<R = void> {
@@ -39,8 +25,4 @@ export class Resolver<R = void> {
       this.reject = rj;
     });
   }
-}
-
-export function sleep(time: number) {
-  return new Promise((rs) => setTimeout(rs, time));
 }

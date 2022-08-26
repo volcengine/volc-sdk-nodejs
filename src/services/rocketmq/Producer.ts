@@ -1,8 +1,7 @@
 import { Client } from "./Client";
 import { PublishMessageOptions } from "./types";
-import { MQError } from "./utils/error";
+import { MQError, isMQError } from "./utils/error";
 import * as v1 from "./ protocol/v1";
-import { isMQError } from "./utils/common";
 import { MQAgent } from "./utils/agent";
 import { Worker } from "./Worker";
 

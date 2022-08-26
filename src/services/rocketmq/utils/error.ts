@@ -18,3 +18,7 @@ export class MQError extends Error {
     this.cause = cause;
   }
 }
+
+export function isMQError(error: any): error is MQError {
+  return error instanceof MQError;
+}
