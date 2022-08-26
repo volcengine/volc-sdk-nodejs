@@ -1,6 +1,6 @@
 import { Client } from "./Client";
 import { PublishMessageOptions } from "./types";
-import { MQError, isMQError } from "./utils/error";
+import { MQError, isMQError, isNeedReconnectError } from "./utils/error";
 import * as v1 from "./ protocol/v1";
 import { MQAgent } from "./utils/agent";
 import { Worker } from "./Worker";
@@ -63,18 +63,28 @@ export class Producer extends Worker {
     }
 
     try {
+      // 如果正在重连，这里会等待重连成功后promise resolve
+      await this._waitReconnectIfNecessary();
+
       const startTime = Date.now();
       const res = await this._publishMessageRequest(options);
+
       this._logger.debug(`Publish message succeed.`, {
         timeSpent: Date.now() - startTime,
         payload: options,
       });
       return res;
     } catch (error) {
+      if (isNeedReconnectError(error)) {
+        this._reconnect();
+        return this.publishMessage(options); // 开启重连后，将当前消息重发，并返回给调用方
+      }
       const msg = `Producer publish message failed: ${error.message}`;
-      this._logger.error(msg, { payload: isMQError(error) ? error.cause : undefined });
+      this._logger.error(msg, {
+        payload: isMQError(error) ? error.cause : undefined,
+      });
 
-      throw new MQError(msg);
+      throw new MQError(`[RocketMQ-node-sdk] ${msg}`);
     }
   }
 

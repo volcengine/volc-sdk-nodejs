@@ -7,8 +7,8 @@ import {
   ACKMessagesOptions,
   ConsumerSubscribeOption,
 } from "./types";
-import { requiredCheck, Resolver, sleep } from "./utils/common";
-import { MQError, isMQError } from "./utils/error";
+import { requiredCheck, sleep } from "./utils/common";
+import { isMQError, MQError, isNeedReconnectError } from "./utils/error";
 import { MQAgent } from "./utils/agent";
 
 export class Consumer extends Worker {
@@ -35,7 +35,6 @@ export class Consumer extends Worker {
 
   private _consumerAgent: MQAgent;
 
-  private _consumeResolver: Resolver | null;
   /**
    * 是否正在轮询
    */
@@ -112,9 +111,7 @@ export class Consumer extends Worker {
       throw new MQError("[RocketMQ-node-sdk] please pass the runner option");
     }
 
-    const { eachMessage } = options;
-
-    if (!eachMessage) {
+    if (!options.eachMessage) {
       throw new MQError("[RocketMQ-node-sdk] eachMessage is necessary");
     }
 
@@ -124,71 +121,69 @@ export class Consumer extends Worker {
       );
     }
 
+    if (this._running) {
+      throw new MQError("[RocketMQ-node-sdk] Consumer is already running");
+    }
+
     this._running = true;
 
     while (this._running) {
-      // 开始轮询前创建一个resolver
-      this._consumeResolver = new Resolver();
-
       if (this._pollingInterval) {
         await sleep(this._pollingInterval);
       }
 
-      let messages: v1.ConsumeMessage[] = [];
       try {
         const startTime = Date.now();
-        const res = await this._pullMessageRequest();
-        messages = res.messages || [];
-        this._logger.debug(`Pull message succeed.`, {
+        const messages = await this._consume(options);
+        this._logger.debug("Consume messages succeed.", {
           timeSpent: Date.now() - startTime,
-          payload: { messageCount: messages.length },
+          payload: { messagesCount: messages?.length },
         });
       } catch (error) {
-        this._logger.error(`Pull message failed: ${error.message}`, {
+        if (isNeedReconnectError(error)) {
+          this._reconnect(); // 开始重新连接
+          await this._waitReconnectIfNecessary(); // 等待重连成功后才进入下一次轮询
+          continue;
+        }
+        this._logger.error(`Consume messages failed: ${error.message}`, {
           payload: isMQError(error) ? error.cause : undefined,
         });
       }
-
-      if (messages.length > 0) {
-        // consume message
-        const runResult = await Promise.all(
-          messages.map(async (msg) => {
-            try {
-              const msgResult = await eachMessage(msg);
-              return { handle: msg.msgHandle, succeed: msgResult };
-            } catch (error) {
-              // ack filed when  error
-              return { handle: msg.msgHandle, succeed: false };
-            }
-          })
-        );
-
-        // ack message
-        try {
-          const startTime = Date.now();
-          await this._ackMessagesRequest({
-            acks: runResult.filter((item) => item.succeed).map((item) => item.handle),
-            nacks: runResult.filter((item) => !item.succeed).map((item) => item.handle),
-          });
-          this._logger.debug(`ACK message succeed`, { timeSpent: Date.now() - startTime });
-        } catch (error) {
-          this._logger.error(`ACK message failed: ${error.message}`, {
-            payload: isMQError(error) ? error.cause : undefined,
-          });
-        }
-      }
-
-      // 当次轮询结束后要解决resolver
-      this._consumeResolver.resolve();
-      this._consumeResolver = null;
     }
   }
 
   async stop() {
     this._running = false;
-    if (this._consumeResolver) {
-      await this._consumeResolver.promise;
+  }
+
+  private async _consume(options: ConsumerRunOptions) {
+    const { eachMessage } = options;
+
+    const res = await this._pullMessageRequest();
+    const messages = res.messages || [];
+
+    if (messages.length > 0) {
+      // consume message
+      const runResult = await Promise.all(
+        messages.map(async (msg) => {
+          try {
+            const msgResult = await eachMessage(msg);
+            return { handle: msg.msgHandle, succeed: msgResult };
+          } catch (error) {
+            // ack filed when  error
+            return { handle: msg.msgHandle, succeed: false };
+          }
+        })
+      );
+
+      // ack message
+      await this._ackMessagesRequest({
+        acks: runResult.filter((item) => item.succeed).map((item) => item.handle),
+        nacks: runResult.filter((item) => !item.succeed).map((item) => item.handle),
+      });
     }
+
+    return messages;
   }
 
   private async _pullMessageRequest() {

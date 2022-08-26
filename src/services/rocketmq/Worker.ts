@@ -4,6 +4,7 @@ import { MQAgent } from "./utils/agent";
 import Logger from "./utils/logger";
 import { MQError, isMQError } from "./utils/error";
 import { WorkerStatus } from "./types";
+import { Resolver } from "./utils/common";
 
 export type WorkerType = "consumer" | "producer";
 
@@ -35,6 +36,11 @@ export abstract class Worker {
    * 保存链接时的选项，用于重连
    */
   private _connectOption: ConnectOptions | null = null;
+
+  /**
+   * 重连成功或者失败时的resolver
+   */
+  private _reconnectResolver: Resolver | null;
 
   constructor(client: Client, options: WorkerOptions) {
     const { type } = options;
@@ -124,18 +130,35 @@ export abstract class Worker {
   }
 
   protected async _reconnect() {
+    // 如果有_reconnectResolver，说明正在重连，不需要执行后续重连逻辑
+    if (this._reconnectResolver) return;
+
+    this._reconnectResolver = new Resolver();
+
+    // 开始不断尝试重连
     try {
       this._logger.info("Reconnecting.", { payload: { prevClientToken: this._clientToken } });
 
       const res = await this._connectRequest(this._connectOption as ConnectOptions);
       this._clientToken = res.result.clientToken;
 
-      this._logger.info("Reconnection succeed.", { payload: { clientToken: this._clientToken } });
+      this._logger.info("Reconnect succeed.", { payload: { clientToken: this._clientToken } });
+
+      // 重连后要解决
+      this._reconnectResolver?.resolve();
+      this._reconnectResolver = null;
     } catch (error) {
-      this._logger.error(`Reconnection Failed: ${error.message}`, {
+      this._logger.error(`Reconnect Failed: ${error.message}`, {
         payload: isMQError(error) ? error.cause : undefined,
       });
     }
+  }
+
+  protected _waitReconnectIfNecessary() {
+    if (this._reconnectResolver) {
+      return this._reconnectResolver.promise;
+    }
+    return Promise.resolve();
   }
 
   private async _heartBeat() {
