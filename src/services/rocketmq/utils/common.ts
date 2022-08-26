@@ -1,3 +1,6 @@
+import { isMQError } from "./error";
+import { ErrorCode } from "../ protocol/errors";
+
 export function sleep(time: number) {
   return new Promise((rs) => setTimeout(rs, time));
 }
@@ -24,5 +27,13 @@ export class Resolver<R = void> {
       this.resolve = rs;
       this.reject = rj;
     });
+  }
+}
+
+export function isNeedReconnectError(err: any): boolean {
+  if (isMQError(err)) {
+    return err.cause?.response?.code === ErrorCode.ClientNotFound;
+  } else {
+    return false;
   }
 }

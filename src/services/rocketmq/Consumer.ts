@@ -8,7 +8,8 @@ import {
   ConsumerSubscribeOption,
 } from "./types";
 import { requiredCheck, sleep } from "./utils/common";
-import { isMQError, MQError, isNeedReconnectError } from "./utils/error";
+import { isMQError, MQError } from "./utils/error";
+import { isNeedReconnectError } from "./utils/common";
 import { MQAgent } from "./utils/agent";
 
 export class Consumer extends Worker {
