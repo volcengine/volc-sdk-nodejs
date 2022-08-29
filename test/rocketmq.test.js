@@ -1,20 +1,24 @@
 const { Client } = require("../lib/services/rocketmq");
 
-const config = {
-  instanceId: "MQ_INST_72f5hg5hjj57_6m91x",
-  endpoint: "http://10.249.54.252:8089",
-  accessKey: "yvdsdPFBfQJuVWqepQQKwpVF",
-  secretKey: "dd6WoMboq6PuS1zCjXUm0UDi",
-};
+const instanceId = process.env.MQ_INSTANCE_ID;
+const endpoint = process.env.MQ_ENDPOINT;
+const accessKey = process.env.MQ_ACCESS_KEY;
+const secretKey = process.env.MQ_SECRET_KEY;
 
-const TOPIC = "FE_sdk_test";
-const GROUP = "GID_FE_sdk_test";
+const topic = process.env.MQ_TOPIC;
+const group = process.env.MQ_GROUP;
 
-const client = new Client(config);
+const client = new Client({
+  instanceId,
+  endpoint,
+  accessKey,
+  secretKey,
+});
 
-describe("RocketMq producer test", () => {
-  test("注册全部Topic，发送消息到存在的Topic", async () => {
+describe("RocketMQ producer test", () => {
+  test("连接并关闭", async () => {
     const producer = client.createProducer();
     await producer.connect();
+    await producer.close();
   });
 });
