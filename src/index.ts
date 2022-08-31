@@ -9,6 +9,7 @@ import * as rtcOpenapi from "./services/rtc";
 import * as vodOpenapi from "./services/vod";
 import * as tlsOpenapi from "./services/tls";
 import * as liveOpenapi from "./services/live";
+import * as billing from "./services/billing";
 
 export {
   Service,
@@ -22,4 +23,5 @@ export {
   vodOpenapi,
   tlsOpenapi,
   liveOpenapi,
+  billing,
 };
