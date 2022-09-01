@@ -2,7 +2,7 @@ export const LivesaasUploadAction = [
   "Livesaas:GetUploadTokenSDK",
   "Livesaas:UploadActivityMediaSDK",
   "Livesaas:CheckSpaceActivityMediaSDK",
-  "Livesaas:SyncCoverImageToMediaSDK",
+  "Livesaas:UpdateMediaCoverImageSDK",
 ];
 
 export const Domain = {
