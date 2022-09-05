@@ -2,7 +2,7 @@ import { Client } from "./Client";
 import { PublishMessageOptions } from "./types";
 import { MQError, isMQError } from "./utils/error";
 import { isNeedReconnectError } from "./utils/common";
-import * as v1 from "./ protocol/v1";
+import * as v1 from "./protocol/v1";
 import { MQAgent } from "./utils/agent";
 import { Worker } from "./Worker";
 

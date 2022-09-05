@@ -1,4 +1,4 @@
-import { ConsumeMessage } from "./ protocol/v1";
+import { ConsumeMessage } from "./protocol/v1";
 import { MessageProperties } from "./Producer";
 
 /** Client  */

@@ -1,4 +1,4 @@
-import * as v1 from "./ protocol/v1";
+import * as v1 from "./protocol/v1";
 import { Worker } from "./Worker";
 import { Client } from "./Client";
 import {

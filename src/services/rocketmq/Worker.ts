@@ -1,5 +1,5 @@
 import { Client } from "./Client";
-import * as v1 from "./ protocol/v1";
+import * as v1 from "./protocol/v1";
 import { MQAgent } from "./utils/agent";
 import Logger from "./utils/logger";
 import { MQError, isMQError } from "./utils/error";

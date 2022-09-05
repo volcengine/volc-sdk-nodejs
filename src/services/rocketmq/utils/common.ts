@@ -1,5 +1,5 @@
 import { isMQError } from "./error";
-import { ErrorCode } from "../ protocol/errors";
+import { ErrorCode } from "../protocol/errors";
 
 export function sleep(time: number) {
   return new Promise((rs) => setTimeout(rs, time));
