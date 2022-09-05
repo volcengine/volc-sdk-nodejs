@@ -10,6 +10,7 @@ import * as vodOpenapi from "./services/vod";
 import * as tlsOpenapi from "./services/tls";
 import * as liveOpenapi from "./services/live";
 import * as livesaasOpenapi from "./services/livesaas";
+import * as rocketmq from "./services/rocketmq";
 
 export {
   Service,
@@ -24,4 +25,5 @@ export {
   tlsOpenapi,
   liveOpenapi,
   livesaasOpenapi,
+  rocketmq,
 };
