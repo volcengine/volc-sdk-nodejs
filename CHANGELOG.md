@@ -1,3 +1,7 @@
+2022-08-25 Bumped to version v1.4.1
+- edit: fix content type
+- add: livesaas 
+
 2022-08-10 Bumped to version v1.4.0
 - tls: 修复 lz4 在数据很小时，不压缩的问题
 - live: casterplayer token
