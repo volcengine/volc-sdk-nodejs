@@ -10,7 +10,8 @@
     "lint": "eslint . --ext ts --fix --quiet",
     "dev": "tsc --watch",
     "dev:proxy": "VOLC_PROXY_PORT=8888 yarn dev",
-    "test": "yarn build && jest --env=node"
+    "test": "yarn build && jest --env=node",
+    "test-mq": "jest ./test/rocketmq.test.js --env=node "
   },
   "repository": {
     "type": "git",
@@ -47,6 +48,7 @@
     "axios": "^0.21.1",
     "crc": "^4.1.0",
     "crypto-js": "^4.0.0",
+    "dayjs": "^1.11.5",
     "debug": "^4.3.1",
     "form-data": "^3.0.0",
     "lodash.get": "^4.4.2",
