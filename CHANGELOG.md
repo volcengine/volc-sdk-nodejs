@@ -1,3 +1,7 @@
+2022-09-08 Bumped to version v1.5.0
+- service: add billing service
+- signer: add getSignUrl method 
+
 2022-08-25 Bumped to version v1.4.1
 - edit: fix content type
 - add: livesaas 
