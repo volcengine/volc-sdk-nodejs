@@ -1,8 +1,11 @@
 import hmacSHA256 from "crypto-js/hmac-sha256";
 import SHA256 from "crypto-js/sha256";
 import CryptoJS from "crypto-js/core";
-import { RequestObj, SignerOptions, Credentials } from "./types";
+import { Credentials, RequestObj, SignerOptions } from "./types";
 import FormData from "form-data";
+import utils from "util";
+
+const debugLog = utils.debuglog("signer");
 
 const util = {
   crypto: {
@@ -24,14 +27,22 @@ const unsignableHeaders = [
   "presigned-expires",
   "expect",
 ];
+
 const constant = {
   algorithm: "HMAC-SHA256",
   v4Identifier: "request",
   dateHeader: "X-Date",
-  tokenHeader: "x-security-token",
+  tokenHeader: "X-Security-Token",
   contentSha256Header: "X-Content-Sha256",
+  notSignBody: "X-NotSignBody",
   kDatePrefix: "",
+  credential: "X-Credential",
+  algorithmKey: "X-Algorithm",
+  signHeadersKey: "X-SignedHeaders",
+  signQueriesKey: "X-SignedQueries",
+  signatureKey: "X-Signature",
 };
+
 const uriEscape = (str) => {
   try {
     return encodeURIComponent(str)
@@ -63,14 +74,12 @@ export const queryParamsToString = (params) =>
     })
     .filter((v) => v)
     .join("&");
-/**
- * @api private
- */
+
 export default class Signer {
   request: RequestObj;
   serviceName: string;
-  signatureCache: boolean;
   bodySha256?: string;
+
   constructor(request: RequestObj, serviceName: string, options?: SignerOptions) {
     this.request = request;
     this.request.headers = request.headers || {};
@@ -84,6 +93,10 @@ export default class Signer {
     const newParams = {};
     if (params) {
       Object.keys(params)
+        .filter((key) => {
+          const value = params[key];
+          return typeof value !== "undefined" && value !== null;
+        })
         .sort()
         .map((key) => {
           newParams[key] = params[key];
@@ -93,9 +106,49 @@ export default class Signer {
   }
 
   addAuthorization(credentials: Credentials, date?: Date): void {
-    const datetime = this.iso8601(date).replace(/[:\-]|\.\d{3}/g, "");
+    const datetime = this.getDateTime(date);
     this.addHeaders(credentials, datetime);
     this.request.headers["Authorization"] = this.authorization(credentials, datetime);
+  }
+
+  authorization(credentials: Credentials, datetime: string) {
+    const parts: string[] = [];
+    const credString = this.credentialString(datetime);
+    parts.push(`${constant.algorithm} Credential=${credentials.accessKeyId}/${credString}`);
+    parts.push(`SignedHeaders=${this.signedHeaders()}`);
+    // parts.push(`SignedQueries=${this.signedQueries()}`);
+    parts.push(`Signature=${this.signature(credentials, datetime)}`);
+    return parts.join(", ");
+  }
+
+  getSignUrl(credentials: Credentials, date?: Date): string {
+    const datetime = this.getDateTime(date);
+    let query = { ...this.request.params };
+    const params = this.request.params;
+    const headers = this.request.headers;
+    if (credentials.sessionToken) {
+      query[constant.tokenHeader] = credentials.sessionToken;
+    }
+    query[constant.dateHeader] = datetime;
+    query[constant.notSignBody] = "";
+    query[constant.credential] = `${credentials.accessKeyId}/${this.credentialString(datetime)}`;
+    query[constant.algorithmKey] = constant.algorithm;
+    query[constant.signHeadersKey] = "";
+    query[constant.signQueriesKey] = undefined;
+    query[constant.signatureKey] = undefined;
+    query = this.sortParams(query);
+    this.request.params = query;
+    this.request.headers = {};
+    const sig = this.signature(credentials, datetime);
+    this.request.params = params;
+    this.request.headers = headers;
+    query[constant.signQueriesKey] = Object.keys(query).sort().join(";");
+    query[constant.signatureKey] = sig;
+    return queryParamsToString(query);
+  }
+
+  getDateTime(date?: Date): string {
+    return this.iso8601(date).replace(/[:\-]|\.\d{3}/g, "");
   }
 
   addHeaders(credentials: Credentials, datetime: string) {
@@ -119,16 +172,6 @@ export default class Signer {
     }
   }
 
-  authorization(credentials: Credentials, datetime: string) {
-    const parts: string[] = [];
-    const credString = this.credentialString(datetime);
-    parts.push(`${constant.algorithm} Credential=${credentials.accessKeyId}/${credString}`);
-    parts.push(`SignedHeaders=${this.signedHeaders()}`);
-    // parts.push(`SignedQueries=${this.signedQueries()}`);
-    parts.push(`Signature=${this.signature(credentials, datetime)}`);
-    return parts.join(", ");
-  }
-
   signature(credentials: Credentials, datetime: string) {
     const signingKey = this.getSigningKey(
       credentials,
@@ -145,7 +188,9 @@ export default class Signer {
     parts.push(datetime);
     parts.push(this.credentialString(datetime));
     parts.push(this.hexEncodedHash(this.canonicalString()).toString());
-    return parts.join("\n");
+    const result = parts.join("\n");
+    debugLog("--------SignString:\n%s", result);
+    return result;
   }
 
   canonicalString(): string {
@@ -159,7 +204,9 @@ export default class Signer {
     parts.push(`${this.canonicalHeaders()}\n`);
     parts.push(this.signedHeaders());
     parts.push(this.hexEncodedBodyHash());
-    return parts.join("\n");
+    const result = parts.join("\n");
+    debugLog("--------CanonicalString:\n%s", result);
+    return result;
   }
 
   canonicalHeaders() {
@@ -240,9 +287,7 @@ export default class Signer {
     const kRegion = util.crypto.hmac(kDate, region);
     const kService = util.crypto.hmac(kRegion, service);
 
-    const signingKey = util.crypto.hmac(kService, constant.v4Identifier);
-
-    return signingKey;
+    return util.crypto.hmac(kService, constant.v4Identifier);
   }
 
   createScope(date: string, region: string, serviceName: string) {
