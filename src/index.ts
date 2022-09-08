@@ -11,6 +11,7 @@ import * as tlsOpenapi from "./services/tls";
 import * as liveOpenapi from "./services/live";
 import * as livesaasOpenapi from "./services/livesaas";
 import * as rocketmq from "./services/rocketmq";
+import * as billing from "./services/billing";
 
 export {
   Service,
@@ -26,4 +27,5 @@ export {
   liveOpenapi,
   livesaasOpenapi,
   rocketmq,
+  billing,
 };
