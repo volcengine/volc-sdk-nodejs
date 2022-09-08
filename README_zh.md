@@ -66,6 +66,7 @@ async main(AccessKeyId, SecretKey) {
 
 ## OpenAPI 签名方法
 
+### Header 方式
 ```ts
 import {Signer} from '@volcengine/openapi';
 
@@ -88,4 +89,33 @@ signer.addAuthorization({accessKeyId, secretKey, sessionToken});
 
 // 打印签名后的 headers
 console.log(openApiRequestData.headers);
+```
+
+### Query 方式
+
+```ts
+import {Signer} from '@volcengine/openapi';
+
+// 请求数据
+const openApiRequestData: RequestObj = {
+    method: "POST",
+    region: "cn-north-1",
+    params: {
+        Action: "AssumeRole",
+        Version: "2018-01-01",
+        RoleTrn: "trn:iam::200:role/STSRole",
+        RoleSessionName: "test",
+    },
+}
+
+const credentials: Credentials = {
+    accessKeyId: VOLC_ACCESSKEY,
+    secretKey: VOLC_SECRETKEY,
+    sessionToken: "",
+}
+
+const signer = new Signer(openApiRequestData, "sts");
+
+// 最终经过加签的 HTTP Query Params
+const signedQueryString = signer.getSignUrl(credentials);
 ```

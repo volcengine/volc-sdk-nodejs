@@ -63,6 +63,8 @@ async function main(AccessKeyId, SecretKey) {
 
 ## OpenAPI signature method
 
+### By HTTP Header
+
 ```ts
 import {Signer} from '@volcengine/openapi';
 
@@ -85,4 +87,29 @@ signer.addAuthorization({accessKeyId, secretKey, sessionToken});
 
 // Print signed headers
 console.log(openApiRequestData.headers);
+```
+
+### By HTTP Query 
+
+```ts
+const openApiRequestData: RequestObj = {
+    method: "POST",
+    region: "cn-north-1",
+    params: {
+        Action: "AssumeRole",
+        Version: "2018-01-01",
+        RoleTrn: "trn:iam::200:role/STSRole",
+        RoleSessionName: "test",
+    },
+}
+
+const credentials: Credentials = {
+    accessKeyId: VOLC_ACCESSKEY,
+    secretKey: VOLC_SECRETKEY,
+    sessionToken: "",
+}
+
+const signer = new Signer(openApiRequestData, "sts");
+
+const signedQueryString = signer.getSignUrl(credentials);
 ```
