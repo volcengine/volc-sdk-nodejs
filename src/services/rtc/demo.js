@@ -13,24 +13,44 @@ async function main(AccessKeyId, SecretKey, SessionToken) {
   }
 
   // 获取房间信息
-  await rtcOpenapiService.ListRooms({
-    AppId: "your app id",
+  await rtcOpenapiService.StartRecord({
+    "AppId" : "Your_AppId",
+    "BusinessId" : "Your_BusinessId",
+    "RoomId" : "Your_RoomId",
+    "TaskId": "Your_TaskId",
+    "RecordMode": 0,
+    "FileFormatConfig": {
+        "FileFormat": ["HLS", "FLV"]
+    },
+    "FileNameConfig": {
+        "Prefix": ["directory1", "directory2"],
+        "Pattern": ""
+    },
+    "StorageConfig": {
+        "Type": 0,
+        "TosConfig": {
+            "UserAccountId": "Your_UserAccountId",
+            "Region": "Your_Region",
+            "Bucket": "Your_Bucket"
+        }
+    }
   });
 
   // 获取质量数据
-  await rtcOpenapiService.ListIndicators({
-    AppId: "your app id",
-    StartTime: "your startTime",
-    EndTime: "your endTime",
-    Indicator: "your indicator",
+  await rtcOpenapiService.StopRecord({
+    "AppId" : "Your_AppId",
+    "RoomId" : "Your_RoomId",
+    "TaskId": "Your_TaskId"
   });
 
   // 自定义OpenAPI请求
   await rtcOpenapiService.fetchOpenAPI({
-    Action: "ListRooms",
-    Version: "2020-12-01",
+    Action: "GetRecordTask",
+    Version: "2022-06-01",
     query: {
-      AppId: "your app id",
+      AppId: "Your_AppId",
+      RoomId: "Your_RoomId",
+      TaskId: "Your_TaskId"
     },
   });
 }
