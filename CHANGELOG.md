@@ -1,3 +1,6 @@
+2022-09-23 Bumped to version v1.5.2
+- remove bad npm mirror url
+
 2022-09-08 Bumped to version v1.5.0
 - service: add billing service
 - signer: add getSignUrl method 
