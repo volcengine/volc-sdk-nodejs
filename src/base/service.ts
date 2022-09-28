@@ -113,11 +113,11 @@ export default class Service {
    * @param createParams.method http method like GET POST PUT
    * @param createParams.contentType body content type. support: json urlencode form-data. default is urlencode.
    */
-  createAPI<RequstData, Result>(Action: string, createParams?: CreateAPIParams) {
+  createAPI<RequestData, Result>(Action: string, createParams?: CreateAPIParams) {
     const { Version, method = "GET", contentType = "urlencode", queryKeys = [] } =
       createParams || {};
     return (
-      requestData: RequstData,
+      requestData: RequestData,
       params?: FetchParams & AxiosRequestConfig,
       options?: ServiceOptionsBase
     ) => {
