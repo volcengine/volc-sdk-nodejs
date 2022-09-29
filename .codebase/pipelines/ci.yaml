@@ -1,0 +1,10 @@
+name: Node
+trigger: change
+jobs:
+  # jobs 会并行执行
+  SourceCodeCheck:
+    image: hub.byted.org/codebase/ci_nodejs_16
+    steps:
+      - name: check_bnpm_repo
+        commands:
+          - if [ $(cat yarn.lock | grep bnpm | wc -l) -gt 0 ]; then echo "found bnpm repo url"; exit 1; fi
