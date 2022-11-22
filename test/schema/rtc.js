@@ -91,3 +91,66 @@ export const ListIndicatorsReponseSchemaValidate = ajv.compile(
     required: ["Indicators"],
   })
 );
+
+export const StartRecordParamsSchemaValidate = ajv.compile(
+  createResponseSchema({
+    type: "string",
+  })
+);
+export const StopRecordParamsSchemaValidate = ajv.compile(
+  createResponseSchema({
+    type: "string",
+  })
+);
+
+export const GetRecordTaskParamsSchemaValidate = ajv.compile(
+  createResponseSchema({
+    type: "object",
+    properties: {
+      StartTime: {
+        type: "number",
+      },
+      EndTime: {
+        type: "number",
+      },
+      Status: {
+        type: "number",
+      },
+      StopReason: {
+        type: "string",
+      },
+      RecordFileList: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            Vid: {
+              type: "string",
+            },
+            Duration: {
+              type: "number",
+            },
+            Size: {
+              type: "number",
+            },
+            StreamList: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  UserId: {
+                    type: "string",
+                  },
+                  StreamType: {
+                    type: "number",
+                  },
+                }
+              }
+            },
+          },
+        },
+      },
+    },
+    required: ["StartTime", "EndTime", "Status", "StopReason", "RecordFileList"],
+  })
+);
