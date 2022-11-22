@@ -1,7 +1,6 @@
 name: Node
 trigger: change
 jobs:
-  # jobs 会并行执行
   SourceCodeCheck:
     image: hub.byted.org/codebase/ci_nodejs_16
     steps:
