@@ -189,7 +189,7 @@ export abstract class Worker {
         type: this._workerType,
         clientVersion: this._client.VERSION,
         clientToken: this._clientToken, // It is may be a reconnection request.
-        subscriptions,
+        subscriptions, // only  for consumer
         group,
         properties: {
           ...properties,
@@ -202,7 +202,7 @@ export abstract class Worker {
 
   private _closeRequest() {
     return this._client._request<v1.CloseReq, void>({
-      method: "delete",
+      method: "DELETE",
       path: `/v1/clients/${this._clientToken}`,
       data: {
         clientToken: this._clientToken as string,
