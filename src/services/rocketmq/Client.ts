@@ -5,9 +5,9 @@ import { ClientOptions, ConsumerOptions } from "./types";
 import { Consumer } from "./Consumer";
 import { Producer } from "./Producer";
 import { MQError } from "./utils/error";
-import { requiredCheck } from "./utils/common";
+import { instanceNeedNamespace, requiredCheck } from "./utils/common";
 
-const SDK_VERSION = "0.0.1";
+const SDK_VERSION = "0.0.2";
 // client 对应session超时时间
 const SESSION_TIMEOUT = 60;
 
@@ -82,11 +82,17 @@ export class Client {
   }
 
   getTopicId(topic: string) {
-    return `${this._instanceId}%${topic}`;
+    if (instanceNeedNamespace(this._instanceId)) {
+      return `${this._instanceId}%${topic}`;
+    }
+    return topic;
   }
 
   getGroupId(group: string) {
-    return `${this._instanceId}%${group}`;
+    if (instanceNeedNamespace(this._instanceId)) {
+      return `${this._instanceId}%${group}`;
+    }
+    return group;
   }
 
   private _createRequestId() {

@@ -41,3 +41,7 @@ export function isNeedReconnectError(err: any): boolean {
     return false;
   }
 }
+
+export function instanceNeedNamespace(instanceId: string): boolean {
+  return /^MQ_INST/.test(instanceId);
+}
