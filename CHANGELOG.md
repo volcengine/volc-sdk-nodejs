@@ -1,3 +1,6 @@
+2022-11-24 Bumped to version v1.6.0
+- rtc: upgrade openapi version
+
 2022-09-23 Bumped to version v1.5.2
 - remove bad npm mirror url
 
