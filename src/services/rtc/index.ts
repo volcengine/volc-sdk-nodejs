@@ -6,7 +6,7 @@ import {
   StopRecordParams,
   StopRecordResult,
   GetRecordTaskParams,
-  GetRecordTaskResult
+  GetRecordTaskResult,
 } from "./types";
 
 export class RtcService extends Service {
@@ -34,7 +34,7 @@ export class RtcService extends Service {
     method: "GET",
     contentType: "json",
     Version: "2022-06-01",
-    queryKeys: ["AppId","RoomId","TaskId"],
+    queryKeys: ["AppId", "RoomId", "TaskId"],
   });
 }
 

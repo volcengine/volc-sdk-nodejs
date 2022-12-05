@@ -51,15 +51,15 @@ export interface ListIndicatorsResult {
   Indicators: IIndicator[];
 }
 
-type Stream = {Index?: number; UserId: string; StreamType?: number}
+type Stream = { Index?: number; UserId: string; StreamType?: number };
 
 type Streams = {
-  StreamList: Stream[]
-}
+  StreamList: Stream[];
+};
 
 type Encode = {
   VideoWidth?: number;
-  VideoFps? : number;
+  VideoFps?: number;
   VideoBitrate?: number;
   VideoCodec?: number;
   VideoGop?: number;
@@ -68,13 +68,13 @@ type Encode = {
   AudioBitrate?: number;
   AudioSampleRate?: number;
   AudioChannels?: number;
-}
+};
 
-type Canvas= {
+type Canvas = {
   Width: number;
   Height: number;
   Background: string;
-}
+};
 
 type Region = {
   StreamIndex: number;
@@ -90,13 +90,13 @@ type Region = {
     LocationY: number;
     WidthProportion: number;
     HeightProportion: number;
-  }
+  };
   AlternateImage: string;
-}
+};
 type CustomLayout = {
   Canvas: Canvas;
   Regions: Region[];
-}
+};
 export interface StartRecordParams {
   AppId: string;
   BusinessId?: string;
@@ -109,28 +109,28 @@ export interface StartRecordParams {
   Layout: {
     LayoutMode?: number;
     MainVideoStream?: Stream;
-    CustomLayout: CustomLayout
-  }
+    CustomLayout: CustomLayout;
+  };
   FileFormatConfig: {
     FileFormat: string[];
-  }
+  };
   FileNameConfig: {
     Prefix: string[];
     Pattern: string;
-  }
+  };
   StorageConfig: {
     Type: number;
     TosConfig: {
       UserAccountId: string;
       Region: string;
       Bucket: string;
-    }
-  }
+    };
+  };
 }
 
 export type StartRecordResult = string;
 
-export interface StopRecordParams{
+export interface StopRecordParams {
   AppId: string;
   BusinessId?: string;
   RoomId: string;
@@ -139,7 +139,7 @@ export interface StopRecordParams{
 
 export type StopRecordResult = string;
 
-export interface GetRecordTaskParams{
+export interface GetRecordTaskParams {
   Action: string;
   Version: string;
   AppId: string;
@@ -147,23 +147,23 @@ export interface GetRecordTaskParams{
   TaskId: string;
 }
 
-export interface GetRecordTaskResult{
+export interface GetRecordTaskResult {
   RecordTask: {
     StartTime: number;
     EndTime: number;
     Status: number;
     StopReason: string;
-    RecordFileList:{
+    RecordFileList: {
       Vid: string;
       Duration: number;
       Size: number;
       StartTime: number;
       StreamList: [
-          {
-              UserId: string;
-              StreamType: number;
-          }
-      ]
-    }[]
-  }
+        {
+          UserId: string;
+          StreamType: number;
+        }
+      ];
+    }[];
+  };
 }
