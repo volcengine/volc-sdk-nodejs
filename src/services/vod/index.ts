@@ -13,6 +13,14 @@ import { MinChunkSize, LargeFileSize, VALID_TYPE_LIST } from "./constants";
 const fsStat = fsPromises ? fsPromises.stat : promisify(fs.stat);
 const fsOpen = promisify(fs.open);
 const fsRead = promisify(fs.read);
+const fsClose = promisify(fs.close);
+
+// 考虑到filename可能包含中文 因此url encode下 否则分片上传会失败
+function getEncodedUri(originUri: string): string {
+  if (!originUri) return "";
+  const arr = originUri.split("/");
+  return arr.map((v) => encodeURIComponent(v)).join("/");
+}
 
 export class VodService extends Service {
   constructor(options?: ServiceOptions) {
@@ -26,7 +34,7 @@ export class VodService extends Service {
 
   private uploadToB = async (params: types.UploadParams): Promise<{ sessionKey: string }> => {
     /* 校验文件是否合法 */
-    const { SpaceName, FilePath, FileType } = params;
+    const { SpaceName, FilePath, FileType, FileName, FileExtension } = params;
     const fileStat = await fsStat(FilePath);
     const fileSize = fileStat.size;
     if (!fileStat.isFile()) {
@@ -37,7 +45,12 @@ export class VodService extends Service {
     }
 
     /* 获取文件上传凭证及地址 */
-    const applyReq = { SpaceName, FileType: FileType || "media" };
+    const applyReq: types.VodApplyUploadInfoRequest = {
+      SpaceName,
+      FileType: FileType || "media",
+      FileName,
+      FileExtension,
+    };
     const applyRes = await this.ApplyUploadInfo(applyReq);
     if (applyRes.ResponseMetadata.Error) {
       throw new Error(JSON.stringify(applyRes));
@@ -70,18 +83,23 @@ export class VodService extends Service {
     auth: string,
     size: number
   ) => {
-    const bufferInit = Buffer.alloc(size);
-    const fd = await fsOpen(filePath, "r");
-    const { buffer } = await fsRead(fd, bufferInit, 0, size, 0);
-    await axios(`http://${host}/${oid}`, {
-      method: "put",
-      headers: {
-        "Content-CRC32": crc32(buffer).toString(16).padStart(8, "0"),
-        Authorization: auth,
-      },
-      data: buffer,
-      maxBodyLength: MinChunkSize * 2,
-    });
+    let fd = 0;
+    try {
+      const bufferInit = Buffer.alloc(size);
+      fd = await fsOpen(filePath, "r");
+      const { buffer } = await fsRead(fd, bufferInit, 0, size, 0);
+      await axios(`http://${host}/${getEncodedUri(oid)}`, {
+        method: "put",
+        headers: {
+          "Content-CRC32": crc32(buffer).toString(16).padStart(8, "0"),
+          Authorization: auth,
+        },
+        data: buffer,
+        maxBodyLength: MinChunkSize * 2,
+      });
+    } finally {
+      await fsClose(fd);
+    }
   };
 
   // 大文件分片上传
@@ -93,37 +111,42 @@ export class VodService extends Service {
     size: number,
     isLargeFile: boolean
   ) => {
-    const uploadId = await this.initUploadPart(host, oid, auth, isLargeFile); // 获取上传id
-    const n = Math.floor(size / MinChunkSize); // 向下取整
-    const lastSize = size % MinChunkSize;
-    let lastNum = n - 1;
-    const parts: string[] = []; // 存储校验和列表
-    for (let i = 0; i < lastNum; i++) {
-      const bufferInit = Buffer.alloc(MinChunkSize);
-      const fd = await fsOpen(filePath, "r");
-      const { buffer } = await fsRead(fd, bufferInit, 0, MinChunkSize, i * MinChunkSize);
-      let partNum = i;
-      if (isLargeFile) {
-        partNum = i + 1;
+    let fd = 0;
+    try {
+      const uploadId = await this.initUploadPart(host, oid, auth, isLargeFile); // 获取上传id
+      const n = Math.floor(size / MinChunkSize); // 向下取整
+      const lastSize = size % MinChunkSize;
+      let lastNum = n - 1;
+      const parts: string[] = []; // 存储校验和列表
+      fd = await fsOpen(filePath, "r");
+      for (let i = 0; i < lastNum; i++) {
+        const bufferInit = Buffer.alloc(MinChunkSize);
+        const { buffer } = await fsRead(fd, bufferInit, 0, MinChunkSize, i * MinChunkSize);
+        let partNum = i;
+        if (isLargeFile) {
+          partNum = i + 1;
+        }
+        const part = await this.uploadPart(host, oid, auth, uploadId, partNum, buffer, isLargeFile);
+        parts.push(part);
       }
-      const part = await this.uploadPart(host, oid, auth, uploadId, partNum, buffer, isLargeFile);
+
+      const bufferInit = Buffer.alloc(MinChunkSize + lastSize);
+      const { buffer } = await fsRead(
+        fd,
+        bufferInit,
+        0,
+        MinChunkSize + lastSize,
+        lastNum * MinChunkSize
+      );
+      if (isLargeFile) {
+        lastNum = lastNum + 1;
+      }
+      const part = await this.uploadPart(host, oid, auth, uploadId, lastNum, buffer, isLargeFile);
       parts.push(part);
+      await this.uploadMergePart(host, oid, auth, uploadId, parts, isLargeFile);
+    } finally {
+      await fsClose(fd);
     }
-    const bufferInit = Buffer.alloc(MinChunkSize + lastSize);
-    const fd = await fsOpen(filePath, "r");
-    const { buffer } = await fsRead(
-      fd,
-      bufferInit,
-      0,
-      MinChunkSize + lastSize,
-      lastNum * MinChunkSize
-    );
-    if (isLargeFile) {
-      lastNum = lastNum + 1;
-    }
-    const part = await this.uploadPart(host, oid, auth, uploadId, lastNum, buffer, isLargeFile);
-    parts.push(part);
-    await this.uploadMergePart(host, oid, auth, uploadId, parts, isLargeFile);
   };
 
   private initUploadPart = async (
@@ -133,7 +156,7 @@ export class VodService extends Service {
     isLargeFile: boolean
   ) => {
     try {
-      const url = `http://${host}/${oid}?uploads`;
+      const url = `http://${host}/${getEncodedUri(oid)}?uploads`;
       const headers = { Authorization: auth };
       if (isLargeFile) {
         headers["X-Storage-Mode"] = "gateway";
@@ -162,7 +185,7 @@ export class VodService extends Service {
     isLargeFile: boolean
   ) => {
     try {
-      const url = `http://${host}/${oid}?partNumber=${partNumber}&uploadID=${uploadID}`;
+      const url = `http://${host}/${getEncodedUri(oid)}?partNumber=${partNumber}&uploadID=${uploadID}`;
       const check_sum: string = crc32(data).toString(16).padStart(8, "0");
       const headers = { "Content-CRC32": check_sum, Authorization: auth };
       if (isLargeFile) {
@@ -189,7 +212,7 @@ export class VodService extends Service {
     isLargeFile: boolean
   ) => {
     try {
-      const url = `http://${host}/${oid}?uploadID=${uploadID}`;
+      const url = `http://${host}/${getEncodedUri(oid)}?uploadID=${uploadID}`;
       const data = this.generateMergeBody(checkSumList);
       const headers = { Authorization: auth };
       if (isLargeFile) {
@@ -230,8 +253,16 @@ export class VodService extends Service {
         FilePath = "",
         Functions = JSON.stringify(defaultMediaFunctions),
         CallbackArgs = "",
+        FileName = "",
+        FileExtension = "",
       } = req;
-      const { sessionKey } = await this.uploadToB({ SpaceName, FilePath, FileType: "media" });
+      const { sessionKey } = await this.uploadToB({
+        SpaceName,
+        FilePath,
+        FileType: "media",
+        FileName,
+        FileExtension,
+      });
       const commitQuery = {
         SpaceName,
         SessionKey: sessionKey,
@@ -251,8 +282,22 @@ export class VodService extends Service {
   // 素材上传
   UploadMaterial = async (req: types.VodUploadMaterialRequest) => {
     try {
-      const { SpaceName, FilePath = "", Functions = "", CallbackArgs = "", FileType = "" } = req;
-      const { sessionKey } = await this.uploadToB({ SpaceName, FilePath, FileType });
+      const {
+        SpaceName,
+        FilePath = "",
+        Functions = "",
+        CallbackArgs = "",
+        FileType = "",
+        FileName = "",
+        FileExtension = "",
+      } = req;
+      const { sessionKey } = await this.uploadToB({
+        SpaceName,
+        FilePath,
+        FileType,
+        FileName,
+        FileExtension,
+      });
       const commitQuery = {
         SpaceName,
         SessionKey: sessionKey,
@@ -271,14 +316,15 @@ export class VodService extends Service {
 
   // 获取上传地址与凭证
   ApplyUploadInfo = this.createAPI<types.VodApplyUploadInfoRequest, types.VodApplyUploadInfoResult>(
-    "ApplyUploadInfo"
+    "ApplyUploadInfo",
+    { Version: "2022-01-01" }
   );
 
   // 确认上传
   CommitUploadInfo = this.createAPI<
     types.VodCommitUploadInfoRequest,
     types.VodCommitUploadInfoResult
-  >("CommitUploadInfo");
+  >("CommitUploadInfo", { Version: "2022-01-01" });
 
   // URL批量拉取上传
   UploadMediaByUrl = (req: types.VodUploadMediaByUrlRequest) => {

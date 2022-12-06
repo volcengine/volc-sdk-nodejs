@@ -20,6 +20,8 @@ export interface UploadParams {
   SessionKey?: string;
   FileType?: string;
   CallbackArgs?: string;
+  FileName?: string;
+  FileExtension?: string;
 }
 
 // 媒资上传
@@ -28,6 +30,8 @@ export interface VodUploadMediaRequest {
   FilePath?: string;
   CallbackArgs?: string;
   Functions?: string;
+  FileName?: string; // 设置文件存储路径
+  FileExtension?: string; // 设置文件后缀
 }
 
 // 素材上传
@@ -45,6 +49,8 @@ export interface VodApplyUploadInfoRequest {
   SessionKey?: string;
   FileSize?: number;
   FileType?: string;
+  FileName?: string; // 设置文件存储路径
+  FileExtension?: string; // 设置文件后缀
 }
 interface VodStoreInfo {
   StoreUri?: string;
@@ -123,7 +129,8 @@ interface VodUrlUploadURLSet {
   Description?: string; // 描述信息
   Tags?: string; // 标签
   Category?: string; // 分类
-  FileName?: string; // 设置文件名
+  FileName?: string; // 设置文件存储路径
+  FileExtension?: string; // 设置文件后缀
 }
 /**
  * URL批量拉取上传请求
