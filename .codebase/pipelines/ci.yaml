@@ -2,7 +2,7 @@ name: Node
 trigger: change
 jobs:
   SourceCodeCheck:
-    image: hub.byted.org/codebase/ci_nodejs_16
+    image: node:16-alpine
     steps:
       - name: check_bnpm_repo
         commands:
