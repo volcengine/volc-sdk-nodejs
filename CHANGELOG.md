@@ -1,3 +1,6 @@
+2023-02-10 Bumped to version v1.7.1
+- tls：修复 TS 类型错误
+
 2022-12-29 Bumped to version v1.7.0
 - vod: 上传支持传入 FileName 和 FileExtension
 
