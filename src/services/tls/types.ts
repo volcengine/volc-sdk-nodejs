@@ -991,7 +991,7 @@ export interface LogGroup {
   Source: string;
   LogTags: LogTag[];
   FileName: string;
-  ContextFlow: string;
+  ContextFlow?: string;
 }
 
 export interface LogGroupList {
