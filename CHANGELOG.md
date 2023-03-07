@@ -1,3 +1,6 @@
+2023-03-07 Bumped to version v1.8.0
+- add cdn openapi
+
 2023-02-10 Bumped to version v1.7.1
 - tls：修复 TS 类型错误
 
