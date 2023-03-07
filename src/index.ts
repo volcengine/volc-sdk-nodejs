@@ -13,6 +13,7 @@ import * as livesaasOpenapi from "./services/livesaas";
 import * as rocketmq from "./services/rocketmq";
 import * as billing from "./services/billing";
 import * as sts from "./services/sts";
+import * as cdn from "./services/cdn";
 
 export {
   Service,
@@ -30,4 +31,5 @@ export {
   rocketmq,
   billing,
   sts,
+  cdn,
 };
