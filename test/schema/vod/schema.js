@@ -16,6 +16,12 @@ export const jsonSchema = {
       SpaceName: {
         type: "string",
       },
+      FileName: {
+        type: "string",
+      },
+      FileExtension: {
+        type: "string",
+      },
     },
     type: "object",
   },
@@ -1472,6 +1478,9 @@ export const jsonSchema = {
               type: "string",
             },
             FileName: {
+              type: "string",
+            },
+            FileExtension: {
               type: "string",
             },
             Md5: {

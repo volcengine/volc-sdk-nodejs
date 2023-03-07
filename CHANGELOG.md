@@ -1,7 +1,12 @@
+2023-02-10 Bumped to version v1.7.1
+- tls：修复 TS 类型错误
+
+2022-12-29 Bumped to version v1.7.0
+- vod: 上传支持传入 FileName 和 FileExtension
+
 2022-11-30 Bumped to version v1.6.1
 - rocketmq: 新版实例topic&group不拼接命名空间
 - 新增 sts 服务
-
 
 2022-11-24 Bumped to version v1.6.0
 - rtc: upgrade openapi version

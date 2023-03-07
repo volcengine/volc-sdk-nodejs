@@ -89,11 +89,11 @@ export interface CreateAPIParams {
   /**
    * http method like GET POST PUT
    */
-  method: Method;
+  method?: Method;
   /**
    * body content type. support: json urlencode form-data
    */
-  contentType: "json" | "urlencode" | "form-data";
+  contentType?: "json" | "urlencode" | "form-data";
   /**
    * keys in query
    */
