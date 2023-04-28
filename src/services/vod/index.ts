@@ -185,7 +185,9 @@ export class VodService extends Service {
     isLargeFile: boolean
   ) => {
     try {
-      const url = `http://${host}/${getEncodedUri(oid)}?partNumber=${partNumber}&uploadID=${uploadID}`;
+      const url = `http://${host}/${getEncodedUri(
+        oid
+      )}?partNumber=${partNumber}&uploadID=${uploadID}`;
       const check_sum: string = crc32(data).toString(16).padStart(8, "0");
       const headers = { "Content-CRC32": check_sum, Authorization: auth };
       if (isLargeFile) {

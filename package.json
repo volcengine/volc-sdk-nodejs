@@ -1,6 +1,6 @@
 {
   "name": "@volcengine/openapi",
-  "version": "1.8.0",
+  "version": "1.8.1",
   "description": "火山引擎OpenAPI SDK nodejs版",
   "main": "lib/index.js",
   "scripts": {
@@ -18,7 +18,7 @@
     "url": "git@github.com:volcengine/volc-sdk-nodejs.git"
   },
   "author": "",
-  "license": "ISC",
+  "license": "Apache-2.0",
   "devDependencies": {
     "@babel/preset-env": "^7.16.4",
     "@babel/preset-typescript": "^7.12.7",
