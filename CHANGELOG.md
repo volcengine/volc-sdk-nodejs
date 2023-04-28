@@ -1,3 +1,6 @@
+2023-04-28 Bumped to version v1.8.1
+- add LICENSE file
+
 2023-03-07 Bumped to version v1.8.0
 - add cdn openapi
 
