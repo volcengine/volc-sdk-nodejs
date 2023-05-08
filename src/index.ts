@@ -14,6 +14,7 @@ import * as rocketmq from "./services/rocketmq";
 import * as billing from "./services/billing";
 import * as sts from "./services/sts";
 import * as cdn from "./services/cdn";
+import * as sms from "./services/sms";
 
 export {
   Service,
@@ -32,4 +33,5 @@ export {
   billing,
   sts,
   cdn,
+  sms,
 };

@@ -48,8 +48,8 @@ test("imagex:GetUploadAuthToken", async () => {
 
   const imagexService = imagex.defaultService;
 
-  imagexService.setAccessKeyId("ak");
-  imagexService.setSecretKey("sk");
+  imagexService.setAccessKeyId("testAk");
+  imagexService.setSecretKey("testSk");
 
   const base64String = imagexService.GetUploadAuthToken({
     ServiceId: "your imagex service id",
