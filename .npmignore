@@ -8,3 +8,4 @@ babel.config.js
 tsconfig.json
 src
 test
+*.lock
