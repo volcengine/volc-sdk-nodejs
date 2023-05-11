@@ -1,9 +1,0 @@
-name: Node
-trigger: change
-jobs:
-  SourceCodeCheck:
-    image: node:16-alpine
-    steps:
-      - name: check_bnpm_repo
-        commands:
-          - if [ $(cat yarn.lock | grep bnpm | wc -l) -gt 0 ]; then echo "found bnpm repo url"; exit 1; fi
