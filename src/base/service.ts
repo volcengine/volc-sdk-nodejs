@@ -113,9 +113,16 @@ export default class Service {
    * @param createParams.method http method like GET POST PUT
    * @param createParams.contentType body content type. support: json urlencode form-data. default is urlencode.
    */
-  createAPI<RequestData, Result>(Action: string, createParams?: CreateAPIParams) {
-    const { Version, method = "GET", contentType = "urlencode", queryKeys = [] } =
-      createParams || {};
+  createAPI<RequestData extends Record<string, any>, Result>(
+    Action: string,
+    createParams?: CreateAPIParams
+  ) {
+    const {
+      Version,
+      method = "GET",
+      contentType = "urlencode",
+      queryKeys = [],
+    } = createParams || {};
     return (
       requestData: RequestData,
       params?: FetchParams & AxiosRequestConfig,
@@ -147,9 +154,14 @@ export default class Service {
           }
           case "urlencode": {
             const body = new URLSearchParams();
-            Object.keys(requestData).forEach((key) => {
-              body.append(key, requestData[key]);
-            });
+            Object.keys(requestData)
+              .filter((key) => {
+                const val = requestData[key];
+                return val !== null && val !== undefined;
+              })
+              .forEach((key) => {
+                body.append(key, String(requestData[key]));
+              });
             requestParams.data = body;
             break;
           }
