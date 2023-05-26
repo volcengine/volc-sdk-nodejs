@@ -1,3 +1,6 @@
+2023-05-25 Bumped to version v1.9.3
+- base: fix type issue
+
 2023-05-25 Bumped to version v1.9.2
 - livesaas: remove unused url
 
