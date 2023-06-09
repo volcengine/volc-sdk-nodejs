@@ -22,6 +22,7 @@ export interface UploadParams {
   CallbackArgs?: string;
   FileName?: string;
   FileExtension?: string;
+  maxConcurrency?: number;
 }
 
 // 媒资上传
@@ -32,6 +33,7 @@ export interface VodUploadMediaRequest {
   Functions?: string;
   FileName?: string; // 设置文件存储路径
   FileExtension?: string; // 设置文件后缀
+  maxConcurrency?: number; // 单次上传最大并发数
 }
 
 // 素材上传

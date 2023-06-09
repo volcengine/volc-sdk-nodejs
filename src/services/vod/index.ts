@@ -8,7 +8,11 @@ import { crc32 } from "crc";
 import fs, { promises as fsPromises } from "fs";
 import get from "lodash.get";
 import axios from "axios";
-import { MinChunkSize, LargeFileSize, VALID_TYPE_LIST } from "./constants";
+import { MinChunkSize, VALID_TYPE_LIST } from "./constants";
+import pLimit from "p-limit";
+
+// 进程级chunk上传并发数限制
+const maxLimit = pLimit(20);
 
 const fsStat = fsPromises ? fsPromises.stat : promisify(fs.stat);
 const fsOpen = promisify(fs.open);
@@ -34,7 +38,7 @@ export class VodService extends Service {
 
   private uploadToB = async (params: types.UploadParams): Promise<{ sessionKey: string }> => {
     /* 校验文件是否合法 */
-    const { SpaceName, FilePath, FileType, FileName, FileExtension } = params;
+    const { SpaceName, FilePath, FileType, FileName, FileExtension, maxConcurrency } = params;
     const fileStat = await fsStat(FilePath);
     const fileSize = fileStat.size;
     if (!fileStat.isFile()) {
@@ -63,12 +67,10 @@ export class VodService extends Service {
     // const startTime = dayjs();
 
     /* 判断文件大小,选择上传方式 */
-    if (fileSize < MinChunkSize) {
+    if (fileSize <= MinChunkSize) {
       await this.directUpload(FilePath, host, oid, auth, fileSize);
-    } else if (fileSize > LargeFileSize) {
-      await this.chunkUpload(FilePath, host, oid, auth, fileSize, true);
     } else {
-      await this.chunkUpload(FilePath, host, oid, auth, fileSize, false);
+      await this.chunkUpload(FilePath, host, oid, auth, fileSize, true, maxConcurrency);
     }
     // const cost = dayjs().diff(startTime, "second");
     // const avgSpeed = fileSize / cost;
@@ -102,6 +104,26 @@ export class VodService extends Service {
     }
   };
 
+  private createUploadTask = (
+    host: string,
+    oid: string,
+    auth: string,
+    uploadId: number,
+    isLargeFile: boolean,
+    fd: number,
+    chunkSize: number,
+    position: number,
+    partNum: number
+  ) => {
+    // 被maxLimit包裹后，无论同时上传多少个文件，最多20个分片并发上传，避免占用内存过多
+    return maxLimit(async () => {
+      const bufferInit = Buffer.alloc(chunkSize);
+      const { buffer } = await fsRead(fd, bufferInit, 0, chunkSize, position);
+      const part = await this.uploadPart(host, oid, auth, uploadId, partNum, buffer, isLargeFile);
+      return part;
+    });
+  };
+
   // 大文件分片上传
   private chunkUpload = async (
     filePath: string,
@@ -109,40 +131,59 @@ export class VodService extends Service {
     oid: string,
     auth: string,
     size: number,
-    isLargeFile: boolean
+    isLargeFile: boolean,
+    maxConcurrency = 4
   ) => {
+    const limit = pLimit(maxConcurrency);
     let fd = 0;
     try {
       const uploadId = await this.initUploadPart(host, oid, auth, isLargeFile); // 获取上传id
       const n = Math.floor(size / MinChunkSize); // 向下取整
       const lastSize = size % MinChunkSize;
-      let lastNum = n - 1;
+      const lastNum = n - 1;
       const parts: string[] = []; // 存储校验和列表
       fd = await fsOpen(filePath, "r");
+      const tasks: Promise<void>[] = [];
       for (let i = 0; i < lastNum; i++) {
-        const bufferInit = Buffer.alloc(MinChunkSize);
-        const { buffer } = await fsRead(fd, bufferInit, 0, MinChunkSize, i * MinChunkSize);
         let partNum = i;
         if (isLargeFile) {
           partNum = i + 1;
         }
-        const part = await this.uploadPart(host, oid, auth, uploadId, partNum, buffer, isLargeFile);
-        parts.push(part);
+        // 被limit包裹后，确保每个文件同时最多上传maxConcurrency个分片
+        tasks.push(
+          limit(
+            this.createUploadTask,
+            host,
+            oid,
+            auth,
+            uploadId,
+            isLargeFile,
+            fd,
+            MinChunkSize,
+            i * MinChunkSize,
+            partNum
+          ).then((part) => {
+            parts[i] = part;
+          })
+        );
       }
-
-      const bufferInit = Buffer.alloc(MinChunkSize + lastSize);
-      const { buffer } = await fsRead(
-        fd,
-        bufferInit,
-        0,
-        MinChunkSize + lastSize,
-        lastNum * MinChunkSize
+      tasks.push(
+        limit(
+          this.createUploadTask,
+          host,
+          oid,
+          auth,
+          uploadId,
+          isLargeFile,
+          fd,
+          MinChunkSize + lastSize,
+          lastNum * MinChunkSize,
+          isLargeFile ? lastNum + 1 : lastNum
+        ).then((part) => {
+          parts[lastNum] = part;
+        })
       );
-      if (isLargeFile) {
-        lastNum = lastNum + 1;
-      }
-      const part = await this.uploadPart(host, oid, auth, uploadId, lastNum, buffer, isLargeFile);
-      parts.push(part);
+      await Promise.all(tasks);
       await this.uploadMergePart(host, oid, auth, uploadId, parts, isLargeFile);
     } finally {
       await fsClose(fd);
@@ -257,6 +298,7 @@ export class VodService extends Service {
         CallbackArgs = "",
         FileName = "",
         FileExtension = "",
+        maxConcurrency = 4,
       } = req;
       const { sessionKey } = await this.uploadToB({
         SpaceName,
@@ -264,6 +306,7 @@ export class VodService extends Service {
         FileType: "media",
         FileName,
         FileExtension,
+        maxConcurrency,
       });
       const commitQuery = {
         SpaceName,
@@ -292,6 +335,7 @@ export class VodService extends Service {
         FileType = "",
         FileName = "",
         FileExtension = "",
+        maxConcurrency = 4,
       } = req;
       const { sessionKey } = await this.uploadToB({
         SpaceName,
@@ -299,6 +343,7 @@ export class VodService extends Service {
         FileType,
         FileName,
         FileExtension,
+        maxConcurrency,
       });
       const commitQuery = {
         SpaceName,
