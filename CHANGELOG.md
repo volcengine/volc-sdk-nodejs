@@ -1,3 +1,6 @@
+2023-06-15 Bumped to version v1.10.0
+- vod: support sharded upload
+
 2023-05-25 Bumped to version v1.9.3
 - base: fix type issue
 
