@@ -1,5 +1,9 @@
 # 火山引擎 OpenAPI node sdk
 
+## 环境要求:
+
+- Node.js >= 12
+
 ## 安装
 
 ```shell

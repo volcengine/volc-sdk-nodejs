@@ -2,6 +2,10 @@
 
 [中文文档](./README_zh.md)
 
+## Requirements:
+
+- Node.js >= 12
+
 ## Installation
 ```shell
 npm install -S @volcengine/openapi

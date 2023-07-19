@@ -1,8 +1,11 @@
 {
   "name": "@volcengine/openapi",
-  "version": "1.10.0",
+  "version": "1.10.1",
   "description": "火山引擎OpenAPI SDK nodejs版",
   "main": "lib/index.js",
+  "engines": {
+    "node": ">=12"
+  },
   "scripts": {
     "cp:tls-proto": "cp src/services/tls/tls.proto lib/services/tls/tls.proto",
     "cp:tls-lz4": "cp src/services/tls/lz4.js lib/services/tls/lz4.js",
