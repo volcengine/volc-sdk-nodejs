@@ -1,3 +1,7 @@
+2023-06-15 Bumped to version v1.10.2
+- chore: Add node version requirements
+- fix: Upgrade protobufjs to fix high-risk vulnerabilities
+
 2023-06-15 Bumped to version v1.10.0
 - vod: support sharded upload
 
