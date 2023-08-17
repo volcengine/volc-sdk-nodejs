@@ -15,6 +15,7 @@ import * as billing from "./services/billing";
 import * as sts from "./services/sts";
 import * as cdn from "./services/cdn";
 import * as sms from "./services/sms";
+import * as maas from "./services/maas";
 
 export {
   Service,
@@ -34,4 +35,5 @@ export {
   sts,
   cdn,
   sms,
+  maas,
 };
