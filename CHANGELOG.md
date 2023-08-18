@@ -1,3 +1,6 @@
+2023-08-18 Bumped to version v1.11.0
+- feat: Add maas api
+
 2023-06-15 Bumped to version v1.10.2
 - chore: Add node version requirements
 - fix: Upgrade protobufjs to fix high-risk vulnerabilities

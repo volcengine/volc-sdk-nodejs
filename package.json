@@ -1,6 +1,6 @@
 {
   "name": "@volcengine/openapi",
-  "version": "1.10.2",
+  "version": "1.11.0",
   "description": "火山引擎OpenAPI SDK nodejs版",
   "main": "lib/index.js",
   "engines": {
