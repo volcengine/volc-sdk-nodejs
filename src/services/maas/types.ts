@@ -1,20 +1,26 @@
+export type ServiceOptions = {
+  host?: string;
+  region?: string;
+  timeout?: number;
+};
+
 export interface Model {
   name?: string;
   endpoint_id?: string;
 }
 
 export enum ChatRole {
-  ChatRoleOfUser = "user",
-  ChatRoleOfAssistant = "assistant",
-  ChatRoleOfSystem = "system",
+  User = "user",
+  Assistant = "assistant",
+  System = "system",
 }
 
 export interface Message {
-  role: ChatRole;
+  role?: ChatRole;
   content: string;
 }
 
-export interface Parameters {
+export interface ChatParameters {
   temperature?: number; // Exponential scaling output probability distribution
   max_tokens?: number; // The maximum number of tokens to generate in the char completion.
   // An alternative to sampling with temperature, called nucleus sampling,
@@ -59,7 +65,7 @@ export type Usage = {
 export type ChatApiError = {
   code: string;
   message: string;
-  code_n?: number;
+  code_n: number;
 };
 
 export type ChatResult = {
@@ -70,7 +76,7 @@ export type ChatResult = {
   // The generated result
   choice: Choice;
   // The tokens usage
-  usage: Usage;
+  usage?: Usage;
 };
 
 export interface ChatReqParams {
@@ -79,12 +85,12 @@ export interface ChatReqParams {
   // User input prompt
   messages: Message[];
   // API specific parameters
-  parameters?: Parameters;
+  parameters?: ChatParameters;
   // Whether use stream mode, if set, partial message deltas will be sent as
   // data-only server-sent events as they become available
   // The stream will be terminated by a data: [DONE]
   stream?: boolean;
   // optional symmetric key to encrypt messages, the key itself is encrypted
   // with model's public key.
-  crypto_token: string;
+  crypto_token?: string;
 }

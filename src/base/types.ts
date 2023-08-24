@@ -80,6 +80,7 @@ export interface FetchParams {
   Action: string;
   Version?: string;
   query?: any;
+  pathname?: string;
 }
 export interface CreateAPIParams {
   /**
