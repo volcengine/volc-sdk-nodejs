@@ -1,7 +1,7 @@
 import { maas } from "../lib";
 import { ChatMaasSchemaValidate } from "./schema/maas";
 
-const maasOpenApiService = new maas.MaasService({
+const maasService = new maas.MaasService({
   host: "maas-api.ml-platform-cn-beijing.volces.com",
   region: "cn-beijing",
 });
@@ -31,13 +31,14 @@ const requestParams = {
 };
 
 test("maas:Chat", async () => {
-  const response = await maasOpenApiService.Chat({ ...requestParams });
-  const validateResult = ChatMaasSchemaValidate(response);
+  const resp = await maasService.Chat({ ...requestParams });
+  const validateResult = ChatMaasSchemaValidate(resp);
   expect(validateResult).toBe(true);
 });
 
 test("maas:StreamChat", async () => {
-  const response = await maasOpenApiService.StreamChat({ ...requestParams });
-  response.pipe(process.stdout);
-  response.on("end", function () {});
+  const streamGenerator = await maasService.StreamChat({ ...requestParams });
+  for await (const value of streamGenerator) {
+    process.stdout.write(JSON.stringify(value));
+  }
 });
