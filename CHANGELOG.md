@@ -1,3 +1,6 @@
+2023-08-24 Bumped to version v1.11.1
+- maas: optimize stream api
+
 2023-08-18 Bumped to version v1.11.0
 - feat: Add maas api
 
