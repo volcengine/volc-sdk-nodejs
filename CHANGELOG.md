@@ -1,3 +1,6 @@
+2023-10-12 Bumped to version v1.11.2
+- tls: fix tls lz4
+
 2023-08-24 Bumped to version v1.11.1
 - maas: optimize stream api
 
