@@ -133,16 +133,8 @@ export default class Service {
         }
       }
 
-      const {
-        accessKeyId,
-        secretKey,
-        sessionToken,
-        host,
-        version,
-        protocol,
-        serviceName,
-        region,
-      } = this.options;
+      const { accessKeyId, secretKey, sessionToken, host, version, protocol, serviceName, region } =
+        this.options;
       if (!accessKeyId || !secretKey || !host)
         throw new Error(`[tls-node-sdk] host and accessKeyId and secretKey is necessary`);
 
