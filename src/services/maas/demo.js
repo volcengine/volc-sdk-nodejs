@@ -1,16 +1,15 @@
 /* eslint-disable no-console */
-import { MaasService, ChatRole } from "./index";
+import { maas } from "@volcengine/openapi";
 
-// 创建一个新实例 const maasOpenApiService = new maas.MaasService();
-const maas = new MaasService({
+// 创建一个新实例
+const maasService = new maas.MaasService({
   host: "maas-api.ml-platform-cn-beijing.volces.com",
   region: "cn-beijing",
-  serviceName: "ml_maas",
 });
 
 // 从环境变量设置 ak & sk
-maas.setAccessKeyId(process.env.VOLC_ACCESSKEY);
-maas.setSecretKey(process.env.VOLC_SECRETKEY);
+maasService.setAccessKeyId(process.env.VOLC_ACCESSKEY);
+maasService.setSecretKey(process.env.VOLC_SECRETKEY);
 
 const chatParams = {
   model: {
@@ -18,15 +17,15 @@ const chatParams = {
   },
   messages: [
     {
-      role: ChatRole.User,
+      role: maas.ChatRole.User,
       content: "天为什么这么蓝？",
     },
     {
-      role: ChatRole.Assistant,
+      role: maas.ChatRole.Assistant,
       content: "因为有你",
     },
     {
-      role: ChatRole.User,
+      role: maas.ChatRole.User,
       content: "花儿为什么这么香？",
     },
   ],
@@ -36,7 +35,7 @@ const chatParams = {
   },
 };
 
-await maas
+await maasService
   .Chat(chatParams)
   .then((result) => {
     console.log(result?.choice?.message?.content || "no content");
@@ -47,7 +46,7 @@ await maas
   });
 
 try {
-  for await (const result of maas.StreamChat(chatParams)) {
+  for await (const result of maasService.StreamChat(chatParams)) {
     console.log(result?.choice?.message?.content || "no content");
     // usage only appears in the last item.
     console.log(result?.usage || "no usage");
