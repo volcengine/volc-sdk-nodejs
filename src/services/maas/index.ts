@@ -1,9 +1,9 @@
 import Service from "../../base/service";
 import { MaasError, new_client_sdk_error } from "./error";
-import { ChatReqParams, ChatResult, ServiceOptions, ChatRole, ChatParameters } from "./types";
+import { ChatReq, ChatResp, ServiceOptions } from "./types";
 
 export class MaasService extends Service {
-  chat = this.createAPI<ChatReqParams, ChatResult>("chat", {
+  chat = this.createAPI<ChatReq, ChatResp>("chat", {
     method: "POST",
     contentType: "json",
   });
@@ -18,7 +18,7 @@ export class MaasService extends Service {
     this.timeout = options?.timeout || 60_000; // default timeout is 60s
   }
 
-  Chat(requestData: ChatReqParams): Promise<ChatResult> {
+  Chat(requestData: ChatReq): Promise<ChatResp> {
     return this.chat(
       { ...requestData, stream: false },
       {
@@ -29,7 +29,7 @@ export class MaasService extends Service {
     )
       .then((done) => {
         // 200 status code
-        return done as unknown as ChatResult;
+        return done as unknown as ChatResp;
       })
       .then((result) => {
         if (result.error != null && result.error != undefined) {
@@ -43,7 +43,7 @@ export class MaasService extends Service {
           throw error;
         }
 
-        const err = (error.response.data as ChatResult)?.error;
+        const err = (error.response.data as ChatResp)?.error;
         if (err !== undefined && err !== null) {
           throw new MaasError(err.code, err.message, err.code_n);
         } else {
@@ -52,7 +52,7 @@ export class MaasService extends Service {
       });
   }
 
-  async *StreamChat(requestData: ChatReqParams) {
+  async *StreamChat(requestData: ChatReq) {
     const response: any = await this.chat(
       { ...requestData, stream: true },
       {
@@ -61,7 +61,7 @@ export class MaasService extends Service {
         responseType: "stream",
       }
     ).catch((error) => {
-      const err = (error.response.data as ChatResult)?.error;
+      const err = (error.response.data as ChatResp)?.error;
       if (err !== undefined && err !== null) {
         throw new MaasError(err.code, err.message, err.code_n);
       } else {
@@ -70,7 +70,7 @@ export class MaasService extends Service {
     });
 
     let buffer = "";
-    const _parse_line = (line: string): ChatResult | null => {
+    const _parse_line = (line: string): ChatResp | null => {
       if (line.length > 0) {
         const pos = line.indexOf(":");
         if (pos >= 0) {
@@ -80,7 +80,7 @@ export class MaasService extends Service {
             // ignore comment
             return null;
           } else if (field === "data" && data != "[DONE]") {
-            const result = JSON.parse(data) as ChatResult;
+            const result = JSON.parse(data) as ChatResp;
             if (result.error !== undefined && result.error !== null) {
               const err = result.error;
               throw new MaasError(err.code, err.message, err.code_n);
@@ -117,7 +117,7 @@ export class MaasService extends Service {
   }
 }
 
-export { ChatReqParams, ChatResult, ServiceOptions, ChatRole, ChatParameters };
+export * from "./types";
 
 export const defaultService = new MaasService({
   host: "maas-api.ml-platform-cn-beijing.volces.com",
