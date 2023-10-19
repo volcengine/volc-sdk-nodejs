@@ -1,3 +1,6 @@
+2023-10-19 Bumped to version v1.12.0
+- maas: function_call && web references
+
 2023-10-12 Bumped to version v1.11.2
 - tls: fix tls lz4
 
