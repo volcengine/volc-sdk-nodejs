@@ -140,6 +140,10 @@ export interface GetVmsTemplateStatusResponse {
   ResponseMetadata: BaseMetaData & BaseError;
   Result: {
     ApplyResult: CarrierReviewInfo[];
+    approveTime: number;
+    expireTime: number;
+    restValidDays: number;
+    status: number;
   };
 }
 /* vms -end*/
