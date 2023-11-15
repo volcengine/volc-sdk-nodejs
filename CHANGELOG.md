@@ -1,3 +1,6 @@
+2023-11-15 Bumped to version v1.13.0
+- sms: 新增视频短信模板返回值参数
+
 2023-10-19 Bumped to version v1.12.0
 - maas: function_call && web references
 
