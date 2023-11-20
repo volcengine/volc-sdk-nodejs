@@ -1,12 +1,31 @@
 import Service from "../../base/service";
 import { MaasError, new_client_sdk_error } from "./error";
-import { ChatReq, ChatResp, ServiceOptions } from "./types";
+import {
+  ChatReq,
+  ChatResp,
+  ServiceOptions,
+  TokenizeReq,
+  TokenizeResp,
+  ClassificationReq,
+  ClassificationResp,
+} from "./types";
 
 export class MaasService extends Service {
   chat = this.createAPI<ChatReq, ChatResp>("chat", {
     method: "POST",
     contentType: "json",
   });
+
+  tokenization = this.createAPI<TokenizeReq, TokenizeResp>("tokenization", {
+    method: "POST",
+    contentType: "json",
+  });
+
+  classification = this.createAPI<ClassificationReq, ClassificationResp>("classification", {
+    method: "POST",
+    contentType: "json",
+  });
+
   timeout: number;
 
   constructor(options?: ServiceOptions) {
@@ -114,6 +133,74 @@ export class MaasService extends Service {
         yield result;
       }
     }
+  }
+
+  Tokenization(requestData: TokenizeReq): Promise<TokenizeResp> {
+    return this.tokenization(
+      { ...requestData },
+      {
+        Action: "tokenization",
+        pathname: "/api/v1/tokenization",
+        timeout: this.timeout,
+      }
+    )
+      .then((done) => {
+        // 200 status code
+        return done as unknown as TokenizeResp;
+      })
+      .then((result) => {
+        if (result.error != null && result.error != undefined) {
+          const err = result.error;
+          throw new MaasError(err.code, err.message, err.code_n);
+        }
+        return result;
+      })
+      .catch((error) => {
+        if (error instanceof MaasError) {
+          throw error;
+        }
+
+        const err = (error.response.data as TokenizeResp)?.error;
+        if (err !== undefined && err !== null) {
+          throw new MaasError(err.code, err.message, err.code_n);
+        } else {
+          throw new_client_sdk_error(error);
+        }
+      });
+  }
+
+  Classification(requestData: ClassificationReq): Promise<ClassificationResp> {
+    return this.classification(
+      { ...requestData },
+      {
+        Action: "classification",
+        pathname: "/api/v1/classification",
+        timeout: this.timeout,
+      }
+    )
+      .then((done) => {
+        // 200 status code
+        return done as unknown as ClassificationResp;
+      })
+      .then((result) => {
+        if (result.error != null && result.error != undefined) {
+          const err = result.error;
+          throw new MaasError(err.code, err.message, err.code_n);
+        }
+        return result;
+      })
+      .catch((error) => {
+        if (error instanceof MaasError) {
+          throw error;
+        }
+
+        const err = (error.response.data as ClassificationResp)?.error;
+        if (err !== undefined && err !== null) {
+          throw new MaasError(err.code, err.message, err.code_n);
+        } else {
+          throw new_client_sdk_error(error);
+        }
+      });
   }
 }
 
