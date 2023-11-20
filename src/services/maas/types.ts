@@ -198,3 +198,70 @@ export interface ChatResp {
   // extra info
   extra?: { [key: string]: string };
 }
+
+export interface TokenizeReq {
+  // Used model for inference
+  model: Model;
+
+  // Text
+  text: string;
+
+  // Unified request id
+  req_id?: string;
+}
+
+export interface TokenizeResp {
+  // Unified request id
+  req_id?: string;
+
+  // Tokens
+  tokens: string[];
+
+  // Total tokens
+  total_tokens?: number;
+
+  // Error if exists for the req
+  error?: Error;
+}
+
+export interface ClassificationReq {
+  // Unified request id
+  req_id?: string;
+
+  // Used model for inference
+  model: Model;
+
+  // Query
+  query: string;
+
+  // Labels
+  labels: string[];
+}
+
+export interface LabelLogprobosValue {
+  // Unified request id
+  req_id?: string;
+
+  // Tokens
+  tokens: string[];
+
+  // TokenLogprobos
+  token_logprobos: string[];
+}
+
+export interface ClassificationResp {
+  // Unified request id
+  req_id: string;
+
+  // Label
+  label: string;
+
+  // LabelLogprobos
+  label_logprobos: { [key: string]: LabelLogprobosValue };
+
+  // Usage
+  usage: Usage;
+
+  // Error if exists for the req
+  error: Error;
+}

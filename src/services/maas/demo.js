@@ -35,6 +35,23 @@ const chatParams = {
   },
 };
 
+const tokenizationParams = {
+  model: {
+    name: "${YOUR_MODEL_NAME}",
+    version: "${YOUR_VERSION}",
+  },
+  text: "天空为什么这么蓝？",
+};
+
+const classificationParams = {
+  model: {
+    name: "${YOUR_MODEL_NAME}",
+    version: "${YOUR_VERSION}",
+  },
+  query: "中国的第一个经济特区是？",
+  labels: ["北京", "珠海", "深圳", "厦门", "上海"],
+};
+
 await maasService
   .Chat(chatParams)
   .then((result) => {
@@ -54,3 +71,23 @@ try {
 } catch (ex) {
   console.error(ex);
 }
+
+await maasService
+  .Tokenization(tokenizationParams)
+  .then((result) => {
+    console.log(result?.total_tokens || "no total_tokens");
+    console.log(result?.tokens || "no tokens");
+  })
+  .catch((reason) => {
+    console.error(reason);
+  });
+
+await maasService
+  .Classification({ ...classificationParams })
+  .then((result) => {
+    console.log(result?.label || "no label");
+    console.log(result?.label_logprobos || "no label_logprobos");
+  })
+  .catch((reason) => {
+    console.error(reason);
+  });
