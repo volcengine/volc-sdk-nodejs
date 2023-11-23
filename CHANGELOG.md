@@ -1,3 +1,7 @@
+2023-11-23 Bumped to version v1.14.0
+- tls: 修复测试报错问题
+- maas: 新增 tokenization & classification
+
 2023-11-15 Bumped to version v1.13.0
 - sms: 新增视频短信模板返回值参数
 
