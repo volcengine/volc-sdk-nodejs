@@ -1,4 +1,5 @@
 import Service from "../../base/service";
+import { createDebug } from "../../base/utils";
 import { MaasError, new_client_sdk_error } from "./error";
 import {
   ChatReq,
@@ -10,6 +11,7 @@ import {
   ClassificationResp,
 } from "./types";
 
+const debug = createDebug("maas");
 export class MaasService extends Service {
   chat = this.createAPI<ChatReq, ChatResp>("chat", {
     method: "POST",
@@ -34,7 +36,7 @@ export class MaasService extends Service {
       serviceName: "ml_maas",
     });
 
-    this.timeout = options?.timeout || 60_000; // default timeout is 60s
+    this.timeout = options?.timeout || 60000; // default timeout is 60s
   }
 
   Chat(requestData: ChatReq): Promise<ChatResp> {
@@ -51,6 +53,7 @@ export class MaasService extends Service {
         return done as unknown as ChatResp;
       })
       .then((result) => {
+        debug("chat result. result: %j", result);
         if (result.error != null && result.error != undefined) {
           const err = result.error;
           throw new MaasError(err.code, err.message, err.code_n);
@@ -78,6 +81,7 @@ export class MaasService extends Service {
         Action: "chat",
         pathname: "/api/v1/chat",
         responseType: "stream",
+        timeout: this.timeout,
       }
     ).catch((error) => {
       const err = (error.response.data as ChatResp)?.error;
@@ -149,6 +153,7 @@ export class MaasService extends Service {
         return done as unknown as TokenizeResp;
       })
       .then((result) => {
+        debug("tokenization result. result: %j", result);
         if (result.error != null && result.error != undefined) {
           const err = result.error;
           throw new MaasError(err.code, err.message, err.code_n);
@@ -183,6 +188,7 @@ export class MaasService extends Service {
         return done as unknown as ClassificationResp;
       })
       .then((result) => {
+        debug("classification result. result: %j", result);
         if (result.error != null && result.error != undefined) {
           const err = result.error;
           throw new MaasError(err.code, err.message, err.code_n);
