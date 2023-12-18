@@ -1,3 +1,6 @@
+2023-12-18 Bumped to version v1.14.1
+- maas: 修复 timeout 参数问题
+
 2023-11-23 Bumped to version v1.14.0
 - tls: 修复测试报错问题
 - maas: 新增 tokenization & classification
