@@ -33,7 +33,7 @@ export class Producer extends Worker {
 
     super(client, { type: "producer" });
 
-    this._producerAgent = new MQAgent({ maxSockets: 1 });
+    this._producerAgent = this._workerAgent;
   }
 
   connect() {
