@@ -61,7 +61,7 @@ export class Consumer extends Worker {
     this._maxMessageNumber = maxMessageNumber;
     this._maxWaitTimeMs = maxWaitTimeMs;
     this._pollingInterval = pollingInterval;
-    this._consumerAgent = new MQAgent({ maxSockets: 1 });
+    this._consumerAgent = this._workerAgent;
     this._running = false;
   }
 

@@ -31,7 +31,7 @@ export abstract class Worker {
 
   private _heartBeatTimer: NodeJS.Timeout | null = null;
 
-  private _workerAgent: MQAgent;
+  protected _workerAgent: MQAgent;
   /**
    * 保存链接时的选项，用于重连
    */
@@ -47,7 +47,7 @@ export abstract class Worker {
 
     this._client = client;
     this._workerType = type;
-    this._workerAgent = new MQAgent({ maxSockets: 1 });
+    this._workerAgent = new MQAgent({ maxSockets: 1, keepAlive: true });
 
     this._logger = new Logger({ namespace: this._workerType });
 
@@ -93,7 +93,9 @@ export abstract class Worker {
       this._workerStatus = "connectFailed";
 
       const msg = `Connect failed: ${error.message}`;
-      this._logger.error(msg, { payload: isMQError(error) ? error.cause : undefined });
+      this._logger.error(msg, {
+        payload: isMQError(error) ? error.cause : undefined,
+      });
 
       throw new MQError(`[RocketMQ-node-sdk] ${msg}`);
     }
@@ -123,7 +125,9 @@ export abstract class Worker {
       this._workerStatus = "closeFailed";
       const msg = `Close failed: ${error.message}`;
 
-      this._logger.error(msg, { payload: isMQError(error) ? error.cause : undefined });
+      this._logger.error(msg, {
+        payload: isMQError(error) ? error.cause : undefined,
+      });
 
       throw new MQError(`[RocketMQ-node-sdk] ${msg}`);
     }
@@ -139,12 +143,16 @@ export abstract class Worker {
     // 仅仅在 connected状态才不断尝试重连，防止关闭后循环依然在执行
     while (this._workerStatus === "connected") {
       try {
-        this._logger.info("Reconnecting.", { payload: { prevClientToken: this._clientToken } });
+        this._logger.info("Reconnecting.", {
+          payload: { prevClientToken: this._clientToken },
+        });
 
         const res = await this._connectRequest(this._connectOption as ConnectOptions);
         this._clientToken = res.result.clientToken;
 
-        this._logger.info("Reconnect succeed.", { payload: { clientToken: this._clientToken } });
+        this._logger.info("Reconnect succeed.", {
+          payload: { clientToken: this._clientToken },
+        });
 
         break;
       } catch (error) {
@@ -171,7 +179,9 @@ export abstract class Worker {
   private async _heartBeat() {
     try {
       await this._heartBeatRequest();
-      this._logger.debug("Heart beat succeed.", { payload: { clientToken: this._clientToken } });
+      this._logger.debug("Heart beat succeed.", {
+        payload: { clientToken: this._clientToken },
+      });
     } catch (error) {
       this._logger.error(`Heart beat failed: ${error.message}`, {
         payload: isMQError(error) ? error.cause : undefined,
