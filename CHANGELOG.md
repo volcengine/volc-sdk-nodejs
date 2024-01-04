@@ -1,3 +1,6 @@
+2023-12-28 Bumped to version v1.15.0
+- rocketmq: 支持多副本
+
 2023-12-18 Bumped to version v1.14.1
 - maas: 修复 timeout 参数问题
 
