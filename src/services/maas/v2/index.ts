@@ -1,57 +1,50 @@
-import Service from "../../base/service";
-import { createDebug } from "../../base/utils";
-import { MaasError, new_client_sdk_error } from "./error";
+import Service from "../../../base/service";
+import { createDebug } from "../../../base/utils";
 import {
   ChatReq,
   ChatResp,
-  ServiceOptions,
-  TokenizeReq,
-  TokenizeResp,
   ClassificationReq,
   ClassificationResp,
   EmbeddingsReq,
   EmbeddingsResp,
+  ServiceOptions,
+  TokenizeReq,
+  TokenizeResp,
 } from "./types";
+import { MaasError, new_client_sdk_error } from "../error";
 
 const debug = createDebug("maas");
-export class MaasService extends Service {
+export class MaasServiceV2 extends Service {
+  timeout: number;
   chat = this.createAPI<ChatReq, ChatResp>("chat", {
     method: "POST",
     contentType: "json",
   });
-
   tokenization = this.createAPI<TokenizeReq, TokenizeResp>("tokenization", {
     method: "POST",
     contentType: "json",
   });
-
   classification = this.createAPI<ClassificationReq, ClassificationResp>("classification", {
     method: "POST",
     contentType: "json",
   });
-
   embeddings = this.createAPI<EmbeddingsReq, EmbeddingsResp>("embeddings", {
     method: "POST",
     contentType: "json",
   });
-
-  timeout: number;
-
   constructor(options?: ServiceOptions) {
     super({
       ...options,
       serviceName: "ml_maas",
     });
-
     this.timeout = options?.timeout || 60000; // default timeout is 60s
   }
-
-  Chat(requestData: ChatReq): Promise<ChatResp> {
+  Chat(endpointId: string, reqData: ChatReq): Promise<ChatResp> {
     return this.chat(
-      { ...requestData, stream: false },
+      { ...reqData, stream: false },
       {
         Action: "chat",
-        pathname: "/api/v1/chat",
+        pathname: `/api/v2/endpoint/${endpointId}/chat`,
         timeout: this.timeout,
       }
     )
@@ -80,13 +73,12 @@ export class MaasService extends Service {
         }
       });
   }
-
-  async *StreamChat(requestData: ChatReq) {
+  async *StreamChat(endpointId: string, reqData: ChatReq) {
     const response: any = await this.chat(
-      { ...requestData, stream: true },
+      { ...reqData, stream: true },
       {
         Action: "chat",
-        pathname: "/api/v1/chat",
+        pathname: `/api/v2/endpoint/${endpointId}/chat`,
         responseType: "stream",
         timeout: this.timeout,
       }
@@ -100,12 +92,15 @@ export class MaasService extends Service {
     });
 
     let buffer = "";
+
     const _parse_line = (line: string): ChatResp | null => {
       if (line.length > 0) {
         const pos = line.indexOf(":");
         if (pos >= 0) {
+          // [field]:[data]
           const field = line.substring(0, pos).trim(),
             data = line.substring(pos + 1).trim();
+
           if (field == "") {
             // ignore comment
             return null;
@@ -124,18 +119,16 @@ export class MaasService extends Service {
 
     for await (const chunk of response) {
       buffer += chunk;
-
-      do {
-        const pos = buffer.indexOf("\n");
-        if (pos >= 0) {
-          const line = buffer.substring(0, pos).trim();
-          buffer = buffer.substring(pos + 1);
-          const result = _parse_line(line);
-          if (result !== null) {
-            yield result;
-          }
+      let pos = buffer.indexOf("\n");
+      while (pos > -1) {
+        const line = buffer.substring(0, pos).trim();
+        buffer = buffer.substring(pos + 1);
+        const result = _parse_line(line);
+        if (result !== null) {
+          yield result;
         }
-      } while (buffer.includes("\n"));
+        pos = buffer.indexOf("\n");
+      }
     }
 
     if (buffer.length > 0) {
@@ -145,16 +138,12 @@ export class MaasService extends Service {
       }
     }
   }
-
-  Tokenization(requestData: TokenizeReq): Promise<TokenizeResp> {
-    return this.tokenization(
-      { ...requestData },
-      {
-        Action: "tokenization",
-        pathname: "/api/v1/tokenization",
-        timeout: this.timeout,
-      }
-    )
+  Tokenization(endpointId: string, reqData: TokenizeReq): Promise<TokenizeResp> {
+    return this.tokenization(reqData, {
+      Action: "tokenization",
+      pathname: `/api/v2/endpoint/${endpointId}/tokenization`,
+      timeout: this.timeout,
+    })
       .then((done) => {
         // 200 status code
         return done as unknown as TokenizeResp;
@@ -172,7 +161,7 @@ export class MaasService extends Service {
           throw error;
         }
 
-        const err = (error.response.data as TokenizeResp)?.error;
+        const err = (error.response.data as ChatResp)?.error;
         if (err !== undefined && err !== null) {
           throw new MaasError(err.code, err.message, err.code_n);
         } else {
@@ -180,16 +169,12 @@ export class MaasService extends Service {
         }
       });
   }
-
-  Classification(requestData: ClassificationReq): Promise<ClassificationResp> {
-    return this.classification(
-      { ...requestData },
-      {
-        Action: "classification",
-        pathname: "/api/v1/classification",
-        timeout: this.timeout,
-      }
-    )
+  Classification(endpointId: string, reqData: ClassificationReq): Promise<ClassificationResp> {
+    return this.classification(reqData, {
+      Action: "classification",
+      pathname: `/api/v2/endpoint/${endpointId}/classification`,
+      timeout: this.timeout,
+    })
       .then((done) => {
         // 200 status code
         return done as unknown as ClassificationResp;
@@ -215,16 +200,12 @@ export class MaasService extends Service {
         }
       });
   }
-
-  Embeddings(requestData: EmbeddingsReq): Promise<EmbeddingsResp> {
-    return this.embeddings(
-      { ...requestData },
-      {
-        Action: "embeddings",
-        pathname: "/api/v1/embeddings",
-        timeout: this.timeout,
-      }
-    )
+  Embeddings(endpointId: string, reqData: EmbeddingsReq): Promise<EmbeddingsResp> {
+    return this.embeddings(reqData, {
+      Action: "embeddings",
+      pathname: `/api/v2/endpoint/${endpointId}/embeddings`,
+      timeout: this.timeout,
+    })
       .then((done) => {
         // 200 status code
         return done as unknown as EmbeddingsResp;
@@ -250,12 +231,3 @@ export class MaasService extends Service {
       });
   }
 }
-
-export * from "./types";
-
-export * from "./v2";
-
-export const defaultService = new MaasService({
-  host: "maas-api.ml-platform-cn-beijing.volces.com",
-  region: "cn-beijing",
-});
