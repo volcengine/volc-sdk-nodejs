@@ -1,8 +1,7 @@
 /* eslint-disable no-console */
 import { maas } from "@volcengine/openapi";
-
 // 创建一个新实例
-const maasService = new maas.MaasService({
+const maasService = new maas.MaasServiceV2({
   host: "maas-api.ml-platform-cn-beijing.volces.com",
   region: "cn-beijing",
 });
@@ -11,54 +10,44 @@ const maasService = new maas.MaasService({
 maasService.setAccessKeyId(process.env.VOLC_ACCESSKEY);
 maasService.setSecretKey(process.env.VOLC_SECRETKEY);
 
+const endpointId = "${YOUR_ENDPOINT_ID}";
 const chatParams = {
-  model: {
-    name: "${YOUR_MODEL_NAME}",
+  parameters: {
+    max_new_tokens: 1000,
+    min_new_tokens: 1,
+    temperature: 0.7,
+    top_p: 0.9,
+    top_k: 0,
+    max_prompt_tokens: 4000,
   },
   messages: [
     {
-      role: maas.ChatRole.User,
+      role: "user",
       content: "天为什么这么蓝？",
     },
     {
-      role: maas.ChatRole.Assistant,
+      role: "assistant",
       content: "因为有你",
     },
     {
-      role: maas.ChatRole.User,
+      role: "user",
       content: "花儿为什么这么香？",
     },
   ],
-  parameters: {
-    max_new_tokens: 1000,
-    temperature: 1,
-  },
 };
-
 const tokenizationParams = {
-  model: {
-    name: "${YOUR_MODEL_NAME}",
-    version: "${YOUR_VERSION}",
-  },
-  text: "天空为什么这么蓝？",
+  text: "花儿为什么这么香？",
 };
-
 const classificationParams = {
-  model: {
-    name: "${YOUR_MODEL_NAME}",
-    version: "${YOUR_VERSION}",
-  },
-  query: "中国的第一个经济特区是？",
-  labels: ["北京", "珠海", "深圳", "厦门", "上海"],
+  query: "花儿为什么这么香？",
+  labels: ["陈述句", "疑问句", "肯定句"],
 };
 const embeddingsParams = {
-  model: {
-    name: "bge-large-zh",
-  },
   input: ["天很蓝", "海很深"],
 };
+
 await maasService
-  .Chat(chatParams)
+  .Chat(endpointId, chatParams)
   .then((result) => {
     console.log(result?.choice?.message?.content || "no content");
     console.log(result?.usage || "no usage");
@@ -67,18 +56,8 @@ await maasService
     console.error(reason);
   });
 
-try {
-  for await (const result of maasService.StreamChat(chatParams)) {
-    console.log(result?.choice?.message?.content || "no content");
-    // usage only appears in the last item.
-    console.log(result?.usage || "no usage");
-  }
-} catch (ex) {
-  console.error(ex);
-}
-
 await maasService
-  .Tokenization(tokenizationParams)
+  .Tokenization(endpointId, tokenizationParams)
   .then((result) => {
     console.log(result?.total_tokens || "no total_tokens");
     console.log(result?.tokens || "no tokens");
@@ -88,8 +67,8 @@ await maasService
   });
 
 await maasService
-  .Classification({ ...classificationParams })
-  .then((result) => {
+  .Classification(endpointId, classificationParams)
+  .Classification.then((result) => {
     console.log(result?.label || "no label");
     console.log(result?.label_logprobos || "no label_logprobos");
   })
@@ -98,7 +77,7 @@ await maasService
   });
 
 await maasService
-  .Embeddings({ ...embeddingsParams })
+  .Embeddings(endpointId, embeddingsParams)
   .then((result) => {
     console.log(result?.object || "no object");
     console.log(result?.data || "no data");
