@@ -4,7 +4,7 @@ import path from "path";
 export function getDefaultOption() {
   const defaultOptions = {
     host: process.env.VOLCENGINE_ENDPOINT,
-    region: process.env.VOLC_REGION,
+    region: process.env.VOLCENGINE_REGION,
     protocol: "https:",
     accessKeyId: process.env.VOLCENGINE_ACCESS_KEY_ID,
     secretKey: process.env.VOLCENGINE_ACCESS_KEY_SECRET,
@@ -24,8 +24,8 @@ export function getDefaultOption() {
         if (!defaultOptions.host && configData.VOLCENGINE_ENDPOINT) {
           defaultOptions.host = configData.VOLCENGINE_ENDPOINT;
         }
-        if (!defaultOptions.region && configData.VOLCENGINE_ENDPOINT) {
-          defaultOptions.region = configData.VOLCENGINE_ENDPOINT;
+        if (!defaultOptions.region && configData.VOLCENGINE_REGION) {
+          defaultOptions.region = configData.VOLCENGINE_REGION;
         }
       }
     }
