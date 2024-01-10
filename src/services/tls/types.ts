@@ -750,7 +750,7 @@ export interface IAlarmPolicyCreateReq {
   AlarmNotifyGroup: Array<string>;
   /** 告警重复的周期。单位是分钟。取值范围是0~1440。 */
   AlarmPeriod: number;
-  /** 告警触发条件，参考告警条件表达式：https://bytedance.feishu.cn/wiki/wikcnxhR5kkc31qgQGdMiOPuFle */
+  /** 告警触发条件  */
   Condition: string;
   /** 告警策略所属的ProjectId */
   ProjectId: string;
@@ -940,7 +940,7 @@ export interface IIndexSearchLogsReq {
   HighLight?: boolean;
   /** 返回的日志条数，最大值为100，通过分页最多返回100000条。 */
   Limit: number;
-  /** 查询语句，语句长度最大为4096。查询语法与规则见: https://bytedance.feishu.cn/wiki/wikcn5MxzYyrm4IOhq04CMHF6Qg */
+  /** 查询语句，语句长度最大为4096 */
   Query: string;
   /** 按日志时间戳顺序返回日志，精确到秒:
    - desc：（默认值）按照时间逆序返回日志，新的日志在前。

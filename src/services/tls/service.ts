@@ -3,7 +3,7 @@ import Signer from "../../base/sign";
 import protobuf from "protobufjs";
 import LZ4 from "./lz4";
 import path from "path";
-import { getDefaultOption } from "../../base/utils";
+import { getDefaultOption } from "./utils";
 import {
   IPutLogsReq,
   IPutLogsResp,
