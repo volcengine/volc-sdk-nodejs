@@ -1,3 +1,10 @@
+2024-01-11 Bumped to version v1.16.0
+- maas:
+  - V1 增加 Embeddings 接口
+  - 适配 V2 接口
+- tls:
+  - 修改 defaultOption
+
 2023-12-28 Bumped to version v1.15.0
 - rocketmq: 支持多副本
 
