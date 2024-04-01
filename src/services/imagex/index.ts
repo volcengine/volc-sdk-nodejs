@@ -1,25 +1,18 @@
-import Service from "../../base/service";
-import { ServiceOptions, OpenApiResponse, FetchParams } from "../../base/types";
 import fs from "fs";
 import axios, { ResponseType, AxiosPromise } from "axios";
-import {
-  ApplyImageUploadParams,
-  ApplyImageUploadResult,
-  CommitImageUploadParams,
-  CommitImageUploadResult,
-  UpdateImageUploadFilesParams,
-  UpdateImageUploadFilesResult,
-  PreviewImageUploadFileParams,
-  PreviewImageUploadFileResult,
-  DeleteImageUploadFilesParams,
-  DeleteImageUploadFilesResult,
-  UploadImagesOption,
-  GetUploadAuthParams,
-  GetUploadAuthTokenParams,
-} from "./types";
-import { SecurityToken2 } from "../../base/types";
-import Signer, { queryParamsToString } from "../../base/sign";
 import { getDefaultOption } from "../../base/utils";
+import Signer, { queryParamsToString } from "../../base/sign";
+import {
+  ServiceOptions,
+  OpenApiResponse,
+  FetchParams,
+  Statement,
+  Policy,
+  SecurityToken2,
+} from "../../base/types";
+import { UploadImagesOption, GetUploadAuthParams, GetUploadAuthTokenParams } from "./types";
+import { CommitImageUploadRes } from "./type";
+import ImagexAutoService from "./client";
 
 const defaultUploadAuthParams: GetUploadAuthParams = {
   serviceIds: [],
@@ -27,7 +20,15 @@ const defaultUploadAuthParams: GetUploadAuthParams = {
   expire: 60 * 60 * 1000,
 };
 
-export class ImagexService extends Service {
+const newAllowStatement = (actions: string[], resources: string[]): Statement => {
+  return {
+    Effect: "Allow",
+    Action: actions,
+    Resource: resources,
+  };
+};
+
+export class ImagexService extends ImagexAutoService {
   constructor(options?: ServiceOptions) {
     super({
       ...options,
@@ -36,41 +37,9 @@ export class ImagexService extends Service {
     });
   }
 
-  ApplyImageUpload = this.createAPI<ApplyImageUploadParams, ApplyImageUploadResult>(
-    "ApplyImageUpload"
-  );
-  CommitImageUpload = this.createAPI<CommitImageUploadParams, CommitImageUploadResult>(
-    "CommitImageUpload",
-    {
-      method: "POST",
-      contentType: "json",
-      queryKeys: ["ServiceId"],
-    }
-  );
-  UpdateImageUploadFiles = this.createAPI<
-    UpdateImageUploadFilesParams,
-    UpdateImageUploadFilesResult
-  >("UpdateImageUploadFiles", {
-    method: "POST",
-    contentType: "json",
-    queryKeys: ["ServiceId"],
-  });
-  PreviewImageUploadFile = this.createAPI<
-    PreviewImageUploadFileParams,
-    PreviewImageUploadFileResult
-  >("PreviewImageUploadFile");
-  DeleteImageUploadFiles = this.createAPI<
-    DeleteImageUploadFilesParams,
-    DeleteImageUploadFilesResult
-  >("DeleteImageUploadFiles", {
-    method: "POST",
-    contentType: "json",
-    queryKeys: ["ServiceId"],
-  });
-
   UploadImages = async (
     option: UploadImagesOption
-  ): Promise<OpenApiResponse<CommitImageUploadResult>> => {
+  ): Promise<OpenApiResponse<CommitImageUploadRes["Result"]>> => {
     const query = {
       ServiceId: option.serviceId,
       UploadNum: option.files.length,
@@ -132,26 +101,42 @@ export class ImagexService extends Service {
     await Promise.all(promiseArray);
   };
 
+  /**
+   * 获取上传临时密钥, 默认超时时间为 1h
+   */
   GetUploadAuth = (options?: GetUploadAuthParams): SecurityToken2 => {
-    const { serviceIds, storeKeys, expire } = options ?? defaultUploadAuthParams;
+    const { serviceIds, storeKeys, uploadOverwrite, uploadPolicy, expire } =
+      options ?? defaultUploadAuthParams;
     const serviceIdPolicy = serviceIds?.length
       ? serviceIds.map((serviceId) => `trn:ImageX:*:*:ServiceId/${serviceId}`)
       : ["trn:ImageX:*:*:ServiceId/*"];
     const storeKeysPolicy = storeKeys?.length
       ? storeKeys.map((storeKey) => `trn:ImageX:*:*:StoreKeys/${storeKey}`)
       : ["trn:ImageX:*:*:StoreKeys/*"];
-    const policy = {
+
+    const policy: Policy = {
       Statement: [
-        {
-          Effect: "Allow",
-          Action: ["ImageX:ApplyImageUpload", "ImageX:CommitImageUpload"],
-          Resource: [...serviceIdPolicy, ...storeKeysPolicy],
-        },
+        newAllowStatement(
+          ["ImageX:ApplyImageUpload", "ImageX:CommitImageUpload"],
+          [...serviceIdPolicy, ...storeKeysPolicy]
+        ),
       ],
     };
+    // 配置重名覆盖上传
+    if (typeof uploadOverwrite === "boolean") {
+      policy.Statement.push(newAllowStatement(["UploadOverwrite"], [`${uploadOverwrite}`]));
+    }
+    // 配置上传策略
+    if (uploadPolicy && typeof uploadPolicy === "object" && Object.keys(uploadPolicy).length) {
+      policy.Statement.push(newAllowStatement(["UploadPolicy"], [JSON.stringify(uploadPolicy)]));
+    }
+
     return this.signSts2(policy, expire ?? 60 * 60 * 1000);
   };
 
+  /**
+   * 获取临时上传凭证
+   */
   GetUploadAuthToken = (query: GetUploadAuthTokenParams): string => {
     const applyUploadToken = this._signUrl({
       method: "GET",
