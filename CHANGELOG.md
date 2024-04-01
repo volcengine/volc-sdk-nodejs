@@ -1,3 +1,8 @@
+2024-04-01 Bumped to version v1.17.0
+- imagex:
+  - add more imagex api 
+  - upload auth supports type and size limit
+
 2024-01-11 Bumped to version v1.16.0
 - maas:
   - V1 增加 Embeddings 接口
