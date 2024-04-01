@@ -102,13 +102,43 @@ export interface UploadImagesOption {
   fileKeys?: string[];
 }
 
+// 指定上传策略
+export type UploadPolicy = {
+  /**
+   * 上传格式黑名单, 示例 image/* video/*
+   */
+  ContentTypeBlackList?: string[];
+  /**
+   * 上传格式白名单, 示例 image/* video/*
+   */
+  ContentTypeWhiteList?: string[];
+  /**
+   * 上传文件大小上限, 单位 byte, 示例 1024
+   */
+  FileSizeUpLimit?: string;
+  /**
+   * 上传文件大小下限, 单位 byte, 示例 1024
+   */
+  FileSizeBottomLimit?: string;
+};
+
+// 生成上传临时密钥配置参数
 export interface GetUploadAuthParams {
+  /** 指定服务 ID 列表 */
   serviceIds?: string[];
+  /** 密钥超时时间 */
   expire?: number;
+  /** 指定资源存储名称 */
   storeKeys?: string[];
+  /** 是否开启上传覆盖 */
+  uploadOverwrite?: boolean;
+  /** 上传策略配置 */
+  uploadPolicy?: UploadPolicy;
 }
 
 export interface GetUploadAuthTokenParams {
+  /** 指定服务 ID */
   ServiceId: string;
+  /** 指定过期时间 */
   "X-Expires": number;
 }
