@@ -1,3 +1,9 @@
+2024-04-09 Bumped to version v1.18.0
+- imagex:
+  - UploadImages 方法入参调整，参考服务端的部分实现，支持传入 ApplyImageUpload 和 CommitImageUpload 的所有参数
+  - 补充 & 处理 UploadImages 方法内的报错信息
+  - 补充 API 列表
+
 2024-04-01 Bumped to version v1.17.0
 - imagex:
   - add more imagex api 
