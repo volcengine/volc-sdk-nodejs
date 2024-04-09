@@ -1,5 +1,7 @@
 import fs from "fs";
-import axios, { ResponseType, AxiosPromise } from "axios";
+import axios from "axios";
+import { promisify } from "util";
+import get from "lodash.get";
 import { getDefaultOption } from "../../base/utils";
 import Signer, { queryParamsToString } from "../../base/sign";
 import {
@@ -9,10 +11,19 @@ import {
   Statement,
   Policy,
   SecurityToken2,
+  OpenApiResponseMetadataParams,
 } from "../../base/types";
-import { UploadImagesOption, GetUploadAuthParams, GetUploadAuthTokenParams } from "./types";
-import { CommitImageUploadRes } from "./type";
+import { GetUploadAuthParams, GetUploadAuthTokenParams, UploadPutResult } from "./types";
+import {
+  ApplyImageUploadQuery,
+  ApplyImageUploadRes,
+  CommitImageUploadBody,
+  CommitImageUploadQuery,
+  CommitImageUploadRes,
+} from "./type";
 import ImagexAutoService from "./client";
+
+const fsAccess = promisify(fs.access);
 
 const defaultUploadAuthParams: GetUploadAuthParams = {
   serviceIds: [],
@@ -28,6 +39,19 @@ const newAllowStatement = (actions: string[], resources: string[]): Statement =>
   };
 };
 
+// 考虑到filename可能包含中文 因此url encode下 否则分片上传会失败
+function getEncodedUri(originUri: string): string {
+  if (!originUri) return "";
+  const arr = originUri.split("/");
+  return arr.map((v) => encodeURIComponent(v)).join("/");
+}
+
+function formatApiErrMsg(params: OpenApiResponseMetadataParams) {
+  return `API ${params.Action} error, reqId: ${params.RequestId}, CodeN: ${
+    params.Error?.CodeN || "-"
+  }, Code: ${params.Error?.Code || "-"}, ErrMessage: ${params.Error?.Message}`;
+}
+
 export class ImagexService extends ImagexAutoService {
   constructor(options?: ServiceOptions) {
     super({
@@ -38,67 +62,185 @@ export class ImagexService extends ImagexAutoService {
   }
 
   UploadImages = async (
-    option: UploadImagesOption
+    params: {
+      ApplyParams: ApplyImageUploadQuery;
+      CommitParams?: CommitImageUploadQuery & CommitImageUploadBody;
+      SkipCommit?: boolean;
+    },
+    files: string[] | NodeJS.ReadableStream[] | ArrayBuffer[] | ArrayBufferView[]
   ): Promise<OpenApiResponse<CommitImageUploadRes["Result"]>> => {
-    const query = {
-      ServiceId: option.serviceId,
-      UploadNum: option.files.length,
-    };
-    if (option.fileKeys && option.fileKeys.length > 0) {
-      query["StoreKeys"] = option.fileKeys;
+    // 1. apply
+    if (!files.length || files.length > 10) {
+      throw Error(`files num ${files.length} is invalid, the range is [1, 10]`);
     }
 
-    const applyRes = await this.ApplyImageUpload(query);
+    const applyFinalParams = {
+      ...params.ApplyParams,
+      UploadNum: files.length,
+    };
+    let originalApplyStoreKeys: string[] = [];
+    const applyStoreKeys = params.ApplyParams.StoreKeys;
+    if (Array.isArray(applyStoreKeys)) {
+      if (applyStoreKeys.length !== files.length) {
+        throw Error(`StoreKeys len ${applyStoreKeys.length} != files num ${files.length}`);
+      }
+      // applyStoreKeys.length > 0
+      originalApplyStoreKeys = applyStoreKeys?.slice(0);
+      applyFinalParams.StoreKeys = applyStoreKeys.slice(0).sort(); // top 参数鉴权需要将数组按字母序排列
+    }
+
+    const applyRes = await this.ApplyImageUpload(applyFinalParams);
+    if (applyRes.ResponseMetadata?.Error) {
+      throw new Error(formatApiErrMsg(applyRes.ResponseMetadata));
+    }
     const reqId = applyRes.Result?.RequestId;
-    const address = applyRes.Result?.UploadAddress;
-    const uploadHosts = address?.UploadHosts ?? [];
-    const storeInfos = address?.StoreInfos ?? [];
-    if (uploadHosts.length === 0) {
+    const uploadAddr = applyRes.Result?.UploadAddress;
+    const uploadHosts = uploadAddr?.UploadHosts ?? [];
+    const storeInfos = uploadAddr?.StoreInfos ?? [];
+
+    if (!uploadAddr) {
+      throw Error(`no upload address found, reqId: ${reqId}`);
+    }
+    if (!uploadHosts.length) {
       throw Error(`no upload host found, reqId: ${reqId}`);
     }
-    if (address?.StoreInfos.length !== option.files.length) {
+    if (storeInfos.length !== files.length) {
       throw Error(
-        `store info len ${address?.StoreInfos.length} != upload num ${option.files.length}, reqId: ${reqId}`
+        `store info len ${storeInfos.length} != upload num ${files.length}, reqId: ${reqId}`
       );
     }
 
-    const sessionKey = address["SessionKey"];
-    const host = uploadHosts[0];
-    await this.DoUpload(option.files, host, storeInfos);
+    // 用户自定义了存储 key
+    // Prefix 与 FileExtension 仅当未指定StoreKeys时生效, 因此无需考虑这两个参数
+    const newStoreInfos: ApplyImageUploadRes["Result"]["UploadAddress"]["StoreInfos"] = [];
+    if (originalApplyStoreKeys.length) {
+      for (const originalStoreKey of originalApplyStoreKeys) {
+        // StoreUri 形如 {bucketid}/xxxx/yyy/zzz 其中 xxxx/yyy/zzz === 用户指定的 StoreKey
+        // 指定StoreKeys时 Prefix 与 FileExtension无影响 无需考虑 此时用户指定的路径即是服务下发的路径
+        const targetStoreInfo = storeInfos.find(
+          ({ StoreUri }) => StoreUri.slice(StoreUri.split("/")[0].length + 1) === originalStoreKey
+        );
+        targetStoreInfo && newStoreInfos.push(targetStoreInfo);
+      }
+    }
+    // 2. upload
+    // 记录上传任务的执行结果
+    const uploadTaskResults = await this.DoUpload(
+      files,
+      uploadHosts[0],
+      newStoreInfos.length ? newStoreInfos : storeInfos
+    );
+    // 存在失败文件 则 error 提示,但是不阻塞流程
+    for (const res of uploadTaskResults) {
+      if (!res.success) {
+        console.error(
+          `uri ${res.uri} upload error, ${
+            !res.putErr
+              ? ""
+              : Object.entries(res.putErr)
+                  .map(([k, v]) => `${k}: ${v || "-"}`)
+                  .join(", ")
+          }`
+        );
+      }
+    }
+    // 跳过 commmit 阶段或者没有一个文件上传成功
+    if (params.SkipCommit || !uploadTaskResults.filter((item) => item.success).length) {
+      return {
+        Results: uploadTaskResults.map((item) => {
+          if (item.success) {
+            return {
+              Uri: item.uri,
+              UriStatus: 2000, //上传成功
+            };
+          }
+          return {
+            Uri: item.uri,
+            UriStatus: 2001, // 上传失败
+            PutError: item.putErr,
+          };
+        }),
+      } as any;
+    }
 
-    const commitQuery = {
-      ServiceId: option.serviceId,
-      SessionKey: sessionKey,
+    // 3. commit
+    const commitParams = {
+      ServiceId: params.ApplyParams.ServiceId,
+      SessionKey: uploadAddr.SessionKey,
+      SuccessOids: uploadTaskResults.filter((item) => item.success).map((item) => item.uri),
+      ...params.CommitParams,
     };
-    const commitRes = await this.CommitImageUpload(commitQuery);
+    const commitRes = await this.CommitImageUpload(commitParams);
+    if (commitRes.ResponseMetadata?.Error) {
+      throw new Error(formatApiErrMsg(commitRes.ResponseMetadata));
+    }
     return commitRes;
   };
 
   DoUpload = async (
     files: string[] | NodeJS.ReadableStream[] | ArrayBuffer[] | ArrayBufferView[],
     uploadHost: string,
-    storeInfos: any[]
+    storeInfos: ApplyImageUploadRes["Result"]["UploadAddress"]["StoreInfos"]
   ) => {
-    const promiseArray: AxiosPromise<ResponseType>[] = [];
+    const promiseArray: Promise<UploadPutResult>[] = [];
     for (let i = 0; i < files.length; i++) {
-      const oid = storeInfos[i]["StoreUri"];
-      const auth = storeInfos[i]["Auth"];
-      let file = files[i];
-      if (Object.prototype.toString.call(file) === "[object String]") {
-        file = fs.createReadStream(file as string);
-      }
+      const { StoreUri: oid, Auth: auth } = storeInfos[i];
       promiseArray.push(
-        axios(`http://${uploadHost}/${oid}`, {
-          method: "post",
-          headers: {
-            "Content-CRC32": "Ignore",
-            Authorization: auth,
-          },
-          data: file,
+        this.directUpload({
+          uploadHost,
+          oid,
+          auth,
+          file: files[i],
         })
       );
     }
-    await Promise.all(promiseArray);
+    return await Promise.all(promiseArray);
+  };
+
+  private directUpload = async (params: {
+    uploadHost: string;
+    oid: string;
+    auth: string;
+    file: string | NodeJS.ReadableStream | ArrayBuffer | ArrayBufferView;
+  }): Promise<UploadPutResult> => {
+    const { uploadHost, oid, auth, file } = params;
+    let fileCopy = file;
+    if (Object.prototype.toString.call(fileCopy) === "[object String]") {
+      try {
+        await fsAccess(fileCopy as string);
+        fileCopy = fs.createReadStream(fileCopy as string);
+      } catch (err) {
+        return {
+          uri: oid,
+          success: false,
+          putErr: {
+            errMsg: err.message,
+          },
+        };
+      }
+    }
+    try {
+      await axios(`http://${uploadHost}/${getEncodedUri(oid)}`, {
+        method: "post",
+        headers: {
+          "Content-CRC32": "Ignore",
+          Authorization: auth,
+        },
+        data: fileCopy,
+      });
+      return { uri: oid, success: true };
+    } catch (error) {
+      return {
+        uri: oid,
+        success: false,
+        putErr: {
+          errStatus: get(error, "response.data.error.code"),
+          errCodeN: get(error, "response.data.error.error_code"),
+          errMsg: get(error, "response.data.error.message"),
+          errCode: get(error, "response.data.error.error"),
+        },
+      };
+    }
   };
 
   /**

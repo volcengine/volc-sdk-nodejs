@@ -629,6 +629,42 @@ export default class ImagexService extends Service {
   });
 
   /**
+   * @function DescribeImageXExceedResolutionRatioAll
+   */
+  public DescribeImageXExceedResolutionRatioAll = this.createAPI<
+    types.DescribeImageXExceedResolutionRatioAllBody,
+    types.DescribeImageXExceedResolutionRatioAllRes["Result"]
+  >("DescribeImageXExceedResolutionRatioAll", {
+    method: "post",
+    contentType: "json",
+    Version: "2023-05-01",
+  });
+
+  /**
+   * @function DescribeImageXExceedFileSize
+   */
+  public DescribeImageXExceedFileSize = this.createAPI<
+    types.DescribeImageXExceedFileSizeBody,
+    types.DescribeImageXExceedFileSizeRes["Result"]
+  >("DescribeImageXExceedFileSize", {
+    method: "post",
+    contentType: "json",
+    Version: "2023-05-01",
+  });
+
+  /**
+   * @function DescribeImageXExceedCountByTime
+   */
+  public DescribeImageXExceedCountByTime = this.createAPI<
+    types.DescribeImageXExceedCountByTimeBody,
+    types.DescribeImageXExceedCountByTimeRes["Result"]
+  >("DescribeImageXExceedCountByTime", {
+    method: "post",
+    contentType: "json",
+    Version: "2023-05-01",
+  });
+
+  /**
    * @function DescribeImageXServiceQuality
    */
   public DescribeImageXServiceQuality = this.createAPI<
@@ -1423,6 +1459,19 @@ export default class ImagexService extends Service {
     contentType: "json",
     Version: "2023-05-01",
     queryKeys: ["ServiceId", "Domain", "URI", "Tpl", "Proto", "Format", "Timestamp"],
+  });
+
+  /**
+   * @function CreateImageFromUri
+   */
+  public CreateImageFromUri = this.createAPI<
+    types.CreateImageFromUriQuery & types.CreateImageFromUriBody,
+    types.CreateImageFromUriRes["Result"]
+  >("CreateImageFromUri", {
+    method: "post",
+    contentType: "json",
+    Version: "2018-08-01",
+    queryKeys: ["ServiceId"],
   });
 
   /**

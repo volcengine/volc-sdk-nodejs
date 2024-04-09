@@ -87,21 +87,6 @@ export interface PreviewImageUploadFileResult {
   ImageDuration?: number;
 }
 
-export interface DeleteImageUploadFilesParams {
-  ServiceId: string;
-  StoreUris: string[];
-}
-export interface DeleteImageUploadFilesResult {
-  ServiceId: string;
-  DeletedFiles: string[];
-}
-
-export interface UploadImagesOption {
-  serviceId: string;
-  files: string[] | NodeJS.ReadableStream[] | ArrayBuffer[] | ArrayBufferView[];
-  fileKeys?: string[];
-}
-
 // 指定上传策略
 export type UploadPolicy = {
   /**
@@ -142,3 +127,14 @@ export interface GetUploadAuthTokenParams {
   /** 指定过期时间 */
   "X-Expires": number;
 }
+
+export type UploadPutResult = {
+  success: boolean;
+  uri: string;
+  putErr?: {
+    errCode?: string;
+    errCodeN?: string | number;
+    errStatus?: number;
+    errMsg?: string;
+  };
+};
