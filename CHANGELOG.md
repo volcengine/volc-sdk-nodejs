@@ -1,3 +1,8 @@
+2024-04-18 Bumped to version v1.18.1
+- 升级 crypto-js 解决安全问题
+- vod:
+  - 点播demo获取aksk优化
+
 2024-04-09 Bumped to version v1.18.0
 - imagex:
   - UploadImages 方法入参调整，参考服务端的部分实现，支持传入 ApplyImageUpload 和 CommitImageUpload 的所有参数
