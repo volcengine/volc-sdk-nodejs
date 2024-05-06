@@ -142,7 +142,7 @@ export default class ImagexService extends Service {
   >("CreateImageMigrateTask", {
     method: "post",
     contentType: "json",
-    Version: "2018-08-01",
+    Version: "2023-05-01",
   });
 
   /**
@@ -154,7 +154,7 @@ export default class ImagexService extends Service {
   >("DeleteImageMigrateTask", {
     method: "post",
     contentType: "json",
-    Version: "2018-08-01",
+    Version: "2023-05-01",
     queryKeys: ["Region", "TaskId"],
   });
 
@@ -167,7 +167,7 @@ export default class ImagexService extends Service {
   >("ExportFailedMigrateTask", {
     method: "get",
     contentType: "json",
-    Version: "2018-08-01",
+    Version: "2023-05-01",
     queryKeys: ["Region", "TaskId"],
   });
 
@@ -180,7 +180,7 @@ export default class ImagexService extends Service {
   >("UpdateImageTaskStrategy", {
     method: "post",
     contentType: "json",
-    Version: "2018-08-01",
+    Version: "2023-05-01",
   });
 
   /**
@@ -192,7 +192,7 @@ export default class ImagexService extends Service {
   >("TerminateImageMigrateTask", {
     method: "post",
     contentType: "json",
-    Version: "2018-08-01",
+    Version: "2023-05-01",
     queryKeys: ["Region", "TaskId"],
   });
 
@@ -205,7 +205,7 @@ export default class ImagexService extends Service {
   >("GetVendorBuckets", {
     method: "post",
     contentType: "json",
-    Version: "2018-08-01",
+    Version: "2023-05-01",
   });
 
   /**
@@ -217,7 +217,7 @@ export default class ImagexService extends Service {
   >("GetImageMigrateTasks", {
     method: "get",
     contentType: "json",
-    Version: "2018-08-01",
+    Version: "2023-05-01",
     queryKeys: ["Region", "TaskId", "ServiceId", "Offset", "Limit", "TaskNamePtn", "Status"],
   });
 
@@ -230,8 +230,85 @@ export default class ImagexService extends Service {
   >("RerunImageMigrateTask", {
     method: "post",
     contentType: "json",
-    Version: "2018-08-01",
+    Version: "2023-05-01",
     queryKeys: ["Region", "TaskId"],
+  });
+
+  /**
+   * @function DescribeImageXSourceRequestBandwidth
+   */
+  public DescribeImageXSourceRequestBandwidth = this.createAPI<
+    types.DescribeImageXSourceRequestBandwidthQuery,
+    types.DescribeImageXSourceRequestBandwidthRes["Result"]
+  >("DescribeImageXSourceRequestBandwidth", {
+    method: "get",
+    contentType: "json",
+    Version: "2023-05-01",
+    queryKeys: [
+      "ServiceIds",
+      "DomainNames",
+      "Regions",
+      "UserCountry",
+      "UserProvince",
+      "Protocols",
+      "Isp",
+      "GroupBy",
+      "StartTime",
+      "EndTime",
+      "Interval",
+    ],
+  });
+
+  /**
+   * @function DescribeImageXSourceRequestTraffic
+   */
+  public DescribeImageXSourceRequestTraffic = this.createAPI<
+    types.DescribeImageXSourceRequestTrafficQuery,
+    types.DescribeImageXSourceRequestTrafficRes["Result"]
+  >("DescribeImageXSourceRequestTraffic", {
+    method: "get",
+    contentType: "json",
+    Version: "2023-05-01",
+    queryKeys: [
+      "ServiceIds",
+      "DomainNames",
+      "Regions",
+      "UserCountry",
+      "UserProvince",
+      "Protocols",
+      "Isp",
+      "GroupBy",
+      "StartTime",
+      "EndTime",
+      "Interval",
+    ],
+  });
+
+  /**
+   * @function DescribeImageXSourceRequest
+   */
+  public DescribeImageXSourceRequest = this.createAPI<
+    types.DescribeImageXSourceRequestQuery,
+    types.DescribeImageXSourceRequestRes["Result"]
+  >("DescribeImageXSourceRequest", {
+    method: "get",
+    contentType: "json",
+    Version: "2023-05-01",
+    queryKeys: [
+      "ServiceIds",
+      "DomainNames",
+      "Regions",
+      "UserCountry",
+      "UserProvince",
+      "Protocols",
+      "Isp",
+      "DataTypes",
+      "GroupBy",
+      "StartTime",
+      "EndTime",
+      "Interval",
+      "DetailedCode",
+    ],
   });
 
   /**
@@ -257,7 +334,7 @@ export default class ImagexService extends Service {
     method: "get",
     contentType: "json",
     Version: "2023-05-01",
-    queryKeys: ["Timestamp", "ServiceIds"],
+    queryKeys: ["ServiceIds", "Timestamp"],
   });
 
   /**

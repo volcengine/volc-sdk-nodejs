@@ -1057,7 +1057,7 @@ export interface CreateImageMigrateTaskBody {
       /**
        * 迁移目标服务 ID，请提前[新建服务](https://www.volcengine.com/docs/508/357114#%E6%96%B0%E5%BB%BA%E6%9C%8D%E5%8A%A1)。
        *
-       * - 您可以在veImageX 控制台 [服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。
+       * - 您可以在veImageX 控制台[服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。
        * - 您也可以通过 OpenAPI 的方式获取服务 ID，具体请参考[获取所有服务信息](https://www.volcengine.com/docs/508/9360)。
        * @example "uh**7j"
        */
@@ -1099,7 +1099,7 @@ export interface CreateImageMigrateTaskBody {
        *
        * - 取值为负值时，表示无限制
        * - 取值为 0 时，表示对应时间不允许迁移
-       * @example "{100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 1100, 1200, 1300, 1400, 1500, 1600, 1700, 1800, 1900, 2000, 2100, 2200, 2300, 2400}"
+       * @example "[100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 1100, 1200, 1300, 1400, 1500, 1600, 1700, 1800, 1900, 2000, 2100, 2200, 2300, 2400]"
        */
       ReadQps?: number[];
       /**
@@ -1107,7 +1107,7 @@ export interface CreateImageMigrateTaskBody {
        *
        * - 取值为负值时，表示无限制
        * - 取值为 0 时，表示对应时间不允许迁移
-       * @example "{100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 1100, 1200, 1300, 1400, 1500, 1600, 1700, 1800, 1900, 2000, 2100, 2200, 2300, 2400}"
+       * @example "[100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 1100, 1200, 1300, 1400, 1500, 1600, 1700, 1800, 1900, 2000, 2100, 2200, 2300, 2400]"
        */
       ReadRate?: number[];
     };
@@ -1129,6 +1129,9 @@ export interface CreateImageMigrateTaskBody {
        * 源端 Bucket。
        *
        * - 仅当`Vendor`为`URL`时，需填写 URL 列表文件地址（公网 URL 地址）。
+       *  :::tip
+       * 若您需要对迁移后文件批量重命名，请在 URL 的同一行内增加指定迁移后文件的 StoreKey，URL 和对应的 StoreKey 之间使用`;`分隔。StoreKey 填写规则详见[自定义迁移文件名规则](#自定义迁移文件名规则)。
+       *  :::
        * - 当`Vendor`为其他时，请填写对应云服务商所需迁移数据的 Bucket 名称。您可参考[云数据迁移准备](https://www.volcengine.com/docs/508/129213)获取对应阿里云OSS、腾讯云COS、七牛云KODO、百度云BOS、华为云OBS、 优刻得（Ucloud File)、AWS国际站的 Bucket 名称。
        * @example "storage-test"
        */
@@ -1148,7 +1151,7 @@ export interface CreateImageMigrateTaskBody {
       /**
        * 仅迁移匹配的前缀列表文件。文件路径前缀无需包含桶名称，但需要完整路径。
        * 默认为空，表示对该存储 Bucket 内资源执行全量迁移。若不为空，表示仅做部分迁移，即指定迁移的文件路径前缀。
-       * @example "home/aaaa"
+       * @example "["home/aaaa"]"
        */
       Prefix?: string[];
       /**
@@ -1158,7 +1161,7 @@ export interface CreateImageMigrateTaskBody {
        * - 多条正则表达式之间是"或"的关系，即源文件匹配任何一条正则表达式即视为符合迁移条件。
        * - 正则过滤规则需要遍历源桶中的全部文件，如果源桶中文件数量较多会降低迁移速度。
        * :::
-       * @example "\.png\"
+       * @example "["\.png\]"
        */
       Regex?: string[];
       /**
@@ -1316,7 +1319,7 @@ export interface CreateImageServiceBody {
    * 创建服务时绑定的域名列表
    * @example "-"
    */
-  Domains?: {
+  Domains: {
     /**
      * 待绑定的证书 ID。
      * 证书ID
@@ -1362,29 +1365,20 @@ export interface CreateImageServiceBody {
   ServiceName: string;
   /**
    * 服务地域，取值如下所示：
-   * * `cn`：中国；
-   * * `va`：美东；
-   * * `sg`：新加坡。
+   * * `cn`：中国
+   * * `sg`：新加坡
    * 服务所在区域，cn或va或sg
    * @example "cn"
    */
   ServiceRegion: string;
   /**
    * 服务类型，取值如下所示：
-   * * `StaticRc`：素材托管服务，支持任何合法资源的存储和分发。
-   * * `Image`：图片处理服务，除支持存储任意合法资源外，还支持对图片进行实时处理。
+   * * `StaticRc`：素材托管服务，支持任意类型资源的存储和分发。
+   * * `Image`：图片处理服务，除支持任意类型资源的存储和分发外，还支持对图片进行实时处理。
    * 取值为StaticRc时表示创建「静态资源托管服务」，取值为Image时表示创建「图片处理服务」。默认创建「图片处理服务」
    * @example "Image"
    */
   ServiceType?: string;
-  /**
-   * 服务的存储有效期。若资源有效期到期，veImageX 将自动删除指定服务内的资源。单位为秒，取值范围为 [600, 7776000]。
-   * 若取值超过整天，则默认向上取整，例如当`TTL`取值为`86401`时，实际有效期被设置为 2 天。
-   * 存储TTL，单位秒
-   * @format int64
-   * @example "0"
-   */
-  StorageTTL?: number;
 }
 
 export interface CreateImageServiceRes {
@@ -1425,9 +1419,15 @@ export interface CreateImageServiceRes {
     Version: string;
   };
   Result: {
-    /** 创建的服务 ID。 */
+    /**
+     * 创建的服务 ID。
+     * @example "d7b84a******4a"
+     */
     ServiceId: string;
-    /** 服务的名称。 */
+    /**
+     * 服务的名称。
+     * @example "Test"
+     */
     ServiceName: string;
   };
 }
@@ -2201,7 +2201,7 @@ export interface CreateTemplatesFromBinRes {
 /** 描述 */
 export interface DelDomainBody {
   /**
-   * 域名，您可以通过 [获取服务下全部域名](https://www.volcengine.com/docs/508/9379) 获取服务下域名信息。
+   * 待删除的域名，您可以通过 [获取服务下全部域名](https://www.volcengine.com/docs/508/9379) 获取服务下域名信息。
    * @example "test.imagex.com"
    */
   Domain: string;
@@ -2209,7 +2209,9 @@ export interface DelDomainBody {
 
 export interface DelDomainQuery {
   /**
-   * imagex服务ID
+   * 待删除域名的服务 ID。
+   * - 您可以在 veImageX 控制台[服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。
+   * - 您也可以通过 OpenAPI 的方式获取服务 ID，具体请参考[获取所有服务信息](https://www.volcengine.com/docs/508/9360)。
    * @example "sedf**sdf"
    */
   ServiceId: string;
@@ -2331,7 +2333,6 @@ export interface DeleteImageMigrateTaskQuery {
    * 任务地区（即任务目标服务的地区），默认空，返回国内任务。
    *
    * - `cn`：国内
-   * - `va`：美东
    * - `sg`：新加坡
    * @example "cn"
    */
@@ -2372,11 +2373,12 @@ export interface DeleteImageMigrateTaskRes {
 
 export interface DeleteImageServiceQuery {
   /**
-   * 服务 ID。
+   * 待删除的服务 ID。
    * - 您可以在 veImageX 控制台 [服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。
    * - 您也可以通过 OpenAPI 的方式获取服务 ID，具体请参考[获取所有服务信息](https://www.volcengine.com/docs/508/9360)。
+   * @example "g9y**8hu"
    */
-  ServiceId?: string;
+  ServiceId: string;
 }
 
 export interface DeleteImageServiceRes {
@@ -2779,12 +2781,12 @@ export interface DescribeImageVolcCdnAccessLogRes {
 
 export interface DescribeImageXBaseOpUsageQuery {
   /**
-   * 获取数据结束时间点。日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
+   * 获取数据结束时间点。日期格式按照 ISO8601 表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如`2019-06-02T00:00:00+08:00`。
    * @example "2019-06-02T00:00:00+08:00"
    */
   EndTime: string;
   /**
-   * 查询数据的时间粒度。单位为秒。缺省时查询 `StartTime` 和 `EndTime` 时间段全部数据，此时单次查询最大时间跨度为 93 天。支持取值如下：
+   * 查询数据的时间粒度。单位为秒。缺省时查询 `StartTime` 和 `EndTime` 时间段全部数据，此时单次查询最大时间跨度为 93 天。取值如下所示：
    *
    * - `300`：单次查询最大时间跨度为 31 天
    * - `600`：单次查询最大时间跨度为 31 天
@@ -2797,15 +2799,12 @@ export interface DescribeImageXBaseOpUsageQuery {
    */
   Interval?: string;
   /**
-   * 服务 ID。为空时表示不筛选，支持查询多个服务，使用逗号分隔不同的服务。
-   *
-   * - 您可以在 veImageX 控制台[服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。
-   * - 您也可以通过 OpenAPI 的方式获取服务 ID，具体请参考 [GetAllImageServices](https://www.volcengine.com/docs/508/9360)。
+   * 服务 ID。支持查询多个服务，传入多个时用英文逗号“,”分割，缺省情况下表示查询所有服务。您可以在 veImageX 控制台的[服务管理](https://console.volcengine.com/imagex/service_manage/)模块或者调用 [GetAllImageServices](https://www.volcengine.com/docs/508/9360) 接口获取服务 ID。
    * @example "s1,s2"
    */
   ServiceIds?: string;
   /**
-   * 获取数据起始时间点。日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
+   * 获取数据起始时间点。日期格式按照 ISO8601 表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如`2019-06-02T00:00:00+08:00`。
    * :::tip
    * 由于仅支持查询近一年历史数据，则若此刻时间为`2011-11-21T16:14:00+08:00`，那么您可输入最早的开始时间为`2010-11-21T00:00:00+08:00`。
    * :::
@@ -2828,9 +2827,15 @@ export interface DescribeImageXBaseOpUsageRes {
     Version: string;
   };
   Result: {
-    /** 计量数据列表 */
+    /**
+     * 计量数据列表
+     * @example "-"
+     */
     BaseOpData: {
-      /** 计量数据 */
+      /**
+       * 计量数据
+       * @example "-"
+       */
       Data: {
         /**
          * 统计时间点，时间片开始时刻。日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
@@ -2839,7 +2844,7 @@ export interface DescribeImageXBaseOpUsageRes {
          */
         TimeStamp: string;
         /**
-         * 基础处理量，单位为：Byte。
+         * 基础处理量，单位为 Byte。
          * 基础处理量，单位Byte
          * @example "123"
          */
@@ -2851,14 +2856,12 @@ export interface DescribeImageXBaseOpUsageRes {
 
 export interface DescribeImageXBillingRequestCntUsageQuery {
   /**
-   * 组件名称。为空时表示不筛选，支持查询多个`AdvFeat`，不同的`AdvFeat`使用逗号分隔。
-   * 您可通过调用 [GetImageAddOnConf](https://www.volcengine.com/docs/508/66145) 查看`Key`返回值。
+   * 组件名称。支持查询多个组件，传入多个时用英文逗号“,”分割，缺省情况下表示查询所有组件。您可通过调用 [GetImageAddOnConf](https://www.volcengine.com/docs/508/66145) 查看`Key`返回值。
    * @example "a1,a2"
    */
   AdvFeats?: string;
   /**
-   * 获取数据结束时间点。
-   * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
+   * 获取数据结束时间点。日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
    * @example "2019-06-02T00:00:00+08:00"
    */
   EndTime: string;
@@ -2868,7 +2871,7 @@ export interface DescribeImageXBillingRequestCntUsageQuery {
    */
   GroupBy: string;
   /**
-   * 查询数据的时间粒度。单位为秒。缺省时查询 StartTime 和 EndTime 时间段全部数据，此时单次查询最大时间跨度为 93 天。支持取值如下：
+   * 查询数据的时间粒度。单位为秒。缺省时查询 `StartTime` 和 `EndTime` 时间段全部数据，此时单次查询最大时间跨度为 93 天。支持取值如下：
    *
    * - `300`：单次查询最大时间跨度为 31 天
    * - `600`：单次查询最大时间跨度为 31 天
@@ -2881,15 +2884,12 @@ export interface DescribeImageXBillingRequestCntUsageQuery {
    */
   Interval?: string;
   /**
-   * 服务 ID。为空时表示不筛选，支持查询多个服务，不同的服务使用逗号分隔。
-   * * 您可以在veImageX 控制台 [服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。
-   * * 您也可以通过 OpenAPI 的方式获取服务 ID，具体请参考[获取所有服务信息](https://www.volcengine.com/docs/508/9360)。
+   * 服务 ID。支持查询多个服务，传入多个时用英文逗号“,”分割，缺省情况下表示查询所有服务。您可以在 veImageX 控制台的[服务管理](https://console.volcengine.com/imagex/service_manage/)模块或者调用 [GetAllImageServices](https://www.volcengine.com/docs/508/9360) 接口获取服务 ID。
    * @example "s1,s2"
    */
   ServiceIds?: string;
   /**
-   * 获取数据起始时间点。
-   * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
+   * 获取数据起始时间点。日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
    * :::tip
    * 由于仅支持查询近一年历史数据，则若此刻时间为`2011-11-21T16:14:00+08:00`，那么您可输入最早的开始时间为`2010-11-21T00:00:00+08:00`。
    * :::
@@ -2914,7 +2914,7 @@ export interface DescribeImageXBillingRequestCntUsageRes {
   Result: {
     /**
      * 附加组件通用请求次数据。
-     * @example ""
+     * @example "-"
      */
     RequestCntData: {
       /**
@@ -2927,7 +2927,7 @@ export interface DescribeImageXBillingRequestCntUsageRes {
       AdvFeat: string;
       /**
        * 时序数据列表。
-       * @example ""
+       * @example "-"
        */
       Data: {
         /**
@@ -3140,12 +3140,12 @@ export interface DescribeImageXCDNTopRequestDataQuery {
    */
   Country?: string;
   /**
-   * 域名。传入多个时用“,”作为分割符，缺省情况下表示不限制域名。您可以通过调用[获取服务下全部域名](https://www.volcengine.com/docs/508/9379)获取所需的域名。
+   * 域名。支持查询多个域名，传入多个时用英文逗号“,”分割，缺省情况下表示查询所有域名。您可以通过调用 [GetServiceDomains](https://www.volcengine.com/docs/508/9379) 获取所需的域名。
    * @example "d1,d2"
    */
   DomainNames?: string;
   /**
-   * 获取数据结束时间点。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00。
+   * 获取数据结束时间点。日期格式按照 ISO8601 表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如 2019-06-02T00:00:00+08:00。
    * @example "2019-06-02T00:00:00+08:00"
    */
   EndTime: string;
@@ -3162,7 +3162,7 @@ export interface DescribeImageXCDNTopRequestDataQuery {
    */
   IPVersion?: string;
   /**
-   * 排序指标。取值如下所示：
+   * 排序依据，取值如下所示：
    *
    * - `URL`：生成的图片访问 URL
    * - `UserAgent`：用户代理
@@ -3185,15 +3185,12 @@ export interface DescribeImageXCDNTopRequestDataQuery {
    */
   Offset?: string;
   /**
-   * 服务 ID。传入多个时用“,”作为分割符，缺省情况下表示不限制服务 ID。
-   *
-   * - 您可以在 veImageX 控制台[服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。
-   * - 您也可以通过 OpenAPI 的方式获取服务 ID，具体请参考[获取所有服务信息](https://www.volcengine.com/docs/508/9360)。
+   * 服务 ID。支持查询多个服务，传入多个时用英文逗号“,”分割，缺省情况下表示查询所有服务。您可以在 veImageX 控制台的[服务管理](https://console.volcengine.com/imagex/service_manage/)模块或者调用 [GetAllImageServices](https://www.volcengine.com/docs/508/9360) 接口获取服务 ID。
    * @example "s1,s2"
    */
   ServiceIds?: string;
   /**
-   * 获取数据起始时间点。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00。
+   * 获取数据起始时间点。日期格式按照 ISO8601 表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如 2019-06-02T00:00:00+08:00。
    * @example "2019-06-02T00:00:00+08:00"
    */
   StartTime: string;
@@ -3204,7 +3201,7 @@ export interface DescribeImageXCDNTopRequestDataQuery {
    * - `RequestCnt`：按请求次数排序
    *
    * :::tip
-   * 当`KeyType`取值为`Domain`时，`ValueType`仅支持取值为`Traffic`，即按照流量排序获取域名列表。
+   * 当`KeyType`取值为`Domain`时，仅支持将`ValueType`取值为`Traffic`，即按照流量排序获取域名列表。
    * :::
    * @example "Traffic"
    */
@@ -3235,6 +3232,7 @@ export interface DescribeImageXCDNTopRequestDataRes {
      * 数据列表，按`Value`降序排列。
      * 数据列表，按Value降序排列。
      * @uniqueItems true
+     * @example "-"
      */
     TopValue: {
       /**
@@ -3269,12 +3267,13 @@ export interface DescribeImageXCdnDurationAllBody {
   /**
    * 需要匹配的 App 版本，不传则匹配 App 的所有版本。
    * 需要匹配的 App 版本，不传则匹配 App 的所有版本。
+   * @example "["1.2.0"]"
    */
   AppVer?: string[];
   /**
-   * 应用 ID。默认为空，不传则匹配账号下的所有的 App ID。
+   * 应用 ID。默认为空，不传则匹配账号下的所有的 AppID。
    * :::tip
-   * 您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/19511)的方式获取所需的 AppID。
+   * 您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/1213042)的方式获取所需的 AppID。
    * :::
    * 应用 ID。默认为空，匹配账号下的所有的App ID。
    * @example "123"
@@ -3293,11 +3292,12 @@ export interface DescribeImageXCdnDurationAllBody {
   /**
    * 需要匹配的域名，不传则匹配所有域名。
    * 需要匹配的域名，不传则匹配所有域名
+   * @example "["d1"]"
    */
   Domain?: string[];
   /**
    * 获取数据结束时间点，需在起始时间点之后。
-   * * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
+   * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
    * 获取数据结束时间点，需在起始时间点之后。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00
    * @example "2019-06-27T15:00:00+08:00"
    */
@@ -3305,12 +3305,13 @@ export interface DescribeImageXCdnDurationAllBody {
   /**
    * 需要匹配的自定义维度项 。
    * 需要匹配的自定义维度项
+   * @example "-"
    */
   ExtraDims?: {
     /**
      * 自定义维度名称。
      * :::tip
-     * 您可以通过调用[获取自定义维度列表](https://www.volcengine.com/docs/508/34554)来获取。
+     * 您可以通过调用[获取自定义维度列表](https://www.volcengine.com/docs/508/1213048)来获取。
      * :::
      * 自定义维度名称。
      * @example "access"
@@ -3319,14 +3320,15 @@ export interface DescribeImageXCdnDurationAllBody {
     /**
      * 需要匹配的对应维度值
      * :::tip
-     * 您可以通过调用[获取自定义维度值](https://www.volcengine.com/docs/508/34555)来获取。
+     * 您可以通过调用[获取自定义维度值](https://www.volcengine.com/docs/508/1213050)来获取。
      * :::
      * 需要匹配的对应维度值
+     * @example "["4g"]"
      */
     Vals: string[];
   }[];
   /**
-   * 聚合维度。
+   * 聚合维度。取值如下所示：
    * * `Domain`：域名；
    * * `Region`：地区；
    * * `Isp`：运营商。
@@ -3338,7 +3340,7 @@ export interface DescribeImageXCdnDurationAllBody {
    */
   GroupBy: string;
   /**
-   * 需要匹配的图片类型，不传则匹配所有图片类型。
+   * 需要匹配的图片类型，不传则匹配所有图片类型。取值如下所示：
    * - `GIF`
    * - `PNG`
    * - `JPEG`
@@ -3358,10 +3360,11 @@ export interface DescribeImageXCdnDurationAllBody {
    * AWEBP
    * VVIC
    * 其他
+   * @example "["PNG"]"
    */
   ImageType?: string[];
   /**
-   * 需要匹配的运营商名称，不传则匹配所有运营商。支持取值如下：
+   * 需要匹配的运营商名称，不传则匹配所有运营商。取值如下所示：
    * - `电信`
    * - `联通`
    * - `移动`
@@ -3377,6 +3380,7 @@ export interface DescribeImageXCdnDurationAllBody {
    * 鹏博士
    * 教育网
    * 其他
+   * @example "["电信"]"
    */
   Isp?: string[];
   /**
@@ -3392,13 +3396,15 @@ export interface DescribeImageXCdnDurationAllBody {
    */
   OS?: string;
   /**
+   * 是否升序排序。取值如下所示：
+   * - `true`：是，表示升序排序。
+   * - `false`：（默认）否，表示降序排序。
    * 是否升序排序。不传则默认降序排序。
-   * 是否升序排序。不传则默认降序排序。
-   * @example "false"
+   * @example "true"
    */
   OrderAsc?: boolean;
   /**
-   * 排序依据。
+   * 排序依据。取值如下所示：
    * * `Duration`：按耗时排序。
    * * `Count`：（默认）按上报量排序。
    * 排序依据。
@@ -3416,11 +3422,12 @@ export interface DescribeImageXCdnDurationAllBody {
   /**
    * 需要匹配的 SDK 版本，不传则匹配所有版本.
    * 需要匹配的SDK版本，不传则匹配所有版本
+   * @example "["1.2.0"]"
    */
   SdkVer?: string[];
   /**
    * 获取数据起始时间点。
-   * * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
+   * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
    * 获取数据起始时间点。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00
    * @example "2019-06-27T13:00:00+08:00"
    */
@@ -3444,6 +3451,7 @@ export interface DescribeImageXCdnDurationAllRes {
     /**
      * 网络耗时数据。
      * 网络耗时数据。
+     * @example "-"
      */
     DurationData: {
       /**
@@ -3495,12 +3503,13 @@ export interface DescribeImageXCdnDurationDetailByTimeBody {
   /**
    * 需要匹配的 App 版本，不传则匹配 App 的所有版本。
    * 需要匹配的 App 版本，不传则匹配 App 的所有版本。
+   * @example "["1.2.0"]"
    */
   AppVer?: string[];
   /**
    * 应用 ID。默认为空，不传则匹配账号下的所有的 App ID。
    * :::tip
-   * 您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/19511)的方式获取所需的 AppID。
+   * 您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/1213042)的方式获取所需的 AppID。
    * :::
    * 应用 ID。默认为空，匹配账号下的所有的App ID。
    * @example "123"
@@ -3519,6 +3528,7 @@ export interface DescribeImageXCdnDurationDetailByTimeBody {
   /**
    * 需要匹配的域名，不传则匹配所有域名。
    * 需要匹配的域名，不传则匹配所有域名
+   * @example "["d1"]"
    */
   Domain?: string[];
   /**
@@ -3531,12 +3541,13 @@ export interface DescribeImageXCdnDurationDetailByTimeBody {
   /**
    * 需要匹配的自定义维度项 。
    * 需要匹配的自定义维度项
+   * @example "-"
    */
   ExtraDims?: {
     /**
      * 自定义维度名称。
      * :::tip
-     * 您可以通过调用[获取自定义维度列表](https://www.volcengine.com/docs/508/34554)来获取。
+     * 您可以通过调用[获取自定义维度列表](https://www.volcengine.com/docs/508/1213048)来获取。
      * :::
      * 自定义维度名称。
      * @example "access"
@@ -3545,9 +3556,10 @@ export interface DescribeImageXCdnDurationDetailByTimeBody {
     /**
      * 需要匹配的对应维度值
      * :::tip
-     * 您可以通过调用[获取自定义维度值](https://www.volcengine.com/docs/508/34555)来获取。
+     * 您可以通过调用[获取自定义维度值](https://www.volcengine.com/docs/508/1213050)来获取。
      * :::
      * 需要匹配的对应维度值
+     * @example "["4g"]"
      */
     Vals: string[];
   }[];
@@ -3568,7 +3580,7 @@ export interface DescribeImageXCdnDurationDetailByTimeBody {
    * * `Duration`：表示拆分网络耗时分位数据
    * - `Phase`：表示拆分网络耗时分布数据
    * - 公共维度：`Appid`、`OS`、`AppVer`、`SdkVer`、`ImageType`、`Country`、`Province`、`Isp`、`Domain`
-   * - 自定义维度：您可以通过调用 [GetImageXQueryDims](https://www.volcengine.com/docs/508/34554)接口获取自定义维度指标。
+   * - 自定义维度：您可以通过调用 [获取自定义维度列表](https://www.volcengine.com/docs/508/1213048)接口获取自定义维度指标。
    * 拆分维度。默认为空，表示不拆分。支持取值：Duration（拆分网络耗时分位数据）、Phase（拆分网络耗时分布数据）、公共维度（Appid,OS,AppVer,SdkVer,ImageType,Country,Province,Isp,Domain），自定义维度（通过"获取自定义维度列表"接口获取）
    * @example "Duration"
    */
@@ -3594,6 +3606,7 @@ export interface DescribeImageXCdnDurationDetailByTimeBody {
    * AWEBP
    * VVIC
    * 其他
+   * @example "["PNG"]"
    */
   ImageType?: string[];
   /**
@@ -3613,6 +3626,7 @@ export interface DescribeImageXCdnDurationDetailByTimeBody {
    * 鹏博士
    * 教育网
    * 其他
+   * @example "["电信"]"
    */
   Isp?: string[];
   /**
@@ -3656,6 +3670,7 @@ export interface DescribeImageXCdnDurationDetailByTimeBody {
   /**
    * 需要匹配的 SDK 版本，不传则匹配所有版本.
    * 需要匹配的SDK版本，不传则匹配所有版本
+   * @example "["1.2.0"]"
    */
   SdkVer?: string[];
   /**
@@ -3684,6 +3699,7 @@ export interface DescribeImageXCdnDurationDetailByTimeRes {
     /**
      * 网络耗时数据。
      * 网络耗时数据
+     * @example "-"
      */
     DurationData: {
       /**
@@ -3695,6 +3711,7 @@ export interface DescribeImageXCdnDurationDetailByTimeRes {
       /**
        * 对应的网络耗时数据列表。
        * 对应的网络耗时数据列表。
+       * @example "-"
        */
       Data: {
         /**
@@ -3740,12 +3757,13 @@ export interface DescribeImageXCdnErrorCodeAllBody {
   /**
    * 需要匹配的 App 版本，不传则匹配 App 的所有版本。
    * 需要匹配的 App 版本，不传则匹配 App 的所有版本。
+   * @example "["1.2.0"]"
    */
   AppVer?: string[];
   /**
-   * 应用 ID。默认为空，不传则匹配账号下的所有的 App ID。
+   * 应用 ID。默认为空，不传则匹配账号下的所有的 AppID。
    * :::tip
-   * 您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/19511)的方式获取所需的 AppID。
+   * 您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/1213042)的方式获取所需的 AppID。
    * :::
    * 应用 ID。默认为空，匹配账号下的所有的App ID。
    * @example "123"
@@ -3764,11 +3782,12 @@ export interface DescribeImageXCdnErrorCodeAllBody {
   /**
    * 需要匹配的域名，不传则匹配所有域名。
    * 需要匹配的域名，不传则匹配所有域名
+   * @example "["d1"]"
    */
   Domain?: string[];
   /**
    * 获取数据结束时间点，需在起始时间点之后。
-   * * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
+   * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
    * 获取数据结束时间点，需在起始时间点之后。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00
    * @example "2019-06-27T15:00:00+08:00"
    */
@@ -3776,12 +3795,13 @@ export interface DescribeImageXCdnErrorCodeAllBody {
   /**
    * 需要匹配的自定义维度项 。
    * 需要匹配的自定义维度项
+   * @example "-"
    */
   ExtraDims?: {
     /**
      * 自定义维度名称。
      * :::tip
-     * 您可以通过调用[获取自定义维度列表](https://www.volcengine.com/docs/508/34554)来获取。
+     * 您可以通过调用[获取自定义维度列表](https://www.volcengine.com/docs/508/1213048)来获取。
      * :::
      * 自定义维度名称。
      * @example "access"
@@ -3790,14 +3810,15 @@ export interface DescribeImageXCdnErrorCodeAllBody {
     /**
      * 需要匹配的对应维度值
      * :::tip
-     * 您可以通过调用[获取自定义维度值](https://www.volcengine.com/docs/508/34555)来获取。
+     * 您可以通过调用[获取自定义维度值](https://www.volcengine.com/docs/508/1213050)来获取。
      * :::
      * 需要匹配的对应维度值
+     * @example "["4g"]"
      */
     Vals: string[];
   }[];
   /**
-   * 聚合维度。
+   * 聚合维度。取值如下所示：
    * * `Domain`：域名；
    * * `ErrorCode`：错误码；
    * * `Region`：地区；
@@ -3811,7 +3832,7 @@ export interface DescribeImageXCdnErrorCodeAllBody {
    */
   GroupBy: string;
   /**
-   * 需要匹配的图片类型，不传则匹配所有图片类型。
+   * 需要匹配的图片类型，不传则匹配所有图片类型。取值如下所示：
    * - `GIF`
    * - `PNG`
    * - `JPEG`
@@ -3831,10 +3852,11 @@ export interface DescribeImageXCdnErrorCodeAllBody {
    * AWEBP
    * VVIC
    * 其他
+   * @example "["PNG"]"
    */
   ImageType?: string[];
   /**
-   * 需要匹配的运营商名称，不传则匹配所有运营商。支持取值如下：
+   * 需要匹配的运营商名称，不传则匹配所有运营商。取值如下所示：
    * - `电信`
    * - `联通`
    * - `移动`
@@ -3850,6 +3872,7 @@ export interface DescribeImageXCdnErrorCodeAllBody {
    * 鹏博士
    * 教育网
    * 其他
+   * @example "["电信"]"
    */
   Isp?: string[];
   /**
@@ -3865,9 +3888,11 @@ export interface DescribeImageXCdnErrorCodeAllBody {
    */
   OS?: string;
   /**
-   * 是否升序排序。不传则默认降序排序，默认降序排序。
+   * 是否升序排序。取值如下所示：
+   * - `true`：是，表示升序排序。
+   * - `false`：（默认）否，表示降序排序。
    * 是否升序排序。不传则默认降序排序。
-   * @example "false"
+   * @example "true"
    */
   OrderAsc?: boolean;
   /**
@@ -3885,11 +3910,12 @@ export interface DescribeImageXCdnErrorCodeAllBody {
   /**
    * 需要匹配的 SDK 版本，不传则匹配所有版本.
    * 需要匹配的SDK版本，不传则匹配所有版本
+   * @example "["1.2.0"]"
    */
   SdkVer?: string[];
   /**
    * 获取数据起始时间点。
-   * * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
+   * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
    * 获取数据起始时间点。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00
    * @example "2019-06-27T13:00:00+08:00"
    */
@@ -3913,11 +3939,13 @@ export interface DescribeImageXCdnErrorCodeAllRes {
     /**
      * 错误码数据。
      * 错误码数据
+     * @example "-"
      */
     ErrorCodeData: {
       /**
        * 当`GroupBy`取值**非**`ErrorCode`时出现，表示错误码详细信息。
        * 当GroupBy取值非ErrorCode时出现，表示错误码详细信息。
+       * @example "-"
        */
       Details?: {
         /**
@@ -3993,12 +4021,13 @@ export interface DescribeImageXCdnErrorCodeByTimeBody {
   /**
    * 需要匹配的 App 版本，不传则匹配 App 的所有版本。
    * 需要匹配的 App 版本，不传则匹配 App 的所有版本。
+   * @example "["1.2.0"]"
    */
   AppVer?: string[];
   /**
-   * 应用 ID。默认为空，不传则匹配账号下的所有的 App ID。
+   * 应用 ID。默认为空，不传则匹配账号下的所有的 AppID。
    * :::tip
-   * 您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/19511)的方式获取所需的 AppID。
+   * 您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/1213042)的方式获取所需的 AppID。
    * :::
    * 应用 ID。默认为空，匹配账号下的所有的App ID。
    * @example "123"
@@ -4017,11 +4046,12 @@ export interface DescribeImageXCdnErrorCodeByTimeBody {
   /**
    * 需要匹配的域名，不传则匹配所有域名。
    * 需要匹配的域名，不传则匹配所有域名
+   * @example "["d1"]"
    */
   Domain?: string[];
   /**
    * 获取数据结束时间点，需在起始时间点之后。
-   * * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
+   * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
    * 获取数据结束时间点，需在起始时间点之后。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00
    * @example "2019-06-27T15:00:00+08:00"
    */
@@ -4029,12 +4059,13 @@ export interface DescribeImageXCdnErrorCodeByTimeBody {
   /**
    * 需要匹配的自定义维度项 。
    * 需要匹配的自定义维度项
+   * @example "-"
    */
   ExtraDims?: {
     /**
      * 自定义维度名称。
      * :::tip
-     * 您可以通过调用[获取自定义维度列表](https://www.volcengine.com/docs/508/34554)来获取。
+     * 您可以通过调用[获取自定义维度列表](https://www.volcengine.com/docs/508/1213048)来获取。
      * :::
      * 自定义维度名称。
      * @example "access"
@@ -4043,14 +4074,15 @@ export interface DescribeImageXCdnErrorCodeByTimeBody {
     /**
      * 需要匹配的对应维度值
      * :::tip
-     * 您可以通过调用[获取自定义维度值](https://www.volcengine.com/docs/508/34555)来获取。
+     * 您可以通过调用[获取自定义维度值](https://www.volcengine.com/docs/508/1213050)来获取。
      * :::
      * 需要匹配的对应维度值
+     * @example "["4g"]"
      */
     Vals: string[];
   }[];
   /**
-   * 返回数据的时间粒度。
+   * 返回数据的时间粒度。取值如下所示：
    * * `5m`：5 分钟；
    * * `1h`：1 小时；
    * * `1d`：1 天。
@@ -4062,7 +4094,7 @@ export interface DescribeImageXCdnErrorCodeByTimeBody {
    */
   Granularity: string;
   /**
-   * 需要匹配的图片类型，不传则匹配所有图片类型。
+   * 需要匹配的图片类型，不传则匹配所有图片类型。取值如下所示：
    * - `GIF`
    * - `PNG`
    * - `JPEG`
@@ -4082,10 +4114,11 @@ export interface DescribeImageXCdnErrorCodeByTimeBody {
    * AWEBP
    * VVIC
    * 其他
+   * @example "["PNG"]"
    */
   ImageType?: string[];
   /**
-   * 需要匹配的运营商名称，不传则匹配所有运营商。支持取值如下：
+   * 需要匹配的运营商名称，不传则匹配所有运营商。取值如下所示：
    * - `电信`
    * - `联通`
    * - `移动`
@@ -4101,6 +4134,7 @@ export interface DescribeImageXCdnErrorCodeByTimeBody {
    * 鹏博士
    * 教育网
    * 其他
+   * @example "["电信"]"
    */
   Isp?: string[];
   /**
@@ -4124,11 +4158,12 @@ export interface DescribeImageXCdnErrorCodeByTimeBody {
   /**
    * 需要匹配的 SDK 版本，不传则匹配所有版本.
    * 需要匹配的SDK版本，不传则匹配所有版本
+   * @example "["1.2.0"]"
    */
   SdkVer?: string[];
   /**
    * 获取数据起始时间点。
-   * * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
+   * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
    * 获取数据起始时间点。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00
    * @example "2019-06-27T13:00:00+08:00"
    */
@@ -4152,6 +4187,7 @@ export interface DescribeImageXCdnErrorCodeByTimeRes {
     /**
      * 所有错误码数据。
      * 所有错误码数据。
+     * @example "-"
      */
     ErrorCodeData: {
       /**
@@ -4163,6 +4199,7 @@ export interface DescribeImageXCdnErrorCodeByTimeRes {
       /**
        * 错误码对应的时序数据。
        * 错误码对应的时序数据。
+       * @example "-"
        */
       Data: {
         /**
@@ -4172,8 +4209,7 @@ export interface DescribeImageXCdnErrorCodeByTimeRes {
          */
         Count: number;
         /**
-         * 数据对应时间点。
-         * * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`。
+         * 数据对应时间点。日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`。
          * 数据对应时间点，按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。
          * @example "2023-01-01T00:00:00+08:00"
          */
@@ -4199,12 +4235,13 @@ export interface DescribeImageXCdnProtocolRateByTimeBody {
   /**
    * 需要匹配的 App 版本，不传则匹配 App 的所有版本。
    * 需要匹配的 App 版本，不传则匹配 App 的所有版本。
+   * @example "["1.2.0"]"
    */
   AppVer?: string[];
   /**
-   * 应用 ID。默认为空，不传则匹配账号下的所有的 App ID。
+   * 应用 ID。默认为空，不传则匹配账号下的所有的 AppID。
    * :::tip
-   * 您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/19511)的方式获取所需的 AppID。
+   * 您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/1213042)的方式获取所需的 AppID。
    * :::
    * 应用 ID。默认为空，匹配账号下的所有的App ID。
    * @example "123"
@@ -4223,11 +4260,12 @@ export interface DescribeImageXCdnProtocolRateByTimeBody {
   /**
    * 需要匹配的域名，不传则匹配所有域名。
    * 需要匹配的域名，不传则匹配所有域名
+   * @example "["d1"]"
    */
   Domain?: string[];
   /**
    * 获取数据结束时间点，需在起始时间点之后。
-   * * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
+   * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
    * 获取数据结束时间点，需在起始时间点之后。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00
    * @example "2019-06-27T15:00:00+08:00"
    */
@@ -4235,12 +4273,13 @@ export interface DescribeImageXCdnProtocolRateByTimeBody {
   /**
    * 需要匹配的自定义维度项 。
    * 需要匹配的自定义维度项
+   * @example "-"
    */
   ExtraDims?: {
     /**
      * 自定义维度名称。
      * :::tip
-     * 您可以通过调用[获取自定义维度列表](https://www.volcengine.com/docs/508/34554)来获取。
+     * 您可以通过调用[获取自定义维度列表](https://www.volcengine.com/docs/508/1213048)来获取。
      * :::
      * 自定义维度名称。
      * @example "access"
@@ -4249,14 +4288,15 @@ export interface DescribeImageXCdnProtocolRateByTimeBody {
     /**
      * 需要匹配的对应维度值
      * :::tip
-     * 您可以通过调用[获取自定义维度值](https://www.volcengine.com/docs/508/34555)来获取。
+     * 您可以通过调用[获取自定义维度值](https://www.volcengine.com/docs/508/1213050)来获取。
      * :::
      * 需要匹配的对应维度值
+     * @example "["4g"]"
      */
     Vals: string[];
   }[];
   /**
-   * 返回数据的时间粒度。
+   * 返回数据的时间粒度。取值如下所示：
    * * `5m`：5 分钟；
    * * `1h`：1 小时；
    * * `1d`：1 天。
@@ -4268,7 +4308,7 @@ export interface DescribeImageXCdnProtocolRateByTimeBody {
    */
   Granularity: string;
   /**
-   * 需要匹配的图片类型，不传则匹配所有图片类型。
+   * 需要匹配的图片类型，不传则匹配所有图片类型。取值如下所示：
    * - `GIF`
    * - `PNG`
    * - `JPEG`
@@ -4288,10 +4328,11 @@ export interface DescribeImageXCdnProtocolRateByTimeBody {
    * AWEBP
    * VVIC
    * 其他
+   * @example "["PNG"]"
    */
   ImageType?: string[];
   /**
-   * 需要匹配的运营商名称，不传则匹配所有运营商。支持取值如下：
+   * 需要匹配的运营商名称，不传则匹配所有运营商。取值如下所示：
    * - `电信`
    * - `联通`
    * - `移动`
@@ -4307,6 +4348,7 @@ export interface DescribeImageXCdnProtocolRateByTimeBody {
    * 鹏博士
    * 教育网
    * 其他
+   * @example "["电信"]"
    */
   Isp?: string[];
   /**
@@ -4330,11 +4372,12 @@ export interface DescribeImageXCdnProtocolRateByTimeBody {
   /**
    * 需要匹配的 SDK 版本，不传则匹配所有版本.
    * 需要匹配的SDK版本，不传则匹配所有版本
+   * @example "["1.2.0"]"
    */
   SdkVer?: string[];
   /**
    * 获取数据起始时间点。
-   * * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
+   * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
    * 获取数据起始时间点。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00
    * @example "2019-06-27T13:00:00+08:00"
    */
@@ -4358,6 +4401,7 @@ export interface DescribeImageXCdnProtocolRateByTimeRes {
     /**
      * 各协议占比数据。
      * 各协议占比数据
+     * @example "-"
      */
     ProtocolRateData: {
       /**
@@ -4369,6 +4413,7 @@ export interface DescribeImageXCdnProtocolRateByTimeRes {
       /**
        * 对应的协议占比数据列表。
        * 对应的协议占比数据列表。
+       * @example "-"
        */
       Data: {
         /**
@@ -4378,8 +4423,7 @@ export interface DescribeImageXCdnProtocolRateByTimeRes {
          */
         Count: number;
         /**
-         * 数据对应时间点。
-         * * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`。
+         * 数据对应时间点。日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`。
          * 数据对应时间点，按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。
          * @example "2023-01-01T00:00:00+08:00"
          */
@@ -4408,12 +4452,13 @@ export interface DescribeImageXCdnReuseRateAllBody {
   /**
    * 需要匹配的 App 版本，不传则匹配 App 的所有版本。
    * 需要匹配的 App 版本，不传则匹配 App 的所有版本。
+   * @example "["1.2.0"]"
    */
   AppVer?: string[];
   /**
-   * 应用 ID。默认为空，不传则匹配账号下的所有的 App ID。
+   * 应用 ID。默认为空，不传则匹配账号下的所有的 AppID。
    * :::tip
-   * 您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/19511)的方式获取所需的 AppID。
+   * 您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/1213042)的方式获取所需的 AppID。
    * :::
    * 应用 ID。默认为空，匹配账号下的所有的App ID。
    * @example "123"
@@ -4432,11 +4477,12 @@ export interface DescribeImageXCdnReuseRateAllBody {
   /**
    * 需要匹配的域名，不传则匹配所有域名。
    * 需要匹配的域名，不传则匹配所有域名
+   * @example "["d1"]"
    */
   Domain?: string[];
   /**
    * 获取数据结束时间点，需在起始时间点之后。
-   * * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
+   * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
    * 获取数据结束时间点，需在起始时间点之后。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00
    * @example "2019-06-27T15:00:00+08:00"
    */
@@ -4444,12 +4490,13 @@ export interface DescribeImageXCdnReuseRateAllBody {
   /**
    * 需要匹配的自定义维度项 。
    * 需要匹配的自定义维度项
+   * @example "-"
    */
   ExtraDims?: {
     /**
      * 自定义维度名称。
      * :::tip
-     * 您可以通过调用[获取自定义维度列表](https://www.volcengine.com/docs/508/34554)来获取。
+     * 您可以通过调用[获取自定义维度列表](https://www.volcengine.com/docs/508/1213048)来获取。
      * :::
      * 自定义维度名称。
      * @example "access"
@@ -4458,14 +4505,15 @@ export interface DescribeImageXCdnReuseRateAllBody {
     /**
      * 需要匹配的对应维度值
      * :::tip
-     * 您可以通过调用[获取自定义维度值](https://www.volcengine.com/docs/508/34555)来获取。
+     * 您可以通过调用[获取自定义维度值](https://www.volcengine.com/docs/508/1213050)来获取。
      * :::
      * 需要匹配的对应维度值
+     * @example "["4g"]"
      */
     Vals: string[];
   }[];
   /**
-   * 聚合维度
+   * 聚合维度，取值如下所示：
    * - `Domain`：域名；
    * - `Region`：地区；
    * - `Isp`：运营商。
@@ -4477,7 +4525,7 @@ export interface DescribeImageXCdnReuseRateAllBody {
    */
   GroupBy: string;
   /**
-   * 需要匹配的图片类型，不传则匹配所有图片类型。
+   * 需要匹配的图片类型，不传则匹配所有图片类型。取值如下所示：
    * - `GIF`
    * - `PNG`
    * - `JPEG`
@@ -4497,10 +4545,11 @@ export interface DescribeImageXCdnReuseRateAllBody {
    * AWEBP
    * VVIC
    * 其他
+   * @example "["PNG"]"
    */
   ImageType?: string[];
   /**
-   * 需要匹配的运营商名称，不传则匹配所有运营商。支持取值如下：
+   * 需要匹配的运营商名称，不传则匹配所有运营商。取值如下所示：
    * - `电信`
    * - `联通`
    * - `移动`
@@ -4516,6 +4565,7 @@ export interface DescribeImageXCdnReuseRateAllBody {
    * 鹏博士
    * 教育网
    * 其他
+   * @example "["电信"]"
    */
   Isp?: string[];
   /**
@@ -4531,13 +4581,15 @@ export interface DescribeImageXCdnReuseRateAllBody {
    */
   OS?: string;
   /**
+   * 是否升序排序。取值如下所示：
+   * - `true`：是，表示升序排序。
+   * - `false`：（默认）否，表示降序排序。
    * 是否升序排序。不传则默认降序排序。
-   * 是否升序排序。不传则默认降序排序。
-   * @example "false"
+   * @example "true"
    */
   OrderAsc?: boolean;
   /**
-   * 维度区分，不传或者传空默认按上报量排序。
+   * 维度区分，不传或者传空默认按上报量排序。取值如下所示：
    * * `ReuseRate`：按连接复用率排序；
    * * `Count`：按上报量排序。
    * 维度区分，不传或者传空默认按上报量排序。
@@ -4555,11 +4607,12 @@ export interface DescribeImageXCdnReuseRateAllBody {
   /**
    * 需要匹配的 SDK 版本，不传则匹配所有版本.
    * 需要匹配的SDK版本，不传则匹配所有版本
+   * @example "["1.2.0"]"
    */
   SdkVer?: string[];
   /**
    * 获取数据起始时间点。
-   * * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
+   * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
    * 获取数据起始时间点。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00
    * @example "2019-06-27T13:00:00+08:00"
    */
@@ -4583,6 +4636,7 @@ export interface DescribeImageXCdnReuseRateAllRes {
     /**
      * 连接复用率数据。
      * 连接复用率数据。
+     * @example "-"
      */
     ReuseRateData: {
       /**
@@ -4634,12 +4688,13 @@ export interface DescribeImageXCdnReuseRateByTimeBody {
   /**
    * 需要匹配的 App 版本，不传则匹配 App 的所有版本。
    * 需要匹配的 App 版本，不传则匹配 App 的所有版本。
+   * @example "["1.2.0"]"
    */
   AppVer?: string[];
   /**
-   * 应用 ID。默认为空，不传则匹配账号下的所有的 App ID。
+   * 应用 ID。默认为空，不传则匹配账号下的所有的 AppID。
    * :::tip
-   * 您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/19511)的方式获取所需的 AppID。
+   * 您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/1213042)的方式获取所需的 AppID。
    * :::
    * 应用 ID。默认为空，匹配账号下的所有的App ID。
    * @example "123"
@@ -4658,11 +4713,12 @@ export interface DescribeImageXCdnReuseRateByTimeBody {
   /**
    * 需要匹配的域名，不传则匹配所有域名。
    * 需要匹配的域名，不传则匹配所有域名
+   * @example "["d1"]"
    */
   Domain?: string[];
   /**
    * 获取数据结束时间点，需在起始时间点之后。
-   * * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
+   * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
    * 获取数据结束时间点，需在起始时间点之后。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00
    * @example "2019-06-27T15:00:00+08:00"
    */
@@ -4670,12 +4726,13 @@ export interface DescribeImageXCdnReuseRateByTimeBody {
   /**
    * 需要匹配的自定义维度项 。
    * 需要匹配的自定义维度项
+   * @example "-"
    */
   ExtraDims?: {
     /**
      * 自定义维度名称。
      * :::tip
-     * 您可以通过调用[获取自定义维度列表](https://www.volcengine.com/docs/508/34554)来获取。
+     * 您可以通过调用[获取自定义维度列表](https://www.volcengine.com/docs/508/1213048)来获取。
      * :::
      * 自定义维度名称。
      * @example "access"
@@ -4684,14 +4741,15 @@ export interface DescribeImageXCdnReuseRateByTimeBody {
     /**
      * 需要匹配的对应维度值
      * :::tip
-     * 您可以通过调用[获取自定义维度值](https://www.volcengine.com/docs/508/34555)来获取。
+     * 您可以通过调用[获取自定义维度值](https://www.volcengine.com/docs/508/1213050)来获取。
      * :::
      * 需要匹配的对应维度值
+     * @example "["4g"]"
      */
     Vals: string[];
   }[];
   /**
-   * 返回数据的时间粒度。
+   * 返回数据的时间粒度。取值如下所示：
    * * `5m`：5 分钟；
    * * `1h`：1 小时；
    * * `1d`：1 天。
@@ -4705,13 +4763,13 @@ export interface DescribeImageXCdnReuseRateByTimeBody {
   /**
    * 拆分维度。默认为空，不拆分。支持取值：
    * - 公共维度：`Appid`、`OS`、`AppVer`、`SdkVer`、`ImageType`、`Country`、`Province`、`Isp`、`Domain`
-   * - 自定义维度：您可以通过调用 [GetImageXQueryDims](https://www.volcengine.com/docs/508/34554)接口获取自定义维度指标。
+   * - 自定义维度：您可以通过调用 [获取自定义维度列表](https://www.volcengine.com/docs/508/1213048)接口获取自定义维度指标。
    * 拆分维度。默认为空，表示不拆分。支持取值：公共维度（Appid,OS,AppVer,SdkVer,ImageType,Country,Province,Isp,Domain），自定义维度（通过"获取自定义维度列表"接口获取）
    * @example "OS"
    */
   GroupBy?: string;
   /**
-   * 需要匹配的图片类型，不传则匹配所有图片类型。
+   * 需要匹配的图片类型，不传则匹配所有图片类型。取值如下所示：
    * - `GIF`
    * - `PNG`
    * - `JPEG`
@@ -4731,10 +4789,11 @@ export interface DescribeImageXCdnReuseRateByTimeBody {
    * AWEBP
    * VVIC
    * 其他
+   * @example "["PNG"]"
    */
   ImageType?: string[];
   /**
-   * 需要匹配的运营商名称，不传则匹配所有运营商。支持取值如下：
+   * 需要匹配的运营商名称，不传则匹配所有运营商。取值如下所示：
    * - `电信`
    * - `联通`
    * - `移动`
@@ -4750,6 +4809,7 @@ export interface DescribeImageXCdnReuseRateByTimeBody {
    * 鹏博士
    * 教育网
    * 其他
+   * @example "["电信"]"
    */
   Isp?: string[];
   /**
@@ -4773,11 +4833,12 @@ export interface DescribeImageXCdnReuseRateByTimeBody {
   /**
    * 需要匹配的 SDK 版本，不传则匹配所有版本.
    * 需要匹配的SDK版本，不传则匹配所有版本
+   * @example "["1.2.0"]"
    */
   SdkVer?: string[];
   /**
    * 获取数据起始时间点。
-   * * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
+   * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
    * 获取数据起始时间点。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00
    * @example "2019-06-27T13:00:00+08:00"
    */
@@ -4801,6 +4862,7 @@ export interface DescribeImageXCdnReuseRateByTimeRes {
     /**
      * 连接复用率数据。
      * 连接复用率数据
+     * @example "-"
      */
     ReuseRateData: {
       /**
@@ -4812,6 +4874,7 @@ export interface DescribeImageXCdnReuseRateByTimeRes {
       /**
        * 对应的连接复用率数据列表。
        * 对应的连接复用率数据列表。
+       * @example "-"
        */
       Data: {
         /**
@@ -4822,7 +4885,7 @@ export interface DescribeImageXCdnReuseRateByTimeRes {
         Count: number;
         /**
          * 数据对应时间点。
-         * * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`。
+         * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`。
          * 数据对应时间点，按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。
          * @example "2023-01-01T00:00:00+08:00"
          */
@@ -4849,12 +4912,13 @@ export interface DescribeImageXCdnSuccessRateAllBody {
   /**
    * 需要匹配的 App 版本，不传则匹配 App 的所有版本。
    * 需要匹配的 App 版本，不传则匹配 App 的所有版本。
+   * @example "["1.0.1"]"
    */
   AppVer?: string[];
   /**
-   * 应用 ID。默认为空，不传则匹配账号下的所有的 App ID。
+   * 应用 ID。默认为空，不传则匹配账号下的所有的 AppID。
    * :::tip
-   * 您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/19511)的方式获取所需的 AppID。
+   * 您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/1213042)的方式获取所需的 AppID。
    * :::
    * 应用 ID。默认为空，匹配账号下的所有的App ID。
    * @example "123"
@@ -4873,6 +4937,7 @@ export interface DescribeImageXCdnSuccessRateAllBody {
   /**
    * 需要匹配的域名，不传则匹配所有域名。
    * 需要匹配的域名，不传则匹配所有域名
+   * @example "["d1"]"
    */
   Domain?: string[];
   /**
@@ -4885,12 +4950,13 @@ export interface DescribeImageXCdnSuccessRateAllBody {
   /**
    * 需要匹配的自定义维度项。
    * 需要匹配的自定义维度项
+   * @example "-"
    */
   ExtraDims?: {
     /**
      * 自定义维度名称。
      * :::tip
-     * 您可以通过调用[获取自定义维度列表](https://www.volcengine.com/docs/508/34554)来获取。
+     * 您可以通过调用[获取自定义维度列表](https://www.volcengine.com/docs/508/1213048)来获取。
      * :::
      * 自定义维度名称。
      * @example "access"
@@ -4899,14 +4965,15 @@ export interface DescribeImageXCdnSuccessRateAllBody {
     /**
      * 需要匹配的对应维度值。
      * :::tip
-     * 您可以通过调用[获取自定义维度值](https://www.volcengine.com/docs/508/34555)来获取。
+     * 您可以通过调用[获取自定义维度值](https://www.volcengine.com/docs/508/1213050)来获取。
      * :::
      * 需要匹配的对应维度值
+     * @example "["4g"]"
      */
     Vals: string[];
   }[];
   /**
-   * 聚合维度。
+   * 聚合维度。取值如下所示：
    * * `Domain`：域名；
    * * `Region`：地区；
    * * `Isp`：运营商。
@@ -4918,7 +4985,7 @@ export interface DescribeImageXCdnSuccessRateAllBody {
    */
   GroupBy: string;
   /**
-   * 需要匹配的图片类型，不传则匹配所有图片类型。
+   * 需要匹配的图片类型，不传则匹配所有图片类型。取值如下所示：
    * - `GIF`
    * - `PNG`
    * - `JPEG`
@@ -4938,10 +5005,11 @@ export interface DescribeImageXCdnSuccessRateAllBody {
    * AWEBP
    * VVIC
    * 其他
+   * @example "["PNG"]"
    */
   ImageType?: string[];
   /**
-   * 需要匹配的运营商名称，不传则匹配所有运营商。支持取值如下：
+   * 需要匹配的运营商名称，不传则匹配所有运营商。取值如下所示：
    * - `电信`
    * - `联通`
    * - `移动`
@@ -4957,6 +5025,7 @@ export interface DescribeImageXCdnSuccessRateAllBody {
    * 鹏博士
    * 教育网
    * 其他
+   * @example "["电信"]"
    */
   Isp?: string[];
   /**
@@ -4972,9 +5041,11 @@ export interface DescribeImageXCdnSuccessRateAllBody {
    */
   OS?: string;
   /**
+   * 是否升序排序。取值如下所示：
+   * - `true`：是，表示升序排序。
+   * - `false`：（默认）否，表示降序排序。
    * 是否升序排序。不传则默认降序排序。
-   * 是否升序排序。不传则默认降序排序。
-   * @example "false"
+   * @example "true"
    */
   OrderAsc?: boolean;
   /**
@@ -4996,6 +5067,7 @@ export interface DescribeImageXCdnSuccessRateAllBody {
   /**
    * 需要匹配的 SDK 版本，不传则匹配所有版本。
    * 需要匹配的SDK版本，不传则匹配所有版本
+   * @example "["1.34.1"]"
    */
   SdkVer?: string[];
   /**
@@ -5024,6 +5096,7 @@ export interface DescribeImageXCdnSuccessRateAllRes {
     /**
      * 网络成功率数据。
      * 网络成功率数据。
+     * @example "-"
      */
     SuccessRateData: {
       /**
@@ -5075,12 +5148,13 @@ export interface DescribeImageXCdnSuccessRateByTimeBody {
   /**
    * 需要匹配的 App 版本，不传则匹配 App 的所有版本。
    * 需要匹配的 App 版本，不传则匹配 App 的所有版本。
+   * @example "["1.2.0"]"
    */
   AppVer?: string[];
   /**
-   * 应用 ID。默认为空，不传则匹配账号下的所有的 App ID。
+   * 应用 ID。默认为空，不传则匹配账号下的所有的 AppID。
    * :::tip
-   * 您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/19511)的方式获取所需的 AppID。
+   * 您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/1213042)的方式获取所需的 AppID。
    * :::
    * 应用 ID。默认为空，匹配账号下的所有的App ID。
    * @example "123"
@@ -5099,6 +5173,7 @@ export interface DescribeImageXCdnSuccessRateByTimeBody {
   /**
    * 需要匹配的域名，不传则匹配所有域名。
    * 需要匹配的域名，不传则匹配所有域名
+   * @example "["d1"]"
    */
   Domain?: string[];
   /**
@@ -5111,12 +5186,13 @@ export interface DescribeImageXCdnSuccessRateByTimeBody {
   /**
    * 需要匹配的自定义维度项 。
    * 需要匹配的自定义维度项
+   * @example "-"
    */
   ExtraDims?: {
     /**
      * 自定义维度名称。
      * :::tip
-     * 您可以通过调用[获取自定义维度列表](https://www.volcengine.com/docs/508/34554)来获取。
+     * 您可以通过调用[获取自定义维度列表](https://www.volcengine.com/docs/508/1213048)来获取。
      * :::
      * 自定义维度名称。
      * @example "access"
@@ -5125,14 +5201,15 @@ export interface DescribeImageXCdnSuccessRateByTimeBody {
     /**
      * 需要匹配的对应维度值
      * :::tip
-     * 您可以通过调用[获取自定义维度值](https://www.volcengine.com/docs/508/34555)来获取。
+     * 您可以通过调用[获取自定义维度值](https://www.volcengine.com/docs/508/1213050)来获取。
      * :::
      * 需要匹配的对应维度值
+     * @example "["4g"]"
      */
     Vals: string[];
   }[];
   /**
-   * 返回数据的时间粒度。
+   * 返回数据的时间粒度。取值如下所示：
    * * `5m`：5 分钟；
    * * `1h`：1 小时；
    * * `1d`：1 天。
@@ -5146,13 +5223,13 @@ export interface DescribeImageXCdnSuccessRateByTimeBody {
   /**
    * 拆分维度。默认为空，不拆分。支持取值：
    * - 公共维度：`Appid`、`OS`、`AppVer`、`SdkVer`、`ImageType`、`Country`、`Province`、`Isp`、`Domain`
-   * - 自定义维度：您可以通过调用 [GetImageXQueryDims](https://www.volcengine.com/docs/508/34554)接口获取自定义维度指标。
+   * - 自定义维度：您可以通过调用 [获取自定义维度列表](https://www.volcengine.com/docs/508/1213048)接口获取自定义维度指标。
    * 拆分维度。默认为空，表示不拆分。支持取值：公共维度（Appid,OS,AppVer,SdkVer,ImageType,Country,Province,Isp,Domain），自定义维度（通过"获取自定义维度列表"接口获取）
    * @example "OS"
    */
   GroupBy?: string;
   /**
-   * 需要匹配的图片类型，不传则匹配所有图片类型。
+   * 需要匹配的图片类型，不传则匹配所有图片类型。取值如下所示：
    * - `GIF`
    * - `PNG`
    * - `JPEG`
@@ -5172,10 +5249,11 @@ export interface DescribeImageXCdnSuccessRateByTimeBody {
    * AWEBP
    * VVIC
    * 其他
+   * @example "["PNG"]"
    */
   ImageType?: string[];
   /**
-   * 需要匹配的运营商名称，不传则匹配所有运营商。支持取值如下：
+   * 需要匹配的运营商名称，不传则匹配所有运营商。取值如下所示：
    * - `电信`
    * - `联通`
    * - `移动`
@@ -5191,6 +5269,7 @@ export interface DescribeImageXCdnSuccessRateByTimeBody {
    * 鹏博士
    * 教育网
    * 其他
+   * @example "["电信"]"
    */
   Isp?: string[];
   /**
@@ -5214,6 +5293,7 @@ export interface DescribeImageXCdnSuccessRateByTimeBody {
   /**
    * 需要匹配的 SDK 版本，不传则匹配所有版本.
    * 需要匹配的SDK版本，不传则匹配所有版本
+   * @example "["1.2.0"]"
    */
   SdkVer?: string[];
   /**
@@ -5242,6 +5322,7 @@ export interface DescribeImageXCdnSuccessRateByTimeRes {
     /**
      * 网络成功率数据
      * 网络成功率数据
+     * @example "-"
      */
     SuccessRateData: {
       /**
@@ -5253,6 +5334,7 @@ export interface DescribeImageXCdnSuccessRateByTimeRes {
       /**
        * 具体数据
        * 具体数据
+       * @example "-"
        */
       Data: {
         /**
@@ -5289,12 +5371,13 @@ export interface DescribeImageXClientCountByTimeBody {
   /**
    * 需要匹配的 App 版本，不传则匹配 App 的所有版本。
    * 需要匹配的 App 版本，不传则匹配 App 的所有版本。
+   * @example "["1.2.0"]"
    */
   AppVer?: string[];
   /**
-   * 应用 ID。默认为空，不传则匹配账号下的所有的 App ID。
+   * 应用 ID。默认为空，不传则匹配账号下的所有的 AppID。
    * :::tip
-   * 您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/19511)的方式获取所需的 AppID。
+   * 您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/1213042)的方式获取所需的 AppID。
    * :::
    * 应用 ID。默认为空，匹配账号下的所有的App ID。
    * @example "123"
@@ -5313,11 +5396,12 @@ export interface DescribeImageXClientCountByTimeBody {
   /**
    * 需要匹配的域名，不传则匹配所有域名。
    * 需要匹配的域名，不传则匹配所有域名
+   * @example "["d1"]"
    */
   Domain?: string[];
   /**
    * 获取数据结束时间点，需在起始时间点之后。
-   * * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
+   * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
    * 获取数据结束时间点，需在起始时间点之后。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00
    * @example "2019-06-27T15:00:00+08:00"
    */
@@ -5325,12 +5409,13 @@ export interface DescribeImageXClientCountByTimeBody {
   /**
    * 需要匹配的自定义维度项 。
    * 需要匹配的自定义维度项
+   * @example "-"
    */
   ExtraDims?: {
     /**
      * 自定义维度名称。
      * :::tip
-     * 您可以通过调用[获取自定义维度列表](https://www.volcengine.com/docs/508/34554)来获取。
+     * 您可以通过调用[获取自定义维度列表](https://www.volcengine.com/docs/508/1213048)来获取。
      * :::
      * 自定义维度名称。
      * @example "access"
@@ -5339,14 +5424,15 @@ export interface DescribeImageXClientCountByTimeBody {
     /**
      * 需要匹配的对应维度值
      * :::tip
-     * 您可以通过调用[获取自定义维度值](https://www.volcengine.com/docs/508/34555)来获取。
+     * 您可以通过调用[获取自定义维度值](https://www.volcengine.com/docs/508/1213050)来获取。
      * :::
      * 需要匹配的对应维度值
+     * @example "["4g"]"
      */
     Vals: string[];
   }[];
   /**
-   * 返回数据的时间粒度。
+   * 返回数据的时间粒度。取值如下所示：
    * * `5m`：5 分钟；
    * * `1h`：1 小时；
    * * `1d`：1 天。
@@ -5360,13 +5446,13 @@ export interface DescribeImageXClientCountByTimeBody {
   /**
    * 拆分维度。默认为空，不拆分。支持取值：
    * - 公共维度：`Appid`、`OS`、`AppVer`、`SdkVer`、`ImageType`、`Country`、`Province`、`Isp`、`Domain`
-   * - 自定义维度：您可以通过调用 [GetImageXQueryDims](https://www.volcengine.com/docs/508/34554)接口获取自定义维度指标
+   * - 自定义维度：您可以通过调用 [获取自定义维度列表](https://www.volcengine.com/docs/508/1213048)接口获取自定义维度指标
    * 拆分维度。默认为空，表示不拆分。支持取值：公共维度（Appid,OS,AppVer,SdkVer,ImageType,Country,Province,Isp,Domain），自定义维度（通过"获取自定义维度列表"接口获取）
    * @example "OS"
    */
   GroupBy?: string;
   /**
-   * 需要匹配的图片类型，不传则匹配所有图片类型。
+   * 需要匹配的图片类型，不传则匹配所有图片类型。取值如下所示：
    * - `GIF`
    * - `PNG`
    * - `JPEG`
@@ -5386,10 +5472,11 @@ export interface DescribeImageXClientCountByTimeBody {
    * AWEBP
    * VVIC
    * 其他
+   * @example "["PNG"]"
    */
   ImageType?: string[];
   /**
-   * 需要匹配的运营商名称，不传则匹配所有运营商。支持取值如下：
+   * 需要匹配的运营商名称，不传则匹配所有运营商。取值如下所示：
    * - `电信`
    * - `联通`
    * - `移动`
@@ -5405,6 +5492,7 @@ export interface DescribeImageXClientCountByTimeBody {
    * 鹏博士
    * 教育网
    * 其他
+   * @example "["电信"]"
    */
   Isp?: string[];
   /**
@@ -5428,11 +5516,12 @@ export interface DescribeImageXClientCountByTimeBody {
   /**
    * 需要匹配的 SDK 版本，不传则匹配所有版本.
    * 需要匹配的SDK版本，不传则匹配所有版本
+   * @example "["1.2.0"]"
    */
   SdkVer?: string[];
   /**
    * 获取数据起始时间点。
-   * * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
+   * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
    * 获取数据起始时间点。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00
    * @example "2019-06-27T13:00:00+08:00"
    */
@@ -5456,6 +5545,7 @@ export interface DescribeImageXClientCountByTimeRes {
     /**
      * 客户端上报量数据。
      * 客户端上报量数据。
+     * @example "-"
      */
     ClientCountData: {
       /**
@@ -5467,6 +5557,7 @@ export interface DescribeImageXClientCountByTimeRes {
       /**
        * 对应的客户端上报量数据列表。
        * 对应的客户端上报量数据列表。
+       * @example "-"
        */
       Data: {
         /**
@@ -5476,8 +5567,7 @@ export interface DescribeImageXClientCountByTimeRes {
          */
         Count: number;
         /**
-         * 数据对应时间点。
-         * * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`。
+         * 数据对应时间点。日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`。
          * 数据对应时间点，按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。
          * @example "2023-01-01T00:00:00+08:00"
          */
@@ -5503,12 +5593,13 @@ export interface DescribeImageXClientDecodeDurationByTimeBody {
   /**
    * 需要匹配的 App 版本，不传则匹配 App 的所有版本。
    * 需要匹配的 App 版本，不传则匹配 App 的所有版本。
+   * @example "["1.2.0"]"
    */
   AppVer?: string[];
   /**
-   * 应用 ID。默认为空，不传则匹配账号下的所有的 App ID。
+   * 应用 ID。默认为空，不传则匹配账号下的所有的 AppID。
    * :::tip
-   * 您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/19511)的方式获取所需的 AppID。
+   * 您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/1213042)的方式获取所需的 AppID。
    * :::
    * 应用 ID。默认为空，匹配账号下的所有的App ID。
    * @example "123"
@@ -5527,11 +5618,12 @@ export interface DescribeImageXClientDecodeDurationByTimeBody {
   /**
    * 需要匹配的域名，不传则匹配所有域名。
    * 需要匹配的域名，不传则匹配所有域名
+   * @example "["d1"]"
    */
   Domain?: string[];
   /**
    * 获取数据结束时间点，需在起始时间点之后。
-   * * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
+   * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
    * 获取数据结束时间点，需在起始时间点之后。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00
    * @example "2019-06-27T15:00:00+08:00"
    */
@@ -5539,12 +5631,13 @@ export interface DescribeImageXClientDecodeDurationByTimeBody {
   /**
    * 需要匹配的自定义维度项 。
    * 需要匹配的自定义维度项
+   * @example "-"
    */
   ExtraDims?: {
     /**
      * 自定义维度名称。
      * :::tip
-     * 您可以通过调用[获取自定义维度列表](https://www.volcengine.com/docs/508/34554)来获取。
+     * 您可以通过调用[获取自定义维度列表](https://www.volcengine.com/docs/508/1213048)来获取。
      * :::
      * 自定义维度名称。
      * @example "access"
@@ -5553,14 +5646,15 @@ export interface DescribeImageXClientDecodeDurationByTimeBody {
     /**
      * 需要匹配的对应维度值
      * :::tip
-     * 您可以通过调用[获取自定义维度值](https://www.volcengine.com/docs/508/34555)来获取。
+     * 您可以通过调用[获取自定义维度值](https://www.volcengine.com/docs/508/1213050)来获取。
      * :::
      * 需要匹配的对应维度值
+     * @example "["4g"]"
      */
     Vals: string[];
   }[];
   /**
-   * 返回数据的时间粒度。
+   * 返回数据的时间粒度。取值如下所示：
    * * `5m`：5 分钟；
    * * `1h`：1 小时；
    * * `1d`：1 天。
@@ -5575,13 +5669,13 @@ export interface DescribeImageXClientDecodeDurationByTimeBody {
    * 拆分维度。默认为空，表示拆分分位数据。支持取值：
    * - `Duration`：表示拆分分位数据
    * - 公共维度：`Appid`、`OS`、`AppVer`、`SdkVer`、`ImageType`、`Country`、`Province`、`Isp`、`Domain`
-   * - 自定义维度：您可以通过调用 [GetImageXQueryDims](https://www.volcengine.com/docs/508/34554)接口获取自定义维度指标
+   * - 自定义维度：您可以通过调用 [获取自定义维度列表](https://www.volcengine.com/docs/508/1213048)接口获取自定义维度指标
    * 拆分维度。默认为空，表示拆分分位数据。支持取值：Duration（拆分分位数据）、公共维度（Appid,OS,AppVer,SdkVer,ImageType,Country,Province,Isp,Domain），自定义维度（通过"获取自定义维度列表"接口获取）
    * @example "Duration"
    */
   GroupBy?: string;
   /**
-   * 需要匹配的图片类型，不传则匹配所有图片类型。
+   * 需要匹配的图片类型，不传则匹配所有图片类型。取值如下所示：
    * - `GIF`
    * - `PNG`
    * - `JPEG`
@@ -5601,10 +5695,11 @@ export interface DescribeImageXClientDecodeDurationByTimeBody {
    * AWEBP
    * VVIC
    * 其他
+   * @example "["PNG"]"
    */
   ImageType?: string[];
   /**
-   * 需要匹配的运营商名称，不传则匹配所有运营商。支持取值如下：
+   * 需要匹配的运营商名称，不传则匹配所有运营商。取值如下所示：
    * - `电信`
    * - `联通`
    * - `移动`
@@ -5620,6 +5715,7 @@ export interface DescribeImageXClientDecodeDurationByTimeBody {
    * 鹏博士
    * 教育网
    * 其他
+   * @example "["电信"]"
    */
   Isp?: string[];
   /**
@@ -5643,11 +5739,12 @@ export interface DescribeImageXClientDecodeDurationByTimeBody {
   /**
    * 需要匹配的 SDK 版本，不传则匹配所有版本.
    * 需要匹配的SDK版本，不传则匹配所有版本
+   * @example "["1.2.0"]"
    */
   SdkVer?: string[];
   /**
    * 获取数据起始时间点。
-   * * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
+   * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
    * 获取数据起始时间点。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00
    * @example "2019-06-27T13:00:00+08:00"
    */
@@ -5671,6 +5768,7 @@ export interface DescribeImageXClientDecodeDurationByTimeRes {
     /**
      * 解码耗时数据。
      * 解码耗时数据
+     * @example "-"
      */
     DurationData: {
       /**
@@ -5682,6 +5780,7 @@ export interface DescribeImageXClientDecodeDurationByTimeRes {
       /**
        * 对应的解码耗时数据列表。
        * 对应的解码耗时数据列表。
+       * @example "-"
        */
       Data: {
         /**
@@ -5691,8 +5790,7 @@ export interface DescribeImageXClientDecodeDurationByTimeRes {
          */
         Count: number;
         /**
-         * 数据对应时间点。
-         * * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
+         * 数据对应时间点。日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
          * 数据对应时间点，按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。
          * @example "2023-01-01T00:00:00+08:00"
          */
@@ -5720,12 +5818,13 @@ export interface DescribeImageXClientDecodeSuccessRateByTimeBody {
   /**
    * 需要匹配的 App 版本，不传则匹配 App 的所有版本。
    * 需要匹配的 App 版本，不传则匹配 App 的所有版本。
+   * @example "["1.2.0"]"
    */
   AppVer?: string[];
   /**
-   * 应用 ID。默认为空，不传则匹配账号下的所有的 App ID。
+   * 应用 ID。默认为空，不传则匹配账号下的所有的 AppID。
    * :::tip
-   * 您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/19511)的方式获取所需的 AppID。
+   * 您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/1213042)的方式获取所需的 AppID。
    * :::
    * 应用 ID。默认为空，匹配账号下的所有的App ID。
    * @example "123"
@@ -5744,11 +5843,12 @@ export interface DescribeImageXClientDecodeSuccessRateByTimeBody {
   /**
    * 需要匹配的域名，不传则匹配所有域名。
    * 需要匹配的域名，不传则匹配所有域名
+   * @example "["d1"]"
    */
   Domain?: string[];
   /**
    * 获取数据结束时间点，需在起始时间点之后。
-   * * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
+   * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
    * 获取数据结束时间点，需在起始时间点之后。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00
    * @example "2019-06-27T15:00:00+08:00"
    */
@@ -5756,12 +5856,13 @@ export interface DescribeImageXClientDecodeSuccessRateByTimeBody {
   /**
    * 需要匹配的自定义维度项 。
    * 需要匹配的自定义维度项
+   * @example "-"
    */
   ExtraDims?: {
     /**
      * 自定义维度名称。
      * :::tip
-     * 您可以通过调用[获取自定义维度列表](https://www.volcengine.com/docs/508/34554)来获取。
+     * 您可以通过调用[获取自定义维度列表](https://www.volcengine.com/docs/508/1213048)来获取。
      * :::
      * 自定义维度名称。
      * @example "access"
@@ -5770,14 +5871,15 @@ export interface DescribeImageXClientDecodeSuccessRateByTimeBody {
     /**
      * 需要匹配的对应维度值
      * :::tip
-     * 您可以通过调用[获取自定义维度值](https://www.volcengine.com/docs/508/34555)来获取。
+     * 您可以通过调用[获取自定义维度值](https://www.volcengine.com/docs/508/1213050)来获取。
      * :::
      * 需要匹配的对应维度值
+     * @example "["4g"]"
      */
     Vals: string[];
   }[];
   /**
-   * 返回数据的时间粒度。
+   * 返回数据的时间粒度。取值如下所示：
    * * `5m`：5 分钟；
    * * `1h`：1 小时；
    * * `1d`：1 天。
@@ -5791,13 +5893,13 @@ export interface DescribeImageXClientDecodeSuccessRateByTimeBody {
   /**
    * 拆分维度。默认为空，不拆分。支持取值：
    * - 公共维度：`Appid`、`OS`、`AppVer`、`SdkVer`、`ImageType`、`Country`、`Province`、`Isp`、`Domain`
-   * - 自定义维度：您可以通过调用 [GetImageXQueryDims](https://www.volcengine.com/docs/508/34554)接口获取自定义维度指标。
+   * - 自定义维度：您可以通过调用 [获取自定义维度列表](https://www.volcengine.com/docs/508/1213048)接口获取自定义维度指标。
    * 拆分维度。默认为空，表示不拆分。支持取值：公共维度（Appid,OS,AppVer,SdkVer,ImageType,Country,Province,Isp,Domain），自定义维度（通过"获取自定义维度列表"接口获取）
    * @example "OS"
    */
   GroupBy?: string;
   /**
-   * 需要匹配的图片类型，不传则匹配所有图片类型。
+   * 需要匹配的图片类型，不传则匹配所有图片类型。取值如下所示：
    * - `GIF`
    * - `PNG`
    * - `JPEG`
@@ -5817,10 +5919,11 @@ export interface DescribeImageXClientDecodeSuccessRateByTimeBody {
    * AWEBP
    * VVIC
    * 其他
+   * @example "["PNG"]"
    */
   ImageType?: string[];
   /**
-   * 需要匹配的运营商名称，不传则匹配所有运营商。支持取值如下：
+   * 需要匹配的运营商名称，不传则匹配所有运营商。取值如下所示：
    * - `电信`
    * - `联通`
    * - `移动`
@@ -5836,6 +5939,7 @@ export interface DescribeImageXClientDecodeSuccessRateByTimeBody {
    * 鹏博士
    * 教育网
    * 其他
+   * @example "["电信"]"
    */
   Isp?: string[];
   /**
@@ -5859,11 +5963,12 @@ export interface DescribeImageXClientDecodeSuccessRateByTimeBody {
   /**
    * 需要匹配的 SDK 版本，不传则匹配所有版本.
    * 需要匹配的SDK版本，不传则匹配所有版本
+   * @example "["1.2.0"]"
    */
   SdkVer?: string[];
   /**
    * 获取数据起始时间点。
-   * * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
+   * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
    * 获取数据起始时间点。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00
    * @example "2019-06-27T13:00:00+08:00"
    */
@@ -5887,6 +5992,7 @@ export interface DescribeImageXClientDecodeSuccessRateByTimeRes {
     /**
      * 解码成功率数据。
      * 解码成功率数据
+     * @example "-"
      */
     SuccessRateData: {
       /**
@@ -5898,6 +6004,7 @@ export interface DescribeImageXClientDecodeSuccessRateByTimeRes {
       /**
        * 对应的解码成功率数据列表。
        * 对应的解码成功率数据列表。
+       * @example "-"
        */
       Data: {
         /**
@@ -5908,7 +6015,7 @@ export interface DescribeImageXClientDecodeSuccessRateByTimeRes {
         Count: number;
         /**
          * 数据对应时间点。
-         * * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`。
+         * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`。
          * 数据对应时间点，按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。
          * @example "2023-01-01T00:00:00+08:00"
          */
@@ -5935,12 +6042,13 @@ export interface DescribeImageXClientDemotionRateByTimeBody {
   /**
    * 需要匹配的 App 版本，不传则匹配 App 的所有版本。
    * 需要匹配的 App 版本，不传则匹配 App 的所有版本。
+   * @example "["1.2.0"]"
    */
   AppVer?: string[];
   /**
-   * 应用 ID。默认为空，不传则匹配账号下的所有的 App ID。
+   * 应用 ID。默认为空，不传则匹配账号下的所有的 AppID。
    * :::tip
-   * 您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/19511)的方式获取所需的 AppID。
+   * 您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/1213042)的方式获取所需的 AppID。
    * :::
    * 应用 ID。默认为空，匹配账号下的所有的App ID。
    * @example "123"
@@ -5972,11 +6080,12 @@ export interface DescribeImageXClientDemotionRateByTimeBody {
   /**
    * 需要匹配的域名，不传则匹配所有域名。
    * 需要匹配的域名，不传则匹配所有域名
+   * @example "["d1"]"
    */
   Domain?: string[];
   /**
    * 获取数据结束时间点，需在起始时间点之后。
-   * * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
+   * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
    * 获取数据结束时间点，需在起始时间点之后。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00
    * @example "2019-06-27T15:00:00+08:00"
    */
@@ -5984,12 +6093,13 @@ export interface DescribeImageXClientDemotionRateByTimeBody {
   /**
    * 需要匹配的自定义维度项 。
    * 需要匹配的自定义维度项
+   * @example "-"
    */
   ExtraDims?: {
     /**
      * 自定义维度名称。
      * :::tip
-     * 您可以通过调用[获取自定义维度列表](https://www.volcengine.com/docs/508/34554)来获取。
+     * 您可以通过调用[获取自定义维度列表](https://www.volcengine.com/docs/508/1213048)来获取。
      * :::
      * 自定义维度名称。
      * @example "access"
@@ -5998,14 +6108,15 @@ export interface DescribeImageXClientDemotionRateByTimeBody {
     /**
      * 需要匹配的对应维度值
      * :::tip
-     * 您可以通过调用[获取自定义维度值](https://www.volcengine.com/docs/508/34555)来获取。
+     * 您可以通过调用[获取自定义维度值](https://www.volcengine.com/docs/508/1213050)来获取。
      * :::
      * 需要匹配的对应维度值
+     * @example "["4g"]"
      */
     Vals: string[];
   }[];
   /**
-   * 返回数据的时间粒度。
+   * 返回数据的时间粒度。取值如下所示：
    * * `5m`：5 分钟；
    * * `1h`：1 小时；
    * * `1d`：1 天。
@@ -6020,13 +6131,13 @@ export interface DescribeImageXClientDemotionRateByTimeBody {
    * 拆分维度。默认为空，表示拆分分位数据。支持取值：
    * - `Duration`：表示拆分分位数据
    * - 公共维度：`Appid`、`OS`、`AppVer`、`SdkVer`、`ImageType`、`Country`、`Province`、`Isp`、`Domain`
-   * - 自定义维度：您可以通过调用 [GetImageXQueryDims](https://www.volcengine.com/docs/508/34554)接口获取自定义维度指标
+   * - 自定义维度：您可以通过调用 [获取自定义维度列表](https://www.volcengine.com/docs/508/1213048)接口获取自定义维度指标
    * 拆分维度。默认为空，表示拆分分位数据。支持取值：Duration（拆分分位数据）、公共维度（Appid,OS,AppVer,SdkVer,ImageType,Country,Province,Isp,Domain），自定义维度（通过"获取自定义维度列表"接口获取）
    * @example "Duration"
    */
   GroupBy?: string;
   /**
-   * 需要匹配的图片类型，不传则匹配所有图片类型。
+   * 需要匹配的图片类型，不传则匹配所有图片类型。取值如下所示：
    * - `GIF`
    * - `PNG`
    * - `JPEG`
@@ -6046,10 +6157,11 @@ export interface DescribeImageXClientDemotionRateByTimeBody {
    * AWEBP
    * VVIC
    * 其他
+   * @example "["PNG"]"
    */
   ImageType?: string[];
   /**
-   * 需要匹配的运营商名称，不传则匹配所有运营商。支持取值如下：
+   * 需要匹配的运营商名称，不传则匹配所有运营商。取值如下所示：
    * - `电信`
    * - `联通`
    * - `移动`
@@ -6065,6 +6177,7 @@ export interface DescribeImageXClientDemotionRateByTimeBody {
    * 鹏博士
    * 教育网
    * 其他
+   * @example "["电信"]"
    */
   Isp?: string[];
   /**
@@ -6088,11 +6201,12 @@ export interface DescribeImageXClientDemotionRateByTimeBody {
   /**
    * 需要匹配的 SDK 版本，不传则匹配所有版本.
    * 需要匹配的SDK版本，不传则匹配所有版本
+   * @example "["1.2.0"]"
    */
   SdkVer?: string[];
   /**
    * 获取数据起始时间点。
-   * * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
+   * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
    * 获取数据起始时间点。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00
    * @example "2019-06-27T13:00:00+08:00"
    */
@@ -6116,6 +6230,7 @@ export interface DescribeImageXClientDemotionRateByTimeRes {
     /**
      * 降级率数据
      * 降级率数据
+     * @example "-"
      */
     DemotionRateData: {
       /**
@@ -6127,6 +6242,7 @@ export interface DescribeImageXClientDemotionRateByTimeRes {
       /**
        * 具体数据
        * 具体数据
+       * @example "-"
        */
       Data: {
         /**
@@ -6163,12 +6279,13 @@ export interface DescribeImageXClientErrorCodeAllBody {
   /**
    * 需要匹配的 App 版本，不传则匹配 App 的所有版本。
    * 需要匹配的 App 版本，不传则匹配 App 的所有版本。
+   * @example "["1.2.0"]"
    */
   AppVer?: string[];
   /**
-   * 应用 ID。默认为空，不传则匹配账号下的所有的 App ID。
+   * 应用 ID。默认为空，不传则匹配账号下的所有的 AppID。
    * :::tip
-   * 您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/19511)的方式获取所需的 AppID。
+   * 您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/1213042)的方式获取所需的 AppID。
    * :::
    * 应用 ID。默认为空，匹配账号下的所有的App ID。
    * @example "123"
@@ -6187,11 +6304,12 @@ export interface DescribeImageXClientErrorCodeAllBody {
   /**
    * 需要匹配的域名，不传则匹配所有域名。
    * 需要匹配的域名，不传则匹配所有域名
+   * @example "["d1"]"
    */
   Domain?: string[];
   /**
    * 获取数据结束时间点，需在起始时间点之后。
-   * * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
+   * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
    * 获取数据结束时间点，需在起始时间点之后。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00
    * @example "2019-06-27T15:00:00+08:00"
    */
@@ -6199,12 +6317,13 @@ export interface DescribeImageXClientErrorCodeAllBody {
   /**
    * 需要匹配的自定义维度项 。
    * 需要匹配的自定义维度项
+   * @example "-"
    */
   ExtraDims?: {
     /**
      * 自定义维度名称。
      * :::tip
-     * 您可以通过调用[获取自定义维度列表](https://www.volcengine.com/docs/508/34554)来获取。
+     * 您可以通过调用[获取自定义维度列表](https://www.volcengine.com/docs/508/1213048)来获取。
      * :::
      * 自定义维度名称。
      * @example "access"
@@ -6213,14 +6332,15 @@ export interface DescribeImageXClientErrorCodeAllBody {
     /**
      * 需要匹配的对应维度值
      * :::tip
-     * 您可以通过调用[获取自定义维度值](https://www.volcengine.com/docs/508/34555)来获取。
+     * 您可以通过调用[获取自定义维度值](https://www.volcengine.com/docs/508/1213050)来获取。
      * :::
      * 需要匹配的对应维度值
+     * @example "["4g"]"
      */
     Vals: string[];
   }[];
   /**
-   * 聚合维度。
+   * 聚合维度。取值如下所示：
    * * `Domain`：域名；
    * * `ErrorCode`：错误码；
    * * `Region`：地区；
@@ -6234,7 +6354,7 @@ export interface DescribeImageXClientErrorCodeAllBody {
    */
   GroupBy: string;
   /**
-   * 需要匹配的图片类型，不传则匹配所有图片类型。
+   * 需要匹配的图片类型，不传则匹配所有图片类型。取值如下所示：
    * - `GIF`
    * - `PNG`
    * - `JPEG`
@@ -6254,10 +6374,11 @@ export interface DescribeImageXClientErrorCodeAllBody {
    * AWEBP
    * VVIC
    * 其他
+   * @example "["PNG"]"
    */
   ImageType?: string[];
   /**
-   * 需要匹配的运营商名称，不传则匹配所有运营商。支持取值如下：
+   * 需要匹配的运营商名称，不传则匹配所有运营商。取值如下所示：
    * - `电信`
    * - `联通`
    * - `移动`
@@ -6273,6 +6394,7 @@ export interface DescribeImageXClientErrorCodeAllBody {
    * 鹏博士
    * 教育网
    * 其他
+   * @example "["电信"]"
    */
   Isp?: string[];
   /**
@@ -6288,9 +6410,11 @@ export interface DescribeImageXClientErrorCodeAllBody {
    */
   OS?: string;
   /**
+   * 是否升序排序。取值如下所示：
+   * - `true`：是，表示升序排序。
+   * - `false`：（默认）否，表示降序排序。
    * 是否升序排序。不传则默认降序排序。
-   * 是否升序排序。不传则默认降序排序。
-   * @example "false"
+   * @example "true"
    */
   OrderAsc?: boolean;
   /**
@@ -6308,11 +6432,12 @@ export interface DescribeImageXClientErrorCodeAllBody {
   /**
    * 需要匹配的 SDK 版本，不传则匹配所有版本.
    * 需要匹配的SDK版本，不传则匹配所有版本
+   * @example "["1.2.0"]"
    */
   SdkVer?: string[];
   /**
    * 获取数据起始时间点。
-   * * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
+   * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
    * 获取数据起始时间点。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00
    * @example "2019-06-27T13:00:00+08:00"
    */
@@ -6336,11 +6461,13 @@ export interface DescribeImageXClientErrorCodeAllRes {
     /**
      * 错误码数据。
      * 错误码数据
+     * @example "-"
      */
     ErrorCodeData: {
       /**
        * 当`GroupBy`取值**非**`ErrorCode`时出现，表示错误码详细信息。
        * 当GroupBy取值非ErrorCode时出现，表示错误码详细信息。
+       * @example "-"
        */
       Details?: {
         /**
@@ -6416,12 +6543,13 @@ export interface DescribeImageXClientErrorCodeByTimeBody {
   /**
    * 需要匹配的 App 版本，不传则匹配 App 的所有版本。
    * 需要匹配的 App 版本，不传则匹配 App 的所有版本。
+   * @example "["1.2.0"]"
    */
   AppVer?: string[];
   /**
-   * 应用 ID。默认为空，不传则匹配账号下的所有的 App ID。
+   * 应用 ID。默认为空，不传则匹配账号下的所有的 AppID。
    * :::tip
-   * 您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/19511)的方式获取所需的 AppID。
+   * 您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/1213042)的方式获取所需的 AppID。
    * :::
    * 应用 ID。默认为空，匹配账号下的所有的App ID。
    * @example "123"
@@ -6440,11 +6568,12 @@ export interface DescribeImageXClientErrorCodeByTimeBody {
   /**
    * 需要匹配的域名，不传则匹配所有域名。
    * 需要匹配的域名，不传则匹配所有域名
+   * @example "["d1"]"
    */
   Domain?: string[];
   /**
    * 获取数据结束时间点，需在起始时间点之后。
-   * * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
+   * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
    * 获取数据结束时间点，需在起始时间点之后。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00
    * @example "2019-06-27T15:00:00+08:00"
    */
@@ -6452,12 +6581,13 @@ export interface DescribeImageXClientErrorCodeByTimeBody {
   /**
    * 需要匹配的自定义维度项 。
    * 需要匹配的自定义维度项
+   * @example "-"
    */
   ExtraDims?: {
     /**
      * 自定义维度名称。
      * :::tip
-     * 您可以通过调用[获取自定义维度列表](https://www.volcengine.com/docs/508/34554)来获取。
+     * 您可以通过调用[获取自定义维度列表](https://www.volcengine.com/docs/508/1213048)来获取。
      * :::
      * 自定义维度名称。
      * @example "access"
@@ -6466,14 +6596,15 @@ export interface DescribeImageXClientErrorCodeByTimeBody {
     /**
      * 需要匹配的对应维度值
      * :::tip
-     * 您可以通过调用[获取自定义维度值](https://www.volcengine.com/docs/508/34555)来获取。
+     * 您可以通过调用[获取自定义维度值](https://www.volcengine.com/docs/508/1213050)来获取。
      * :::
      * 需要匹配的对应维度值
+     * @example "["4g"]"
      */
     Vals: string[];
   }[];
   /**
-   * 返回数据的时间粒度。
+   * 返回数据的时间粒度。取值如下所示：
    * * `5m`：5 分钟；
    * * `1h`：1 小时；
    * * `1d`：1 天。
@@ -6485,7 +6616,7 @@ export interface DescribeImageXClientErrorCodeByTimeBody {
    */
   Granularity: string;
   /**
-   * 需要匹配的图片类型，不传则匹配所有图片类型。
+   * 需要匹配的图片类型，不传则匹配所有图片类型。取值如下所示：
    * - `GIF`
    * - `PNG`
    * - `JPEG`
@@ -6505,10 +6636,11 @@ export interface DescribeImageXClientErrorCodeByTimeBody {
    * AWEBP
    * VVIC
    * 其他
+   * @example "["PNG"]"
    */
   ImageType?: string[];
   /**
-   * 需要匹配的运营商名称，不传则匹配所有运营商。支持取值如下：
+   * 需要匹配的运营商名称，不传则匹配所有运营商。取值如下所示：
    * - `电信`
    * - `联通`
    * - `移动`
@@ -6524,6 +6656,7 @@ export interface DescribeImageXClientErrorCodeByTimeBody {
    * 鹏博士
    * 教育网
    * 其他
+   * @example "["电信"]"
    */
   Isp?: string[];
   /**
@@ -6547,11 +6680,12 @@ export interface DescribeImageXClientErrorCodeByTimeBody {
   /**
    * 需要匹配的 SDK 版本，不传则匹配所有版本.
    * 需要匹配的SDK版本，不传则匹配所有版本
+   * @example "["1.2.0"]"
    */
   SdkVer?: string[];
   /**
    * 获取数据起始时间点。
-   * * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
+   * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
    * 获取数据起始时间点。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00
    * @example "2019-06-27T13:00:00+08:00"
    */
@@ -6575,6 +6709,7 @@ export interface DescribeImageXClientErrorCodeByTimeRes {
     /**
      * 所有错误码数据。
      * 所有错误码数据
+     * @example "-"
      */
     ErrorCodeData: {
       /**
@@ -6586,6 +6721,7 @@ export interface DescribeImageXClientErrorCodeByTimeRes {
       /**
        * 错误码对应的时序数据。
        * 错误码对应的时序数据。
+       * @example "-"
        */
       Data: {
         /**
@@ -6595,8 +6731,7 @@ export interface DescribeImageXClientErrorCodeByTimeRes {
          */
         Count: number;
         /**
-         * 数据对应时间点。
-         * * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`。
+         * 数据对应时间点。日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`。
          * 数据对应时间点，按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。
          * @example "2023-01-01T00:00:00+08:00"
          */
@@ -6622,12 +6757,13 @@ export interface DescribeImageXClientFailureRateBody {
   /**
    * 需要匹配的 App 版本，不传则匹配 App 的所有版本。
    * 需要匹配的 App 版本，不传则匹配 App 的所有版本。
+   * @example "["1.2.0"]"
    */
   AppVer?: string[];
   /**
-   * 应用 ID。默认为空，不传则匹配账号下的所有的 App ID。
+   * 应用 ID。默认为空，不传则匹配账号下的所有的 AppID。
    * :::tip
-   * 您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/19511)的方式获取所需的 AppID。
+   * 您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/1213042)的方式获取所需的 AppID。
    * :::
    * 应用 ID。默认为空，匹配账号下的所有的App ID。
    * @example "123"
@@ -6646,11 +6782,12 @@ export interface DescribeImageXClientFailureRateBody {
   /**
    * 需要匹配的域名，不传则匹配所有域名。
    * 需要匹配的域名，不传则匹配所有域名
+   * @example "["d1"]"
    */
   Domain?: string[];
   /**
    * 获取数据结束时间点，需在起始时间点之后。
-   * * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
+   * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
    * 获取数据结束时间点，需在起始时间点之后。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00
    * @example "2019-06-27T15:00:00+08:00"
    */
@@ -6658,12 +6795,13 @@ export interface DescribeImageXClientFailureRateBody {
   /**
    * 需要匹配的自定义维度项 。
    * 需要匹配的自定义维度项
+   * @example "-"
    */
   ExtraDims?: {
     /**
      * 自定义维度名称。
      * :::tip
-     * 您可以通过调用[获取自定义维度列表](https://www.volcengine.com/docs/508/34554)来获取。
+     * 您可以通过调用[获取自定义维度列表](https://www.volcengine.com/docs/508/1213048)来获取。
      * :::
      * 自定义维度名称。
      * @example "access"
@@ -6672,14 +6810,15 @@ export interface DescribeImageXClientFailureRateBody {
     /**
      * 需要匹配的对应维度值
      * :::tip
-     * 您可以通过调用[获取自定义维度值](https://www.volcengine.com/docs/508/34555)来获取。
+     * 您可以通过调用[获取自定义维度值](https://www.volcengine.com/docs/508/1213050)来获取。
      * :::
      * 需要匹配的对应维度值
+     * @example "["4g"]"
      */
     Vals: string[];
   }[];
   /**
-   * 返回数据的时间粒度。
+   * 返回数据的时间粒度。取值如下所示：
    * * `5m`：5 分钟；
    * * `1h`：1 小时；
    * * `1d`：1 天。
@@ -6693,13 +6832,13 @@ export interface DescribeImageXClientFailureRateBody {
   /**
    * 拆分维度。默认为空，不拆分。支持取值：
    * - 公共维度：`Appid`、`OS`、`AppVer`、`SdkVer`、`ImageType`、`Country`、`Province`、`Isp`、`Domain`
-   * - 自定义维度：您可以通过调用 [GetImageXQueryDims](https://www.volcengine.com/docs/508/34554)接口获取自定义维度指标。
+   * - 自定义维度：您可以通过调用 [获取自定义维度列表](https://www.volcengine.com/docs/508/1213048)接口获取自定义维度指标。
    * 拆分维度。默认为空，表示不拆分。支持取值：公共维度（Appid,OS,AppVer,SdkVer,ImageType,Country,Province,Isp,Domain），自定义维度（通过"获取自定义维度列表"接口获取）
    * @example "OS"
    */
   GroupBy?: string;
   /**
-   * 需要匹配的图片类型，不传则匹配所有图片类型。
+   * 需要匹配的图片类型，不传则匹配所有图片类型。取值如下所示：
    * - `GIF`
    * - `PNG`
    * - `JPEG`
@@ -6719,10 +6858,11 @@ export interface DescribeImageXClientFailureRateBody {
    * AWEBP
    * VVIC
    * 其他
+   * @example "["PNG"]"
    */
   ImageType?: string[];
   /**
-   * 需要匹配的运营商名称，不传则匹配所有运营商。支持取值如下：
+   * 需要匹配的运营商名称，不传则匹配所有运营商。取值如下所示：
    * - `电信`
    * - `联通`
    * - `移动`
@@ -6738,6 +6878,7 @@ export interface DescribeImageXClientFailureRateBody {
    * 鹏博士
    * 教育网
    * 其他
+   * @example "["电信"]"
    */
   Isp?: string[];
   /**
@@ -6761,11 +6902,12 @@ export interface DescribeImageXClientFailureRateBody {
   /**
    * 需要匹配的 SDK 版本，不传则匹配所有版本.
    * 需要匹配的SDK版本，不传则匹配所有版本
+   * @example "["1.2.0"]"
    */
   SdkVer?: string[];
   /**
    * 获取数据起始时间点。
-   * * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
+   * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
    * 获取数据起始时间点。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00
    * @example "2019-06-27T13:00:00+08:00"
    */
@@ -6789,6 +6931,7 @@ export interface DescribeImageXClientFailureRateRes {
     /**
      * 用户感知失败率数据。
      * 用户感知失败率数据
+     * @example "-"
      */
     FailureRateData: {
       /**
@@ -6800,6 +6943,7 @@ export interface DescribeImageXClientFailureRateRes {
       /**
        * 对应的用户感知失败率数据列表。
        * 对应的用户感知失败率数据列表。
+       * @example "-"
        */
       Data: {
         /**
@@ -6809,8 +6953,7 @@ export interface DescribeImageXClientFailureRateRes {
          */
         Count: number;
         /**
-         * 数据对应时间点。
-         * * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`。
+         * 数据对应时间点。日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`。
          * 数据对应时间点，按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。
          * @example "2023-01-01T00:00:00+08:00"
          */
@@ -6837,12 +6980,13 @@ export interface DescribeImageXClientFileSizeBody {
   /**
    * 需要匹配的 App 版本，不传则匹配 App 的所有版本。
    * 需要匹配的 App 版本，不传则匹配 App 的所有版本。
+   * @example "["1.2.0"]"
    */
   AppVer?: string[];
   /**
-   * 应用 ID。默认为空，不传则匹配账号下的所有的 App ID。
+   * 应用 ID。默认为空，不传则匹配账号下的所有的 AppID。
    * :::tip
-   * 您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/19511)的方式获取所需的 AppID。
+   * 您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/1213042)的方式获取所需的 AppID。
    * :::
    * 应用 ID。默认为空，匹配账号下的所有的App ID。
    * @example "123"
@@ -6861,11 +7005,12 @@ export interface DescribeImageXClientFileSizeBody {
   /**
    * 需要匹配的域名，不传则匹配所有域名。
    * 需要匹配的域名，不传则匹配所有域名
+   * @example "["d1"]"
    */
   Domain?: string[];
   /**
    * 获取数据结束时间点，需在起始时间点之后。
-   * * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
+   * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
    * 获取数据结束时间点，需在起始时间点之后。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00
    * @example "2019-06-27T15:00:00+08:00"
    */
@@ -6873,12 +7018,13 @@ export interface DescribeImageXClientFileSizeBody {
   /**
    * 需要匹配的自定义维度项 。
    * 需要匹配的自定义维度项
+   * @example "-"
    */
   ExtraDims?: {
     /**
      * 自定义维度名称。
      * :::tip
-     * 您可以通过调用[获取自定义维度列表](https://www.volcengine.com/docs/508/34554)来获取。
+     * 您可以通过调用[获取自定义维度列表](https://www.volcengine.com/docs/508/1213048)来获取。
      * :::
      * 自定义维度名称。
      * @example "access"
@@ -6887,14 +7033,15 @@ export interface DescribeImageXClientFileSizeBody {
     /**
      * 需要匹配的对应维度值
      * :::tip
-     * 您可以通过调用[获取自定义维度值](https://www.volcengine.com/docs/508/34555)来获取。
+     * 您可以通过调用[获取自定义维度值](https://www.volcengine.com/docs/508/1213050)来获取。
      * :::
      * 需要匹配的对应维度值
+     * @example "["4g"]"
      */
     Vals: string[];
   }[];
   /**
-   * 返回数据的时间粒度。
+   * 返回数据的时间粒度。取值如下所示：
    * * `5m`：5 分钟；
    * * `1h`：1 小时；
    * * `1d`：1 天。
@@ -6909,13 +7056,13 @@ export interface DescribeImageXClientFileSizeBody {
    * 拆分维度。默认为空，表示拆分分位数据。支持取值：
    * - `Duration`：表示拆分分位数据
    * - 公共维度：`Appid`、`OS`、`AppVer`、`SdkVer`、`ImageType`、`Country`、`Province`、`Isp`、`Domain`
-   * - 自定义维度：您可以通过调用 [GetImageXQueryDims](https://www.volcengine.com/docs/508/34554)接口获取自定义维度指标
+   * - 自定义维度：您可以通过调用 [获取自定义维度列表](https://www.volcengine.com/docs/508/1213048)接口获取自定义维度指标
    * 拆分维度。默认为空，表示拆分分位数据。支持取值：Duration（拆分分位数据）、公共维度（Appid,OS,AppVer,SdkVer,ImageType,Country,Province,Isp,Domain），自定义维度（通过"获取自定义维度列表"接口获取）
    * @example "OS"
    */
   GroupBy?: string;
   /**
-   * 需要匹配的图片类型，不传则匹配所有图片类型。
+   * 需要匹配的图片类型，不传则匹配所有图片类型。取值如下所示：
    * - `GIF`
    * - `PNG`
    * - `JPEG`
@@ -6935,10 +7082,11 @@ export interface DescribeImageXClientFileSizeBody {
    * AWEBP
    * VVIC
    * 其他
+   * @example "["PNG"]"
    */
   ImageType?: string[];
   /**
-   * 需要匹配的运营商名称，不传则匹配所有运营商。支持取值如下：
+   * 需要匹配的运营商名称，不传则匹配所有运营商。取值如下所示：
    * - `电信`
    * - `联通`
    * - `移动`
@@ -6954,6 +7102,7 @@ export interface DescribeImageXClientFileSizeBody {
    * 鹏博士
    * 教育网
    * 其他
+   * @example "["电信"]"
    */
   Isp?: string[];
   /**
@@ -6977,11 +7126,12 @@ export interface DescribeImageXClientFileSizeBody {
   /**
    * 需要匹配的 SDK 版本，不传则匹配所有版本.
    * 需要匹配的SDK版本，不传则匹配所有版本
+   * @example "["1.2.0"]"
    */
   SdkVer?: string[];
   /**
    * 获取数据起始时间点。
-   * * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
+   * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
    * 获取数据起始时间点。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00
    * @example "2019-06-27T13:00:00+08:00"
    */
@@ -7005,6 +7155,7 @@ export interface DescribeImageXClientFileSizeRes {
     /**
      * 客户端文件大小分布数据。
      * 客户端文件大小分布数据
+     * @example "-"
      */
     FSizeData: {
       /**
@@ -7016,6 +7167,7 @@ export interface DescribeImageXClientFileSizeRes {
       /**
        * 对应的文件大小数据列表。
        * 对应的文件大小数据列表。
+       * @example "-"
        */
       Data: {
         /**
@@ -7025,8 +7177,7 @@ export interface DescribeImageXClientFileSizeRes {
          */
         Count: number;
         /**
-         * 数据对应时间点。
-         * * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`。
+         * 数据对应时间点。日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`。
          * 数据对应时间点，按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。
          * @example "2023-01-01T00:00:00+08:00"
          */
@@ -7055,12 +7206,13 @@ export interface DescribeImageXClientLoadDurationAllBody {
   /**
    * 需要匹配的 App 版本，不传则匹配 App 的所有版本。
    * 需要匹配的 App 版本，不传则匹配 App 的所有版本。
+   * @example "["1.2.0"]"
    */
   AppVer?: string[];
   /**
-   * 应用 ID。默认为空，不传则匹配账号下的所有的 App ID。
+   * 应用 ID。默认为空，不传则匹配账号下的所有的 AppID。
    * :::tip
-   * 您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/19511)的方式获取所需的 AppID。
+   * 您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/1213042)的方式获取所需的 AppID。
    * :::
    * 应用 ID。默认为空，匹配账号下的所有的App ID。
    * @example "123"
@@ -7079,11 +7231,12 @@ export interface DescribeImageXClientLoadDurationAllBody {
   /**
    * 需要匹配的域名，不传则匹配所有域名。
    * 需要匹配的域名，不传则匹配所有域名
+   * @example "["d1"]"
    */
   Domain?: string[];
   /**
    * 获取数据结束时间点，需在起始时间点之后。
-   * * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
+   * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
    * 获取数据结束时间点，需在起始时间点之后。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00
    * @example "2019-06-27T15:00:00+08:00"
    */
@@ -7091,12 +7244,13 @@ export interface DescribeImageXClientLoadDurationAllBody {
   /**
    * 需要匹配的自定义维度项 。
    * 需要匹配的自定义维度项
+   * @example "-"
    */
   ExtraDims?: {
     /**
      * 自定义维度名称。
      * :::tip
-     * 您可以通过调用[获取自定义维度列表](https://www.volcengine.com/docs/508/34554)来获取。
+     * 您可以通过调用[获取自定义维度列表](https://www.volcengine.com/docs/508/1213048)来获取。
      * :::
      * 自定义维度名称。
      * @example "access"
@@ -7105,14 +7259,15 @@ export interface DescribeImageXClientLoadDurationAllBody {
     /**
      * 需要匹配的对应维度值
      * :::tip
-     * 您可以通过调用[获取自定义维度值](https://www.volcengine.com/docs/508/34555)来获取。
+     * 您可以通过调用[获取自定义维度值](https://www.volcengine.com/docs/508/1213050)来获取。
      * :::
      * 需要匹配的对应维度值
+     * @example "["4g"]"
      */
     Vals: string[];
   }[];
   /**
-   * 聚合维度。
+   * 聚合维度，取值如下所示：
    * - `Domain`：域名
    * - `Region`：地区
    * - `Isp`：运营商
@@ -7124,7 +7279,7 @@ export interface DescribeImageXClientLoadDurationAllBody {
    */
   GroupBy: string;
   /**
-   * 需要匹配的图片类型，不传则匹配所有图片类型。
+   * 需要匹配的图片类型，不传则匹配所有图片类型。取值如下所示：
    * - `GIF`
    * - `PNG`
    * - `JPEG`
@@ -7144,10 +7299,11 @@ export interface DescribeImageXClientLoadDurationAllBody {
    * AWEBP
    * VVIC
    * 其他
+   * @example "["PNG"]"
    */
   ImageType?: string[];
   /**
-   * 需要匹配的运营商名称，不传则匹配所有运营商。支持取值如下：
+   * 需要匹配的运营商名称，不传则匹配所有运营商。取值如下所示：
    * - `电信`
    * - `联通`
    * - `移动`
@@ -7163,6 +7319,7 @@ export interface DescribeImageXClientLoadDurationAllBody {
    * 鹏博士
    * 教育网
    * 其他
+   * @example "["电信"]"
    */
   Isp?: string[];
   /**
@@ -7178,13 +7335,15 @@ export interface DescribeImageXClientLoadDurationAllBody {
    */
   OS?: string;
   /**
+   * 是否升序排序。取值如下所示：
+   * - `true`：是，表示升序排序。
+   * - `false`：（默认）否，表示降序排序。
    * 是否升序排序。不传则默认降序排序。
-   * 是否升序排序。不传则默认降序排序。
-   * @example "false"
+   * @example "true"
    */
   OrderAsc?: boolean;
   /**
-   * 排序依据
+   * 排序依据，取值如下所示：
    * * `Duration`：按耗时排序。
    * * `Count`：（默认）按上报量排序。
    * 目前仅支持传入Count按错误码数量排序。不传或者传空默认按错误码数量排序。
@@ -7200,11 +7359,12 @@ export interface DescribeImageXClientLoadDurationAllBody {
   /**
    * 需要匹配的 SDK 版本，不传则匹配所有版本.
    * 需要匹配的SDK版本，不传则匹配所有版本
+   * @example "["1.2.0"]"
    */
   SdkVer?: string[];
   /**
    * 获取数据起始时间点。
-   * * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
+   * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
    * 获取数据起始时间点。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00
    * @example "2019-06-27T13:00:00+08:00"
    */
@@ -7228,6 +7388,7 @@ export interface DescribeImageXClientLoadDurationAllRes {
     /**
      * 网络耗时数据。
      * 网络耗时数据
+     * @example "-"
      */
     DurationData: {
       /**
@@ -7279,12 +7440,13 @@ export interface DescribeImageXClientLoadDurationBody {
   /**
    * 需要匹配的 App 版本，不传则匹配 App 的所有版本。
    * 需要匹配的 App 版本，不传则匹配 App 的所有版本。
+   * @example "["1.2.0"]"
    */
   AppVer?: string[];
   /**
-   * 应用 ID。默认为空，不传则匹配账号下的所有的 App ID。
+   * 应用 ID。默认为空，不传则匹配账号下的所有的 AppID。
    * :::tip
-   * 您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/19511)的方式获取所需的 AppID。
+   * 您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/1213042)的方式获取所需的 AppID。
    * :::
    * 应用 ID。默认为空，匹配账号下的所有的App ID。
    * @example "123"
@@ -7303,11 +7465,12 @@ export interface DescribeImageXClientLoadDurationBody {
   /**
    * 需要匹配的域名，不传则匹配所有域名。
    * 需要匹配的域名，不传则匹配所有域名
+   * @example "["d1"]"
    */
   Domain?: string[];
   /**
    * 获取数据结束时间点，需在起始时间点之后。
-   * * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
+   * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
    * 获取数据结束时间点，需在起始时间点之后。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00
    * @example "2019-06-27T15:00:00+08:00"
    */
@@ -7315,12 +7478,13 @@ export interface DescribeImageXClientLoadDurationBody {
   /**
    * 需要匹配的自定义维度项 。
    * 需要匹配的自定义维度项
+   * @example "-"
    */
   ExtraDims?: {
     /**
      * 自定义维度名称。
      * :::tip
-     * 您可以通过调用[获取自定义维度列表](https://www.volcengine.com/docs/508/34554)来获取。
+     * 您可以通过调用[获取自定义维度列表](https://www.volcengine.com/docs/508/1213048)来获取。
      * :::
      * 自定义维度名称。
      * @example "access"
@@ -7329,14 +7493,15 @@ export interface DescribeImageXClientLoadDurationBody {
     /**
      * 需要匹配的对应维度值
      * :::tip
-     * 您可以通过调用[获取自定义维度值](https://www.volcengine.com/docs/508/34555)来获取。
+     * 您可以通过调用[获取自定义维度值](https://www.volcengine.com/docs/508/1213050)来获取。
      * :::
      * 需要匹配的对应维度值
+     * @example "["4g"]"
      */
     Vals: string[];
   }[];
   /**
-   * 返回数据的时间粒度。
+   * 返回数据的时间粒度。取值如下所示：
    * * `5m`：5 分钟；
    * * `1h`：1 小时；
    * * `1d`：1 天。
@@ -7351,13 +7516,13 @@ export interface DescribeImageXClientLoadDurationBody {
    * 拆分维度。默认为空，表示拆分分位数据。支持取值：
    * - `Duration`：表示拆分分位数据
    * - 公共维度：`Appid`、`OS`、`AppVer`、`SdkVer`、`ImageType`、`Country`、`Province`、`Isp`、`Domain`
-   * - 自定义维度：您可以通过调用 [GetImageXQueryDims](https://www.volcengine.com/docs/508/34554)接口获取自定义维度指标
+   * - 自定义维度：您可以通过调用 [获取自定义维度列表](https://www.volcengine.com/docs/508/1213048)接口获取自定义维度指标
    * 拆分维度。默认为空，表示拆分分位数据。支持取值：Duration（拆分分位数据）、公共维度（Appid,OS,AppVer,SdkVer,ImageType,Country,Province,Isp,Domain），自定义维度（通过"获取自定义维度列表"接口获取）
    * @example "Duration"
    */
   GroupBy?: string;
   /**
-   * 需要匹配的图片类型，不传则匹配所有图片类型。
+   * 需要匹配的图片类型，不传则匹配所有图片类型。取值如下所示：
    * - `GIF`
    * - `PNG`
    * - `JPEG`
@@ -7377,10 +7542,11 @@ export interface DescribeImageXClientLoadDurationBody {
    * AWEBP
    * VVIC
    * 其他
+   * @example "["PNG"]"
    */
   ImageType?: string[];
   /**
-   * 需要匹配的运营商名称，不传则匹配所有运营商。支持取值如下：
+   * 需要匹配的运营商名称，不传则匹配所有运营商。取值如下所示：
    * - `电信`
    * - `联通`
    * - `移动`
@@ -7396,6 +7562,7 @@ export interface DescribeImageXClientLoadDurationBody {
    * 鹏博士
    * 教育网
    * 其他
+   * @example "["电信"]"
    */
   Isp?: string[];
   /**
@@ -7419,11 +7586,12 @@ export interface DescribeImageXClientLoadDurationBody {
   /**
    * 需要匹配的 SDK 版本，不传则匹配所有版本.
    * 需要匹配的SDK版本，不传则匹配所有版本
+   * @example "["1.2.0"]"
    */
   SdkVer?: string[];
   /**
    * 获取数据起始时间点。
-   * * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
+   * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
    * 获取数据起始时间点。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00
    * @example "2019-06-27T13:00:00+08:00"
    */
@@ -7447,6 +7615,7 @@ export interface DescribeImageXClientLoadDurationRes {
     /**
      * 加载耗时数据。
      * 加载耗时数据
+     * @example "-"
      */
     DurationData: {
       /**
@@ -7458,6 +7627,7 @@ export interface DescribeImageXClientLoadDurationRes {
       /**
        * 对应的加载耗时数据列表。
        * 对应的加载耗时数据列表
+       * @example "-"
        */
       Data: {
         /**
@@ -7467,14 +7637,13 @@ export interface DescribeImageXClientLoadDurationRes {
          */
         Count: number;
         /**
-         * 数据对应时间点。
-         * * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`。
+         * 数据对应时间点。日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`。
          * 数据对应时间点，按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。
          * @example "2023-01-01T00:00:00+08:00"
          */
         Timestamp: string;
         /**
-         * 平均耗时，单位毫秒。
+         * 平均耗时，单位为毫秒。
          * 平均耗时，单位毫秒
          * @format float
          * @example "5142"
@@ -7496,12 +7665,13 @@ export interface DescribeImageXClientQualityRateByTimeBody {
   /**
    * 需要匹配的 App 版本，不传则匹配 App 的所有版本。
    * 需要匹配的 App 版本，不传则匹配 App 的所有版本。
+   * @example "["1.2.0"]"
    */
   AppVer?: string[];
   /**
-   * 应用 ID。默认为空，不传则匹配账号下的所有的 App ID。
+   * 应用 ID。默认为空，不传则匹配账号下的所有的 AppID。
    * :::tip
-   * 您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/19511)的方式获取所需的 AppID。
+   * 您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/1213042)的方式获取所需的 AppID。
    * :::
    * 应用 ID。默认为空，匹配账号下的所有的App ID。
    * @example "123"
@@ -7520,11 +7690,12 @@ export interface DescribeImageXClientQualityRateByTimeBody {
   /**
    * 需要匹配的域名，不传则匹配所有域名。
    * 需要匹配的域名，不传则匹配所有域名
+   * @example "["d1"]"
    */
   Domain?: string[];
   /**
    * 获取数据结束时间点，需在起始时间点之后。
-   * * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
+   * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
    * 获取数据结束时间点，需在起始时间点之后。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00
    * @example "2019-06-27T15:00:00+08:00"
    */
@@ -7532,12 +7703,13 @@ export interface DescribeImageXClientQualityRateByTimeBody {
   /**
    * 需要匹配的自定义维度项 。
    * 需要匹配的自定义维度项
+   * @example "-"
    */
   ExtraDims?: {
     /**
      * 自定义维度名称。
      * :::tip
-     * 您可以通过调用[获取自定义维度列表](https://www.volcengine.com/docs/508/34554)来获取。
+     * 您可以通过调用[获取自定义维度列表](https://www.volcengine.com/docs/508/1213048)来获取。
      * :::
      * 自定义维度名称。
      * @example "access"
@@ -7546,14 +7718,15 @@ export interface DescribeImageXClientQualityRateByTimeBody {
     /**
      * 需要匹配的对应维度值
      * :::tip
-     * 您可以通过调用[获取自定义维度值](https://www.volcengine.com/docs/508/34555)来获取。
+     * 您可以通过调用[获取自定义维度值](https://www.volcengine.com/docs/508/1213050)来获取。
      * :::
      * 需要匹配的对应维度值
+     * @example "["4g"]"
      */
     Vals: string[];
   }[];
   /**
-   * 返回数据的时间粒度。
+   * 返回数据的时间粒度。取值如下所示：
    * * `5m`：5 分钟；
    * * `1h`：1 小时；
    * * `1d`：1 天。
@@ -7567,13 +7740,13 @@ export interface DescribeImageXClientQualityRateByTimeBody {
   /**
    * 拆分维度。默认为空，不拆分。支持取值：
    * - 公共维度：`Appid`、`OS`、`AppVer`、`SdkVer`、`ImageType`、`Country`、`Province`、`Isp`、`Domain`
-   * - 自定义维度：您可以通过调用 [GetImageXQueryDims](https://www.volcengine.com/docs/508/34554)接口获取自定义维度指标
+   * - 自定义维度：您可以通过调用 [获取自定义维度列表](https://www.volcengine.com/docs/508/1213048)接口获取自定义维度指标
    * 拆分维度。默认为空，表示不拆分。支持取值：公共维度（Appid,OS,AppVer,SdkVer,ImageType,Country,Province,Isp,Domain），自定义维度（通过"获取自定义维度列表"接口获取）
    * @example "OS"
    */
   GroupBy?: string;
   /**
-   * 需要匹配的图片类型，不传则匹配所有图片类型。
+   * 需要匹配的图片类型，不传则匹配所有图片类型。取值如下所示：
    * - `GIF`
    * - `PNG`
    * - `JPEG`
@@ -7593,10 +7766,11 @@ export interface DescribeImageXClientQualityRateByTimeBody {
    * AWEBP
    * VVIC
    * 其他
+   * @example "["PNG"]"
    */
   ImageType?: string[];
   /**
-   * 需要匹配的运营商名称，不传则匹配所有运营商。支持取值如下：
+   * 需要匹配的运营商名称，不传则匹配所有运营商。取值如下所示：
    * - `电信`
    * - `联通`
    * - `移动`
@@ -7612,6 +7786,7 @@ export interface DescribeImageXClientQualityRateByTimeBody {
    * 鹏博士
    * 教育网
    * 其他
+   * @example "["电信"]"
    */
   Isp?: string[];
   /**
@@ -7648,11 +7823,12 @@ export interface DescribeImageXClientQualityRateByTimeBody {
   /**
    * 需要匹配的 SDK 版本，不传则匹配所有版本.
    * 需要匹配的SDK版本，不传则匹配所有版本
+   * @example "["1.2.0"]"
    */
   SdkVer?: string[];
   /**
    * 获取数据起始时间点。
-   * * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
+   * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
    * 获取数据起始时间点。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00
    * @example "2019-06-27T13:00:00+08:00"
    */
@@ -7676,6 +7852,7 @@ export interface DescribeImageXClientQualityRateByTimeRes {
     /**
      * 黑白屏率数据
      * 黑白屏率数据
+     * @example "-"
      */
     QualityRateData: {
       /**
@@ -7687,6 +7864,7 @@ export interface DescribeImageXClientQualityRateByTimeRes {
       /**
        * 具体数据
        * 具体数据
+       * @example "-"
        */
       Data: {
         /**
@@ -7723,12 +7901,13 @@ export interface DescribeImageXClientQueueDurationByTimeBody {
   /**
    * 需要匹配的 App 版本，不传则匹配 App 的所有版本。
    * 需要匹配的 App 版本，不传则匹配 App 的所有版本。
+   * @example "["1.2.0"]"
    */
   AppVer?: string[];
   /**
-   * 应用 ID。默认为空，不传则匹配账号下的所有的 App ID。
+   * 应用 ID。默认为空，不传则匹配账号下的所有的 AppID。
    * :::tip
-   * 您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/19511)的方式获取所需的 AppID。
+   * 您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/1213042)的方式获取所需的 AppID。
    * :::
    * 应用 ID。默认为空，匹配账号下的所有的App ID。
    * @example "123"
@@ -7747,11 +7926,12 @@ export interface DescribeImageXClientQueueDurationByTimeBody {
   /**
    * 需要匹配的域名，不传则匹配所有域名。
    * 需要匹配的域名，不传则匹配所有域名
+   * @example "["d1"]"
    */
   Domain?: string[];
   /**
    * 获取数据结束时间点，需在起始时间点之后。
-   * * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
+   * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
    * 获取数据结束时间点，需在起始时间点之后。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00
    * @example "2019-06-27T15:00:00+08:00"
    */
@@ -7759,12 +7939,13 @@ export interface DescribeImageXClientQueueDurationByTimeBody {
   /**
    * 需要匹配的自定义维度项 。
    * 需要匹配的自定义维度项
+   * @example "-"
    */
   ExtraDims?: {
     /**
      * 自定义维度名称。
      * :::tip
-     * 您可以通过调用[获取自定义维度列表](https://www.volcengine.com/docs/508/34554)来获取。
+     * 您可以通过调用[获取自定义维度列表](https://www.volcengine.com/docs/508/1213048)来获取。
      * :::
      * 自定义维度名称。
      * @example "access"
@@ -7773,14 +7954,15 @@ export interface DescribeImageXClientQueueDurationByTimeBody {
     /**
      * 需要匹配的对应维度值
      * :::tip
-     * 您可以通过调用[获取自定义维度值](https://www.volcengine.com/docs/508/34555)来获取。
+     * 您可以通过调用[获取自定义维度值](https://www.volcengine.com/docs/508/1213050)来获取。
      * :::
      * 需要匹配的对应维度值
+     * @example "["4g"]"
      */
     Vals: string[];
   }[];
   /**
-   * 返回数据的时间粒度。
+   * 返回数据的时间粒度。取值如下所示：
    * * `5m`：5 分钟；
    * * `1h`：1 小时；
    * * `1d`：1 天。
@@ -7795,13 +7977,13 @@ export interface DescribeImageXClientQueueDurationByTimeBody {
    * 拆分维度。默认为空，表示拆分分位数据。支持取值：
    * - `Duration`：表示拆分分位数据
    * - 公共维度：`Appid`、`OS`、`AppVer`、`SdkVer`、`ImageType`、`Country`、`Province`、`Isp`、`Domain`
-   * - 自定义维度：您可以通过调用 [GetImageXQueryDims](https://www.volcengine.com/docs/508/34554)接口获取自定义维度指标
+   * - 自定义维度：您可以通过调用 [获取自定义维度列表](https://www.volcengine.com/docs/508/1213048)接口获取自定义维度指标
    * 拆分维度。默认为空，表示拆分分位数据。支持取值：Duration（拆分分位数据）、公共维度（Appid,OS,AppVer,SdkVer,ImageType,Country,Province,Isp,Domain），自定义维度（通过"获取自定义维度列表"接口获取）
    * @example "Duration"
    */
   GroupBy?: string;
   /**
-   * 需要匹配的图片类型，不传则匹配所有图片类型。
+   * 需要匹配的图片类型，不传则匹配所有图片类型。取值如下所示：
    * - `GIF`
    * - `PNG`
    * - `JPEG`
@@ -7821,10 +8003,11 @@ export interface DescribeImageXClientQueueDurationByTimeBody {
    * AWEBP
    * VVIC
    * 其他
+   * @example "["PNG"]"
    */
   ImageType?: string[];
   /**
-   * 需要匹配的运营商名称，不传则匹配所有运营商。支持取值如下：
+   * 需要匹配的运营商名称，不传则匹配所有运营商。取值如下所示：
    * - `电信`
    * - `联通`
    * - `移动`
@@ -7840,6 +8023,7 @@ export interface DescribeImageXClientQueueDurationByTimeBody {
    * 鹏博士
    * 教育网
    * 其他
+   * @example "["电信"]"
    */
   Isp?: string[];
   /**
@@ -7863,11 +8047,12 @@ export interface DescribeImageXClientQueueDurationByTimeBody {
   /**
    * 需要匹配的 SDK 版本，不传则匹配所有版本.
    * 需要匹配的SDK版本，不传则匹配所有版本
+   * @example "["1.2.0"]"
    */
   SdkVer?: string[];
   /**
    * 获取数据起始时间点。
-   * * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
+   * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
    * 获取数据起始时间点。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00
    * @example "2019-06-27T13:00:00+08:00"
    */
@@ -7891,6 +8076,7 @@ export interface DescribeImageXClientQueueDurationByTimeRes {
     /**
      * 排队耗时数据。
      * 排队耗时数据
+     * @example "-"
      */
     DurationData: {
       /**
@@ -7902,6 +8088,7 @@ export interface DescribeImageXClientQueueDurationByTimeRes {
       /**
        * 对应的排队耗时数据列表。
        * 对应的排队耗时数据列表
+       * @example "-"
        */
       Data: {
         /**
@@ -7911,8 +8098,7 @@ export interface DescribeImageXClientQueueDurationByTimeRes {
          */
         Count: number;
         /**
-         * 数据对应时间点。
-         * * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`。
+         * 数据对应时间点。日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`。
          * 数据对应时间点，按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。
          * @example "2023-01-01T00:00:00+08:00"
          */
@@ -7941,12 +8127,13 @@ export interface DescribeImageXClientScoreByTimeBody {
   /**
    * 需要匹配的 App 版本，不传则匹配 App 的所有版本。
    * 需要匹配的 App 版本，不传则匹配 App 的所有版本。
+   * @example "["1.2.0"]"
    */
   AppVer?: string[];
   /**
-   * 应用 ID。默认为空，不传则匹配账号下的所有的 App ID。
+   * 应用 ID。默认为空，不传则匹配账号下的所有的 AppID。
    * :::tip
-   * 您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/19511)的方式获取所需的 AppID。
+   * 您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/1213042)的方式获取所需的 AppID。
    * :::
    * 应用 ID。默认为空，匹配账号下的所有的App ID。
    * @example "123"
@@ -7965,11 +8152,12 @@ export interface DescribeImageXClientScoreByTimeBody {
   /**
    * 需要匹配的域名，不传则匹配所有域名。
    * 需要匹配的域名，不传则匹配所有域名
+   * @example "["d1"]"
    */
   Domain?: string[];
   /**
    * 获取数据结束时间点，需在起始时间点之后。
-   * * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
+   * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
    * 获取数据结束时间点，需在起始时间点之后。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00
    * @example "2019-06-27T15:00:00+08:00"
    */
@@ -7977,12 +8165,13 @@ export interface DescribeImageXClientScoreByTimeBody {
   /**
    * 需要匹配的自定义维度项 。
    * 需要匹配的自定义维度项
+   * @example "-"
    */
   ExtraDims?: {
     /**
      * 自定义维度名称。
      * :::tip
-     * 您可以通过调用[获取自定义维度列表](https://www.volcengine.com/docs/508/34554)来获取。
+     * 您可以通过调用[获取自定义维度列表](https://www.volcengine.com/docs/508/1213048)来获取。
      * :::
      * 自定义维度名称。
      * @example "access"
@@ -7991,14 +8180,15 @@ export interface DescribeImageXClientScoreByTimeBody {
     /**
      * 需要匹配的对应维度值
      * :::tip
-     * 您可以通过调用[获取自定义维度值](https://www.volcengine.com/docs/508/34555)来获取。
+     * 您可以通过调用[获取自定义维度值](https://www.volcengine.com/docs/508/1213050)来获取。
      * :::
      * 需要匹配的对应维度值
+     * @example "["4g"]"
      */
     Vals: string[];
   }[];
   /**
-   * 返回数据的时间粒度。
+   * 返回数据的时间粒度。取值如下所示：
    * * `5m`：5 分钟；
    * * `1h`：1 小时；
    * * `1d`：1 天。
@@ -8012,13 +8202,13 @@ export interface DescribeImageXClientScoreByTimeBody {
   /**
    * 拆分维度。默认为空，不拆分。支持取值：
    * - 公共维度：`Appid`、`OS`、`AppVer`、`SdkVer`、`ImageType`、`Country`、`Province`、`Isp`、`Domain`
-   * - 自定义维度：您可以通过调用 [GetImageXQueryDims](https://www.volcengine.com/docs/508/34554)接口获取自定义维度指标。
+   * - 自定义维度：您可以通过调用 [获取自定义维度列表](https://www.volcengine.com/docs/508/1213048)接口获取自定义维度指标。
    * 拆分维度。默认为空，表示不拆分。支持取值：公共维度（Appid,OS,AppVer,SdkVer,ImageType,Country,Province,Isp,Domain），自定义维度（通过"获取自定义维度列表"接口获取）
    * @example "OS"
    */
   GroupBy?: string;
   /**
-   * 需要匹配的图片类型，不传则匹配所有图片类型。
+   * 需要匹配的图片类型，不传则匹配所有图片类型。取值如下所示：
    * - `GIF`
    * - `PNG`
    * - `JPEG`
@@ -8038,10 +8228,11 @@ export interface DescribeImageXClientScoreByTimeBody {
    * AWEBP
    * VVIC
    * 其他
+   * @example "["PNG"]"
    */
   ImageType?: string[];
   /**
-   * 需要匹配的运营商名称，不传则匹配所有运营商。支持取值如下：
+   * 需要匹配的运营商名称，不传则匹配所有运营商。取值如下所示：
    * - `电信`
    * - `联通`
    * - `移动`
@@ -8057,6 +8248,7 @@ export interface DescribeImageXClientScoreByTimeBody {
    * 鹏博士
    * 教育网
    * 其他
+   * @example "["电信"]"
    */
   Isp?: string[];
   /**
@@ -8099,11 +8291,12 @@ export interface DescribeImageXClientScoreByTimeBody {
   /**
    * 需要匹配的 SDK 版本，不传则匹配所有版本.
    * 需要匹配的SDK版本，不传则匹配所有版本
+   * @example "["1.2.0"]"
    */
   SdkVer?: string[];
   /**
    * 获取数据起始时间点。
-   * * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
+   * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
    * 获取数据起始时间点。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00
    * @example "2019-06-27T13:00:00+08:00"
    */
@@ -8124,7 +8317,10 @@ export interface DescribeImageXClientScoreByTimeRes {
     Version: string;
   };
   Result: {
-    /** 画质打分数据 */
+    /**
+     * 画质打分数据
+     * @example "-"
+     */
     ScoreData: {
       /**
        * 该数据类型对应的总上报量
@@ -8134,6 +8330,7 @@ export interface DescribeImageXClientScoreByTimeRes {
       /**
        * 具体上报数据
        * 具体数据
+       * @example "-"
        */
       Data: {
         /**
@@ -8167,12 +8364,13 @@ export interface DescribeImageXClientSdkVerByTimeBody {
   /**
    * 需要匹配的 App 版本，不传则匹配 App 的所有版本。
    * 需要匹配的 App 版本，不传则匹配 App 的所有版本。
+   * @example "["1.2.0"]"
    */
   AppVer?: string[];
   /**
-   * 应用 ID。默认为空，不传则匹配账号下的所有的 App ID。
+   * 应用 ID。默认为空，不传则匹配账号下的所有的 AppID。
    * :::tip
-   * 您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/19511)的方式获取所需的 AppID。
+   * 您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/1213042)的方式获取所需的 AppID。
    * :::
    * 应用 ID。默认为空，匹配账号下的所有的App ID。
    * @example "123"
@@ -8191,11 +8389,12 @@ export interface DescribeImageXClientSdkVerByTimeBody {
   /**
    * 需要匹配的域名，不传则匹配所有域名。
    * 需要匹配的域名，不传则匹配所有域名
+   * @example "["d1"]"
    */
   Domain?: string[];
   /**
    * 获取数据结束时间点，需在起始时间点之后。
-   * * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
+   * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
    * 获取数据结束时间点，需在起始时间点之后。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00
    * @example "2019-06-27T15:00:00+08:00"
    */
@@ -8203,12 +8402,13 @@ export interface DescribeImageXClientSdkVerByTimeBody {
   /**
    * 需要匹配的自定义维度项 。
    * 需要匹配的自定义维度项
+   * @example "-"
    */
   ExtraDims?: {
     /**
      * 自定义维度名称。
      * :::tip
-     * 您可以通过调用[获取自定义维度列表](https://www.volcengine.com/docs/508/34554)来获取。
+     * 您可以通过调用[获取自定义维度列表](https://www.volcengine.com/docs/508/1213048)来获取。
      * :::
      * 自定义维度名称。
      * @example "access"
@@ -8217,14 +8417,15 @@ export interface DescribeImageXClientSdkVerByTimeBody {
     /**
      * 需要匹配的对应维度值
      * :::tip
-     * 您可以通过调用[获取自定义维度值](https://www.volcengine.com/docs/508/34555)来获取。
+     * 您可以通过调用[获取自定义维度值](https://www.volcengine.com/docs/508/1213050)来获取。
      * :::
      * 需要匹配的对应维度值
+     * @example "["4g"]"
      */
     Vals: string[];
   }[];
   /**
-   * 返回数据的时间粒度。
+   * 返回数据的时间粒度。取值如下所示：
    * * `5m`：5 分钟；
    * * `1h`：1 小时；
    * * `1d`：1 天。
@@ -8236,7 +8437,7 @@ export interface DescribeImageXClientSdkVerByTimeBody {
    */
   Granularity: string;
   /**
-   * 需要匹配的图片类型，不传则匹配所有图片类型。
+   * 需要匹配的图片类型，不传则匹配所有图片类型。取值如下所示：
    * - `GIF`
    * - `PNG`
    * - `JPEG`
@@ -8256,10 +8457,11 @@ export interface DescribeImageXClientSdkVerByTimeBody {
    * AWEBP
    * VVIC
    * 其他
+   * @example "["PNG"]"
    */
   ImageType?: string[];
   /**
-   * 需要匹配的运营商名称，不传则匹配所有运营商。支持取值如下：
+   * 需要匹配的运营商名称，不传则匹配所有运营商。取值如下所示：
    * - `电信`
    * - `联通`
    * - `移动`
@@ -8275,6 +8477,7 @@ export interface DescribeImageXClientSdkVerByTimeBody {
    * 鹏博士
    * 教育网
    * 其他
+   * @example "["电信"]"
    */
   Isp?: string[];
   /**
@@ -8298,11 +8501,12 @@ export interface DescribeImageXClientSdkVerByTimeBody {
   /**
    * 需要匹配的 SDK 版本，不传则匹配所有版本.
    * 需要匹配的SDK版本，不传则匹配所有版本
+   * @example "["1.2.0"]"
    */
   SdkVer?: string[];
   /**
    * 获取数据起始时间点。
-   * * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
+   * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
    * 获取数据起始时间点。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00
    * @example "2019-06-27T13:00:00+08:00"
    */
@@ -8326,6 +8530,7 @@ export interface DescribeImageXClientSdkVerByTimeRes {
     /**
      * SDK 版本数据。
      * SDK版本数据
+     * @example "-"
      */
     SdkVerData: {
       /**
@@ -8337,6 +8542,7 @@ export interface DescribeImageXClientSdkVerByTimeRes {
       /**
        * 对应的版本数据列表。
        * 对应的版本数据列表。
+       * @example "-"
        */
       Data: {
         /**
@@ -8346,8 +8552,7 @@ export interface DescribeImageXClientSdkVerByTimeRes {
          */
         Count: number;
         /**
-         * 数据对应时间点。
-         * * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`。
+         * 数据对应时间点。日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`。
          * 数据对应时间点，按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。
          * @example "2023-01-01T00:00:00+08:00"
          */
@@ -8371,7 +8576,7 @@ export interface DescribeImageXClientSdkVerByTimeRes {
 
 export interface DescribeImageXClientTopDemotionURLBody {
   /**
-   * 应用 ID。默认为空，不传则匹配账号下的所有的 App ID。您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/19511)的方式获取所需的 AppID。
+   * 应用 ID。默认为空，不传则匹配账号下的所有的 AppID。您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/1213042)的方式获取所需的 AppID。
    * 应用 ID。默认为空，不传则匹配账号下的所有的 App ID。
    * @example "123"
    */
@@ -8439,6 +8644,7 @@ export interface DescribeImageXClientTopDemotionURLRes {
     /**
      * Top URL 数据
      * Top URL数据
+     * @example "-"
      */
     TopUrlData: {
       /**
@@ -8459,7 +8665,7 @@ export interface DescribeImageXClientTopDemotionURLRes {
 
 export interface DescribeImageXClientTopFileSizeBody {
   /**
-   * 应用 ID。默认为空，不传则匹配账号下的所有的 App ID。您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/19511)的方式获取所需的 AppID。
+   * 应用 ID。默认为空，不传则匹配账号下的所有的 App ID。您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/1213042)的方式获取所需的 AppID。
    * 应用 ID。默认为空，不传则匹配账号下的所有的 App ID。
    * @example "123"
    */
@@ -8515,6 +8721,7 @@ export interface DescribeImageXClientTopFileSizeRes {
     /**
      * Top URL 数据
      * Top URL数据
+     * @example "-"
      */
     TopUrlData: {
       /**
@@ -8541,7 +8748,7 @@ export interface DescribeImageXClientTopFileSizeRes {
 
 export interface DescribeImageXClientTopQualityURLBody {
   /**
-   * 应用 ID。默认为空，不传则匹配账号下的所有的 App ID。您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/19511)的方式获取所需的 AppID。
+   * 应用 ID。默认为空，不传则匹配账号下的所有的 AppID。您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/1213042)的方式获取所需的 AppID。
    * 应用 ID。默认为空，不传则匹配账号下的所有的 App ID。
    * @example "123"
    */
@@ -8611,6 +8818,7 @@ export interface DescribeImageXClientTopQualityURLRes {
     /**
      * Top URL数据
      * Top URL数据
+     * @example "-"
      */
     TopUrlData: {
       /**
@@ -8631,12 +8839,12 @@ export interface DescribeImageXClientTopQualityURLRes {
 
 export interface DescribeImageXCompressUsageQuery {
   /**
-   * 获取数据结束时间点。日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
+   * 获取数据结束时间点。日期格式按照 ISO8601 表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如`2019-06-02T00:00:00+08:00`。
    * @example "2019-06-02T00:00:00+08:00"
    */
   EndTime: string;
   /**
-   * 查询数据的时间粒度。单位为秒。缺省时查询 `StartTime` 和 `EndTime` 时间段全部数据，此时单次查询最大时间跨度为 93 天。支持取值如下：
+   * 查询数据的时间粒度。单位为秒。缺省时查询 `StartTime` 和 `EndTime` 时间段全部数据，此时单次查询最大时间跨度为 93 天。取值如下所示：
    *
    * - `300`：单次查询最大时间跨度为 31 天
    * - `600`：单次查询最大时间跨度为 31 天
@@ -8649,15 +8857,12 @@ export interface DescribeImageXCompressUsageQuery {
    */
   Interval?: string;
   /**
-   * 服务 ID。为空时表示不筛选，支持查询多个服务，使用逗号分隔不同的服务。
-   *
-   * - 您可以在 veImageX 控制台[服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。
-   * - 您也可以通过 OpenAPI 的方式获取服务 ID，具体请参考 [GetAllImageServices](https://www.volcengine.com/docs/508/9360)。
+   * 服务 ID。支持查询多个服务，传入多个时用英文逗号“,”分割，缺省情况下表示查询所有服务。您可以在 veImageX 控制台的[服务管理](https://console.volcengine.com/imagex/service_manage/)模块或者调用 [GetAllImageServices](https://www.volcengine.com/docs/508/9360) 接口获取服务 ID。
    * @example "s1,s2"
    */
   ServiceIds?: string;
   /**
-   * 获取数据起始时间点。日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
+   * 获取数据起始时间点。日期格式按照 ISO8601 表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如`2019-06-02T00:00:00+08:00`。
    * :::tip
    * 由于仅支持查询近一年历史数据，则若此刻时间为`2011-11-21T16:14:00+08:00`，那么您可输入最早的开始时间为`2010-11-21T00:00:00+08:00`。
    * :::
@@ -8680,9 +8885,15 @@ export interface DescribeImageXCompressUsageRes {
     Version: string;
   };
   Result: {
-    /** 压缩量数据 */
+    /**
+     * 压缩量数据
+     * @example "-"
+     */
     CompressData: {
-      /** 压缩前大小，单位为 byte。 */
+      /**
+       * 压缩前大小，单位为 byte。
+       * @example "-"
+       */
       InSize: {
         /**
          * 数据对应时间点，时间片开始时刻。日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
@@ -8697,7 +8908,10 @@ export interface DescribeImageXCompressUsageRes {
          */
         Value: number;
       }[];
-      /** 压缩后大小，单位为 byte。 */
+      /**
+       * 压缩后大小，单位为 byte。
+       * @example "-"
+       */
       OutSize: {
         /**
          * 数据对应时间点，时间片开始时刻。日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
@@ -8718,7 +8932,7 @@ export interface DescribeImageXCompressUsageRes {
 
 export interface DescribeImageXDomainBandwidthDataQuery {
   /**
-   * 过滤计费区域。不传表示不过滤，传入多个用英文逗号分隔。支持取值如下：
+   * 计费区域。支持查询多个区域，传入多个时用英文逗号“,”分割，缺省情况下表示查询所有区域。取值如下所示：
    *
    * - `CHN`：中国内地
    * - `AP1`：亚太一区
@@ -8733,18 +8947,17 @@ export interface DescribeImageXDomainBandwidthDataQuery {
    */
   BillingRegion?: string;
   /**
-   * 域名。为空时表示不筛选，支持查询多个域名，不同的域名使用逗号分隔。
-   * 您可以通过调用 [GetServiceDomains](https://www.volcengine.com/docs/508/9379) 获取服务下所有域名信息。
+   * 域名。支持查询多个域名，传入多个时用英文逗号“,”分割，缺省情况下表示查询所有域名。您可以通过调用 [GetServiceDomains](https://www.volcengine.com/docs/508/9379) 获取服务下所有域名信息。
    * @example "d1,d2"
    */
   DomainNames?: string;
   /**
-   * 获取数据结束时间点。日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
+   * 获取数据结束时间点。日期格式按照 ISO8601 表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如`2019-06-02T00:00:00+08:00`。
    * @example "2019-06-02T00:00:00+08:00"
    */
   EndTime: string;
   /**
-   * 需要分组查询的参数。不传表示不拆分维度，传入多个用英文逗号分隔。支持取值如下：
+   * 需要分组查询的参数。不传表示不拆分维度，传入多个用英文逗号分隔。取值如下所示：
    *
    * - `ServiceId`：服务 ID
    * - `DomainName` ：域名
@@ -8752,7 +8965,7 @@ export interface DescribeImageXDomainBandwidthDataQuery {
    */
   GroupBy?: string;
   /**
-   * 查询数据的时间粒度。单位为秒。缺省时查询 `StartTime` 和 `EndTime` 时间段全部数据，此时单次查询最大时间跨度为 93 天。支持取值如下：
+   * 查询数据的时间粒度。单位为秒。缺省时查询 `StartTime` 和 `EndTime` 时间段全部数据，此时单次查询最大时间跨度为 93 天。取值如下所示：
    *
    * - `300`：单次查询最大时间跨度为 31 天
    * - `600`：单次查询最大时间跨度为 31 天
@@ -8765,15 +8978,12 @@ export interface DescribeImageXDomainBandwidthDataQuery {
    */
   Interval?: number;
   /**
-   * 服务 ID。为空时表示不筛选，支持查询多个服务，使用逗号分隔不同的服务。
-   *
-   * - 您可以在 veImageX 控制台[服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。
-   * - 您也可以通过 OpenAPI 的方式获取服务 ID，具体请参考 [GetAllImageServices](https://www.volcengine.com/docs/508/9360)。
+   * 服务 ID。支持查询多个服务，传入多个时用英文逗号“,”分割，缺省情况下表示查询所有服务。您可以在 veImageX 控制台的[服务管理](https://console.volcengine.com/imagex/service_manage/)模块或者调用 [GetAllImageServices](https://www.volcengine.com/docs/508/9360) 接口获取服务 ID。
    * @example "s1,s2"
    */
   ServiceIds?: string;
   /**
-   * 取数据起始时间点。日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
+   * 取数据起始时间点。日期格式按照 ISO8601 表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如`2019-06-02T00:00:00+08:00`。
    * :::tip
    * 由于仅支持查询近一年历史数据，则若此刻时间为`2011-11-21T16:14:00+08:00`，那么您可输入最早的开始时间为`2010-11-21T00:00:00+08:00`。
    * :::
@@ -8799,9 +9009,13 @@ export interface DescribeImageXDomainBandwidthDataRes {
     /**
      * 计量数据列表
      * 计量数据列表
+     * @example "-"
      */
     BpsData: {
-      /** 具体数据。 */
+      /**
+       * 具体数据。
+       * @example "-"
+       */
       Data: {
         /**
          * 统计时间点，时间片开始时刻。日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如 `2019-06-02T00:00:00+08:00`。
@@ -8810,7 +9024,7 @@ export interface DescribeImageXDomainBandwidthDataRes {
          */
         TimeStamp: string;
         /**
-         * 带宽，单位为 bps。
+         * 带宽用量，单位为 bps。
          * 带宽单位：bps
          * @format float
          * @example "123.4"
@@ -8835,7 +9049,7 @@ export interface DescribeImageXDomainBandwidthDataRes {
 
 export interface DescribeImageXDomainBandwidthNinetyFiveDataQuery {
   /**
-   * 过滤计费区域。不传表示不过滤，传入多个用英文逗号分隔。支持取值如下：
+   * 计费区域。支持查询多个区域，传入多个时用英文逗号“,”分割，缺省情况下表示查询所有区域。取值如下所示：
    *
    * - `CHN`：中国内地
    * - `AP1`：亚太一区
@@ -8850,26 +9064,22 @@ export interface DescribeImageXDomainBandwidthNinetyFiveDataQuery {
    */
   BillingRegion?: string;
   /**
-   * 域名。为空时表示不筛选，支持查询多个域名，不同的域名使用逗号分隔。
-   * 您可以通过调用 [GetServiceDomains](https://www.volcengine.com/docs/508/9379) 获取服务下所有域名信息。
+   * 域名。支持查询多个域名，传入多个时用英文逗号“,”分割，缺省情况下表示查询所有域名。您可以通过调用 [GetServiceDomains](https://www.volcengine.com/docs/508/9379) 获取服务下所有域名信息。
    * @example "d1,d2"
    */
   DomainNames?: string;
   /**
-   * 获取数据结束时间点。日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
+   * 获取数据结束时间点。日期格式按照 ISO8601 表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如`2019-06-02T00:00:00+08:00`。
    * @example "2019-06-02T00:00:00+08:00"
    */
   EndTime: string;
   /**
-   * 服务 ID。为空时表示不筛选，支持查询多个服务，使用逗号分隔不同的服务。
-   *
-   * - 您可以在 veImageX 控制台[服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。
-   * - 您也可以通过 OpenAPI 的方式获取服务 ID，具体请参考 [GetAllImageServices](https://www.volcengine.com/docs/508/9360)。
+   * 服务 ID。支持查询多个服务，传入多个时用英文逗号“,”分割，缺省情况下表示查询所有服务。您可以在 veImageX 控制台的[服务管理](https://console.volcengine.com/imagex/service_manage/)模块或者调用 [GetAllImageServices](https://www.volcengine.com/docs/508/9360) 接口获取服务 ID。
    * @example "s1,s2"
    */
   ServiceIds?: string;
   /**
-   * 取数据起始时间点。日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
+   * 取数据起始时间点。日期格式按照 ISO8601 表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如`2019-06-02T00:00:00+08:00`。
    * :::tip
    * 由于仅支持查询近一年历史数据，则若此刻时间为`2011-11-21T16:14:00+08:00`，那么您可输入最早的开始时间为`2010-11-21T00:00:00+08:00`。
    * :::
@@ -8893,7 +9103,7 @@ export interface DescribeImageXDomainBandwidthNinetyFiveDataRes {
   };
   Result: {
     /**
-     * 带宽95值，单位bps
+     * 带宽 95 值，单位为 bps。
      * 带宽95值，单位bps
      * @example "123.1"
      */
@@ -8903,7 +9113,7 @@ export interface DescribeImageXDomainBandwidthNinetyFiveDataRes {
 
 export interface DescribeImageXDomainTrafficDataQuery {
   /**
-   * 过滤计费区域。不传表示不过滤。传入多个用英文逗号分隔。支持取值如下：
+   * 计费区域。支持查询多个区域，传入多个时用英文逗号“,”分割，缺省情况下表示查询所有区域。取值如下所示：
    *
    * - `CHN`：中国内地
    * - `AP1`：亚太一区
@@ -8918,18 +9128,17 @@ export interface DescribeImageXDomainTrafficDataQuery {
    */
   BillingRegion?: string;
   /**
-   * 域名。为空时表示不筛选，支持查询多个域名，不同的域名使用逗号分隔。
-   * 您可以通过调用 [GetServiceDomains](https://www.volcengine.com/docs/508/9379) 获取服务下所有域名信息。
+   * 域名。支持查询多个域名，传入多个时用英文逗号“,”分割，缺省情况下表示查询所有域名。您可以通过调用 [GetServiceDomains](https://www.volcengine.com/docs/508/9379) 获取服务下所有域名信息。
    * @example "d1,d2"
    */
   DomainNames?: string;
   /**
-   * 获取数据结束时间点。日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
+   * 获取数据结束时间点。日期格式按照 ISO8601 表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如`2019-06-02T00:00:00+08:00`。
    * @example "2019-06-02T00:00:00+08:00"
    */
   EndTime: string;
   /**
-   * 需要分组查询的参数。不传表示不拆分维度，传入多个用英文逗号分隔。支持取值如下：
+   * 需要分组查询的参数。不传表示不拆分维度，传入多个用英文逗号分隔。取值如下所示：
    *
    * - `ServiceId`：服务 ID
    * - `DomainName` ：域名
@@ -8937,7 +9146,7 @@ export interface DescribeImageXDomainTrafficDataQuery {
    */
   GroupBy?: string;
   /**
-   * 查询数据的时间粒度。单位为秒。缺省时查询 StartTime 和 EndTime 时间段全部数据，此时单次查询最大时间跨度为 93 天。支持取值如下：
+   * 查询数据的时间粒度。单位为秒。缺省时查询 `StartTime` 和 `EndTime` 时间段全部数据，此时单次查询最大时间跨度为 93 天。取值如下所示：
    *
    * - `300`：单次查询最大时间跨度为 31 天
    * - `600`：单次查询最大时间跨度为 31 天
@@ -8950,14 +9159,12 @@ export interface DescribeImageXDomainTrafficDataQuery {
    */
   Interval?: string;
   /**
-   * 服务 ID。为空时表示不筛选，支持查询多个服务，使用逗号分隔不同的服务。
-   * - 您可以在 veImageX 控制台[服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。
-   * - 您也可以通过 OpenAPI 的方式获取服务 ID，具体请参考 [GetAllImageServices](https://www.volcengine.com/docs/508/9360)。
+   * 服务 ID。支持查询多个服务，传入多个时用英文逗号“,”分割，缺省时表示查询所有服务。您可以在 veImageX 控制台的[服务管理](https://console.volcengine.com/imagex/service_manage/)模块或者调用 [GetAllImageServices](https://www.volcengine.com/docs/508/9360) 接口获取服务 ID。
    * @example "s1,s2"
    */
   ServiceIds?: string;
   /**
-   * 获取数据起始时间点。日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
+   * 获取数据起始时间点。日期格式按照 ISO8601 表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如`2019-06-02T00:00:00+08:00`。
    * :::tip
    * 由于仅支持查询近一年历史数据，则若此刻时间为`2011-11-21T16:14:00+08:00`，那么您可输入最早的开始时间为`2010-11-21T00:00:00+08:00`。
    * :::
@@ -8980,9 +9187,15 @@ export interface DescribeImageXDomainTrafficDataRes {
     Version: string;
   };
   Result: {
-    /** 计量数据列表 */
+    /**
+     * 计量数据列表
+     * @example "-"
+     */
     TrafficData: {
-      /** 具体数据。 */
+      /**
+       * 具体数据。
+       * @example "-"
+       */
       Data: {
         /**
          * 统计时间点，时间片开始时刻。日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如 `2019-06-02T00:00:00+08:00`。
@@ -8991,7 +9204,7 @@ export interface DescribeImageXDomainTrafficDataRes {
          */
         TimeStamp: string;
         /**
-         * 流量，单位：Byte。
+         * 流量用量，单位为 Byte。
          * 流量单位：Byte。
          * @format float
          * @example "123.4"
@@ -9015,6 +9228,3170 @@ export interface DescribeImageXDomainTrafficDataRes {
 }
 
 export interface DescribeImageXEdgeRequestBandwidthQuery {
+  /**
+   * 域名。支持查询多个域名，传入多个时用英文逗号“,”分割，缺省情况下表示查询所有域名。您可以通过调用 [GetServiceDomains](https://www.volcengine.com/docs/508/9379) 获取服务下所有域名信息。
+   * @example "d1,d2"
+   */
+  DomainNames?: string;
+  /**
+   * 获取数据结束时间点。日期格式按照 ISO8601 表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如`2019-06-02T00:00:00+08:00`。
+   * @example "2019-06-02T00:00:00+08:00"
+   */
+  EndTime: string;
+  /**
+   * 分组依据，取值仅支持`DomainName`。
+   * @example "DomainName"
+   */
+  GroupBy?: string;
+  /**
+   * 查询数据的时间粒度。单位为秒，缺省时查询`StartTime`和`EndTime`时间段全部数据，此时单次查询最大时间跨度为 93 天。取值如下所示：
+   *
+   * - `60`：单次查询最大时间跨度为 6 小时
+   * - `120`：单次查询最大时间跨度为 6 小时
+   * - `300`：单次查询最大时间跨度为 31 天
+   * - `600`：单次查询最大时间跨度为 31 天
+   * - `1200`：单次查询最大时间跨度为 31 天
+   * - `1800`：单次查询最大时间跨度为 31 天
+   * - `3600`：单次查询最大时间跨度为 93 天
+   * - `86400`：单次查询最大时间跨度为 93 天
+   * - `604800`：单次查询最大时间跨度为 93 天
+   * @example "300"
+   */
+  Interval?: string;
+  /**
+   * 过滤运营商。传入多个用英文逗号分割，缺省情况下表示不过滤。取值如下所示：
+   *
+   * - `电信`
+   * - `联通`
+   * - `移动`
+   * - `鹏博士`
+   * - `教育网`
+   * - `广电网`
+   * - `其它`
+   * @example "移动,联通"
+   */
+  Isp?: string;
+  /**
+   * 过滤网络协议。传入多个用英文逗号分割，缺省情况下表示不过滤。取值如下所示：
+   *
+   * - `HTTP`
+   * - `HTTPS`
+   * @example "HTTP,HTTPS"
+   */
+  Protocols?: string;
+  /**
+   * 计费区域。支持查询多个区域，传入多个时用英文逗号“,”分割，缺省情况下表示查询所有区域。取值如下所示：
+   *
+   * - `中国大陆`
+   * - `亚太一区`
+   * - `亚太二区`
+   * - `亚太三区`
+   * - `欧洲区`
+   * - `北美区`
+   * - `南美区`
+   * - `中东区`
+   * @example "中国大陆"
+   */
+  Regions?: string;
+  /**
+   * 服务 ID。支持查询多个服务，传入多个时用英文逗号“,”分割，缺省情况下表示查询所有服务。您可以在 veImageX 控制台的[服务管理](https://console.volcengine.com/imagex/service_manage/)模块或者调用 [GetAllImageServices](https://www.volcengine.com/docs/508/9360) 接口获取服务 ID。
+   * @example "s1,s2"
+   */
+  ServiceIds?: string;
+  /**
+   * 获取数据起始时间点。日期格式按照 ISO8601 表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如`2019-06-02T00:00:00+08:00`。
+   * :::tip
+   * 由于仅支持查询近 93 天的历史数据，则若此刻时间为`2011-11-21T16:14:00+08:00`，那么您可输入最早的开始时间为`2011-08-21T00:00:00+08:00`。
+   * :::
+   * @example "2019-06-02T00:00:00+08:00"
+   */
+  StartTime: string;
+  /**
+   * 客户端国家。传入多个时用英文逗号作为分割符，缺省情况下表示不过滤。可调用 [DescribeImageXEdgeRequestRegions](https://www.volcengine.com/docs/508/1209574) 获取 IP 解析后的客户端国家。取值如下所示：
+   *
+   * - `海外`，除中国外全部国家。
+   * - 具体国家取值，如`中国`、`美国`。
+   * @example "中国"
+   */
+  UserCountry?: string;
+  /**
+   * 客户端省份。传入多个用英文逗号分割，缺省情况下表示不过滤。可调用 [DescribeImageXEdgeRequestRegions](https://www.volcengine.com/docs/508/1209574) 获取 IP 解析后的客户端省份。
+   * @example "北京"
+   */
+  UserProvince?: string;
+}
+
+export interface DescribeImageXEdgeRequestBandwidthRes {
+  ResponseMetadata: {
+    /** 请求的接口名，属于请求的公共参数。 */
+    Action: string;
+    /** 请求的Region，例如：cn-north-1 */
+    Region: string;
+    /** RequestID为每次API请求的唯一标识。 */
+    RequestId: string;
+    /** 请求的服务，属于请求的公共参数。 */
+    Service: string;
+    /** 请求的版本号，属于请求的公共参数。 */
+    Version: string;
+  };
+  Result: {
+    /**
+     * 带宽数据。
+     * @example "-"
+     */
+    BpsData: {
+      /**
+       * 时序数据
+       * @example "-"
+       */
+      Data: {
+        /**
+         * 统计时间点，时间片开始时刻，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。
+         * @example "2023-01-01T00:00:00+08:00"
+         */
+        TimeStamp: string;
+        /**
+         * 带宽用量，单位为 bps。
+         * @format float
+         * @example "12.3"
+         */
+        Value: number;
+      }[];
+      /**
+       * 域名，仅当`GroupBy`取值为`DomainName`时返回该参数。
+       * 当GroupBy带有DomainName时出现
+       * @example "d1"
+       */
+      DomainName?: string;
+    }[];
+  };
+}
+
+export interface DescribeImageXEdgeRequestQuery {
+  /**
+   * 状态码，传入多个时用英文逗号分隔。取值如下所示：
+   *
+   * - `req_cnt`：返回所有状态码数据
+   * - `2xx`：返回 2xx 状态码汇总数据
+   * - `3xx`：返回 3xx 状态码汇总数据
+   * - `4xx`：返回 4xx 状态码汇总数据
+   * - `5xx`：返回 5xx 状态码汇总数据。
+   * @example "req_cnt,2xx,3xx"
+   */
+  DataTypes: string;
+  /**
+   * 是否拆分状态码，取值如下所示：
+   *
+   * - `true`：拆分
+   * - `false`：（默认）不拆分
+   * @example "true"
+   */
+  DetailedCode?: boolean;
+  /**
+   * 域名。支持查询多个域名，传入多个时用英文逗号“,”分割，缺省情况下表示查询所有域名。您可以通过调用 [GetServiceDomains](https://www.volcengine.com/docs/508/9379) 获取服务下所有域名信息。
+   * @example "d1,d2"
+   */
+  DomainNames?: string;
+  /**
+   * 获取数据结束时间点。日期格式按照 ISO8601 表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如`2019-06-02T00:00:00+08:00`。
+   * @example "2019-06-02T00:00:00+08:00"
+   */
+  EndTime: string;
+  /**
+   * 需要分组查询的参数，传入多个用英文逗号分割。取值如下所示：
+   *
+   * - `DomainName`：域名
+   * - `DataType`：状态码
+   * @example "DomainName,DataType"
+   */
+  GroupBy?: string;
+  /**
+   * 查询数据的时间粒度。单位为秒，缺省时查询`StartTime`和`EndTime`时间段全部数据，此时单次查询最大时间跨度为 93 天。支持以下取值：
+   *
+   * - `60`：单次查询最大时间跨度为 6 小时
+   * - `120`：单次查询最大时间跨度为 6 小时
+   * - `300`：单次查询最大时间跨度为 31 天
+   * - `600`：单次查询最大时间跨度为 31 天
+   * - `1200`：单次查询最大时间跨度为 31 天
+   * - `1800`：单次查询最大时间跨度为 31 天
+   * - `3600`：单次查询最大时间跨度为 93 天
+   * - `86400`：单次查询最大时间跨度为 93 天
+   * - `604800`：单次查询最大时间跨度为 93 天
+   * @example "300"
+   */
+  Interval?: string;
+  /**
+   * 过滤运营商。传入多个用英文逗号分割，缺省情况下表示不过滤。取值如下所示：
+   *
+   * - `电信`
+   * - `联通`
+   * - `移动`
+   * - `鹏博士`
+   * - `教育网`
+   * - `广电网`
+   * - `其它`
+   * @example "移动,联通"
+   */
+  Isp?: string;
+  /**
+   * 过滤网络协议。传入多个用英文逗号分割，缺省情况下表示不过滤。取值如下所示：
+   *
+   * - `HTTP`
+   * - `HTTPS`
+   * @example "HTTP,HTTPS"
+   */
+  Protocols?: string;
+  /**
+   * 计费区域。支持查询多个区域，传入多个时用英文逗号“,”分割，缺省情况下表示查询所有区域。取值如下所示：
+   *
+   * - `中国大陆`
+   * - `亚太一区`
+   * - `亚太二区`
+   * - `亚太三区`
+   * - `欧洲区`
+   * - `北美区`
+   * - `南美区`
+   * - `中东区`
+   * @example "中国大陆,北美区"
+   */
+  Regions?: string;
+  /**
+   * 服务 ID。支持查询多个服务，传入多个时用英文逗号“,”分割，缺省情况下表示查询所有服务。您可以在 veImageX 控制台的[服务管理](https://console.volcengine.com/imagex/service_manage/)模块或者调用 [GetAllImageServices](https://www.volcengine.com/docs/508/9360) 接口获取服务 ID。
+   * @example "s1,s2"
+   */
+  ServiceIds?: string;
+  /**
+   * 获取数据起始时间点。日期格式按照 ISO8601 表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如`2019-06-02T00:00:00+08:00`。
+   * :::tip
+   * 由于仅支持查询近 93 天的历史数据，则若此刻时间为`2011-11-21T16:14:00+08:00`，那么您可输入最早的开始时间为`2011-08-21T00:00:00+08:00`。
+   * :::
+   * @example "2019-06-02T00:00:00+08:00"
+   */
+  StartTime: string;
+  /**
+   * 客户端国家。支持查询多个国家，传入多个时用英文逗号“,”分割，缺省情况下表示查询所有国家。您可通过调用 [DescribeImageXEdgeRequestRegions](https://www.volcengine.com/docs/508/1209574) 获取 IP 解析后的客户端国家。取值如下所示：
+   *
+   * - `海外`，除中国外全部国家。
+   * - 具体国家取值，如`中国`、`美国`。
+   * @example "中国"
+   */
+  UserCountry?: string;
+  /**
+   * 客户端省份。支持查询多个省份，传入多个时用英文逗号“,”分割，缺省情况下表示查询所有省份。可调用 [DescribeImageXEdgeRequestRegions](https://www.volcengine.com/docs/508/1209574) 获取 IP 解析后的客户端省份。
+   * @example "北京"
+   */
+  UserProvince?: string;
+}
+
+export interface DescribeImageXEdgeRequestRegionsQuery {
+  /**
+   * 获取数据结束时间点。日期格式按照 ISO8601 表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。例如`2019-06-02T00:00:00+08:00`。<br>起始时间与结束时间间隔小于等于 90 天。
+   * @example "2019-06-02T00:00:00+08:00"
+   */
+  EndTime: string;
+  /**
+   * 获取数据起始时间点。日期格式按照 ISO8601 表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。例如`2019-06-02T00:00:00+08:00`。<br>起始时间与结束时间间隔小于等于 90 天。
+   * @example "2019-06-02T00:00:00+08:00"
+   */
+  StartTime: string;
+}
+
+export interface DescribeImageXEdgeRequestRegionsRes {
+  ResponseMetadata: {
+    /** 请求的接口名，属于请求的公共参数。 */
+    Action: string;
+    /** 请求的Region，例如：cn-north-1 */
+    Region: string;
+    /** RequestID为每次API请求的唯一标识。 */
+    RequestId: string;
+    /** 请求的服务，属于请求的公共参数。 */
+    Service: string;
+    /** 请求的版本号，属于请求的公共参数。 */
+    Version: string;
+  };
+  Result: {
+    /**
+     * 客户端国家
+     * @example "["中国"]"
+     */
+    UserCountry: string[];
+    /**
+     * 客户端省份
+     * @example "["北京"]"
+     */
+    UserProvince: string[];
+  };
+}
+
+export interface DescribeImageXEdgeRequestRes {
+  ResponseMetadata: {
+    /** 请求的接口名，属于请求的公共参数。 */
+    Action: string;
+    /** 请求的Region，例如：cn-north-1 */
+    Region: string;
+    /** RequestID为每次API请求的唯一标识。 */
+    RequestId: string;
+    /** 请求的服务，属于请求的公共参数。 */
+    Service: string;
+    /** 请求的版本号，属于请求的公共参数。 */
+    Version: string;
+  };
+  Result: {
+    /**
+     * 数据列表
+     *
+     * @example "-"
+     */
+    RequestCnt: {
+      /**
+       * 时序数据
+       * @example "-"
+       */
+      Data: {
+        /**
+         * 统计时间点，时间片开始时刻，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。
+         * @example "2023-01-01T00:00:00+08:00"
+         */
+        TimeStamp: string;
+        /**
+         * 请求次数，单位为次。
+         * @example "123"
+         */
+        Value: number;
+      }[];
+      /**
+       * 数据类型，当`GroupBy`指定了`DataType`时有返回值。
+       * 当GroupBy带有DataType时出现
+       * @example "200"
+       */
+      DataType?: string;
+      /**
+       * 域名，当`GroupBy`指定了`DomainName`时有返回值。
+       * 当GroupBy带有DomainName时出现
+       * @example "d1"
+       */
+      DomainName?: string;
+    }[];
+  };
+}
+
+export interface DescribeImageXEdgeRequestTrafficQuery {
+  /**
+   * 域名。支持查询多个域名，传入多个时用英文逗号“,”分割，缺省情况下表示查询所有域名。您可以通过调用 [GetServiceDomains](https://www.volcengine.com/docs/508/9379) 获取服务下所有域名信息。
+   * @example "d1,d2"
+   */
+  DomainNames?: string;
+  /**
+   * 获取数据结束时间点。日期格式按照 ISO8601 表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如`2019-06-02T00:00:00+08:00`。
+   * @example "2019-06-02T00:00:00+08:00"
+   */
+  EndTime: string;
+  /**
+   * 分组依据，取值仅支持`DomainName`。
+   * @example "DomainName"
+   */
+  GroupBy?: string;
+  /**
+   * 查询数据的时间粒度。单位为秒，缺省时查询`StartTime`和`EndTime`时间段全部数据，此时单次查询最大时间跨度为 93 天。取值如下所示：
+   *
+   * - `60`：单次查询最大时间跨度为 6 小时
+   * - `120`：单次查询最大时间跨度为 6 小时
+   * - `300`：单次查询最大时间跨度为 31 天
+   * - `600`：单次查询最大时间跨度为 31 天
+   * - `1200`：单次查询最大时间跨度为 31 天
+   * - `1800`：单次查询最大时间跨度为 31 天
+   * - `3600`：单次查询最大时间跨度为 93 天
+   * - `86400`：单次查询最大时间跨度为 93 天
+   * - `604800`：单次查询最大时间跨度为 93 天
+   * @example "300"
+   */
+  Interval?: string;
+  /**
+   * 过滤运营商。传入多个用英文逗号分割，缺省情况下表示不过滤。取值如下所示：
+   *
+   * - `电信`
+   * - `联通`
+   * - `移动`
+   * - `鹏博士`
+   * - `教育网`
+   * - `广电网`
+   * - `其它`
+   * @example "移动,联通"
+   */
+  Isp?: string;
+  /**
+   * 过滤网络协议。传入多个用英文逗号分割，缺省情况下表示不过滤。取值如下所示：
+   *
+   * - `HTTP`
+   * - `HTTPS`
+   * @example "HTTP,HTTPS"
+   */
+  Protocols?: string;
+  /**
+   * 区域。支持查询多个区域，传入多个时用英文逗号“,”分割，缺省情况下表示查询所有区域。取值如下所示：
+   *
+   * - `中国大陆`
+   * - `亚太一区`
+   * - `亚太二区`
+   * - `亚太三区`
+   * - `欧洲区`
+   * - `北美区`
+   * - `南美区`
+   * - `中东区`
+   * @example "中国大陆"
+   */
+  Regions?: string;
+  /**
+   * 服务 ID。支持查询多个服务，传入多个时用英文逗号“,”分割，缺省情况下表示查询所有服务。您可以在 veImageX 控制台的[服务管理](https://console.volcengine.com/imagex/service_manage/)模块或者调用 [GetAllImageServices](https://www.volcengine.com/docs/508/9360) 接口获取服务 ID。
+   * @example "s1,s2"
+   */
+  ServiceIds?: string;
+  /**
+   * 获取数据起始时间点。日期格式按照 ISO8601 表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如`2019-06-02T00:00:00+08:00`。
+   * :::tip
+   * 由于仅支持查询近 93 天的历史数据，则若此刻时间为`2011-11-21T16:14:00+08:00`，那么您可输入最早的开始时间为`2011-08-21T00:00:00+08:00`。
+   * :::
+   * @example "2019-06-02T00:00:00+08:00"
+   */
+  StartTime: string;
+  /**
+   * 客户端国家。传入多个时用英文逗号作为分割符，缺省情况下表示不过滤。您可以通过调用 [DescribeImageXEdgeRequestRegions](https://www.volcengine.com/docs/508/1209574) 获取 IP 解析后的客户端国家。取值如下所示：
+   *
+   * - `海外`，除中国外全部国家。
+   * - 具体国家取值，如`中国`、`美国`。
+   * @example "中国"
+   */
+  UserCountry?: string;
+  /**
+   * 客户端省份。传入多个用英文逗号分割，缺省情况下表示不过滤。可调用 [DescribeImageXEdgeRequestRegions](https://www.volcengine.com/docs/508/1209574) 获取 IP 解析后的客户端省份。
+   * @example "北京"
+   */
+  UserProvince?: string;
+}
+
+export interface DescribeImageXEdgeRequestTrafficRes {
+  ResponseMetadata: {
+    /** 请求的接口名，属于请求的公共参数。 */
+    Action: string;
+    /** 请求的Region，例如：cn-north-1 */
+    Region: string;
+    /** RequestID为每次API请求的唯一标识。 */
+    RequestId: string;
+    /** 请求的服务，属于请求的公共参数。 */
+    Service: string;
+    /** 请求的版本号，属于请求的公共参数。 */
+    Version: string;
+  };
+  Result: {
+    /**
+     * 查询数据
+     * @example "-"
+     */
+    TrafficData: {
+      /**
+       * 时序数据
+       * @example "-"
+       */
+      Data: {
+        /**
+         * 统计时间点，时间片开始时刻，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。
+         * @example "2023-01-01T00:00:00+08:00"
+         */
+        TimeStamp: string;
+        /**
+         * 流量，单位为 byte。
+         * @format float
+         * @example "123"
+         */
+        Value: number;
+      }[];
+      /**
+       * 域名，仅当`GroupBy`取值为`DomainName`时返回该参数。
+       * 当GroupBy带有DomainName时出现
+       * @example "d1"
+       */
+      DomainName?: string;
+    }[];
+  };
+}
+
+export interface DescribeImageXExceedCountByTimeBody {
+  /**
+   * 需要匹配的 App 版本，不传则匹配 App 的所有版本。
+   * 需要匹配的 App 版本，不传则匹配 App 的所有版本。
+   * @example "["1.2.0"]"
+   */
+  AppVer?: string[];
+  /**
+   * 应用 ID。默认为空，不传则匹配账号下的所有的 AppID。您可以通过调用[查询应用列表](https://www.volcengine.com/docs/508/1213042)的方式获取所需的 AppID。
+   * 应用 ID。默认为空，匹配账号下的所有的App ID。
+   * @example "123"
+   */
+  Appid?: string;
+  /**
+   * 获取数据结束时间点，需在起始时间点之后。日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
+   * 获取数据结束时间点，需在起始时间点之后。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00
+   * @example "2019-06-27T15:00:00+08:00"
+   */
+  EndTime: string;
+  /**
+   * 需要匹配的自定义维度项 。
+   * 需要匹配的自定义维度项
+   * @example "-"
+   */
+  ExtraDims?: {
+    /**
+     * 自定义维度名称。
+     * :::tip
+     * 您可以通过调用[查询自定义维度列表](https://www.volcengine.com/docs/508/1213048)来获取。
+     * :::
+     * 自定义维度名称。
+     * @example "access"
+     */
+    Dim: string;
+    /**
+     * 需要匹配的对应维度值
+     * :::tip
+     * 您可以通过调用[查询自定义维度值](https://www.volcengine.com/docs/508/1213048)来获取。
+     * :::
+     * 需要匹配的对应维度值
+     * @example "["4g"]"
+     */
+    Vals: string[];
+  }[];
+  /**
+   * 返回数据的时间粒度，取值如下所示：
+   * * `5m`：5 分钟；
+   * * `1h`：1 小时；
+   * * `1d`：1 天。
+   * 返回数据的时间粒度。
+   * 5m：为 5 分钟；
+   * 1h：为 1 小时；
+   * 1d：为 1 天。
+   * @example "1h"
+   */
+  Granularity: string;
+  /**
+   * 拆分维度。默认为空，表示拆分分位数据。支持取值：
+   * - `Duration`：表示拆分分位数据
+   * - 公共维度：`Appid`、`OS`、`AppVer`、`SdkVer`、`ImageType`、`Country`、`Province`、`Isp`、`Domain`
+   * - 自定义维度：您可以通过调用[查询自定义维度列表](https://www.volcengine.com/docs/508/1213048)接口获取自定义维度指标
+   * 拆分维度。默认为空，表示不拆分。支持取值：公共维度（Appid,OS,AppVer,SdkVer,ImageType），自定义维度（通过"获取自定义维度列表"接口获取）
+   * @example "OS"
+   */
+  GroupBy?: string;
+  /**
+   * 需要匹配的图片类型，不传则匹配所有图片类型。取值如下所示：
+   * - `GIF`
+   * - `PNG`
+   * - `JPEG`
+   * - `HEIF`
+   * - `HEIC`
+   * - `WEBP`
+   * - `AWEBP`
+   * - `VVIC`
+   * - `AVIF`
+   * - `AVIS`
+   * - `其他`
+   * 需要匹配的图片类型，不传则匹配所有图片类型。
+   * GIF
+   * PNG
+   * JPEG
+   * HEIF
+   * HEIC
+   * WEBP
+   * AWEBP
+   * VVIC
+   * 其他
+   * @example "["PNG"]"
+   */
+  ImageType?: string[];
+  /**
+   * 需要匹配的系统类型，不传则匹配非 WEB 端的所有系统。取值如下所示：
+   * - `iOS`
+   * - `Android`
+   * - `WEB`
+   * 需要匹配的系统类型，不传则匹配非WEB端所有系统。取值如下所示：
+   * iOS
+   * Android
+   * WEB
+   * @example "WEB"
+   */
+  OS?: string;
+  /**
+   * 需要匹配的 SDK 版本，不传则匹配所有版本.
+   * 需要匹配的SDK版本，不传则匹配所有版本
+   * @example "["1.2.0"]"
+   */
+  SdkVer?: string[];
+  /**
+   * 获取数据起始时间点。日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
+   * 获取数据起始时间点。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00
+   * @example "2019-06-27T13:00:00+08:00"
+   */
+  StartTime: string;
+}
+
+export interface DescribeImageXExceedCountByTimeRes {
+  ResponseMetadata: {
+    /** 请求的接口名，属于请求的公共参数。 */
+    Action: string;
+    /** 请求的Region，例如：cn-north-1 */
+    Region: string;
+    /** RequestID为每次API请求的唯一标识。 */
+    RequestId: string;
+    /** 请求的服务，属于请求的公共参数。 */
+    Service: string;
+    /** 请求的版本号，属于请求的公共参数。 */
+    Version: string;
+  };
+  Result: {
+    /**
+     * 大图样本量上报数据。
+     * 上报量数据。
+     * @example "-"
+     */
+    ExceedCountData: {
+      /**
+       * 该数据类型对应的总上报量。
+       * 该数据类型对应的上报量
+       * @example "123"
+       */
+      Count: number;
+      /**
+       * 对应的客户端上报量数据列表。
+       * 对应的客户端上报量数据列表。
+       * @example "-"
+       */
+      Data: {
+        /**
+         * 上报量数据
+         * 上报量数据
+         * @example "123"
+         */
+        Count: number;
+        /**
+         * 数据对应时间点。日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`。
+         * 数据对应时间点，按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。
+         * @example "2023-01-01T00:00:00+08:00"
+         */
+        Timestamp: string;
+        /**
+         * 上报量数据
+         * 上报量数据
+         * @example "123"
+         */
+        Value: number;
+      }[];
+      /**
+       * 数据类型，不拆分时值为`Total`，拆分时为具体的维度值。
+       * 数据类型，不拆分时值为Total，拆分时为具体的维度值
+       * @example "Total"
+       */
+      Type: string;
+    }[];
+  };
+}
+
+export interface DescribeImageXExceedFileSizeBody {
+  /**
+   * 需要匹配的 App 版本，不传则匹配 App 的所有版本。
+   * 需要匹配的 App 版本，不传则匹配 App 的所有版本。
+   * @example "["1.2.0"]"
+   */
+  AppVer?: string[];
+  /**
+   * 应用 ID。默认为空，不传则匹配账号下的所有的 AppID。您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/1213042)的方式获取所需的 AppID。
+   * 应用 ID。默认为空，匹配账号下的所有的App ID。
+   * @example "123"
+   */
+  Appid?: string;
+  /**
+   * 获取数据结束时间点，需在起始时间点之后。日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
+   * 获取数据结束时间点，需在起始时间点之后。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00
+   * @example "2019-06-27T15:00:00+08:00"
+   */
+  EndTime: string;
+  /**
+   * 需要匹配的自定义维度项 。
+   * 需要匹配的自定义维度项
+   * @example "-"
+   */
+  ExtraDims?: {
+    /**
+     * 自定义维度名称。
+     * :::tip
+     * 您可以通过调用[获取自定义维度列表](https://www.volcengine.com/docs/508/1213048)来获取。
+     * :::
+     * 自定义维度名称。
+     * @example "access"
+     */
+    Dim: string;
+    /**
+     * 需要匹配的对应维度值
+     * :::tip
+     * 您可以通过调用[获取自定义维度值](https://www.volcengine.com/docs/508/1213050)来获取。
+     * :::
+     * 需要匹配的对应维度值
+     * @example "["4g"]"
+     */
+    Vals: string[];
+  }[];
+  /**
+   * 返回数据的时间粒度，取值如下所示：
+   * * `5m`：5 分钟；
+   * * `1h`：1 小时；
+   * * `1d`：1 天。
+   * 返回数据的时间粒度。
+   * 5m：为 5 分钟；
+   * 1h：为 1 小时；
+   * 1d：为 1 天。
+   * @example "1h"
+   */
+  Granularity: string;
+  /**
+   * 拆分维度。默认为空，表示拆分分位数据。支持取值：
+   * - `Duration`：表示拆分分位数据
+   * - 公共维度：`Appid`、`OS`、`AppVer`、`SdkVer`、`ImageType`、`Country`、`Province`、`Isp`、`Domain`
+   * - 自定义维度：您可以通过调用[获取自定义维度列表](https://www.volcengine.com/docs/508/1213048)接口获取自定义维度指标
+   * 拆分维度。默认为空，表示拆分分位数据。支持取值：Duration（拆分分位数据）、公共维度（Appid,OS,AppVer,SdkVer,ImageType,Country,Province,Isp,Domain），自定义维度（通过"获取自定义维度列表"接口获取）
+   * @example "OS"
+   */
+  GroupBy?: string;
+  /**
+   * 需要匹配的图片类型，不传则匹配所有图片类型。
+   * - `GIF`
+   * - `PNG`
+   * - `JPEG`
+   * - `HEIF`
+   * - `HEIC`
+   * - `WEBP`
+   * - `AWEBP`
+   * - `VVIC`
+   * - `AVIF`
+   * - `AVIS`
+   * - `其他`
+   * 需要匹配的图片类型，不传则匹配所有图片类型。
+   * GIF
+   * PNG
+   * JPEG
+   * HEIF
+   * HEIC
+   * WEBP
+   * AWEBP
+   * VVIC
+   * 其他
+   * @example "["PNG"]"
+   */
+  ImageType?: string[];
+  /**
+   * 需要匹配的系统类型，不传则匹配非 WEB 端的所有系统。取值如下所示：
+   * - `iOS`
+   * - `Android`
+   * - `WEB`
+   * 需要匹配的系统类型，不传则匹配非WEB端所有系统。取值如下所示：
+   * iOS
+   * Android
+   * WEB
+   * @example "WEB"
+   */
+  OS?: string;
+  /**
+   * 需要匹配的 SDK 版本，不传则匹配所有版本.
+   * 需要匹配的SDK版本，不传则匹配所有版本
+   * @example "["1.2.0"]"
+   */
+  SdkVer?: string[];
+  /**
+   * 获取数据起始时间点。日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
+   * 获取数据起始时间点。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00
+   * @example "2019-06-27T13:00:00+08:00"
+   */
+  StartTime: string;
+}
+
+export interface DescribeImageXExceedFileSizeRes {
+  ResponseMetadata: {
+    /** 请求的接口名，属于请求的公共参数。 */
+    Action: string;
+    /** 请求的Region，例如：cn-north-1 */
+    Region: string;
+    /** RequestID为每次API请求的唯一标识。 */
+    RequestId: string;
+    /** 请求的服务，属于请求的公共参数。 */
+    Service: string;
+    /** 请求的版本号，属于请求的公共参数。 */
+    Version: string;
+  };
+  Result: {
+    /**
+     * 客户端文件体积大小分布数据。
+     * 文件大小分布数据
+     * @example "-"
+     */
+    FSizeData: {
+      /**
+       * 该数据类型对应的总上报量。
+       * 该数据类型对应的总上报量
+       * @example "3"
+       */
+      Count: number;
+      /**
+       * 对应的文件大小数据列表。
+       * 对应的文件大小数据列表。
+       * @example "-"
+       */
+      Data: {
+        /**
+         * 数据对应的上报量。
+         * 数据对应的上报量
+         * @example "23"
+         */
+        Count: number;
+        /**
+         * 数据对应时间点。日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`。
+         * 数据对应时间点，按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。
+         * @example "2023-01-01T00:00:00+08:00"
+         */
+        Timestamp: string;
+        /**
+         * 文件大小，单位为 byte。
+         * 文件大小，单位byte
+         * @format float
+         * @example "3672400"
+         */
+        Value: number;
+      }[];
+      /**
+       * 数据类型。当`GroupBy`为空或`Duration`时，取值avg/pct25/pct50/pct90/pct99/min/max，否则取值为指定拆分维度的各个值。
+       * 数据类型。
+       * 当GroupBy为空或Duration时，取值avg/pct25/pct50/pct90/pct99/min/max，否则取值为指定拆分维度的各个值。
+       * @example "avg"
+       */
+      Type: string;
+    }[];
+  };
+}
+
+export interface DescribeImageXExceedResolutionRatioAllBody {
+  /**
+   * 需要匹配的 App 版本，不传则匹配 App 的所有版本。
+   * 需要匹配的 App 版本，不传则匹配 App 的所有版本。
+   * @example "["1.2.0"]"
+   */
+  AppVer?: string[];
+  /**
+   * 应用 ID。默认为空，不传则匹配账号下的所有的 AppID。您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/1213042)的方式获取所需的 AppID。
+   * 应用 ID。默认为空，匹配账号下的所有的App ID。
+   * @example "123"
+   */
+  Appid?: string;
+  /**
+   * 获取数据结束时间点，需在起始时间点之后。日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
+   * 获取数据结束时间点，需在起始时间点之后。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00
+   * @example "2019-06-27T15:00:00+08:00"
+   */
+  EndTime: string;
+  /**
+   * 需要匹配的自定义维度项 。
+   * 需要匹配的自定义维度项
+   * @example "-"
+   */
+  ExtraDims?: {
+    /**
+     * 自定义维度名称。
+     * :::tip
+     * 您可以通过调用[获取自定义维度列表](https://www.volcengine.com/docs/508/1213048)来获取。
+     * :::
+     * 自定义维度名称。
+     * @example "access"
+     */
+    Dim: string;
+    /**
+     * 需要匹配的对应维度值
+     * :::tip
+     * 您可以通过调用[获取自定义维度值](https://www.volcengine.com/docs/508/1213050)来获取。
+     * :::
+     * 需要匹配的对应维度值
+     * @example "["4g"]"
+     */
+    Vals: string[];
+  }[];
+  /**
+   * 需要匹配的图片类型，不传则匹配所有图片类型。
+   * - `GIF`
+   * - `PNG`
+   * - `JPEG`
+   * - `HEIF`
+   * - `HEIC`
+   * - `WEBP`
+   * - `AWEBP`
+   * - `VVIC`
+   * - `AVIF`
+   * - `AVIS`
+   * - `其他`
+   * 需要匹配的图片类型，不传则匹配所有图片类型。
+   * GIF
+   * PNG
+   * JPEG
+   * HEIF
+   * HEIC
+   * WEBP
+   * AWEBP
+   * VVIC
+   * 其他
+   * @example "["PNG"]"
+   */
+  ImageType?: string[];
+  /**
+   * 需要匹配的系统类型，不传则匹配非 WEB 端的所有系统。取值如下所示：
+   * - `iOS`
+   * - `Android`
+   * - `WEB`
+   * 需要匹配的系统类型，不传则匹配非WEB端所有系统。取值如下所示：
+   * iOS
+   * Android
+   * WEB
+   * @example "WEB"
+   */
+  OS?: string;
+  /**
+   * 是否升序排序，取值如下所示：
+   *
+   * - `true`：是，表示升序排序。
+   * - `false`：（默认）否，表示降序排序。
+   * 是否升序排序。不传则默认降序排序。
+   * @example "false"
+   */
+  OrderAsc?: string;
+  /**
+   * 排序依据，不传或者传空默认按上报量排序。取值如下所示：
+   * - `Count`：按上报量排序
+   * - `WidthRatio`：按宽比排序
+   * - `HeightRatio`：按高比排序
+   * - 不传或者传空或者取值为`Count`时，表示按上报量排序。
+   * - 取值为`WidthRatio`时，表示按宽比排序。
+   * - 取值为`HeightRatio`时，表示按高比排序。
+   * @example "Count"
+   */
+  OrderBy?: string;
+  /**
+   * 需要匹配的 SDK 版本，不传则匹配所有版本.
+   * 需要匹配的SDK版本，不传则匹配所有版本
+   * @example "["1.2.0"]"
+   */
+  SdkVer?: string[];
+  /**
+   * 获取数据起始时间点。日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
+   * 获取数据起始时间点。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00
+   * @example "2019-06-27T13:00:00+08:00"
+   */
+  StartTime: string;
+}
+
+export interface DescribeImageXExceedResolutionRatioAllRes {
+  ResponseMetadata: {
+    /** 请求的接口名，属于请求的公共参数。 */
+    Action: string;
+    /** 请求的Region，例如：cn-north-1 */
+    Region: string;
+    /** RequestID为每次API请求的唯一标识。 */
+    RequestId: string;
+    /** 请求的服务，属于请求的公共参数。 */
+    Service: string;
+    /** 请求的版本号，属于请求的公共参数。 */
+    Version: string;
+  };
+  Result: {
+    /**
+     * 客户端大图分辨率分布数据。
+     * 文件大小分布数据
+     * @example "-"
+     */
+    ResolutionRatioData: {
+      /**
+       * 大图样本量
+       * @format int64
+       * @example "100"
+       */
+      Count: number;
+      /**
+       * 高比，为图片高/view 高的整数值。
+       * 高比，即为图片高/view高取整
+       * @format int32
+       * @example "4"
+       */
+      HeightRatio: number;
+      /**
+       * 比率，格式为：宽比-高比。
+       * 格式为：宽比-高比
+       * @example "5-4"
+       */
+      Ratio: string;
+      /**
+       * 宽比，为图片宽/view 宽的整数值。
+       * 宽比，即为图片宽/view宽取整
+       * @format int32
+       * @example "5"
+       */
+      WidthRatio: number;
+    }[];
+  };
+}
+
+export interface DescribeImageXHitRateRequestDataQuery {
+  /**
+   * 域名。支持查询多个域名，传入多个时用英文逗号“,”分割，缺省情况下表示查询所有域名。您可以通过调用 [GetServiceDomains](https://www.volcengine.com/docs/508/9379) 获取服务下所有域名信息。
+   * @example "d1,d2"
+   */
+  DomainNames?: string;
+  /**
+   * 获取数据结束时间点。日期格式按照 ISO8601 表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。例如`2019-06-02T00:00:00+08:00`。
+   * @example "2019-06-02T00:00:00+08:00"
+   */
+  EndTime: string;
+  /**
+   * 需要分组查询的参数。取值仅支持`DomainName`。
+   * @example "DomainName"
+   */
+  GroupBy?: string;
+  /**
+   * 查询数据的时间粒度，单位为秒。缺省时查询`StartTime`和`EndTime`时间段全部数据，此时单次查询最大时间跨度为 93 天。支持以下取值：
+   *
+   * - `60`：单次查询最大时间跨度为 6 小时
+   * - `120`：单次查询最大时间跨度为 6 小时
+   * - `300`：单次查询最大时间跨度为 31 天
+   * - `600`：单次查询最大时间跨度为 31 天
+   * - `1200`：单次查询最大时间跨度为 31 天
+   * - `1800`：单次查询最大时间跨度为 31 天
+   * - `3600`：单次查询最大时间跨度为 93 天
+   * - `86400`：单次查询最大时间跨度为 93 天
+   * - `604800`：单次查询最大时间跨度为 93 天
+   * @example "300"
+   */
+  Interval?: string;
+  /**
+   * 服务 ID。支持查询多个服务，传入多个时用英文逗号“,”分割，缺省情况下表示查询所有服务。您可以在 veImageX 控制台的[服务管理](https://console.volcengine.com/imagex/service_manage/)模块或者调用 [GetAllImageServices](https://www.volcengine.com/docs/508/9360) 接口获取服务 ID。
+   * @example "s1,s2"
+   */
+  ServiceIds?: string;
+  /**
+   * 获取数据起始时间点。日期格式按照 ISO8601 表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。例如`2019-06-02T00:00:00+08:00`。
+   * :::tip
+   * 由于仅支持查询近 93 天的历史数据，则若此刻时间为`2011-11-21T16:14:00+08:00`，那么您可输入最早的开始时间为`2011-08-21T00:00:00+08:00`。
+   * :::
+   * @example "2019-06-02T00:00:00+08:00"
+   */
+  StartTime: string;
+}
+
+export interface DescribeImageXHitRateRequestDataRes {
+  ResponseMetadata: {
+    /** 请求的接口名，属于请求的公共参数。 */
+    Action: string;
+    /** 请求的Region，例如：cn-north-1 */
+    Region: string;
+    /** RequestID为每次API请求的唯一标识。 */
+    RequestId: string;
+    /** 请求的服务，属于请求的公共参数。 */
+    Service: string;
+    /** 请求的版本号，属于请求的公共参数。 */
+    Version: string;
+  };
+  Result: {
+    /**
+     * 命中率数据
+     * @example "-"
+     */
+    HitRateData: {
+      /**
+       * 具体数据
+       * @example "-"
+       */
+      Data: {
+        /**
+         * 统计时间点，时间片开始时刻，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。
+         * @example "2023-01-01T00:00:00+08:00"
+         */
+        TimeStamp: string;
+        /**
+         * 请求命中率
+         * @format float
+         * @example "0.2"
+         */
+        Value: number;
+      }[];
+      /**
+       * 域名，当`GroupBy`指定了`DomainName`时有返回值。
+       * 当GroupBy=DomainName时出现
+       * @example "d1"
+       */
+      DomainName?: string;
+    }[];
+  };
+}
+
+export interface DescribeImageXHitRateTrafficDataQuery {
+  /**
+   * 域名。支持查询多个域名，传入多个时用英文逗号“,”分割，缺省情况下表示查询所有域名。您可以通过调用 [GetServiceDomains](https://www.volcengine.com/docs/508/9379) 获取服务下所有域名信息。
+   * @example "d1,d2"
+   */
+  DomainNames?: string;
+  /**
+   * 获取数据结束时间点。日期格式按照 ISO8601 表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。例如`2019-06-02T00:00:00+08:00`。
+   * @example "2019-06-02T00:00:00+08:00"
+   */
+  EndTime: string;
+  /**
+   * 需要分组查询的参数。取值仅支持`DomainName`。
+   * @example "DomainName"
+   */
+  GroupBy?: string;
+  /**
+   * 查询数据的时间粒度，单位为秒。缺省时查询`StartTime`和`EndTime`时间段全部数据，此时单次查询最大时间跨度为 93 天。支持以下取值：
+   *
+   * - `60`：单次查询最大时间跨度为 6 小时
+   * - `120`：单次查询最大时间跨度为 6 小时
+   * - `300`：单次查询最大时间跨度为 31 天
+   * - `600`：单次查询最大时间跨度为 31 天
+   * - `1200`：单次查询最大时间跨度为 31 天
+   * - `1800`：单次查询最大时间跨度为 31 天
+   * - `3600`：单次查询最大时间跨度为 93 天
+   * - `86400`：单次查询最大时间跨度为 93 天
+   * - `604800`：单次查询最大时间跨度为 93 天
+   * @example "300"
+   */
+  Interval?: string;
+  /**
+   * 服务 ID。支持查询多个服务，传入多个时用英文逗号“,”分割，缺省情况下表示查询所有服务。您可以在 veImageX 控制台的[服务管理](https://console.volcengine.com/imagex/service_manage/)模块或者调用 [GetAllImageServices](https://www.volcengine.com/docs/508/9360) 接口获取服务 ID。
+   * @example "s1,s2"
+   */
+  ServiceIds?: string;
+  /**
+   * 获取数据起始时间点。日期格式按照 ISO8601 表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。例如`2019-06-02T00:00:00+08:00`。
+   * :::tip
+   * 由于仅支持查询近 93 天的历史数据，则若此刻时间为`2011-11-21T16:14:00+08:00`，那么您可输入最早的开始时间为`2011-08-21T00:00:00+08:00`。
+   * :::
+   * @example "2019-06-02T00:00:00+08:00"
+   */
+  StartTime: string;
+}
+
+export interface DescribeImageXHitRateTrafficDataRes {
+  ResponseMetadata: {
+    /** 请求的接口名，属于请求的公共参数。 */
+    Action: string;
+    /** 请求的Region，例如：cn-north-1 */
+    Region: string;
+    /** RequestID为每次API请求的唯一标识。 */
+    RequestId: string;
+    /** 请求的服务，属于请求的公共参数。 */
+    Service: string;
+    /** 请求的版本号，属于请求的公共参数。 */
+    Version: string;
+  };
+  Result: {
+    /**
+     * 命中率数据
+     * @example "-"
+     */
+    HitRateData: {
+      /**
+       * 具体数据
+       * @example "-"
+       */
+      Data: {
+        /**
+         * 统计时间点，时间片开始时刻，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。
+         * @example "2023-01-01T00:00:00+08:00"
+         */
+        TimeStamp: string;
+        /**
+         * 流量命中率。
+         * @format float
+         * @example "0.2"
+         */
+        Value: number;
+      }[];
+      /**
+       * 域名，当`GroupBy`指定了`DomainName`时有返回值。
+       * 当GroupBy=DomainName时出现
+       * @example "d1"
+       */
+      DomainName?: string;
+    }[];
+  };
+}
+
+export interface DescribeImageXMirrorRequestBandwidthBody {
+  /**
+   * 域名。支持查询多个域名，传入多个时用英文逗号“,”分割，缺省情况下表示查询所有域名。您可以通过调用 [GetServiceDomains](https://www.volcengine.com/docs/508/9379) 获取服务下所有域名信息。
+   * 限制查询的域名，传入多个用英文逗号分割。不传为不限制。
+   * @example "["d1","d2"]"
+   */
+  DomainNames?: string[];
+  /**
+   * 获取数据结束时间点。日期格式按照 ISO8601 表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。例如`2019-06-02T00:00:00+08:00`。
+   * 获取数据结束时间点。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00
+   * @example "2019-06-02T00:00:00+08:00"
+   */
+  EndTime: string;
+  /**
+   * 查询数据的时间粒度。单位为秒，缺省时查询`StartTime`和`EndTime`时间段全部数据，此时单次查询最大时间跨度为 93 天。取值如下所示：
+   *
+   * - `60`：单次查询最大时间跨度为 6 小时
+   * - `120`：单次查询最大时间跨度为 6 小时
+   * - `300`：单次查询最大时间跨度为 31 天
+   * - `600`：单次查询最大时间跨度为 31 天
+   * - `1200`：单次查询最大时间跨度为 31 天
+   * - `1800`：单次查询最大时间跨度为 31 天
+   * - `3600`：单次查询最大时间跨度为 93 天
+   * - `86400`：单次查询最大时间跨度为 93 天
+   * - `604800`：单次查询最大时间跨度为 93 天
+   * 查询数据的时间粒度。单位为秒，缺省时查询`StartTime`和`EndTime`时间段全部数据，此时单次查询最大时间跨度为 93 天。支持以下取值：
+   *
+   * - `60`：单次查询最大时间跨度为 6 小时
+   * - `120`：单次查询最大时间跨度为 6 小时
+   * - `300`：单次查询最大时间跨度为 31 天
+   * - `600`：单次查询最大时间跨度为 31 天
+   * - `1200`：单次查询最大时间跨度为 31 天
+   * - `1800`：单次查询最大时间跨度为 31 天
+   * - `3600`：单次查询最大时间跨度为 93 天
+   * - `86400`：单次查询最大时间跨度为 93 天
+   * - `604800`：单次查询最大时间跨度为 93 天
+   * @example "60"
+   */
+  Interval?: string;
+  /**
+   * 服务 ID。支持查询多个服务，传入多个时用英文逗号“,”分割，缺省情况下表示查询所有服务。您可以在 veImageX 控制台的[服务管理](https://console.volcengine.com/imagex/service_manage/)模块或者调用 [GetAllImageServices](https://www.volcengine.com/docs/508/9360) 接口获取服务 ID。
+   * 限制查询的服务id，传入多个用英文逗号分割。不传为不限制。
+   * @example "["s1","s2"]"
+   */
+  ServiceIds?: string[];
+  /**
+   * 获取数据起始时间点。日期格式按照 ISO8601 表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。例如`2019-06-02T00:00:00+08:00`。
+   * :::tip
+   * 由于仅支持查询近 93 天的历史数据，则若此刻时间为`2011-11-21T16:14:00+08:00`，那么您可输入最早的开始时间为`2011-08-21T00:00:00+08:00`。
+   * :::
+   * 获取数据起始时间点。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00
+   * @example "2019-06-02T00:00:00+08:00"
+   */
+  StartTime: string;
+}
+
+export interface DescribeImageXMirrorRequestBandwidthRes {
+  ResponseMetadata: {
+    /** 请求的接口名，属于请求的公共参数。 */
+    Action: string;
+    /** 请求的Region，例如：cn-north-1 */
+    Region: string;
+    /** RequestID为每次API请求的唯一标识。 */
+    RequestId: string;
+    /** 请求的服务，属于请求的公共参数。 */
+    Service: string;
+    /** 请求的版本号，属于请求的公共参数。 */
+    Version: string;
+  };
+  Result: {
+    /**
+     * 时序数据
+     * @example "-"
+     */
+    Data: {
+      /**
+       * 统计时间点，时间片开始时刻，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。
+       * @example "2023-01-01T00:00:00+08:00"
+       */
+      TimeStamp: string;
+      /**
+       * 带宽，单位为 bps。
+       * 带宽，单位bps
+       * @example "12.3"
+       */
+      Value: number;
+    }[];
+  };
+}
+
+/** 描述 */
+export interface DescribeImageXMirrorRequestHttpCodeByTimeBody {
+  /**
+   * 状态码是否聚合，取值如下所示：
+   *
+   * - `true`：聚合
+   * - `false`：（默认）不聚合
+   * 状态码是否聚合。取值：true/false。默认为false
+   * @example "true"
+   */
+  AggregateCode?: string;
+  /**
+   * 域名。支持查询多个域名，传入多个时用英文逗号“,”分割，缺省情况下表示查询所有域名。您可以通过调用 [GetServiceDomains](https://www.volcengine.com/docs/508/9379) 获取服务下所有域名信息。
+   * 限制查询的域名，传入多个用英文逗号分割。不传为不限制。
+   * @example "["d1"]"
+   */
+  DomainNames?: string[];
+  /**
+   * 获取数据结束时间点。日期格式按照 ISO8601 表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。例如`2019-06-02T00:00:00+08:00`。
+   * 获取数据结束时间点。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。
+   * @example "2019-06-02T00:00:00+08:00"
+   */
+  EndTime: string;
+  /**
+   * 查询数据的时间粒度，单位为秒。缺省时查询`StartTime`和`EndTime`时间段全部数据，此时单次查询最大时间跨度为 93 天。取值如下所示：
+   * - `60`：单次查询最大时间跨度为 6 小时
+   * - `120`：单次查询最大时间跨度为 6 小时
+   * - `300`：单次查询最大时间跨度为 31 天
+   * - `600`：单次查询最大时间跨度为 31 天
+   * - `1200`：单次查询最大时间跨度为 31 天
+   * - `1800`：单次查询最大时间跨度为 31 天
+   * - `3600`：单次查询最大时间跨度为 93 天
+   * - `86400`：单次查询最大时间跨度为 93 天
+   * - `604800`：单次查询最大时间跨度为 93 天
+   * 查询数据的时间粒度。单位为秒，缺省时查询`StartTime`和`EndTime`时间段全部数据，此时单次查询最大时间跨度为 93 天。支持以下取值：
+   *
+   * - `60`：单次查询最大时间跨度为 6 小时
+   * - `120`：单次查询最大时间跨度为 6 小时
+   * - `300`：单次查询最大时间跨度为 31 天
+   * - `600`：单次查询最大时间跨度为 31 天
+   * - `1200`：单次查询最大时间跨度为 31 天
+   * - `1800`：单次查询最大时间跨度为 31 天
+   * - `3600`：单次查询最大时间跨度为 93 天
+   * - `86400`：单次查询最大时间跨度为 93 天
+   * - `604800`：单次查询最大时间跨度为 93 天
+   * @example "60"
+   */
+  Interval?: string;
+  /**
+   * 服务 ID。支持查询多个服务，传入多个时用英文逗号“,”分割，缺省情况下表示查询所有服务。您可以在 veImageX 控制台的[服务管理](https://console.volcengine.com/imagex/service_manage/)模块或者调用 [GetAllImageServices](https://www.volcengine.com/docs/508/9360) 接口获取服务 ID。
+   * 限制查询的服务id，传入多个用英文逗号分割。不传为不限制。
+   * @example "["s1"]"
+   */
+  ServiceIds?: string[];
+  /**
+   * 获取数据起始时间点。日期格式按照 ISO8601 表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。例如`2019-06-02T00:00:00+08:00`。
+   * :::tip
+   * 由于仅支持查询近 93 天的历史数据，则若此刻时间为`2011-11-21T16:14:00+08:00`，那么您可输入最早的开始时间为`2011-08-21T00:00:00+08:00`。
+   * :::
+   * 获取数据起始时间点。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。
+   * @example "2019-06-02T00:00:00+08:00"
+   */
+  StartTime: string;
+}
+
+export interface DescribeImageXMirrorRequestHttpCodeByTimeRes {
+  ResponseMetadata: {
+    /** 请求的接口名，属于请求的公共参数。 */
+    Action: string;
+    /** 请求的Region，例如：cn-north-1 */
+    Region: string;
+    /** RequestID为每次API请求的唯一标识。 */
+    RequestId: string;
+    /** 请求的服务，属于请求的公共参数。 */
+    Service: string;
+    /** 请求的版本号，属于请求的公共参数。 */
+    Version: string;
+  };
+  Result: {
+    /**
+     * 数据列表
+     * @example "-"
+     */
+    Data: {
+      /**
+       * 具体数据
+       * @example "-"
+       */
+      Data: {
+        /**
+         * 统计时间点，时间片开始时刻，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。
+         * @example "2023-01-01T00:00:00+08:00"
+         */
+        TimeStamp: string;
+        /**
+         * 请求次数，单位为次。
+         * 请求次数
+         * @example "123"
+         */
+        Value: number;
+      }[];
+      /**
+       * 状态码
+       * @example "2xx"
+       */
+      HttpCode: string;
+    }[];
+  };
+}
+
+/** 描述 */
+export interface DescribeImageXMirrorRequestHttpCodeOverviewBody {
+  /**
+   * 状态码是否聚合，取值如下所示：
+   *
+   * - `true`：聚合
+   * - `false`：（默认）不聚合
+   * 状态码是否聚合。取值：true/false。默认为false
+   * @example "true"
+   */
+  AggregateCode?: string;
+  /**
+   * 域名。支持查询多个域名，传入多个时用英文逗号“,”分割，缺省情况下表示查询所有域名。您可以通过调用 [GetServiceDomains](https://www.volcengine.com/docs/508/9379) 获取服务下所有域名信息。
+   * 限制查询的域名，传入多个用英文逗号分割。不传为不限制。
+   * @example "["d1"]"
+   */
+  DomainNames?: string[];
+  /**
+   * 获取数据结束时间点。日期格式按照 ISO8601 表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如`2019-06-02T00:00:00+08:00`。
+   * 获取数据结束时间点。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。
+   * @example "2019-06-02T00:00:00+08:00"
+   */
+  EndTime: string;
+  /**
+   * 服务 ID。支持查询多个服务，传入多个时用英文逗号“,”分割，缺省情况下表示查询所有服务。您可以在 veImageX 控制台的[服务管理](https://console.volcengine.com/imagex/service_manage/)模块或者调用 [GetAllImageServices](https://www.volcengine.com/docs/508/9360) 接口获取服务 ID。
+   * 限制查询的服务id，传入多个用英文逗号分割。不传为不限制。
+   * @example "["s1"]"
+   */
+  ServiceIds?: string[];
+  /**
+   * 获取数据起始时间点。日期格式按照 ISO8601 表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如`2019-06-02T00:00:00+08:00`。
+   * :::tip
+   * 由于仅支持查询近 93 天的历史数据，则若此刻时间为`2011-11-21T16:14:00+08:00`，那么您可输入最早的开始时间为`2011-08-21T00:00:00+08:00`。
+   * :::
+   * 获取数据起始时间点。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。
+   * @example "2019-06-02T00:00:00+08:00"
+   */
+  StartTime: string;
+}
+
+export interface DescribeImageXMirrorRequestHttpCodeOverviewRes {
+  ResponseMetadata: {
+    /** 请求的接口名，属于请求的公共参数。 */
+    Action: string;
+    /** 请求的Region，例如：cn-north-1 */
+    Region: string;
+    /** RequestID为每次API请求的唯一标识。 */
+    RequestId: string;
+    /** 请求的服务，属于请求的公共参数。 */
+    Service: string;
+    /** 请求的版本号，属于请求的公共参数。 */
+    Version: string;
+  };
+  Result: {
+    /**
+     * 具体数据
+     * @example "-"
+     */
+    Data: {
+      /**
+       * 总请求次数，单位为次。
+       * 总请求次数
+       * @example "123"
+       */
+      Count: number;
+      /**
+       * 详细数据
+       * @example "-"
+       */
+      Details: {
+        /**
+         * Http 状态码
+         * @example "2xx"
+         */
+        HttpCode: string;
+        /**
+         * Http 状态码对应的请求次数，单位为次。
+         * http状态码对应的请求次数
+         * @example "123"
+         */
+        Value: number;
+      }[];
+      /**
+       * 域名
+       * 域名
+       * @example "d1"
+       */
+      Domain: string;
+    }[];
+  };
+}
+
+/** 描述 */
+export interface DescribeImageXMirrorRequestTrafficBody {
+  /**
+   * 域名。支持查询多个域名，传入多个时用英文逗号“,”分割，缺省情况下表示查询所有域名。您可以通过调用 [GetServiceDomains](https://www.volcengine.com/docs/508/9379) 获取服务下所有域名信息。
+   * 限制查询的域名，传入多个用英文逗号分割。不传为不限制。
+   * @example "["d1"]"
+   */
+  DomainNames?: string[];
+  /**
+   * 获取数据结束时间点。日期格式按照 ISO8601 表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。例如`2019-06-02T00:00:00+08:00`。
+   * 获取数据结束时间点。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。
+   * @example "2019-06-02T00:00:00+08:00"
+   */
+  EndTime: string;
+  /**
+   * 查询数据的时间粒度。单位为秒，缺省时查询`StartTime`和`EndTime`时间段全部数据，此时单次查询最大时间跨度为 93 天。取值如下所示：
+   *
+   * - `60`：单次查询最大时间跨度为 6 小时
+   * - `120`：单次查询最大时间跨度为 6 小时
+   * - `300`：单次查询最大时间跨度为 31 天
+   * - `600`：单次查询最大时间跨度为 31 天
+   * - `1200`：单次查询最大时间跨度为 31 天
+   * - `1800`：单次查询最大时间跨度为 31 天
+   * - `3600`：单次查询最大时间跨度为 93 天
+   * - `86400`：单次查询最大时间跨度为 93 天
+   * - `604800`：单次查询最大时间跨度为 93 天
+   * 查询数据的时间粒度。单位为秒，缺省时查询`StartTime`和`EndTime`时间段全部数据，此时单次查询最大时间跨度为 93 天。支持以下取值：
+   *
+   * - `60`：单次查询最大时间跨度为 6 小时
+   * - `120`：单次查询最大时间跨度为 6 小时
+   * - `300`：单次查询最大时间跨度为 31 天
+   * - `600`：单次查询最大时间跨度为 31 天
+   * - `1200`：单次查询最大时间跨度为 31 天
+   * - `1800`：单次查询最大时间跨度为 31 天
+   * - `3600`：单次查询最大时间跨度为 93 天
+   * - `86400`：单次查询最大时间跨度为 93 天
+   * - `604800`：单次查询最大时间跨度为 93 天
+   * @example "60"
+   */
+  Interval?: string;
+  /**
+   * 服务 ID。支持查询多个服务，传入多个时用英文逗号“,”分割，缺省情况下表示查询所有服务。您可以在 veImageX 控制台的[服务管理](https://console.volcengine.com/imagex/service_manage/)模块或者调用 [GetAllImageServices](https://www.volcengine.com/docs/508/9360) 接口获取服务 ID。
+   * 限制查询的服务id，传入多个用英文逗号分割。不传为不限制。
+   * @example "["s1"]"
+   */
+  ServiceIds?: string[];
+  /**
+   * 获取数据起始时间点。日期格式按照 ISO8601 表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。例如`2019-06-02T00:00:00+08:00`。
+   * :::tip
+   * 由于仅支持查询近 93 天的历史数据，则若此刻时间为`2011-11-21T16:14:00+08:00`，那么您可输入最早的开始时间为`2011-08-21T00:00:00+08:00`。
+   * :::
+   * 获取数据起始时间点。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。
+   * @example "2019-06-02T00:00:00+08:00"
+   */
+  StartTime: string;
+}
+
+export interface DescribeImageXMirrorRequestTrafficRes {
+  ResponseMetadata: {
+    /** 请求的接口名，属于请求的公共参数。 */
+    Action: string;
+    /** 请求的Region，例如：cn-north-1 */
+    Region: string;
+    /** RequestID为每次API请求的唯一标识。 */
+    RequestId: string;
+    /** 请求的服务，属于请求的公共参数。 */
+    Service: string;
+    /** 请求的版本号，属于请求的公共参数。 */
+    Version: string;
+  };
+  Result: {
+    /**
+     * 数据列表
+     * @example "-"
+     */
+    Data: {
+      /**
+       * 统计时间点，时间片开始时刻，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。
+       * @example "2023-01-01T00:00:00+08:00"
+       */
+      TimeStamp: string;
+      /**
+       * 流量，单位为 byte。
+       * 流量，单位byte
+       * @example "123"
+       */
+      Value: number;
+    }[];
+  };
+}
+
+export interface DescribeImageXMultiCompressUsageQuery {
+  /**
+   * 获取数据结束时间点。日期格式按照 ISO8601 表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如`2019-06-02T00:00:00+08:00`。
+   * @example "2019-06-02T00:00:00+08:00"
+   */
+  EndTime: string;
+  /**
+   * 查询数据的时间粒度。单位为秒，缺省时查询`StartTime`和`EndTime`时间段全部数据，此时单次查询最大时间跨度为 93 天。取值如下所示：
+   * - `300`：单次查询最大时间跨度为 31 天
+   * - `600`：单次查询最大时间跨度为 31 天
+   * - `1200`：单次查询最大时间跨度为 31 天
+   * - `1800`：单次查询最大时间跨度为 31 天
+   * - `3600`：单次查询最大时间跨度为 93 天
+   * - `86400`：单次查询最大时间跨度为 93 天
+   * - `604800`：单次查询最大时间跨度为 93 天
+   * @example "300"
+   */
+  Interval?: string;
+  /**
+   * 服务 ID。支持查询多个服务，传入多个时用英文逗号“,”分割，缺省情况下表示查询所有服务。您可以在 veImageX 控制台的[服务管理](https://console.volcengine.com/imagex/service_manage/)模块或者调用 [GetAllImageServices](https://www.volcengine.com/docs/508/9360) 接口获取服务 ID。
+   * @example "s1,s2"
+   */
+  ServiceIds?: string;
+  /**
+   * 获取数据起始时间点。日期格式按照 ISO8601 表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如`2019-06-02T00:00:00+08:00`。
+   * :::tip
+   * 由于仅支持查询近 93 天的历史数据，则若此刻时间为`2011-11-21T16:14:00+08:00`，那么您可输入最早的开始时间为`2011-08-21T00:00:00+08:00`。
+   * :::
+   * @example "2019-06-02T00:00:00+08:00"
+   */
+  StartTime: string;
+}
+
+export interface DescribeImageXMultiCompressUsageRes {
+  ResponseMetadata: {
+    /** 请求的接口名，属于请求的公共参数。 */
+    Action: string;
+    /** 请求的Region，例如：cn-north-1 */
+    Region: string;
+    /** RequestID为每次API请求的唯一标识。 */
+    RequestId: string;
+    /** 请求的服务，属于请求的公共参数。 */
+    Service: string;
+    /** 请求的版本号，属于请求的公共参数。 */
+    Version: string;
+  };
+  Result: {
+    /**
+     * 多文件压缩用量数据
+     * @example "-"
+     */
+    CompressData: {
+      /**
+       * 时序数据
+       * @example "-"
+       */
+      Data: {
+        /**
+         * 统计时间点，时间片开始时刻。按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`。
+         * 统计时间点，时间片结束时刻。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00。
+         * @example "2023-01-01T00:00:00+08:00"
+         */
+        TimeStamp: string;
+        /**
+         * 压缩量，单位为 Byte。
+         * 压缩量，单位Byte。
+         * @example "1234"
+         */
+        Value: number;
+      }[];
+    }[];
+  };
+}
+
+export interface DescribeImageXRequestCntUsageQuery {
+  /**
+   * 组件名称。支持查询多个组件，传入多个时用英文逗号“,”分割，缺省情况下表示查询所有组件。您可通过调用 [GetImageAddOnConf](https://www.volcengine.com/docs/508/66145) 查看`Key`返回值。
+   * @example "a1,a2"
+   */
+  AdvFeats?: string;
+  /**
+   * 获取数据结束时间点。日期格式按照 ISO8601 表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如`2019-06-02T00:00:00+08:00`。
+   * @example "2019-06-02T00:00:00+08:00"
+   */
+  EndTime: string;
+  /**
+   * 维度拆分的维度值。不传表示不拆分维度，只能传入单个参数。支持取值如下：
+   * - `ServiceId`：服务
+   * - `AdvFeat`：组件
+   * @example "AdvFeat"
+   */
+  GroupBy?: string;
+  /**
+   * 查询数据的时间粒度。单位为秒。缺省时查询 `StartTime` 和 `EndTime` 时间段全部数据，此时单次查询最大时间跨度为 93 天。取值如下所示：
+   *
+   * - `300`：单次查询最大时间跨度为 31 天
+   * - `600`：单次查询最大时间跨度为 31 天
+   * - `1200`：单次查询最大时间跨度为 31 天
+   * - `1800`：单次查询最大时间跨度为 31 天
+   * - `3600`：单次查询最大时间跨度为 93 天
+   * - `86400`：单次查询最大时间跨度为 93 天
+   * - `604800`：单次查询最大时间跨度为 93 天
+   * @example "300"
+   */
+  Interval?: string;
+  /**
+   * 服务 ID。支持查询多个服务，传入多个时用英文逗号“,”分割，缺省情况下表示查询所有服务。您可以在 veImageX 控制台的[服务管理](https://console.volcengine.com/imagex/service_manage/)模块或者调用 [GetAllImageServices](https://www.volcengine.com/docs/508/9360) 接口获取服务 ID。
+   * @example "s1,s2"
+   */
+  ServiceIds?: string;
+  /**
+   * 获取数据起始时间点。日期格式按照 ISO8601 表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如`2019-06-02T00:00:00+08:00`。
+   * :::tip
+   * 由于仅支持查询近一年历史数据，则若此刻时间为`2011-11-21T16:14:00+08:00`，那么您可输入最早的开始时间为`2010-11-21T00:00:00+08:00`。
+   * :::
+   * @example "2019-06-02T00:00:00+08:00"
+   */
+  StartTime: string;
+  /**
+   * 图片处理模板。支持查询多个模板，传入多个时用英文逗号“,”分割，缺省情况下表示查询所有模板。您可通过调用 [GetAllImageTemplates](https://www.volcengine.com/docs/508/9386) 获取服务下全部模版信息。
+   * @example "t1,t2"
+   */
+  Templates?: string;
+}
+
+export interface DescribeImageXRequestCntUsageRes {
+  ResponseMetadata: {
+    /** 请求的接口名，属于请求的公共参数。 */
+    Action: string;
+    /** 请求的Region，例如：cn-north-1 */
+    Region: string;
+    /** RequestID为每次API请求的唯一标识。 */
+    RequestId: string;
+    /** 请求的服务，属于请求的公共参数。 */
+    Service: string;
+    /** 请求的版本号，属于请求的公共参数。 */
+    Version: string;
+  };
+  Result: {
+    /**
+     * 请求次数据。
+     * @example "-"
+     */
+    RequestCntData: {
+      /**
+       * 附加组件类型，`GroupBy`包含`AdvFeat`时有返回值。如：enhance，smartcut。取值为`total`，表示包含所选`AdvFeat`实际请求次数。
+       * 附加组件类型，`GroupBy`包含`AdvFeat`时有返回值。如：enhance，smartcut。取值为`total`，表示包含所选`AdvFeat`实际请求次数。
+       * @example "total"
+       */
+      AdvFeat?: string;
+      /**
+       * 具体数据
+       * @example "-"
+       */
+      Data: {
+        /**
+         * 统计时间点，时间片开始时刻。按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`。
+         * 统计时间点，时间片结束时刻。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00。
+         * @example "2023-01-01T00:00:00+08:00"
+         */
+        TimeStamp: string;
+        /**
+         * 请求次
+         * 请求次
+         * @example "123"
+         */
+        Value: number;
+      }[];
+      /**
+       * 服务 ID，`GroupBy`包含`ServiceId`时有返回值。
+       * 服务 ID，`GroupBy`包含`ServiceId`时有返回值。
+       * @example "s1"
+       */
+      ServiceId?: string;
+    }[];
+  };
+}
+
+export interface DescribeImageXScreenshotUsageQuery {
+  /**
+   * 获取数据结束时间点。日期格式按照 ISO8601 表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如`2019-06-02T00:00:00+08:00`。
+   * @example "2019-06-02T00:00:00+08:00"
+   */
+  EndTime: string;
+  /**
+   * 查询数据的时间粒度。单位为秒。缺省时查询 `StartTime` 和 `EndTime` 时间段全部数据，此时单次查询最大时间跨度为 93 天。取值如下所示：
+   *
+   * - `300`：单次查询最大时间跨度为 31 天
+   * - `600`：单次查询最大时间跨度为 31 天
+   * - `1200`：单次查询最大时间跨度为 31 天
+   * - `1800`：单次查询最大时间跨度为 31 天
+   * - `3600`：单次查询最大时间跨度为 93 天
+   * - `86400`：单次查询最大时间跨度为 93 天
+   * - `604800`：单次查询最大时间跨度为 93 天
+   * @example "300"
+   */
+  Interval?: string;
+  /**
+   * 服务 ID。支持查询多个服务，传入多个时用英文逗号“,”分割，缺省情况下表示查询所有服务。您可以在 veImageX 控制台的[服务管理](https://console.volcengine.com/imagex/service_manage/)模块或者调用 [GetAllImageServices](https://www.volcengine.com/docs/508/9360) 接口获取服务 ID。
+   * @example "s1,s2"
+   */
+  ServiceIds?: string;
+  /**
+   * 获取数据起始时间点。日期格式按照 ISO8601 表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如`2019-06-02T00:00:00+08:00`。
+   * :::tip
+   * 由于仅支持查询近一年历史数据，则若此刻时间为`2011-11-21T16:14:00+08:00`，那么您可输入最早的开始时间为`2010-11-21T00:00:00+08:00`。
+   * :::
+   * @example "2019-06-02T00:00:00+08:00"
+   */
+  StartTime: string;
+}
+
+export interface DescribeImageXScreenshotUsageRes {
+  ResponseMetadata: {
+    /** 请求的接口名，属于请求的公共参数。 */
+    Action: string;
+    /** 请求的Region，例如：cn-north-1 */
+    Region: string;
+    /** RequestID为每次API请求的唯一标识。 */
+    RequestId: string;
+    /** 请求的服务，属于请求的公共参数。 */
+    Service: string;
+    /** 请求的版本号，属于请求的公共参数。 */
+    Version: string;
+  };
+  Result: {
+    /**
+     * 截帧用量
+     * @example "-"
+     */
+    ScreenshotData: {
+      /**
+       * 时序数据
+       * @example "-"
+       */
+      Data: {
+        /**
+         * 统计时间点。日期格式按照 ISO8601 表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。
+         * 统计时间点。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00。
+         * @example "2023-01-01T00:00:00+08:00"
+         */
+        TimeStamp: string;
+        /**
+         * 截帧使用次数
+         * @example "123"
+         */
+        Value: number;
+      }[];
+    }[];
+  };
+}
+
+export interface DescribeImageXSensibleCacheHitRateByTimeBody {
+  /**
+   * 需要匹配 App 版本，缺省情况下则匹配 App 的所有版本。
+   * 需要匹配 App 版本，缺省情况下则匹配 App 的所有版本。
+   * @example "["1.0.0"]"
+   */
+  AppVer?: string[];
+  /**
+   * 应用 ID，缺省情况下匹配账号下所有 AppID。
+   * :::tip
+   * 您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/1213042)的方式获取所需的 AppID。
+   * :::
+   * 应用 ID。默认为空，匹配账号下的所有的App ID。
+   * @example "123"
+   */
+  Appid?: string;
+  /**
+   * 获取数据结束时间点，需在起始时间点之后。日期格式按照 ISO8601 表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，例如`2019-06-02T00:00:00+08:00`。
+   * 起始时间与结束时间间隔小于等于 90 天。
+   * 获取数据结束时间点，需在起始时间点之后。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00
+   * @example "2019-06-03T00:00:00+08:00"
+   */
+  EndTime: string;
+  /**
+   * 需要匹配的自定义维度项。
+   * 需要匹配的自定义维度项
+   * @example "-"
+   */
+  ExtraDims?: {
+    /**
+     * 自定义维度名称。
+     * :::tip
+     * 您可以通过调用[获取自定义维度列表](https://www.volcengine.com/docs/508/1213048)来获取。
+     * :::
+     * 自定义维度名称。
+     * @example "country"
+     */
+    Dim: string;
+    /**
+     * 需要匹配的对应维度值。
+     * :::tip
+     * 您可以通过调用[获取自定义维度值](https://www.volcengine.com/docs/508/1213048)来获取。
+     * :::
+     * 需要匹配的对应维度值
+     * @example "["中国"]"
+     */
+    Vals: string[];
+  }[];
+  /**
+   * 返回数据的时间粒度，支持以下取值：
+   * - `5m`：5分钟；
+   * - `1h`：1小时；
+   * - `1d`：1天。
+   * 返回数据的时间粒度。
+   * 5m：为 5 分钟；
+   * 1h：为 1 小时；
+   * 1d：为 1 天。
+   * @example "5m"
+   */
+  Granularity: string;
+  /**
+   * 拆分维度。默认为空，不拆分。支持取值：
+   * - 公共维度：`Appid`、`OS`、`AppVer`、`SdkVer`、`ImageType`
+   * - 自定义维度：您可以通过调用 [获取自定义维度列表](https://www.volcengine.com/docs/508/1213048)接口获取自定义维度指标
+   * 拆分维度。默认为空，表示不拆分。支持取值：公共维度（Appid,OS,AppVer,SdkVer,ImageType），自定义维度（通过"获取自定义维度列表"接口获取）
+   * @example "OS"
+   */
+  GroupBy?: string;
+  /**
+   * 需要匹配的图片类型，缺省情况下则匹配所有图片类型。支持以下取值：
+   * - `GIF`
+   * - `PNG`
+   * - `JPEG`
+   * - `HEIF`
+   * - `HEIC`
+   * - `WEBP`
+   * - `AWEBP`
+   * - `VVIC`
+   * - `其他`
+   * 需要匹配的图片类型，不传则匹配所有图片类型。
+   * GIF
+   * PNG
+   * JPEG
+   * HEIF
+   * HEIC
+   * WEBP
+   * AWEBP
+   * VVIC
+   * 其他
+   * @example "["PNG"]"
+   */
+  ImageType?: string[];
+  /**
+   * 需要匹配的系统类型，缺省情况下匹配非 WEB 端的所有系统。取值如下所示：
+   * - `iOS`
+   * - `Android`
+   * - `WEB`
+   * 需要匹配的系统类型，不传则匹配非WEB端所有系统。取值如下所示：
+   * iOS
+   * Android
+   * WEB
+   * @example "Android"
+   */
+  OS?: string;
+  /**
+   * 需要匹配的 SDK 版本，缺省情况下则匹配所有版本。
+   * 需要匹配的SDK版本，不传则匹配所有版本
+   * @example "["1.0.0"]"
+   */
+  SdkVer?: string[];
+  /**
+   * 获取数据起始时间点。日期格式按照 ISO8601 表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，例如`2019-06-02T00:00:00+08:00`。
+   * 起始时间与结束时间间隔小于等于 90 天。
+   * 获取数据起始时间点。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00
+   * @example "2019-06-02T00:00:00+08:00"
+   */
+  StartTime: string;
+  /**
+   * 缓存类型。支持以下取值：
+   * - `1`：查询内存命中率数据；
+   * - `2`：查询磁盘命中率数据。
+   * 缓存类型。支持以下取值：
+   * 1：查询内存命中率数据；
+   * 2：查询磁盘命中率数据。
+   * @example "1"
+   */
+  Type: string;
+}
+
+export interface DescribeImageXSensibleCacheHitRateByTimeRes {
+  ResponseMetadata: {
+    /** 请求的接口名，属于请求的公共参数。 */
+    Action: string;
+    /** 请求的Region，例如：cn-north-1 */
+    Region: string;
+    /** RequestID为每次API请求的唯一标识。 */
+    RequestId: string;
+    /** 请求的服务，属于请求的公共参数。 */
+    Service: string;
+    /** 请求的版本号，属于请求的公共参数。 */
+    Version: string;
+  };
+  Result: {
+    /**
+     * 命中率数据
+     * 命中率数据
+     * @example "-"
+     */
+    CacheHitData: {
+      /**
+       * 该数据类型对应的总上报量。
+       * 该数据类型对应的总上报量
+       * @example "3"
+       */
+      Count: number;
+      /**
+       * 具体数据
+       * 具体数据
+       * @example "-"
+       */
+      Data: {
+        /**
+         * 数据对应的上报量。
+         * 数据对应的上报量
+         * @example "3"
+         */
+        Count: number;
+        /**
+         * 数据对应时间点，按照 ISO8601 表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。
+         * 数据对应时间点，按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。
+         * @example "2023-01-01T00:00:00+08:00"
+         */
+        Timestamp: string;
+        /**
+         * 内存/磁盘命中率。
+         * 内存/磁盘命中率
+         * @format float
+         * @example "0.11297"
+         */
+        Value: number;
+      }[];
+      /**
+       * 数据类型，不拆分时值为`Total`，拆分时为具体的维度值。
+       * 数据类型，不拆分时值为Total，拆分时为具体的维度值
+       * @example "Total"
+       */
+      Type: string;
+    }[];
+  };
+}
+
+export interface DescribeImageXSensibleCountByTimeBody {
+  /**
+   * 需要匹配 App 版本，缺省情况下则匹配 App 的所有版本。
+   * 需要匹配 App 版本，缺省情况下则匹配 App 的所有版本。
+   * @example "["1.0.0"]"
+   */
+  AppVer?: string[];
+  /**
+   * 应用 ID，缺省情况下匹配账号下所有 AppID。
+   * :::tip
+   * 您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/19511)的方式获取所需的 AppID。
+   * :::
+   * 应用 ID。默认为空，匹配账号下的所有的App ID。
+   * @example "123"
+   */
+  Appid?: string;
+  /**
+   * 获取数据结束时间点，需在起始时间点之后。日期格式按照 ISO8601 表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，例如`2019-06-02T00:00:00+08:00`。
+   * 起始时间与结束时间间隔小于等于 90 天。
+   * 获取数据结束时间点，需在起始时间点之后。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00
+   * @example "2019-06-03T00:00:00+08:00"
+   */
+  EndTime: string;
+  /**
+   * 需要匹配的自定义维度项。
+   * 需要匹配的自定义维度项
+   * @example "-"
+   */
+  ExtraDims?: {
+    /**
+     * 自定义维度名称。
+     * :::tip
+     * 您可以通过调用[获取自定义维度列表](https://www.volcengine.com/docs/508/1213048)来获取。
+     * :::
+     * 自定义维度名称。
+     * @example "country"
+     */
+    Dim: string;
+    /**
+     * 需要匹配的对应维度值。
+     * :::tip
+     * 您可以通过调用[获取自定义维度值](https://www.volcengine.com/docs/508/1213050)来获取。
+     * :::
+     * 需要匹配的对应维度值
+     * @example "["中国"]"
+     */
+    Vals: string[];
+  }[];
+  /**
+   * 返回数据的时间粒度，取值如下所示：
+   * - `5m`：5分钟；
+   * - `1h`：1小时；
+   * - `1d`：1天。
+   * 返回数据的时间粒度。
+   * 5m：为 5 分钟；
+   * 1h：为 1 小时；
+   * 1d：为 1 天。
+   * @example "5m"
+   */
+  Granularity: string;
+  /**
+   * 拆分维度。默认为空，不拆分。支持取值：
+   * - 公共维度：`Appid`、`OS`、`AppVer`、`SdkVer`、`ImageType`
+   * - 自定义维度：您可以通过调用 [获取自定义维度列表](https://www.volcengine.com/docs/508/1213048)接口获取自定义维度指标
+   * 拆分维度。默认为空，表示不拆分。支持取值：公共维度（Appid,OS,AppVer,SdkVer,ImageType），自定义维度（通过"获取自定义维度列表"接口获取）
+   * @example "OS"
+   */
+  GroupBy?: string;
+  /**
+   * 需要匹配的图片类型，缺省情况下则匹配所有图片类型。取值如下所示：
+   * - `GIF`
+   * - `PNG`
+   * - `JPEG`
+   * - `HEIF`
+   * - `HEIC`
+   * - `WEBP`
+   * - `AWEBP`
+   * - `VVIC`
+   * - `其他`
+   * 需要匹配的图片类型，不传则匹配所有图片类型。
+   * GIF
+   * PNG
+   * JPEG
+   * HEIF
+   * HEIC
+   * WEBP
+   * AWEBP
+   * VVIC
+   * 其他
+   * @example "["PNG"]"
+   */
+  ImageType?: string[];
+  /**
+   * 需要匹配的系统类型，缺省情况下匹配非 WEB 端的所有系统。取值如下所示：
+   * - `iOS`
+   * - `Android`
+   * - `WEB`
+   * 需要匹配的系统类型，不传则匹配非WEB端所有系统。取值如下所示：
+   * iOS
+   * Android
+   * WEB
+   * @example "Android"
+   */
+  OS?: string;
+  /**
+   * 需要匹配的 SDK 版本，缺省情况下则匹配所有版本。
+   * 需要匹配的SDK版本，不传则匹配所有版本
+   * @example "["1.0.0"]"
+   */
+  SdkVer?: string[];
+  /**
+   * 获取数据起始时间点。日期格式按照 ISO8601 表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，例如`2019-06-02T00:00:00+08:00`。
+   * 起始时间与结束时间间隔小于等于 90 天。
+   * 获取数据起始时间点。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00
+   * @example "2019-06-02T00:00:00+08:00"
+   */
+  StartTime: string;
+}
+
+export interface DescribeImageXSensibleCountByTimeRes {
+  ResponseMetadata: {
+    /** 请求的接口名，属于请求的公共参数。 */
+    Action: string;
+    /** 请求的Region，例如：cn-north-1 */
+    Region: string;
+    /** RequestID为每次API请求的唯一标识。 */
+    RequestId: string;
+    /** 请求的服务，属于请求的公共参数。 */
+    Service: string;
+    /** 请求的版本号，属于请求的公共参数。 */
+    Version: string;
+  };
+  Result: {
+    /**
+     * 采集样本量数据
+     * 采集样本量数据
+     * @example "-"
+     */
+    SensibleCountData: {
+      /**
+       * 该数据类型对应的总上报量。
+       * 该数据类型对应的总上报量
+       * @example "2"
+       */
+      Count: number;
+      /**
+       * 具体数据
+       * 具体数据
+       * @example "-"
+       */
+      Data: {
+        /**
+         * 上报量数据。
+         * 上报量数据
+         * @example "2"
+         */
+        Count: number;
+        /**
+         * 数据对应时间点，按照 ISO8601 表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。
+         * 数据对应时间点，按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。
+         * @example "2023-01-01T00:00:00+08:00"
+         */
+        Timestamp: string;
+        /**
+         * 上报量数据，与`Count`数值相同。
+         * 上报量数据，与Count数值相同。
+         * @example "2"
+         */
+        Value: number;
+      }[];
+      /**
+       * 数据类型，不拆分时值为`Total`，拆分时为具体的维度值。
+       * 数据类型，不拆分时值为Total，拆分时为具体的维度值
+       * @example "Total"
+       */
+      Type: string;
+    }[];
+  };
+}
+
+export interface DescribeImageXSensibleTopRamURLBody {
+  /**
+   * 需要匹配 App 版本，缺省情况下则匹配 App 的所有版本。
+   * 需要匹配 App 版本，缺省情况下则匹配 App 的所有版本。
+   * @example "["1.0.0"]"
+   */
+  AppVer?: string[];
+  /**
+   * 应用 ID。默认为空，缺省情况下匹配账号下的所有的 App ID。您可以通过调用[GetImageXQueryApps](https://www.volcengine.com/docs/508/1213042)的方式获取所需的 AppID。
+   * 应用 ID。默认为空，匹配账号下的所有的App ID。
+   * @example "123"
+   */
+  Appid?: string;
+  /**
+   * 获取数据结束时间点，需在起始时间点之后。日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
+   * 获取数据结束时间点，需在起始时间点之后。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00
+   * @example "2019-06-03T00:00:00+08:00"
+   */
+  EndTime: string;
+  /**
+   * 需要匹配的自定义维度项
+   * 需要匹配的自定义维度项
+   * @example "-"
+   */
+  ExtraDims?: {
+    /**
+     * 自定义维度名称。
+     * :::tip
+     * 您可以通过调用[获取自定义维度列表](https://www.volcengine.com/docs/508/1213048)来获取。
+     * :::
+     * 自定义维度名称。
+     * @example "biz_tag"
+     */
+    Dim: string;
+    /**
+     * 需要匹配的对应维度值。
+     * :::tip
+     * 您可以通过调用[获取自定义维度值](https://www.volcengine.com/docs/508/1213050)来获取。
+     * :::
+     * 需要匹配的对应维度值
+     * @example "["4g"]"
+     */
+    Vals: string[];
+  }[];
+  /**
+   * 需要匹配的图片类型，缺省情况下则匹配所有图片类型。支持以下取值：
+   *
+   * - `GIF`
+   * - `PNG`
+   * - `JPEG`
+   * - `HEIF`
+   * - `HEIC`
+   * - `WEBP`
+   * - `AWEBP`
+   * - `VVIC`
+   * - `AVIF`
+   * - `AVIS`
+   * - `其他`
+   * 需要匹配的图片类型，不传则匹配所有图片类型。
+   * GIF
+   * PNG
+   * JPEG
+   * HEIF
+   * HEIC
+   * WEBP
+   * AWEBP
+   * VVIC
+   * 其他
+   * @example "["PNG"]"
+   */
+  ImageType?: string[];
+  /**
+   * 需要匹配的系统类型，缺省情况下匹配非 WEB 端的所有系统。取值如下所示：
+   *
+   * - `iOS`
+   * - `Android`
+   * - `WEB`
+   * 需要匹配的系统类型，不传则匹配非WEB端所有系统。取值如下所示：
+   * iOS
+   * Android
+   * WEB
+   * @example "Android"
+   */
+  OS?: string;
+  /**
+   * 支持以下取值：
+   * - `1`：按上报次数降序排序；
+   * - `2`：按内存大小降序排序。
+   * 支持以下取值：
+   * 1：按上报次数排序；
+   * 2：按内存大小排序。
+   * @example "1"
+   */
+  OrderByIdx: number;
+  /**
+   * 需要匹配的 SDK 版本，缺省情况下匹配所有版本。
+   * 需要匹配的SDK版本，不传则匹配所有版本
+   * @example "["1.0.0"]"
+   */
+  SdkVer?: string[];
+  /**
+   * 获取数据起始时间点。日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
+   * 获取数据起始时间点。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00
+   * @example "2019-06-02T00:00:00+08:00"
+   */
+  StartTime: string;
+  /**
+   * 查询 Top URL 条数，取值范围为(0,1000]。缺省情况下默认为 1000。
+   * 查询 Top URL 条数，取值范围为(0,1000]。缺省情况下默认为 1000。
+   * @example "1000"
+   */
+  Top?: number;
+}
+
+export interface DescribeImageXSensibleTopRamURLRes {
+  ResponseMetadata: {
+    /** 请求的接口名，属于请求的公共参数。 */
+    Action: string;
+    /** 请求的Region，例如：cn-north-1 */
+    Region: string;
+    /** RequestID为每次API请求的唯一标识。 */
+    RequestId: string;
+    /** 请求的服务，属于请求的公共参数。 */
+    Service: string;
+    /** 请求的版本号，属于请求的公共参数。 */
+    Version: string;
+  };
+  Result: {
+    /**
+     * Top URL 数据
+     * Top URL 数据
+     * @example "-"
+     */
+    TopUrlData: {
+      /**
+       * Activity+View 树，控件信息。
+       * Activity+View 树，控件信息。
+       * @example "Controller/View"
+       */
+      ActivityViewTree: string;
+      /**
+       * 业务标识
+       * 业务标识
+       * @example "xxxx"
+       */
+      BizTag: string;
+      /**
+       * 上报次数
+       * 上报次数
+       * @example "128"
+       */
+      Count: number;
+      /**
+       * 图片内存大小
+       * 图片内存大小
+       * @example "9860"
+       */
+      RamSize: number;
+      /**
+       * 图片 URL
+       * 图片URL
+       * @example "http://xxx.image"
+       */
+      URL: string;
+    }[];
+  };
+}
+
+export interface DescribeImageXSensibleTopResolutionURLBody {
+  /**
+   * 需要匹配 App 版本，缺省情况下则匹配 App 的所有版本。
+   * 需要匹配 App 版本，缺省情况下则匹配 App 的所有版本。
+   * @example "["1.0.0"]"
+   */
+  AppVer?: string[];
+  /**
+   * 应用 ID。默认为空，缺省情况下匹配账号下的所有的 App ID。您可以通过调用[GetImageXQueryApps](https://www.volcengine.com/docs/508/1213042)的方式获取所需的 AppID。
+   * 应用 ID。默认为空，匹配账号下的所有的App ID。
+   * @example "123"
+   */
+  Appid?: string;
+  /**
+   * 获取数据结束时间点，需在起始时间点之后。日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
+   * 获取数据结束时间点，需在起始时间点之后。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00
+   * @example "2019-06-03T00:00:00+08:00"
+   */
+  EndTime: string;
+  /**
+   * 需要匹配的自定义维度项
+   * 需要匹配的自定义维度项
+   * @example "-"
+   */
+  ExtraDims?: {
+    /**
+     * 自定义维度名称。
+     * :::tip
+     * 您可以通过调用[获取自定义维度列表](https://www.volcengine.com/docs/508/1213048)来获取。
+     * :::
+     * 自定义维度名称。
+     * @example "biz_tag"
+     */
+    Dim: string;
+    /**
+     * 需要匹配的对应维度值。
+     * :::tip
+     * 您可以通过调用[获取自定义维度值](https://www.volcengine.com/docs/508/1213050)来获取。
+     * :::
+     * 需要匹配的对应维度值
+     * @example "["4g"]"
+     */
+    Vals: string[];
+  }[];
+  /**
+   * 需要匹配的图片类型，缺省情况下则匹配所有图片类型。支持以下取值：
+   *
+   * - `GIF`
+   * - `PNG`
+   * - `JPEG`
+   * - `HEIF`
+   * - `HEIC`
+   * - `WEBP`
+   * - `AWEBP`
+   * - `VVIC`
+   * - `AVIF`
+   * - `AVIS`
+   * - `其他`
+   * 需要匹配的图片类型，不传则匹配所有图片类型。
+   * GIF
+   * PNG
+   * JPEG
+   * HEIF
+   * HEIC
+   * WEBP
+   * AWEBP
+   * VVIC
+   * 其他
+   * @example "["PNG"]"
+   */
+  ImageType?: string[];
+  /**
+   * 需要匹配的系统类型，缺省情况下匹配非 WEB 端的所有系统。取值如下所示：
+   *
+   * - `iOS`
+   * - `Android`
+   * - `WEB`
+   * 需要匹配的系统类型，不传则匹配非WEB端所有系统。取值如下所示：
+   * iOS
+   * Android
+   * WEB
+   * @example "Android"
+   */
+  OS?: string;
+  /**
+   * 支持以下取值：
+   * - `1`：按上报次数排序；
+   * - `2`：按图片分辨率排序；
+   * - `3`：按 view 分辨率排序。
+   * 支持以下取值：
+   * 1：按上报次数排序；
+   * 2：按图片分辨率排序；
+   * 3：按 view 分辨率排序。
+   * @example "1"
+   */
+  OrderByIdx: number;
+  /**
+   * 需要匹配的 SDK 版本，缺省情况下匹配所有版本。
+   * 需要匹配的SDK版本，不传则匹配所有版本
+   * @example "["1.0.0"]"
+   */
+  SdkVer?: string[];
+  /**
+   * 获取数据起始时间点。日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
+   * 获取数据起始时间点。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00
+   * @example "2019-06-02T00:00:00+08:00"
+   */
+  StartTime: string;
+  /**
+   * 查询 Top URL 条数，取值范围为(0,1000]。缺省情况下默认为 1000。
+   * 查询 Top URL 条数，取值范围为(0,1000]。缺省情况下默认为 1000。
+   * @example "1000"
+   */
+  Top?: number;
+}
+
+export interface DescribeImageXSensibleTopResolutionURLRes {
+  ResponseMetadata: {
+    /** 请求的接口名，属于请求的公共参数。 */
+    Action: string;
+    /** 请求的Region，例如：cn-north-1 */
+    Region: string;
+    /** RequestID为每次API请求的唯一标识。 */
+    RequestId: string;
+    /** 请求的服务，属于请求的公共参数。 */
+    Service: string;
+    /** 请求的版本号，属于请求的公共参数。 */
+    Version: string;
+  };
+  Result: {
+    /**
+     * 具体数据
+     * 具体数据
+     * @example "-"
+     */
+    TopUrlData: {
+      /**
+       * Activity+View 树，控件信息
+       * Activity+View 树，控件信息。
+       * @example "Controller/View"
+       */
+      ActivityViewTree: string;
+      /**
+       * 业务标识
+       * 业务标识
+       * @example "xxxx"
+       */
+      BizTag: string;
+      /**
+       * 上报次数
+       * 上报次数
+       * @example "124"
+       */
+      Count: number;
+      /**
+       * 图片高
+       * 图片高
+       * @example "833"
+       */
+      ImageHeight: number;
+      /**
+       * 图片宽
+       * 图片宽
+       * @example "481"
+       */
+      ImageWidth: number;
+      /**
+       * 图片 URL
+       * 图片URL
+       * @example "http://xxx.image"
+       */
+      URL: string;
+      /**
+       * 图片展示背景 view 高
+       * 图片展示背景 view 高。
+       * @example "800"
+       */
+      ViewHeight: number;
+      /**
+       * 图片展示背景 view 宽
+       * 图片展示背景 view 宽。
+       * @example "500"
+       */
+      ViewWidth: number;
+    }[];
+  };
+}
+
+export interface DescribeImageXSensibleTopSizeURLBody {
+  /**
+   * 需要匹配 App 版本，缺省情况下则匹配 App 的所有版本。
+   * 需要匹配 App 版本，缺省情况下则匹配 App 的所有版本。
+   * @example "["1.0.0"]"
+   */
+  AppVer?: string[];
+  /**
+   * 应用 ID。默认为空，缺省情况下则匹配账号下的所有的 App ID。您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/1213042)的方式获取所需的 AppID。
+   * 应用 ID。默认为空，匹配账号下的所有的App ID。
+   * @example "123"
+   */
+  Appid?: string;
+  /**
+   * 获取数据结束时间点，需在起始时间点之后。日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
+   * 获取数据结束时间点，需在起始时间点之后。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00
+   * @example "2019-06-03T00:00:00+08:00"
+   */
+  EndTime: string;
+  /**
+   * 需要匹配的自定义维度项
+   * 需要匹配的自定义维度项
+   * @example "-"
+   */
+  ExtraDims?: {
+    /**
+     * 自定义维度名称。
+     * :::tip
+     * 您可以通过调用[获取自定义维度列表](https://www.volcengine.com/docs/508/1213048)来获取。
+     * :::
+     * 自定义维度名称。
+     * @example "biz_tag"
+     */
+    Dim: string;
+    /**
+     * 需要匹配的对应维度值。
+     * :::tip
+     * 您可以通过调用[获取自定义维度值](https://www.volcengine.com/docs/508/1213050)来获取。
+     * :::
+     * 需要匹配的对应维度值
+     * @example "["4g"]"
+     */
+    Vals: string[];
+  }[];
+  /**
+   * 需要匹配的图片类型，缺省情况下则匹配所有图片类型。支持以下取值：
+   *
+   * - `GIF`
+   * - `PNG`
+   * - `JPEG`
+   * - `HEIF`
+   * - `HEIC`
+   * - `WEBP`
+   * - `AWEBP`
+   * - `VVIC`
+   * - `AVIF`
+   * - `AVIS`
+   * - `其他`
+   * 需要匹配的图片类型，不传则匹配所有图片类型。
+   * GIF
+   * PNG
+   * JPEG
+   * HEIF
+   * HEIC
+   * WEBP
+   * AWEBP
+   * VVIC
+   * 其他
+   * @example "["PNG"]"
+   */
+  ImageType?: string[];
+  /**
+   * 需要匹配的系统类型，缺省情况下则匹配非 WEB 端的所有系统。取值如下所示：
+   *
+   * - `iOS`
+   * - `Android`
+   * - `WEB`
+   * 需要匹配的系统类型，不传则匹配非WEB端所有系统。取值如下所示：
+   * iOS
+   * Android
+   * WEB
+   * @example "Android"
+   */
+  OS?: string;
+  /**
+   * 支持以下取值：
+   * - `1`：按上报次数降序排序；
+   * - `2`：按文件体积降序排序。
+   * 支持以下取值：
+   * 1：按上报次数排序；
+   * 2：按文件体积排序。
+   * @example "1"
+   */
+  OrderByIdx: number;
+  /**
+   * 需要匹配的 SDK 版本，缺省情况下则匹配所有版本。
+   * 需要匹配的SDK版本，不传则匹配所有版本
+   * @example "["1.0.0"]"
+   */
+  SdkVer?: string[];
+  /**
+   * 获取数据起始时间点。日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
+   * 获取数据起始时间点。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00
+   * @example "2019-06-02T00:00:00+08:00"
+   */
+  StartTime: string;
+  /**
+   * 查询 Top URL 条数，取值范围为(0,1000]。缺省情况下默认为 1000。
+   * 查询 Top URL 条数，取值范围为(0,1000]。缺省情况下默认为 1000。
+   * @example "1000"
+   */
+  Top?: number;
+}
+
+export interface DescribeImageXSensibleTopSizeURLRes {
+  ResponseMetadata: {
+    /** 请求的接口名，属于请求的公共参数。 */
+    Action: string;
+    /** 请求的Region，例如：cn-north-1 */
+    Region: string;
+    /** RequestID为每次API请求的唯一标识。 */
+    RequestId: string;
+    /** 请求的服务，属于请求的公共参数。 */
+    Service: string;
+    /** 请求的版本号，属于请求的公共参数。 */
+    Version: string;
+  };
+  Result: {
+    /**
+     * Top URL数据
+     * Top URL数据
+     * @example "-"
+     */
+    TopUrlData: {
+      /**
+       * Activity+View 树，控件信息。
+       * Activity+View 树，控件信息。
+       * @example "Controller/View"
+       */
+      ActivityViewTree: string;
+      /**
+       * 业务标识
+       * 业务标识
+       * @example "xxxx"
+       */
+      BizTag: string;
+      /**
+       * 上报次数
+       * 上报次数
+       * @example "123"
+       */
+      Count: number;
+      /**
+       * 文件URL
+       * 文件URL
+       * @example "http://xxx.image"
+       */
+      URL: string;
+      /**
+       * 文件体积
+       * 文件体积
+       * @example "6590"
+       */
+      Value: number;
+    }[];
+  };
+}
+
+export interface DescribeImageXSensibleTopUnknownURLBody {
+  /**
+   * 需要匹配 App 版本，缺省情况下匹配 App 的所有版本。
+   * 需要匹配 App 版本，缺省情况下则匹配 App 的所有版本。
+   * @example "["1.0.0"]"
+   */
+  AppVer?: string[];
+  /**
+   * 应用 ID。默认为空，缺省情况下匹配账号下的所有的 App ID。您可以通过调用[GetImageXQueryApps](https://www.volcengine.com/docs/508/1213042)的方式获取所需的 AppID。
+   * 应用 ID。默认为空，匹配账号下的所有的App ID。
+   * @example "123"
+   */
+  Appid?: string;
+  /**
+   * 获取数据结束时间点，需在起始时间点之后。日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
+   * 获取数据结束时间点，需在起始时间点之后。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00
+   * @example "2019-06-03T00:00:00+08:00"
+   */
+  EndTime: string;
+  /**
+   * 需要匹配的自定义维度项
+   * 需要匹配的自定义维度项
+   * @example "-"
+   */
+  ExtraDims?: {
+    /**
+     * 自定义维度名称。
+     * :::tip
+     * 您可以通过调用[获取自定义维度列表](https://www.volcengine.com/docs/508/1213048)来获取。
+     * :::
+     * 自定义维度名称。
+     * @example "biz_tag"
+     */
+    Dim: string;
+    /**
+     * 需要匹配的对应维度值。
+     * :::tip
+     * 您可以通过调用[获取自定义维度值](https://www.volcengine.com/docs/508/1213050)来获取。
+     * :::
+     * 需要匹配的对应维度值
+     * @example "["xxx"]"
+     */
+    Vals: string[];
+  }[];
+  /**
+   * 需要匹配的图片类型，缺省情况下则匹配所有图片类型。支持以下取值：
+   *
+   * - `GIF`
+   * - `PNG`
+   * - `JPEG`
+   * - `HEIF`
+   * - `HEIC`
+   * - `WEBP`
+   * - `AWEBP`
+   * - `VVIC`
+   * - `AVIF`
+   * - `AVIS`
+   * - `其他`
+   * 需要匹配的图片类型，不传则匹配所有图片类型。
+   * GIF
+   * PNG
+   * JPEG
+   * HEIF
+   * HEIC
+   * WEBP
+   * AWEBP
+   * VVIC
+   * 其他
+   * @example "["PNG","JPEG"]"
+   */
+  ImageType?: string[];
+  /**
+   * 需要匹配的系统类型，缺省情况下匹配非 WEB 端的所有系统。取值如下所示：
+   *
+   * - `iOS`
+   * - `Android`
+   * - `WEB`
+   * 需要匹配的系统类型，不传则匹配非WEB端所有系统。取值如下所示：
+   * iOS
+   * Android
+   * WEB
+   * @example "Android"
+   */
+  OS?: string;
+  /**
+   * 支持以下取值：
+   * - `1`：按上报量排序
+   * - `2`：按内存大小排序
+   * - `3`：按文件大小排序
+   * - `4`：按图片分辨率排序
+   * - `5`：按 view 分辨率排序
+   * 支持以下取值：
+   * 1：按上报量排序
+   * 2：按内存大小排序
+   * 3：按文件大小排序
+   * 4：按图片分辨率排序
+   * 5：按 view 分辨率排序
+   * @example "2"
+   */
+  OrderByIdx: number;
+  /**
+   * 需要匹配的 SDK 版本，缺省情况下匹配所有版本。
+   * 需要匹配的SDK版本，不传则匹配所有版本
+   * @example "["1.3.0"]"
+   */
+  SdkVer?: string[];
+  /**
+   * 获取数据起始时间点。日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
+   * 获取数据起始时间点。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00
+   * @example "2019-06-02T00:00:00+08:00"
+   */
+  StartTime: string;
+  /**
+   * 查询 Top URL 条数，取值范围为(0,1000]。默认值为 1000。
+   * 查询 Top URL 条数，取值范围为(0,1000]。缺省情况下默认为 1000。
+   * @example "1000"
+   */
+  Top?: number;
+}
+
+export interface DescribeImageXSensibleTopUnknownURLRes {
+  ResponseMetadata: {
+    /** @example "DescribeImageXSensibleTopUnknownURL" */
+    Action: string;
+    /** @example "cn-north-1" */
+    Region: string;
+    /** @example "202306041104200100100232280022D31" */
+    RequestId: string;
+    /** @example "ImageX" */
+    Service: string;
+    /** @example "2023-05-01" */
+    Version: string;
+  };
+  Result: {
+    /**
+     * Top URL 详情
+     * @example "-"
+     */
+    TopUrlData: {
+      /**
+       * Activity+View 树，控件信息
+       * @example "Controller/View"
+       */
+      ActivityViewTree?: string;
+      /**
+       * 业务标识
+       * @example "xxxx"
+       */
+      BizTag?: string;
+      /**
+       * 上报次数
+       * @example "73"
+       */
+      Count?: number;
+      /**
+       * 文件大小
+       * @example "60"
+       */
+      FileSize?: number;
+      /**
+       * 图片高
+       * @example "591"
+       */
+      ImageHeight?: number;
+      /**
+       * 图片宽
+       * @example "400"
+       */
+      ImageWidth?: number;
+      /**
+       * 图片内存大小
+       * @example "90"
+       */
+      RamSize?: number;
+      /**
+       * 图片 URL
+       * @example "http://xxx.image"
+       */
+      URL?: string;
+      /**
+       * 展示 view 高
+       * @example "700"
+       */
+      ViewHeight?: number;
+      /**
+       * 展示 view 宽
+       * @example "500"
+       */
+      ViewWidth?: number;
+    }[];
+  };
+}
+
+export interface DescribeImageXServerQPSUsageQuery {
+  /**
+   * 获取数据结束时间点。日期格式按照 ISO8601 表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如`2019-06-02T00:00:00+08:00`。
+   * @example "2019-06-02T00:00:00+08:00"
+   */
+  EndTime: string;
+  /**
+   * 查询数据的时间粒度。单位为秒。缺省时查询`StartTime`和`EndTime`时间段全部数据，此时单次查询最大时间跨度为 93 天。取值如下所示：
+   *
+   * - `1`: 单次查询最大时间跨度为 6 小时
+   * - `60`：单次查询最大时间跨度为 6 小时
+   * - `120`：单次查询最大时间跨度为 6 小时
+   * - `300`：单次查询最大时间跨度为 31 天
+   * - `600`：单次查询最大时间跨度为 31 天
+   * - `1200`：单次查询最大时间跨度为 31 天
+   * - `1800`：单次查询最大时间跨度为 31 天
+   * - `3600`：单次查询最大时间跨度为 93 天
+   * - `86400`：单次查询最大时间跨度为 93 天
+   * - `604800`：单次查询最大时间跨度为 93 天
+   * @example "300"
+   */
+  Interval?: string;
+  /**
+   * 服务 ID。支持查询多个服务，传入多个时用英文逗号“,”分割，缺省情况下表示查询所有服务。您可以在 veImageX 控制台的[服务管理](https://console.volcengine.com/imagex/service_manage/)模块或者调用 [GetAllImageServices](https://www.volcengine.com/docs/508/9360) 接口获取服务 ID。
+   * @example "s1,s2"
+   */
+  ServiceIds?: string;
+  /**
+   * 获取数据起始时间点。日期格式按照 ISO8601 表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如`2019-06-02T00:00:00+08:00`。
+   * :::tip
+   * 由于仅支持查询近 93 天的历史数据，则若此刻时间为`2011-11-21T16:14:00+08:00`，那么您可输入最早的开始时间为`2011-08-21T00:00:00+08:00`。
+   * :::
+   * @example "2019-06-02T00:00:00+08:00"
+   */
+  StartTime: string;
+}
+
+export interface DescribeImageXServerQPSUsageRes {
+  ResponseMetadata: {
+    /** 请求的接口名，属于请求的公共参数。 */
+    Action: string;
+    /** 请求的Region，例如：cn-north-1 */
+    Region: string;
+    /** RequestID为每次API请求的唯一标识。 */
+    RequestId: string;
+    /** 请求的服务，属于请求的公共参数。 */
+    Service: string;
+    /** 请求的版本号，属于请求的公共参数。 */
+    Version: string;
+  };
+  /** 视请求的接口而定 */
+  Result: {
+    /**
+     * QPS 用量
+     * @example "-"
+     */
+    QPSData: {
+      /**
+       * 时序数据。
+       * @example "-"
+       */
+      Data: {
+        /**
+         * 统计时间点，时间片开始时刻，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。
+         * @example "2023-01-01T00:00:00+08:00"
+         */
+        TimeStamp: string;
+        /**
+         * QPS 用量的值。单位为 "次/秒"，表示每秒处理的请求数量。
+         * @example "12"
+         */
+        Value: number;
+      }[];
+      /**
+       * QPS 类型，取值如下所示：
+       * - `Request`：专有图像处理和高效压缩
+       * - `Mirror`：资源下载与镜像代理
+       * @example "Request"
+       */
+      QPSType: string;
+    }[];
+  };
+}
+
+export interface DescribeImageXServiceQualityQuery {
+  /**
+   * 获取指定地区的数据。默认为空，表示获取国内数据。
+   * * `cn`：国内。
+   * * `sg`：新加坡。
+   * @example "cn"
+   */
+  Region?: string;
+}
+
+export interface DescribeImageXServiceQualityRes {
+  ResponseMetadata: {
+    /**
+     * 请求的接口名，属于请求的公共参数。
+     * @example "{Action}"
+     */
+    Action: string;
+    /**
+     * 请求的Region，例如：cn-north-1
+     * @example "cn-north-1"
+     */
+    Region: string;
+    /** RequestID为每次API请求的唯一标识。 */
+    RequestId: string;
+    /** 请求的服务，属于请求的公共参数。 */
+    Service: string;
+    /**
+     * 请求的版本号，属于请求的公共参数。
+     * @example "{Version}"
+     */
+    Version: string;
+  };
+  /** 视请求的接口而定 */
+  Result: {
+    /**
+     * 下行概览数据，为当日 0 点至今整体数据。
+     * 下行概览数据，为当日 0 点至今整体数据。
+     * @example "-"
+     */
+    CdnData: {
+      /**
+       * 网络平均耗时，单位为 ms。
+       * 网络平均耗时，单位为 ms。
+       * @format float
+       * @example "356"
+       */
+      AvgDuration: number;
+      /**
+       * 网络成功率
+       * :::tip
+       * 网络成功率 = 1 - 下载失败次数 / 下载总数
+       * :::
+       * 网络成功率
+       * @format float
+       * @example "0.9927386619504328"
+       */
+      SuccessRate: number;
+      /**
+       * 下行总上报数据量。
+       * 下行总上报数据量。
+       * @example "90281"
+       */
+      TotalCount: number;
+    };
+    /**
+     * 客户端概览数据，为当日 0 点查询时间的整体数据。
+     * 客户端概览数据，为当日 0 点查询时间的整体数据。
+     * @example "-"
+     */
+    ClientData: {
+      /**
+       * 平均解码耗时，单位为 ms。
+       * 平均解码耗时，单位为 ms。
+       * @format float
+       * @example "11"
+       */
+      AvgDecodeDuration: number;
+      /**
+       * 平均加载耗时，单位为 ms。
+       * 平均加载耗时，单位为 ms。
+       * @format float
+       * @example "752"
+       */
+      AvgLoadDuration: number;
+      /**
+       * 平均排队耗时，单位为 ms。
+       * 平均排队耗时，单位为 ms。
+       * @format float
+       * @example "370"
+       */
+      AvgQueueDuration: number;
+      /**
+       * 解码成功率
+       * :::tip
+       * 解码成功率 = 1 - 解码失败次数 / 解码总次数
+       * :::
+       * 解码成功率
+       * @format float
+       * @example "0.9996384232001669"
+       */
+      SuccessRate: number;
+      /**
+       * 客户端总上报数据量。
+       * 客户端总上报数据量。
+       * @example "92781"
+       */
+      TotalCount: number;
+    };
+    /**
+     * 用户感知失败率，为当日 0 点至查询时间的整体数据。
+     * 用户感知失败率，为当日 0 点至查询时间的整体数据。
+     * @format float
+     * @example "0.006693045490108962"
+     */
+    FailureRate: number;
+    /**
+     * 上传概览数据，为当日 0 点查询时间的整体数据。
+     * 上传概览数据，为当日 0 点查询时间的整体数据。
+     * @example "-"
+     */
+    UploadData: {
+      /**
+       * 上传平均耗时，单位为 ms。
+       * 上传平均耗时，单位为 ms。
+       * @format float
+       * @example "2428"
+       */
+      AvgDuration: number;
+      /**
+       * 上传文件平均大小，单位为字节。
+       * 上传文件平均大小，单位字节。
+       * @format float
+       * @example "377649"
+       */
+      AvgSize: number;
+      /**
+       * 上传成功率。
+       * :::tip
+       * 上传成功率 = 上传成功次数 / 上传总有效次数
+       * :::
+       * 上传成功率
+       * @format float
+       * @example "0.9975451872358082"
+       */
+      SuccessRate: number;
+      /**
+       * 上传总上报数据量。
+       * 上传总上报数据量。
+       * @example "3919"
+       */
+      TotalCount: number;
+      /**
+       * 上传有效次数。
+       * 上传有效次数
+       * @example "7189143"
+       */
+      UploadCount: number;
+    };
+  };
+}
+
+export interface DescribeImageXSourceRequestBandwidthQuery {
   /**
    * 域名。为空时表示不筛选，支持查询多个域名，不同的域名使用逗号分隔。
    * 您可以通过调用 [GetServiceDomains](https://www.volcengine.com/docs/508/9379) 获取服务下所有域名信息。
@@ -9098,7 +12475,7 @@ export interface DescribeImageXEdgeRequestBandwidthQuery {
    */
   StartTime: string;
   /**
-   * 客户端国家。传入多个时用英文逗号作为分割符，缺省情况下表示不过滤。可调用[获取边缘分发地区列表](https://www.volcengine.com/docs/508/177111)获取 IP 解析后的客户端国家。取值如下所示：
+   * 客户端国家。传入多个时用英文逗号作为分割符，缺省情况下表示不过滤。可调用 [DescribeImageXEdgeRequestRegions](https://www.volcengine.com/docs/508/1209574) 获取 IP 解析后的客户端国家。取值如下所示：
    *
    * - `海外`，除中国外全部国家。
    * - 具体国家取值，如`中国`、`美国`。
@@ -9106,13 +12483,13 @@ export interface DescribeImageXEdgeRequestBandwidthQuery {
    */
   UserCountry?: string;
   /**
-   * 客户端省份。传入多个用英文逗号分割。缺省情况下表示不过滤。可调用[获取边缘分发地区列表](https://www.volcengine.com/docs/508/177111)获取 IP 解析后的客户端省份。
+   * 客户端省份。传入多个用英文逗号分割。缺省情况下表示不过滤。可调用 [DescribeImageXEdgeRequestRegions](https://www.volcengine.com/docs/508/1209574) 获取 IP 解析后的客户端省份。
    * @example "北京"
    */
   UserProvince?: string;
 }
 
-export interface DescribeImageXEdgeRequestBandwidthRes {
+export interface DescribeImageXSourceRequestBandwidthRes {
   ResponseMetadata: {
     /** 请求的接口名，属于请求的公共参数。 */
     Action: string;
@@ -9126,9 +12503,15 @@ export interface DescribeImageXEdgeRequestBandwidthRes {
     Version: string;
   };
   Result: {
-    /** 带宽数据。 */
+    /**
+     * 带宽数据。
+     * @example "-"
+     */
     BpsData: {
-      /** 具体数据 */
+      /**
+       * 具体数据
+       * @example "-"
+       */
       Data: {
         /**
          * 统计时间点，时间片开始时刻，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。
@@ -9152,7 +12535,7 @@ export interface DescribeImageXEdgeRequestBandwidthRes {
   };
 }
 
-export interface DescribeImageXEdgeRequestQuery {
+export interface DescribeImageXSourceRequestQuery {
   /**
    * 状态码。传入多个时用英文逗号分隔。支持以下取值：
    *
@@ -9258,7 +12641,7 @@ export interface DescribeImageXEdgeRequestQuery {
    */
   StartTime: string;
   /**
-   * 客户端国家。传入多个时用英文逗号作为分割符，缺省情况下表示不过滤。可调用[获取边缘分发地区列表](https://www.volcengine.com/docs/508/177111)获取 IP 解析后的客户端国家。取值如下所示：
+   * 客户端国家。传入多个时用英文逗号作为分割符，缺省情况下表示不过滤。可调用 [DescribeImageXEdgeRequestRegions](https://www.volcengine.com/docs/508/1209574) 获取 IP 解析后的客户端国家。取值如下所示：
    *
    * - `海外`，除中国外全部国家。
    * - 具体国家取值，如`中国`、`美国`。
@@ -9266,53 +12649,13 @@ export interface DescribeImageXEdgeRequestQuery {
    */
   UserCountry?: string;
   /**
-   * 客户端省份。传入多个用英文逗号分割。缺省情况下表示不过滤。可调用[获取边缘分发地区列表](https://www.volcengine.com/docs/508/177111)获取 IP 解析后的客户端省份。
+   * 客户端省份。传入多个用英文逗号分割。缺省情况下表示不过滤。可调用 [DescribeImageXEdgeRequestRegions](https://www.volcengine.com/docs/508/1209574) 获取 IP 解析后的客户端省份。
    * @example "北京"
    */
   UserProvince?: string;
 }
 
-export interface DescribeImageXEdgeRequestRegionsQuery {
-  /**
-   * 获取数据结束时间点。日期格式按照 ISO8601 表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。例如`2019-06-02T00:00:00+08:00`。<br>起始时间与结束时间间隔小于等于 90 天。
-   * @example "2019-06-02T00:00:00+08:00"
-   */
-  EndTime: string;
-  /**
-   * 获取数据起始时间点。日期格式按照 ISO8601 表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。例如`2019-06-02T00:00:00+08:00`。<br>起始时间与结束时间间隔小于等于 90 天。
-   * @example "2019-06-02T00:00:00+08:00"
-   */
-  StartTime: string;
-}
-
-export interface DescribeImageXEdgeRequestRegionsRes {
-  ResponseMetadata: {
-    /** 请求的接口名，属于请求的公共参数。 */
-    Action: string;
-    /** 请求的Region，例如：cn-north-1 */
-    Region: string;
-    /** RequestID为每次API请求的唯一标识。 */
-    RequestId: string;
-    /** 请求的服务，属于请求的公共参数。 */
-    Service: string;
-    /** 请求的版本号，属于请求的公共参数。 */
-    Version: string;
-  };
-  Result: {
-    /**
-     * 客户端国家
-     * @example "["中国"]"
-     */
-    UserCountry: string[];
-    /**
-     * 客户端省份
-     * @example "["北京"]"
-     */
-    UserProvince: string[];
-  };
-}
-
-export interface DescribeImageXEdgeRequestRes {
+export interface DescribeImageXSourceRequestRes {
   ResponseMetadata: {
     /** 请求的接口名，属于请求的公共参数。 */
     Action: string;
@@ -9332,9 +12675,13 @@ export interface DescribeImageXEdgeRequestRes {
      * * 若未设置`Interval`，则上报一条`StartTime`与`EndTime`时间段内查询的全部请求次数据；
      * * 若设置了`Interval`，则按`Interval`粒度分段上报查询的时间粒度内请求次数据；
      * :::
+     * @example "-"
      */
     RequestCnt: {
-      /** 具体数据 */
+      /**
+       * 具体数据
+       * @example "-"
+       */
       Data: {
         /**
          * 统计时间点，时间片开始时刻，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。
@@ -9363,7 +12710,7 @@ export interface DescribeImageXEdgeRequestRes {
   };
 }
 
-export interface DescribeImageXEdgeRequestTrafficQuery {
+export interface DescribeImageXSourceRequestTrafficQuery {
   /**
    * 域名。为空时表示不筛选，支持查询多个域名，不同的域名使用逗号分隔。
    * 您可以通过调用 [GetServiceDomains](https://www.volcengine.com/docs/508/9379) 获取服务下所有域名信息。
@@ -9447,7 +12794,7 @@ export interface DescribeImageXEdgeRequestTrafficQuery {
    */
   StartTime: string;
   /**
-   * 客户端国家。传入多个时用英文逗号作为分割符，缺省情况下表示不过滤。可调用[获取边缘分发地区列表](https://www.volcengine.com/docs/508/177111)获取 IP 解析后的客户端国家。取值如下所示：
+   * 客户端国家。传入多个时用英文逗号作为分割符，缺省情况下表示不过滤。可调用 [DescribeImageXEdgeRequestRegions](https://www.volcengine.com/docs/508/1209574) 获取 IP 解析后的客户端国家。取值如下所示：
    *
    * - `海外`，除中国外全部国家。
    * - 具体国家取值，如`中国`、`美国`。
@@ -9455,13 +12802,13 @@ export interface DescribeImageXEdgeRequestTrafficQuery {
    */
   UserCountry?: string;
   /**
-   * 客户端省份。传入多个用英文逗号分割。缺省情况下表示不过滤。可调用[获取边缘分发地区列表](https://www.volcengine.com/docs/508/177111)获取 IP 解析后的客户端省份。
+   * 客户端省份。传入多个用英文逗号分割。缺省情况下表示不过滤。可调用 [DescribeImageXEdgeRequestRegions](https://www.volcengine.com/docs/508/1209574) 获取 IP 解析后的客户端省份。
    * @example "北京"
    */
   UserProvince?: string;
 }
 
-export interface DescribeImageXEdgeRequestTrafficRes {
+export interface DescribeImageXSourceRequestTrafficRes {
   ResponseMetadata: {
     /** 请求的接口名，属于请求的公共参数。 */
     Action: string;
@@ -9475,9 +12822,15 @@ export interface DescribeImageXEdgeRequestTrafficRes {
     Version: string;
   };
   Result: {
-    /** 查询数据 */
+    /**
+     * 查询数据
+     * @example "-"
+     */
     TrafficData: {
-      /** 具体数据 */
+      /**
+       * 具体数据
+       * @example "-"
+       */
       Data: {
         /**
          * 统计时间点，时间片开始时刻，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。
@@ -9501,2548 +12854,9 @@ export interface DescribeImageXEdgeRequestTrafficRes {
   };
 }
 
-export interface DescribeImageXExceedCountByTimeBody {
-  /**
-   * 需要匹配的 App 版本，不传则匹配 App 的所有版本。
-   * 需要匹配的 App 版本，不传则匹配 App 的所有版本。
-   */
-  AppVer?: string[];
-  /**
-   * 应用 ID。默认为空，不传则匹配账号下的所有的 App ID。
-   * :::tip
-   * 您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/19511)的方式获取所需的 AppID。
-   * :::
-   * 应用 ID。默认为空，匹配账号下的所有的App ID。
-   * @example "123"
-   */
-  Appid?: string;
-  /**
-   * 获取数据结束时间点，需在起始时间点之后。
-   * * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
-   * 获取数据结束时间点，需在起始时间点之后。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00
-   * @example "2019-06-27T15:00:00+08:00"
-   */
-  EndTime: string;
-  /**
-   * 需要匹配的自定义维度项 。
-   * 需要匹配的自定义维度项
-   */
-  ExtraDims?: {
-    /**
-     * 自定义维度名称。
-     * :::tip
-     * 您可以通过调用[获取自定义维度列表](https://www.volcengine.com/docs/508/34554)来获取。
-     * :::
-     * 自定义维度名称。
-     * @example "access"
-     */
-    Dim: string;
-    /**
-     * 需要匹配的对应维度值
-     * :::tip
-     * 您可以通过调用[获取自定义维度值](https://www.volcengine.com/docs/508/34555)来获取。
-     * :::
-     * 需要匹配的对应维度值
-     */
-    Vals: string[];
-  }[];
-  /**
-   * 返回数据的时间粒度。
-   * * `5m`：5 分钟；
-   * * `1h`：1 小时；
-   * * `1d`：1 天。
-   * 返回数据的时间粒度。
-   * 5m：为 5 分钟；
-   * 1h：为 1 小时；
-   * 1d：为 1 天。
-   * @example "1h"
-   */
-  Granularity: string;
-  /**
-   * 拆分维度。默认为空，表示拆分分位数据。支持取值：
-   * - `Duration`：表示拆分分位数据
-   * - 公共维度：`Appid`、`OS`、`AppVer`、`SdkVer`、`ImageType`、`Country`、`Province`、`Isp`、`Domain`
-   * - 自定义维度：您可以通过调用 [GetImageXQueryDims](https://www.volcengine.com/docs/508/34554)接口获取自定义维度指标
-   * 拆分维度。默认为空，表示不拆分。支持取值：公共维度（Appid,OS,AppVer,SdkVer,ImageType），自定义维度（通过"获取自定义维度列表"接口获取）
-   * @example "OS"
-   */
-  GroupBy?: string;
-  /**
-   * 需要匹配的图片类型，不传则匹配所有图片类型。
-   * - `GIF`
-   * - `PNG`
-   * - `JPEG`
-   * - `HEIF`
-   * - `HEIC`
-   * - `WEBP`
-   * - `AWEBP`
-   * - `VVIC`
-   * - `其他`
-   * 需要匹配的图片类型，不传则匹配所有图片类型。
-   * GIF
-   * PNG
-   * JPEG
-   * HEIF
-   * HEIC
-   * WEBP
-   * AWEBP
-   * VVIC
-   * 其他
-   */
-  ImageType?: string[];
-  /**
-   * 需要匹配的系统类型，不传则匹配非 WEB 端的所有系统。取值如下所示：
-   * - `iOS`
-   * - `Android`
-   * - `WEB`
-   * 需要匹配的系统类型，不传则匹配非WEB端所有系统。取值如下所示：
-   * iOS
-   * Android
-   * WEB
-   * @example "WEB"
-   */
-  OS?: string;
-  /**
-   * 需要匹配的 SDK 版本，不传则匹配所有版本.
-   * 需要匹配的SDK版本，不传则匹配所有版本
-   */
-  SdkVer?: string[];
-  /**
-   * 获取数据起始时间点。
-   * * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
-   * 获取数据起始时间点。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00
-   * @example "2019-06-27T13:00:00+08:00"
-   */
-  StartTime: string;
-}
-
-export interface DescribeImageXExceedCountByTimeRes {
-  ResponseMetadata: {
-    /** 请求的接口名，属于请求的公共参数。 */
-    Action: string;
-    /** 请求的Region，例如：cn-north-1 */
-    Region: string;
-    /** RequestID为每次API请求的唯一标识。 */
-    RequestId: string;
-    /** 请求的服务，属于请求的公共参数。 */
-    Service: string;
-    /** 请求的版本号，属于请求的公共参数。 */
-    Version: string;
-  };
-  Result: {
-    /**
-     * 客户端上报量数据。
-     * 上报量数据。
-     */
-    ExceedCountData: {
-      /**
-       * 该数据类型对应的总上报量。
-       * 该数据类型对应的上报量
-       * @example "123"
-       */
-      Count: number;
-      /**
-       * 对应的客户端上报量数据列表。
-       * 对应的客户端上报量数据列表。
-       */
-      Data: {
-        /**
-         * 上报量数据
-         * 上报量数据
-         * @example "123"
-         */
-        Count: number;
-        /**
-         * 数据对应时间点。
-         * * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`。
-         * 数据对应时间点，按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。
-         * @example "2023-01-01T00:00:00+08:00"
-         */
-        Timestamp: string;
-        /**
-         * 上报量数据
-         * 上报量数据
-         * @example "123"
-         */
-        Value: number;
-      }[];
-      /**
-       * 数据类型，不拆分时值为`Total`，拆分时为具体的维度值。
-       * 数据类型，不拆分时值为Total，拆分时为具体的维度值
-       * @example "Total"
-       */
-      Type: string;
-    }[];
-  };
-}
-
-export interface DescribeImageXExceedFileSizeBody {
-  /**
-   * 需要匹配的 App 版本，不传则匹配 App 的所有版本。
-   * 需要匹配的 App 版本，不传则匹配 App 的所有版本。
-   */
-  AppVer?: string[];
-  /**
-   * 应用 ID。默认为空，不传则匹配账号下的所有的 App ID。
-   * :::tip
-   * 您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/19511)的方式获取所需的 AppID。
-   * :::
-   * 应用 ID。默认为空，匹配账号下的所有的App ID。
-   * @example "123"
-   */
-  Appid?: string;
-  /**
-   * 获取数据结束时间点，需在起始时间点之后。
-   * * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
-   * 获取数据结束时间点，需在起始时间点之后。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00
-   * @example "2019-06-27T15:00:00+08:00"
-   */
-  EndTime: string;
-  /**
-   * 需要匹配的自定义维度项 。
-   * 需要匹配的自定义维度项
-   */
-  ExtraDims?: {
-    /**
-     * 自定义维度名称。
-     * :::tip
-     * 您可以通过调用[获取自定义维度列表](https://www.volcengine.com/docs/508/34554)来获取。
-     * :::
-     * 自定义维度名称。
-     * @example "access"
-     */
-    Dim: string;
-    /**
-     * 需要匹配的对应维度值
-     * :::tip
-     * 您可以通过调用[获取自定义维度值](https://www.volcengine.com/docs/508/34555)来获取。
-     * :::
-     * 需要匹配的对应维度值
-     */
-    Vals: string[];
-  }[];
-  /**
-   * 返回数据的时间粒度。
-   * * `5m`：5 分钟；
-   * * `1h`：1 小时；
-   * * `1d`：1 天。
-   * 返回数据的时间粒度。
-   * 5m：为 5 分钟；
-   * 1h：为 1 小时；
-   * 1d：为 1 天。
-   * @example "1h"
-   */
-  Granularity: string;
-  /**
-   * 拆分维度。默认为空，表示拆分分位数据。支持取值：
-   * - `Duration`：表示拆分分位数据
-   * - 公共维度：`Appid`、`OS`、`AppVer`、`SdkVer`、`ImageType`、`Country`、`Province`、`Isp`、`Domain`
-   * - 自定义维度：您可以通过调用 [GetImageXQueryDims](https://www.volcengine.com/docs/508/34554)接口获取自定义维度指标
-   * 拆分维度。默认为空，表示拆分分位数据。支持取值：Duration（拆分分位数据）、公共维度（Appid,OS,AppVer,SdkVer,ImageType,Country,Province,Isp,Domain），自定义维度（通过"获取自定义维度列表"接口获取）
-   * @example "OS"
-   */
-  GroupBy?: string;
-  /**
-   * 需要匹配的图片类型，不传则匹配所有图片类型。
-   * - `GIF`
-   * - `PNG`
-   * - `JPEG`
-   * - `HEIF`
-   * - `HEIC`
-   * - `WEBP`
-   * - `AWEBP`
-   * - `VVIC`
-   * - `其他`
-   * 需要匹配的图片类型，不传则匹配所有图片类型。
-   * GIF
-   * PNG
-   * JPEG
-   * HEIF
-   * HEIC
-   * WEBP
-   * AWEBP
-   * VVIC
-   * 其他
-   */
-  ImageType?: string[];
-  /**
-   * 需要匹配的系统类型，不传则匹配非 WEB 端的所有系统。取值如下所示：
-   * - `iOS`
-   * - `Android`
-   * - `WEB`
-   * 需要匹配的系统类型，不传则匹配非WEB端所有系统。取值如下所示：
-   * iOS
-   * Android
-   * WEB
-   * @example "WEB"
-   */
-  OS?: string;
-  /**
-   * 需要匹配的 SDK 版本，不传则匹配所有版本.
-   * 需要匹配的SDK版本，不传则匹配所有版本
-   */
-  SdkVer?: string[];
-  /**
-   * 获取数据起始时间点。
-   * * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
-   * 获取数据起始时间点。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00
-   * @example "2019-06-27T13:00:00+08:00"
-   */
-  StartTime: string;
-}
-
-export interface DescribeImageXExceedFileSizeRes {
-  ResponseMetadata: {
-    /** 请求的接口名，属于请求的公共参数。 */
-    Action: string;
-    /** 请求的Region，例如：cn-north-1 */
-    Region: string;
-    /** RequestID为每次API请求的唯一标识。 */
-    RequestId: string;
-    /** 请求的服务，属于请求的公共参数。 */
-    Service: string;
-    /** 请求的版本号，属于请求的公共参数。 */
-    Version: string;
-  };
-  Result: {
-    /**
-     * 客户端文件大小分布数据。
-     * 文件大小分布数据
-     */
-    FSizeData: {
-      /**
-       * 该数据类型对应的总上报量。
-       * 该数据类型对应的总上报量
-       * @example "3"
-       */
-      Count: number;
-      /**
-       * 对应的文件大小数据列表。
-       * 对应的文件大小数据列表。
-       */
-      Data: {
-        /**
-         * 数据对应的上报量。
-         * 数据对应的上报量
-         * @example "23"
-         */
-        Count: number;
-        /**
-         * 数据对应时间点。
-         * * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`。
-         * 数据对应时间点，按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。
-         * @example "2023-01-01T00:00:00+08:00"
-         */
-        Timestamp: string;
-        /**
-         * 文件大小，单位为 byte。
-         * 文件大小，单位byte
-         * @format float
-         * @example "3672400"
-         */
-        Value: number;
-      }[];
-      /**
-       * 数据类型。
-       * 当`GroupBy`为空或`Duration`时，取值avg/pct25/pct50/pct90/pct99/min/max，否则取值为指定拆分维度的各个值。
-       * 数据类型。
-       * 当GroupBy为空或Duration时，取值avg/pct25/pct50/pct90/pct99/min/max，否则取值为指定拆分维度的各个值。
-       * @example "avg"
-       */
-      Type: string;
-    }[];
-  };
-}
-
-export interface DescribeImageXExceedResolutionRatioAllBody {
-  /**
-   * 需要匹配的 App 版本，不传则匹配 App 的所有版本。
-   * 需要匹配的 App 版本，不传则匹配 App 的所有版本。
-   */
-  AppVer?: string[];
-  /**
-   * 应用 ID。默认为空，不传则匹配账号下的所有的 App ID。
-   * :::tip
-   * 您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/19511)的方式获取所需的 AppID。
-   * :::
-   * 应用 ID。默认为空，匹配账号下的所有的App ID。
-   * @example "123"
-   */
-  Appid?: string;
-  /**
-   * 获取数据结束时间点，需在起始时间点之后。
-   * * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
-   * 获取数据结束时间点，需在起始时间点之后。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00
-   * @example "2019-06-27T15:00:00+08:00"
-   */
-  EndTime: string;
-  /**
-   * 需要匹配的自定义维度项 。
-   * 需要匹配的自定义维度项
-   */
-  ExtraDims?: {
-    /**
-     * 自定义维度名称。
-     * :::tip
-     * 您可以通过调用[获取自定义维度列表](https://www.volcengine.com/docs/508/34554)来获取。
-     * :::
-     * 自定义维度名称。
-     * @example "access"
-     */
-    Dim: string;
-    /**
-     * 需要匹配的对应维度值
-     * :::tip
-     * 您可以通过调用[获取自定义维度值](https://www.volcengine.com/docs/508/34555)来获取。
-     * :::
-     * 需要匹配的对应维度值
-     */
-    Vals: string[];
-  }[];
-  /**
-   * 需要匹配的图片类型，不传则匹配所有图片类型。
-   * - `GIF`
-   * - `PNG`
-   * - `JPEG`
-   * - `HEIF`
-   * - `HEIC`
-   * - `WEBP`
-   * - `AWEBP`
-   * - `VVIC`
-   * - `其他`
-   * 需要匹配的图片类型，不传则匹配所有图片类型。
-   * GIF
-   * PNG
-   * JPEG
-   * HEIF
-   * HEIC
-   * WEBP
-   * AWEBP
-   * VVIC
-   * 其他
-   */
-  ImageType?: string[];
-  /**
-   * 需要匹配的系统类型，不传则匹配非 WEB 端的所有系统。取值如下所示：
-   * - `iOS`
-   * - `Android`
-   * - `WEB`
-   * 需要匹配的系统类型，不传则匹配非WEB端所有系统。取值如下所示：
-   * iOS
-   * Android
-   * WEB
-   * @example "WEB"
-   */
-  OS?: string;
-  /**
-   * 是否升序排序。不传则默认降序排序。
-   * @example "false"
-   */
-  OrderAsc?: string;
-  /**
-   * - 不传或者传空或者取值为`Count`时，表示按上报量排序。
-   * - 取值为`WidthRatio`时，表示按宽比排序。
-   * - 取值为`HeightRatio`时，表示按高比排序。
-   * @example "Count"
-   */
-  OrderBy?: string;
-  /**
-   * 需要匹配的 SDK 版本，不传则匹配所有版本.
-   * 需要匹配的SDK版本，不传则匹配所有版本
-   */
-  SdkVer?: string[];
-  /**
-   * 获取数据起始时间点。
-   * * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
-   * 获取数据起始时间点。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00
-   * @example "2019-06-27T13:00:00+08:00"
-   */
-  StartTime: string;
-}
-
-export interface DescribeImageXExceedResolutionRatioAllRes {
-  ResponseMetadata: {
-    /** 请求的接口名，属于请求的公共参数。 */
-    Action: string;
-    /** 请求的Region，例如：cn-north-1 */
-    Region: string;
-    /** RequestID为每次API请求的唯一标识。 */
-    RequestId: string;
-    /** 请求的服务，属于请求的公共参数。 */
-    Service: string;
-    /** 请求的版本号，属于请求的公共参数。 */
-    Version: string;
-  };
-  Result: {
-    /**
-     * 客户端文件大小分布数据。
-     * 文件大小分布数据
-     */
-    ResolutionRatioData: {
-      /**
-       * 大图样本量
-       * @format int64
-       * @example "100"
-       */
-      Count: number;
-      /**
-       * 高比，即为图片高/view高取整
-       * @format int32
-       * @example "4"
-       */
-      HeightRatio: number;
-      /**
-       * 格式为：宽比-高比
-       * @example "5-4"
-       */
-      Ratio: string;
-      /**
-       * 宽比，即为图片宽/view宽取整
-       * @format int32
-       * @example "5"
-       */
-      WidthRatio: number;
-    }[];
-  };
-}
-
-export interface DescribeImageXHitRateRequestDataQuery {
-  /**
-   * 限制查询的域名，传入多个时用英文逗号分割。缺省情况下表示不限制域名。
-   * 您可以通过调用 [GetServiceDomains](https://www.volcengine.com/docs/508/9379) 获取服务下所有域名信息。
-   * @example "d1,d2"
-   */
-  DomainNames?: string;
-  /**
-   * 获取数据结束时间点。日期格式按照 ISO8601 表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。例如`2019-06-02T00:00:00+08:00`。
-   * @example "2019-06-02T00:00:00+08:00"
-   */
-  EndTime: string;
-  /**
-   * 需要分组查询的参数。仅支持取值`DomainName`。
-   * @example "DomainName"
-   */
-  GroupBy?: string;
-  /**
-   * 查询数据的时间粒度，单位为秒。缺省时查询`StartTime`和`EndTime`时间段全部数据，此时单次查询最大时间跨度为 93 天。支持以下取值：
-   *
-   * - `60`：单次查询最大时间跨度为 6 小时
-   * - `120`：单次查询最大时间跨度为 6 小时
-   * - `300`：单次查询最大时间跨度为 31 天
-   * - `600`：单次查询最大时间跨度为 31 天
-   * - `1200`：单次查询最大时间跨度为 31 天
-   * - `1800`：单次查询最大时间跨度为 31 天
-   * - `3600`：单次查询最大时间跨度为 93 天
-   * - `86400`：单次查询最大时间跨度为 93 天
-   * - `604800`：单次查询最大时间跨度为 93 天
-   * @example "300"
-   */
-  Interval?: string;
-  /**
-   * 限制查询的服务 ID，传入多个时用英文逗号分割。缺省情况下表示不限制服务 ID。
-   *
-   * - 您可以在 veImageX 控制台[服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。
-   * - 您也可以通过 OpenAPI 的方式获取服务 ID，具体请参考 [GetAllImageServices](https://www.volcengine.com/docs/508/9360)。
-   * @example "s1,s2"
-   */
-  ServiceIds?: string;
-  /**
-   * 获取数据起始时间点。日期格式按照 ISO8601 表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。例如`2019-06-02T00:00:00+08:00`。
-   * :::tip
-   * 由于仅支持查询近 93 天的历史数据，则若此刻时间为`2011-11-21T16:14:00+08:00`，那么您可输入最早的开始时间为`2011-08-21T00:00:00+08:00`。
-   * :::
-   * @example "2019-06-02T00:00:00+08:00"
-   */
-  StartTime: string;
-}
-
-export interface DescribeImageXHitRateRequestDataRes {
-  ResponseMetadata: {
-    /** 请求的接口名，属于请求的公共参数。 */
-    Action: string;
-    /** 请求的Region，例如：cn-north-1 */
-    Region: string;
-    /** RequestID为每次API请求的唯一标识。 */
-    RequestId: string;
-    /** 请求的服务，属于请求的公共参数。 */
-    Service: string;
-    /** 请求的版本号，属于请求的公共参数。 */
-    Version: string;
-  };
-  Result: {
-    /** 命中率数据 */
-    HitRateData: {
-      /** 具体数据 */
-      Data: {
-        /**
-         * 统计时间点，时间片开始时刻，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。
-         * @example "2023-01-01T00:00:00+08:00"
-         */
-        TimeStamp: string;
-        /**
-         * 请求命中率
-         * @format float
-         * @example 0.2
-         */
-        Value: number;
-      }[];
-      /**
-       * 域名，当`GroupBy`指定了`DomainName`时有返回值。
-       * 当GroupBy=DomainName时出现
-       * @example "d1"
-       */
-      DomainName?: string;
-    }[];
-  };
-}
-
-export interface DescribeImageXHitRateTrafficDataQuery {
-  /**
-   * 限制查询的域名，传入多个时用英文逗号分割。缺省情况下表示不限制域名。
-   * 您可以通过调用 [GetServiceDomains](https://www.volcengine.com/docs/508/9379) 获取服务下所有域名信息。
-   * @example "d1,d2"
-   */
-  DomainNames?: string;
-  /**
-   * 获取数据结束时间点。日期格式按照 ISO8601 表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。例如`2019-06-02T00:00:00+08:00`。
-   * @example "2019-06-02T00:00:00+08:00"
-   */
-  EndTime: string;
-  /**
-   * 需要分组查询的参数。仅支持取值`DomainName`。
-   * @example "DomainName"
-   */
-  GroupBy?: string;
-  /**
-   * 查询数据的时间粒度，单位为秒。缺省时查询`StartTime`和`EndTime`时间段全部数据，此时单次查询最大时间跨度为 93 天。支持以下取值：
-   *
-   * - `60`：单次查询最大时间跨度为 6 小时
-   * - `120`：单次查询最大时间跨度为 6 小时
-   * - `300`：单次查询最大时间跨度为 31 天
-   * - `600`：单次查询最大时间跨度为 31 天
-   * - `1200`：单次查询最大时间跨度为 31 天
-   * - `1800`：单次查询最大时间跨度为 31 天
-   * - `3600`：单次查询最大时间跨度为 93 天
-   * - `86400`：单次查询最大时间跨度为 93 天
-   * - `604800`：单次查询最大时间跨度为 93 天
-   * @example "300"
-   */
-  Interval?: string;
-  /**
-   * 限制查询的服务 ID，传入多个时用英文逗号分割。缺省情况下表示不限制服务 ID。
-   *
-   * - 您可以在 veImageX 控制台[服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。
-   * - 您也可以通过 OpenAPI 的方式获取服务 ID，具体请参考 [GetAllImageServices](https://www.volcengine.com/docs/508/9360)。
-   * @example "s1,s2"
-   */
-  ServiceIds?: string;
-  /**
-   * 获取数据起始时间点。日期格式按照 ISO8601 表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。例如`2019-06-02T00:00:00+08:00`。
-   * :::tip
-   * 由于仅支持查询近 93 天的历史数据，则若此刻时间为`2011-11-21T16:14:00+08:00`，那么您可输入最早的开始时间为`2011-08-21T00:00:00+08:00`。
-   * :::
-   * @example "2019-06-02T00:00:00+08:00"
-   */
-  StartTime: string;
-}
-
-export interface DescribeImageXHitRateTrafficDataRes {
-  ResponseMetadata: {
-    /** 请求的接口名，属于请求的公共参数。 */
-    Action: string;
-    /** 请求的Region，例如：cn-north-1 */
-    Region: string;
-    /** RequestID为每次API请求的唯一标识。 */
-    RequestId: string;
-    /** 请求的服务，属于请求的公共参数。 */
-    Service: string;
-    /** 请求的版本号，属于请求的公共参数。 */
-    Version: string;
-  };
-  Result: {
-    /** 命中率数据 */
-    HitRateData: {
-      /** 具体数据 */
-      Data: {
-        /**
-         * 统计时间点，时间片开始时刻，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。
-         * @example "2023-01-01T00:00:00+08:00"
-         */
-        TimeStamp: string;
-        /**
-         * 流量命中率。
-         * @format float
-         * @example 0.2
-         */
-        Value: number;
-      }[];
-      /**
-       * 域名，当`GroupBy`指定了`DomainName`时有返回值。
-       * 当GroupBy=DomainName时出现
-       * @example "d1"
-       */
-      DomainName?: string;
-    }[];
-  };
-}
-
-export interface DescribeImageXMirrorRequestBandwidthBody {
-  /**
-   * 限制查询的域名，传入多个时用英文逗号分割。缺省情况下表示不限制域名。
-   * 您可以通过调用 [GetServiceDomains](https://www.volcengine.com/docs/508/9379) 获取服务下所有域名信息。
-   * 限制查询的域名，传入多个用英文逗号分割。不传为不限制。
-   */
-  DomainNames?: string[];
-  /**
-   * 获取数据结束时间点。日期格式按照 ISO8601 表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。例如`2019-06-02T00:00:00+08:00`。
-   * 获取数据结束时间点。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00
-   * @example "2019-06-02T00:00:00+08:00"
-   */
-  EndTime: string;
-  /**
-   * 查询数据的时间粒度。单位为秒，缺省时查询`StartTime`和`EndTime`时间段全部数据，此时单次查询最大时间跨度为 93 天。支持以下取值：
-   *
-   * - `60`：单次查询最大时间跨度为 6 小时
-   * - `120`：单次查询最大时间跨度为 6 小时
-   * - `300`：单次查询最大时间跨度为 31 天
-   * - `600`：单次查询最大时间跨度为 31 天
-   * - `1200`：单次查询最大时间跨度为 31 天
-   * - `1800`：单次查询最大时间跨度为 31 天
-   * - `3600`：单次查询最大时间跨度为 93 天
-   * - `86400`：单次查询最大时间跨度为 93 天
-   * - `604800`：单次查询最大时间跨度为 93 天
-   * 查询数据的时间粒度。单位为秒，缺省时查询`StartTime`和`EndTime`时间段全部数据，此时单次查询最大时间跨度为 93 天。支持以下取值：
-   *
-   * - `60`：单次查询最大时间跨度为 6 小时
-   * - `120`：单次查询最大时间跨度为 6 小时
-   * - `300`：单次查询最大时间跨度为 31 天
-   * - `600`：单次查询最大时间跨度为 31 天
-   * - `1200`：单次查询最大时间跨度为 31 天
-   * - `1800`：单次查询最大时间跨度为 31 天
-   * - `3600`：单次查询最大时间跨度为 93 天
-   * - `86400`：单次查询最大时间跨度为 93 天
-   * - `604800`：单次查询最大时间跨度为 93 天
-   * @example "60"
-   */
-  Interval?: string;
-  /**
-   * 限制查询的服务 ID，传入多个时用英文逗号分割。缺省情况下表示不限制服务 ID。
-   * - 您可以在 veImageX 控制台[服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。
-   * - 您也可以通过 OpenAPI 的方式获取服务 ID，具体请参考 [GetAllImageServices](https://www.volcengine.com/docs/508/9360)。
-   * 限制查询的服务id，传入多个用英文逗号分割。不传为不限制。
-   */
-  ServiceIds?: string[];
-  /**
-   * 获取数据起始时间点。日期格式按照 ISO8601 表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。例如`2019-06-02T00:00:00+08:00`。
-   * :::tip
-   * 由于仅支持查询近 93 天的历史数据，则若此刻时间为`2011-11-21T16:14:00+08:00`，那么您可输入最早的开始时间为`2011-08-21T00:00:00+08:00`。
-   * :::
-   * 获取数据起始时间点。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00
-   * @example "2019-06-02T00:00:00+08:00"
-   */
-  StartTime: string;
-}
-
-export interface DescribeImageXMirrorRequestBandwidthRes {
-  ResponseMetadata: {
-    /** 请求的接口名，属于请求的公共参数。 */
-    Action: string;
-    /** 请求的Region，例如：cn-north-1 */
-    Region: string;
-    /** RequestID为每次API请求的唯一标识。 */
-    RequestId: string;
-    /** 请求的服务，属于请求的公共参数。 */
-    Service: string;
-    /** 请求的版本号，属于请求的公共参数。 */
-    Version: string;
-  };
-  Result: {
-    /** 具体数据 */
-    Data: {
-      /**
-       * 统计时间点，时间片开始时刻，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。
-       * @example "2023-01-01T00:00:00+08:00"
-       */
-      TimeStamp: string;
-      /**
-       * 带宽，单位为 bps。
-       * 带宽，单位bps
-       * @example "12.3"
-       */
-      Value: number;
-    }[];
-  };
-}
-
-/** 描述 */
-export interface DescribeImageXMirrorRequestHttpCodeByTimeBody {
-  /**
-   * 状态码是否聚合。支持以下取值：
-   *
-   * - `true`：聚合
-   * - `false`：（默认）不聚合
-   * 状态码是否聚合。取值：true/false。默认为false
-   * @example "true"
-   */
-  AggregateCode?: string;
-  /**
-   * 限制查询的域名，传入多个时用英文逗号分割。缺省情况下表示不限制域名。
-   * 您可以通过调用 [GetServiceDomains](https://www.volcengine.com/docs/508/9379) 获取服务下所有域名信息。
-   * 限制查询的域名，传入多个用英文逗号分割。不传为不限制。
-   */
-  DomainNames?: string[];
-  /**
-   * 获取数据结束时间点。日期格式按照 ISO8601 表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。例如`2019-06-02T00:00:00+08:00`。
-   * 获取数据结束时间点。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。
-   * @example "2019-06-02T00:00:00+08:00"
-   */
-  EndTime: string;
-  /**
-   * 查询数据的时间粒度，单位为秒。缺省时查询`StartTime`和`EndTime`时间段全部数据，此时单次查询最大时间跨度为 93 天。支持以下取值：
-   * - `60`：单次查询最大时间跨度为 6 小时
-   * - `120`：单次查询最大时间跨度为 6 小时
-   * - `300`：单次查询最大时间跨度为 31 天
-   * - `600`：单次查询最大时间跨度为 31 天
-   * - `1200`：单次查询最大时间跨度为 31 天
-   * - `1800`：单次查询最大时间跨度为 31 天
-   * - `3600`：单次查询最大时间跨度为 93 天
-   * - `86400`：单次查询最大时间跨度为 93 天
-   * - `604800`：单次查询最大时间跨度为 93 天
-   * 查询数据的时间粒度。单位为秒，缺省时查询`StartTime`和`EndTime`时间段全部数据，此时单次查询最大时间跨度为 93 天。支持以下取值：
-   *
-   * - `60`：单次查询最大时间跨度为 6 小时
-   * - `120`：单次查询最大时间跨度为 6 小时
-   * - `300`：单次查询最大时间跨度为 31 天
-   * - `600`：单次查询最大时间跨度为 31 天
-   * - `1200`：单次查询最大时间跨度为 31 天
-   * - `1800`：单次查询最大时间跨度为 31 天
-   * - `3600`：单次查询最大时间跨度为 93 天
-   * - `86400`：单次查询最大时间跨度为 93 天
-   * - `604800`：单次查询最大时间跨度为 93 天
-   * @example "60"
-   */
-  Interval?: string;
-  /**
-   * 限制查询的服务 ID，传入多个时用英文逗号分割。缺省情况下表示不限制服务 ID。
-   *
-   * - 您可以在 veImageX 控制台[服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。
-   * - 您也可以通过 OpenAPI 的方式获取服务 ID，具体请参考 [GetAllImageServices](https://www.volcengine.com/docs/508/9360)。
-   * 限制查询的服务id，传入多个用英文逗号分割。不传为不限制。
-   */
-  ServiceIds?: string[];
-  /**
-   * 获取数据起始时间点。日期格式按照 ISO8601 表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。例如`2019-06-02T00:00:00+08:00`。
-   * :::tip
-   * 由于仅支持查询近 93 天的历史数据，则若此刻时间为`2011-11-21T16:14:00+08:00`，那么您可输入最早的开始时间为`2011-08-21T00:00:00+08:00`。
-   * :::
-   * 获取数据起始时间点。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。
-   * @example "2019-06-02T00:00:00+08:00"
-   */
-  StartTime: string;
-}
-
-export interface DescribeImageXMirrorRequestHttpCodeByTimeRes {
-  ResponseMetadata: {
-    /** 请求的接口名，属于请求的公共参数。 */
-    Action: string;
-    /** 请求的Region，例如：cn-north-1 */
-    Region: string;
-    /** RequestID为每次API请求的唯一标识。 */
-    RequestId: string;
-    /** 请求的服务，属于请求的公共参数。 */
-    Service: string;
-    /** 请求的版本号，属于请求的公共参数。 */
-    Version: string;
-  };
-  Result: {
-    /** 数据列表 */
-    Data: {
-      /** 具体数据 */
-      Data: {
-        /**
-         * 统计时间点，时间片开始时刻，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。
-         * @example "2023-01-01T00:00:00+08:00"
-         */
-        TimeStamp: string;
-        /**
-         * 请求次数，单位为次。
-         * 请求次数
-         * @example "123"
-         */
-        Value: number;
-      }[];
-      /**
-       * 状态码
-       * @example "2xx"
-       */
-      HttpCode: string;
-    }[];
-  };
-}
-
-/** 描述 */
-export interface DescribeImageXMirrorRequestHttpCodeOverviewBody {
-  /**
-   * 状态码是否聚合。支持取值如下：
-   *
-   * - `true`：聚合
-   * - `false`：（默认）不聚合
-   * 状态码是否聚合。取值：true/false。默认为false
-   * @example "true"
-   */
-  AggregateCode?: string;
-  /**
-   * 域名。为空时表示不筛选，支持查询多个域名，不同的域名使用逗号分隔。
-   * 您可以通过调用 [GetServiceDomains](https://www.volcengine.com/docs/508/9379) 获取服务下所有域名信息。
-   * 限制查询的域名，传入多个用英文逗号分割。不传为不限制。
-   */
-  DomainNames?: string[];
-  /**
-   * 获取数据结束时间点。日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
-   * 获取数据结束时间点。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。
-   * @example "2019-06-02T00:00:00+08:00"
-   */
-  EndTime: string;
-  /**
-   * 服务 ID。为空时表示不筛选，支持查询多个服务，使用逗号分隔不同的服务。
-   *
-   * - 您可以在 veImageX 控制台[服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。
-   * - 您也可以通过 OpenAPI 的方式获取服务 ID，具体请参考 [GetAllImageServices](https://www.volcengine.com/docs/508/9360)。
-   * 限制查询的服务id，传入多个用英文逗号分割。不传为不限制。
-   */
-  ServiceIds?: string[];
-  /**
-   * 获取数据起始时间点。日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
-   * :::tip
-   * 由于仅支持查询近 93 天的历史数据，则若此刻时间为`2011-11-21T16:14:00+08:00`，那么您可输入最早的开始时间为`2011-08-21T00:00:00+08:00`。
-   * :::
-   * 获取数据起始时间点。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。
-   * @example "2019-06-02T00:00:00+08:00"
-   */
-  StartTime: string;
-}
-
-export interface DescribeImageXMirrorRequestHttpCodeOverviewRes {
-  ResponseMetadata: {
-    /** 请求的接口名，属于请求的公共参数。 */
-    Action: string;
-    /** 请求的Region，例如：cn-north-1 */
-    Region: string;
-    /** RequestID为每次API请求的唯一标识。 */
-    RequestId: string;
-    /** 请求的服务，属于请求的公共参数。 */
-    Service: string;
-    /** 请求的版本号，属于请求的公共参数。 */
-    Version: string;
-  };
-  Result: {
-    /** 具体数据 */
-    Data: {
-      /**
-       * 总请求次数，单位为次。
-       * 总请求次数
-       * @example "123"
-       */
-      Count: number;
-      /** 详细数据 */
-      Details: {
-        /**
-         * Http 状态码
-         * @example "2xx"
-         */
-        HttpCode: string;
-        /**
-         * Http 状态码对应的请求次数，单位为次。
-         * http状态码对应的请求次数
-         * @example "123"
-         */
-        Value: number;
-      }[];
-      /**
-       * 域名
-       * 域名
-       * @example "d1"
-       */
-      Domain: string;
-    }[];
-  };
-}
-
-/** 描述 */
-export interface DescribeImageXMirrorRequestTrafficBody {
-  /**
-   * 限制查询的域名，传入多个时用英文逗号分割。缺省情况下表示不限制域名。
-   * 您可以通过调用 [GetServiceDomains](https://www.volcengine.com/docs/508/9379) 获取服务下所有域名信息。
-   * 限制查询的域名，传入多个用英文逗号分割。不传为不限制。
-   */
-  DomainNames?: string[];
-  /**
-   * 获取数据结束时间点。日期格式按照 ISO8601 表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。例如`2019-06-02T00:00:00+08:00`。
-   * 获取数据结束时间点。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。
-   * @example "2019-06-02T00:00:00+08:00"
-   */
-  EndTime: string;
-  /**
-   * 查询数据的时间粒度。单位为秒，缺省时查询`StartTime`和`EndTime`时间段全部数据，此时单次查询最大时间跨度为 93 天。支持以下取值：
-   *
-   * - `60`：单次查询最大时间跨度为 6 小时
-   * - `120`：单次查询最大时间跨度为 6 小时
-   * - `300`：单次查询最大时间跨度为 31 天
-   * - `600`：单次查询最大时间跨度为 31 天
-   * - `1200`：单次查询最大时间跨度为 31 天
-   * - `1800`：单次查询最大时间跨度为 31 天
-   * - `3600`：单次查询最大时间跨度为 93 天
-   * - `86400`：单次查询最大时间跨度为 93 天
-   * - `604800`：单次查询最大时间跨度为 93 天
-   * 查询数据的时间粒度。单位为秒，缺省时查询`StartTime`和`EndTime`时间段全部数据，此时单次查询最大时间跨度为 93 天。支持以下取值：
-   *
-   * - `60`：单次查询最大时间跨度为 6 小时
-   * - `120`：单次查询最大时间跨度为 6 小时
-   * - `300`：单次查询最大时间跨度为 31 天
-   * - `600`：单次查询最大时间跨度为 31 天
-   * - `1200`：单次查询最大时间跨度为 31 天
-   * - `1800`：单次查询最大时间跨度为 31 天
-   * - `3600`：单次查询最大时间跨度为 93 天
-   * - `86400`：单次查询最大时间跨度为 93 天
-   * - `604800`：单次查询最大时间跨度为 93 天
-   * @example "60"
-   */
-  Interval?: string;
-  /**
-   * 限制查询的服务 ID，传入多个时用英文逗号分割。缺省情况下表示不限制服务 ID。
-   *
-   * - 您可以在 veImageX 控制台[服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。
-   * - 您也可以通过 OpenAPI 的方式获取服务 ID，具体请参考 [GetAllImageServices](https://www.volcengine.com/docs/508/9360)。
-   * 限制查询的服务id，传入多个用英文逗号分割。不传为不限制。
-   */
-  ServiceIds?: string[];
-  /**
-   * 获取数据起始时间点。日期格式按照 ISO8601 表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。例如`2019-06-02T00:00:00+08:00`。
-   * :::tip
-   * 由于仅支持查询近 93 天的历史数据，则若此刻时间为`2011-11-21T16:14:00+08:00`，那么您可输入最早的开始时间为`2011-08-21T00:00:00+08:00`。
-   * :::
-   * 获取数据起始时间点。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。
-   * @example "2019-06-02T00:00:00+08:00"
-   */
-  StartTime: string;
-}
-
-export interface DescribeImageXMirrorRequestTrafficRes {
-  ResponseMetadata: {
-    /** 请求的接口名，属于请求的公共参数。 */
-    Action: string;
-    /** 请求的Region，例如：cn-north-1 */
-    Region: string;
-    /** RequestID为每次API请求的唯一标识。 */
-    RequestId: string;
-    /** 请求的服务，属于请求的公共参数。 */
-    Service: string;
-    /** 请求的版本号，属于请求的公共参数。 */
-    Version: string;
-  };
-  Result: {
-    /** 数据列表 */
-    Data: {
-      /**
-       * 统计时间点，时间片开始时刻，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。
-       * @example "2023-01-01T00:00:00+08:00"
-       */
-      TimeStamp: string;
-      /**
-       * 流量，单位为 byte。例如`11836259138`。
-       * 流量，单位byte
-       * @example "123"
-       */
-      Value: number;
-    }[];
-  };
-}
-
-export interface DescribeImageXMultiCompressUsageQuery {
-  /**
-   * 获取数据结束时间点。日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
-   * @example "2019-06-02T00:00:00+08:00"
-   */
-  EndTime: string;
-  /**
-   * 查询数据的时间粒度。单位为秒，缺省时查询`StartTime`和`EndTime`时间段全部数据，此时单次查询最大时间跨度为 93 天。支持以下取值：
-   * - `300`：单次查询最大时间跨度为 31 天
-   * - `600`：单次查询最大时间跨度为 31 天
-   * - `1200`：单次查询最大时间跨度为 31 天
-   * - `1800`：单次查询最大时间跨度为 31 天
-   * - `3600`：单次查询最大时间跨度为 93 天
-   * - `86400`：单次查询最大时间跨度为 93 天
-   * - `604800`：单次查询最大时间跨度为 93 天
-   * @example "300"
-   */
-  Interval?: string;
-  /**
-   * 服务 ID。为空时表示不筛选，支持查询多个服务，不同的服务使用逗号分隔。
-   * * 您可以在veImageX 控制台 [服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。
-   * * 您也可以通过 OpenAPI 的方式获取服务 ID，具体请参考[获取所有服务信息](https://www.volcengine.com/docs/508/9360)。
-   * @example "s1,s2"
-   */
-  ServiceIds?: string;
-  /**
-   * 获取数据起始时间点。日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
-   * :::tip
-   * 由于仅支持查询近 93 天的历史数据，则若此刻时间为`2011-11-21T16:14:00+08:00`，那么您可输入最早的开始时间为`2011-08-21T00:00:00+08:00`。
-   * :::
-   * @example "2019-06-02T00:00:00+08:00"
-   */
-  StartTime: string;
-}
-
-export interface DescribeImageXMultiCompressUsageRes {
-  ResponseMetadata: {
-    /** 请求的接口名，属于请求的公共参数。 */
-    Action: string;
-    /** 请求的Region，例如：cn-north-1 */
-    Region: string;
-    /** RequestID为每次API请求的唯一标识。 */
-    RequestId: string;
-    /** 请求的服务，属于请求的公共参数。 */
-    Service: string;
-    /** 请求的版本号，属于请求的公共参数。 */
-    Version: string;
-  };
-  Result: {
-    /** 多文件压缩用量数据。 */
-    CompressData: {
-      Data: {
-        /**
-         * 统计时间点，时间片开始时刻。按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`。
-         * 统计时间点，时间片结束时刻。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00。
-         * @example "2023-01-01T00:00:00+08:00"
-         */
-        TimeStamp: string;
-        /**
-         * 压缩量，单位Byte。
-         * 压缩量，单位Byte。
-         * @example "1234"
-         */
-        Value: number;
-      }[];
-    }[];
-  };
-}
-
-export interface DescribeImageXRequestCntUsageQuery {
-  /**
-   * 组件名称。为空时表示不筛选，支持查询多个`AdvFeat`，不同的`AdvFeat`使用英文逗号分隔。
-   * 您可通过调用 [GetImageAddOnConf](https://www.volcengine.com/docs/508/66145) 查看`Key`返回值。
-   * @example "a1,a2"
-   */
-  AdvFeats?: string;
-  /**
-   * 获取数据结束时间点。日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
-   * @example "2019-06-02T00:00:00+08:00"
-   */
-  EndTime: string;
-  /**
-   * 维度拆分的维度值。不传表示不拆分维度，只能传入单个参数。支持取值如下：
-   * - `ServiceId`
-   * - `AdvFeat`
-   * @example "AdvFeat"
-   */
-  GroupBy?: string;
-  /**
-   * 查询数据的时间粒度。单位为秒。缺省时查询 StartTime 和 EndTime 时间段全部数据，此时单次查询最大时间跨度为 93 天。支持取值如下：
-   *
-   * - `300`：单次查询最大时间跨度为 31 天
-   * - `600`：单次查询最大时间跨度为 31 天
-   * - `1200`：单次查询最大时间跨度为 31 天
-   * - `1800`：单次查询最大时间跨度为 31 天
-   * - `3600`：单次查询最大时间跨度为 93 天
-   * - `86400`：单次查询最大时间跨度为 93 天
-   * - `604800`：单次查询最大时间跨度为 93 天
-   * @example "300"
-   */
-  Interval?: string;
-  /**
-   * 服务 ID。为空时表示不筛选，支持查询多个服务，使用英文逗号分隔不同的服务。
-   *
-   * - 您可以在 veImageX 控制台[服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。
-   * - 您也可以通过 OpenAPI 的方式获取服务 ID，具体请参考 [GetAllImageServices](https://www.volcengine.com/docs/508/9360)。
-   * @example "s1,s2"
-   */
-  ServiceIds?: string;
-  /**
-   * 获取数据起始时间点。日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
-   * :::tip
-   * 由于仅支持查询近一年历史数据，则若此刻时间为`2011-11-21T16:14:00+08:00`，那么您可输入最早的开始时间为`2010-11-21T00:00:00+08:00`。
-   * :::
-   * @example "2019-06-02T00:00:00+08:00"
-   */
-  StartTime: string;
-  /**
-   * 模版。为空时表示不筛选，支持查询多个模板，不同的模板使用英文逗号分隔。
-   * 您可通过调用 [GetAllImageTemplates](https://www.volcengine.com/docs/508/9386) 获取服务下全部模版信息。
-   * @example "t1,t2"
-   */
-  Templates?: string;
-}
-
-export interface DescribeImageXRequestCntUsageRes {
-  ResponseMetadata: {
-    /** 请求的接口名，属于请求的公共参数。 */
-    Action: string;
-    /** 请求的Region，例如：cn-north-1 */
-    Region: string;
-    /** RequestID为每次API请求的唯一标识。 */
-    RequestId: string;
-    /** 请求的服务，属于请求的公共参数。 */
-    Service: string;
-    /** 请求的版本号，属于请求的公共参数。 */
-    Version: string;
-  };
-  Result: {
-    /** 请求次数据。 */
-    RequestCntData: {
-      /**
-       * 附加组件类型，`GroupBy`包含`AdvFeat`时有返回值。如：enhance，smartcut。取值为`total`，表示包含所选`AdvFeat`实际请求次数。
-       * 附加组件类型，`GroupBy`包含`AdvFeat`时有返回值。如：enhance，smartcut。取值为`total`，表示包含所选`AdvFeat`实际请求次数。
-       * @example "total"
-       */
-      AdvFeat?: string;
-      /** 具体数据 */
-      Data: {
-        /**
-         * 统计时间点，时间片开始时刻。按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`。
-         * 统计时间点，时间片结束时刻。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00。
-         * @example "2023-01-01T00:00:00+08:00"
-         */
-        TimeStamp: string;
-        /**
-         * 请求次
-         * 请求次
-         * @example "123"
-         */
-        Value: number;
-      }[];
-      /**
-       * 服务 ID，`GroupBy`包含`ServiceId`时有返回值。
-       * 服务 ID，`GroupBy`包含`ServiceId`时有返回值。
-       * @example "s1"
-       */
-      ServiceId?: string;
-    }[];
-  };
-}
-
-export interface DescribeImageXScreenshotUsageQuery {
-  /**
-   * 获取数据结束时间点。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00。
-   * @example "2019-06-02T00:00:00+08:00"
-   */
-  EndTime: string;
-  /**
-   * 查询数据的时间粒度。单位：秒。支持300,600,1200,1800,3600,86400,604800。缺省时查询StartTime和EndTime时间段全部数据。
-   * @example "300"
-   */
-  Interval?: string;
-  /**
-   * 为空时表示不筛选，支持查询多个 Service，不同的 Service 使用逗号（,）分隔。
-   * @example "s1,s2"
-   */
-  ServiceIds?: string;
-  /**
-   * 获取数据起始时间点。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00。
-   * @example "2019-06-02T00:00:00+08:00"
-   */
-  StartTime: string;
-}
-
-export interface DescribeImageXScreenshotUsageRes {
-  ResponseMetadata: {
-    /** 请求的接口名，属于请求的公共参数。 */
-    Action: string;
-    /** 请求的Region，例如：cn-north-1 */
-    Region: string;
-    /** RequestID为每次API请求的唯一标识。 */
-    RequestId: string;
-    /** 请求的服务，属于请求的公共参数。 */
-    Service: string;
-    /** 请求的版本号，属于请求的公共参数。 */
-    Version: string;
-  };
-  Result: {
-    ScreenshotData: {
-      Data: {
-        /**
-         * 统计时间点。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00。
-         * @example "2023-01-01T00:00:00+08:00"
-         */
-        TimeStamp: string;
-        /**
-         * 截帧使用次数
-         * @example "123"
-         */
-        Value: number;
-      }[];
-    }[];
-  };
-}
-
-export interface DescribeImageXSensibleCacheHitRateByTimeBody {
-  /**
-   * 需要匹配 App 版本，缺省情况下则匹配 App 的所有版本。
-   * 需要匹配 App 版本，缺省情况下则匹配 App 的所有版本。
-   */
-  AppVer?: string[];
-  /**
-   * 应用 ID，缺省情况下匹配账号下所有 AppID。
-   * :::tip
-   * 您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/19511)的方式获取所需的 AppID。
-   * :::
-   * 应用 ID。默认为空，匹配账号下的所有的App ID。
-   * @example "123"
-   */
-  Appid?: string;
-  /**
-   * 获取数据结束时间点，需在起始时间点之后。日期格式按照 ISO8601 表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，例如`2019-06-02T00:00:00+08:00`。
-   * 起始时间与结束时间间隔小于等于 90 天。
-   * 获取数据结束时间点，需在起始时间点之后。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00
-   * @example "2019-06-03T00:00:00+08:00"
-   */
-  EndTime: string;
-  /**
-   * 需要匹配的自定义维度项。
-   * 需要匹配的自定义维度项
-   */
-  ExtraDims?: {
-    /**
-     * 自定义维度名称。
-     * :::tip
-     * 您可以通过调用[获取自定义维度列表](https://www.volcengine.com/docs/508/34554)来获取。
-     * :::
-     * 自定义维度名称。
-     * @example "country"
-     */
-    Dim: string;
-    /**
-     * 需要匹配的对应维度值。
-     * :::tip
-     * 您可以通过调用[获取自定义维度值](https://www.volcengine.com/docs/508/34555)来获取。
-     * :::
-     * 需要匹配的对应维度值
-     */
-    Vals: string[];
-  }[];
-  /**
-   * 返回数据的时间粒度，支持以下取值：
-   * - `5m`：5分钟；
-   * - `1h`：1小时；
-   * - `1d`：1天。
-   * 返回数据的时间粒度。
-   * 5m：为 5 分钟；
-   * 1h：为 1 小时；
-   * 1d：为 1 天。
-   * @example "5m"
-   */
-  Granularity: string;
-  /**
-   * 拆分维度。默认为空，不拆分。支持取值：
-   * - 公共维度：`Appid`、`OS`、`AppVer`、`SdkVer`、`ImageType`
-   * - 自定义维度：您可以通过调用 [GetImageXQueryDims](https://www.volcengine.com/docs/508/34554)接口获取自定义维度指标
-   * 拆分维度。默认为空，表示不拆分。支持取值：公共维度（Appid,OS,AppVer,SdkVer,ImageType），自定义维度（通过"获取自定义维度列表"接口获取）
-   * @example "OS"
-   */
-  GroupBy?: string;
-  /**
-   * 需要匹配的图片类型，缺省情况下则匹配所有图片类型。支持以下取值：
-   * - `GIF`
-   * - `PNG`
-   * - `JPEG`
-   * - `HEIF`
-   * - `HEIC`
-   * - `WEBP`
-   * - `AWEBP`
-   * - `VVIC`
-   * - `其他`
-   * 需要匹配的图片类型，不传则匹配所有图片类型。
-   * GIF
-   * PNG
-   * JPEG
-   * HEIF
-   * HEIC
-   * WEBP
-   * AWEBP
-   * VVIC
-   * 其他
-   */
-  ImageType?: string[];
-  /**
-   * 需要匹配的系统类型，不传则匹配非 WEB 端的所有系统。取值如下所示：
-   * - `iOS`
-   * - `Android`
-   * - `WEB`
-   * 需要匹配的系统类型，不传则匹配非WEB端所有系统。取值如下所示：
-   * iOS
-   * Android
-   * WEB
-   * @example "Android"
-   */
-  OS?: string;
-  /**
-   * 需要匹配的 SDK 版本，缺省情况下则匹配所有版本。
-   * 需要匹配的SDK版本，不传则匹配所有版本
-   */
-  SdkVer?: string[];
-  /**
-   * 获取数据起始时间点。日期格式按照 ISO8601 表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，例如`2019-06-02T00:00:00+08:00`。
-   * 起始时间与结束时间间隔小于等于 90 天。
-   * 获取数据起始时间点。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00
-   * @example "2019-06-02T00:00:00+08:00"
-   */
-  StartTime: string;
-  /**
-   * 缓存类型。支持以下取值：
-   * - `1`：查询内存命中率数据；
-   * - `2`：查询磁盘命中率数据。
-   * 缓存类型。支持以下取值：
-   * 1：查询内存命中率数据；
-   * 2：查询磁盘命中率数据。
-   * @example "1"
-   */
-  Type: string;
-}
-
-export interface DescribeImageXSensibleCacheHitRateByTimeRes {
-  ResponseMetadata: {
-    /** 请求的接口名，属于请求的公共参数。 */
-    Action: string;
-    /** 请求的Region，例如：cn-north-1 */
-    Region: string;
-    /** RequestID为每次API请求的唯一标识。 */
-    RequestId: string;
-    /** 请求的服务，属于请求的公共参数。 */
-    Service: string;
-    /** 请求的版本号，属于请求的公共参数。 */
-    Version: string;
-  };
-  Result: {
-    /**
-     * 命中率数据
-     * 命中率数据
-     */
-    CacheHitData: {
-      /**
-       * 该数据类型对应的总上报量。
-       * 该数据类型对应的总上报量
-       * @example "3"
-       */
-      Count: number;
-      /**
-       * 具体数据
-       * 具体数据
-       */
-      Data: {
-        /**
-         * 数据对应的上报量。
-         * 数据对应的上报量
-         * @example "3"
-         */
-        Count: number;
-        /**
-         * 数据对应时间点，按照 ISO8601 表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。
-         * 数据对应时间点，按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。
-         * @example "2023-01-01T00:00:00+08:00"
-         */
-        Timestamp: string;
-        /**
-         * 内存/磁盘命中率。
-         * 内存/磁盘命中率
-         * @format float
-         * @example "0.11297"
-         */
-        Value: number;
-      }[];
-      /**
-       * 数据类型，不拆分时值为`Total`，拆分时为具体的维度值。
-       * 数据类型，不拆分时值为Total，拆分时为具体的维度值
-       * @example "Total"
-       */
-      Type: string;
-    }[];
-  };
-}
-
-export interface DescribeImageXSensibleCountByTimeBody {
-  /**
-   * 需要匹配 App 版本，缺省情况下则匹配 App 的所有版本。
-   * 需要匹配 App 版本，缺省情况下则匹配 App 的所有版本。
-   */
-  AppVer?: string[];
-  /**
-   * 应用 ID，缺省情况下匹配账号下所有 AppID。
-   * :::tip
-   * 您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/19511)的方式获取所需的 AppID。
-   * :::
-   * 应用 ID。默认为空，匹配账号下的所有的App ID。
-   * @example "123"
-   */
-  Appid?: string;
-  /**
-   * 获取数据结束时间点，需在起始时间点之后。日期格式按照 ISO8601 表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，例如`2019-06-02T00:00:00+08:00`。
-   * 起始时间与结束时间间隔小于等于 90 天。
-   * 获取数据结束时间点，需在起始时间点之后。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00
-   * @example "2019-06-03T00:00:00+08:00"
-   */
-  EndTime: string;
-  /**
-   * 需要匹配的自定义维度项。
-   * 需要匹配的自定义维度项
-   */
-  ExtraDims?: {
-    /**
-     * 自定义维度名称。
-     * :::tip
-     * 您可以通过调用[获取自定义维度列表](https://www.volcengine.com/docs/508/34554)来获取。
-     * :::
-     * 自定义维度名称。
-     * @example "country"
-     */
-    Dim: string;
-    /**
-     * 需要匹配的对应维度值。
-     * :::tip
-     * 您可以通过调用[获取自定义维度值](https://www.volcengine.com/docs/508/34555)来获取。
-     * :::
-     * 需要匹配的对应维度值
-     */
-    Vals: string[];
-  }[];
-  /**
-   * 返回数据的时间粒度，支持以下取值：
-   * - `5m`：5分钟；
-   * - `1h`：1小时；
-   * - `1d`：1天。
-   * 返回数据的时间粒度。
-   * 5m：为 5 分钟；
-   * 1h：为 1 小时；
-   * 1d：为 1 天。
-   * @example "5m"
-   */
-  Granularity: string;
-  /**
-   * 拆分维度。默认为空，不拆分。支持取值：
-   * - 公共维度：`Appid`、`OS`、`AppVer`、`SdkVer`、`ImageType`
-   * - 自定义维度：您可以通过调用 [GetImageXQueryDims](https://www.volcengine.com/docs/508/34554)接口获取自定义维度指标
-   * 拆分维度。默认为空，表示不拆分。支持取值：公共维度（Appid,OS,AppVer,SdkVer,ImageType），自定义维度（通过"获取自定义维度列表"接口获取）
-   * @example "OS"
-   */
-  GroupBy?: string;
-  /**
-   * 需要匹配的图片类型，缺省情况下则匹配所有图片类型。支持以下取值：
-   * - `GIF`
-   * - `PNG`
-   * - `JPEG`
-   * - `HEIF`
-   * - `HEIC`
-   * - `WEBP`
-   * - `AWEBP`
-   * - `VVIC`
-   * - `其他`
-   * 需要匹配的图片类型，不传则匹配所有图片类型。
-   * GIF
-   * PNG
-   * JPEG
-   * HEIF
-   * HEIC
-   * WEBP
-   * AWEBP
-   * VVIC
-   * 其他
-   */
-  ImageType?: string[];
-  /**
-   * 需要匹配的系统类型，不传则匹配非 WEB 端的所有系统。取值如下所示：
-   * - `iOS`
-   * - `Android`
-   * - `WEB`
-   * 需要匹配的系统类型，不传则匹配非WEB端所有系统。取值如下所示：
-   * iOS
-   * Android
-   * WEB
-   * @example "Android"
-   */
-  OS?: string;
-  /**
-   * 需要匹配的 SDK 版本，缺省情况下则匹配所有版本。
-   * 需要匹配的SDK版本，不传则匹配所有版本
-   */
-  SdkVer?: string[];
-  /**
-   * 获取数据起始时间点。日期格式按照 ISO8601 表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，例如`2019-06-02T00:00:00+08:00`。
-   * 起始时间与结束时间间隔小于等于 90 天。
-   * 获取数据起始时间点。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00
-   * @example "2019-06-02T00:00:00+08:00"
-   */
-  StartTime: string;
-}
-
-export interface DescribeImageXSensibleCountByTimeRes {
-  ResponseMetadata: {
-    /** 请求的接口名，属于请求的公共参数。 */
-    Action: string;
-    /** 请求的Region，例如：cn-north-1 */
-    Region: string;
-    /** RequestID为每次API请求的唯一标识。 */
-    RequestId: string;
-    /** 请求的服务，属于请求的公共参数。 */
-    Service: string;
-    /** 请求的版本号，属于请求的公共参数。 */
-    Version: string;
-  };
-  Result: {
-    /**
-     * 采集样本量数据
-     * 采集样本量数据
-     */
-    SensibleCountData: {
-      /**
-       * 该数据类型对应的总上报量。
-       * 该数据类型对应的总上报量
-       * @example "2"
-       */
-      Count: number;
-      /**
-       * 具体数据
-       * 具体数据
-       */
-      Data: {
-        /**
-         * 上报量数据。
-         * 上报量数据
-         * @example "2"
-         */
-        Count: number;
-        /**
-         * 数据对应时间点，按照 ISO8601 表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。
-         * 数据对应时间点，按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。
-         * @example "2023-01-01T00:00:00+08:00"
-         */
-        Timestamp: string;
-        /**
-         * 上报量数据，与`Count`数值相同。
-         * 上报量数据，与Count数值相同。
-         * @example "2"
-         */
-        Value: number;
-      }[];
-      /**
-       * 数据类型，不拆分时值为`Total`，拆分时为具体的维度值。
-       * 数据类型，不拆分时值为Total，拆分时为具体的维度值
-       * @example "Total"
-       */
-      Type: string;
-    }[];
-  };
-}
-
-export interface DescribeImageXSensibleTopRamURLBody {
-  /**
-   * 需要匹配 App 版本，缺省情况下则匹配 App 的所有版本。
-   * 需要匹配 App 版本，缺省情况下则匹配 App 的所有版本。
-   */
-  AppVer?: string[];
-  /**
-   * 应用 ID。默认为空，不传则匹配账号下的所有的 App ID。您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/19511)的方式获取所需的 AppID。
-   * 应用 ID。默认为空，匹配账号下的所有的App ID。
-   * @example "123"
-   */
-  Appid?: string;
-  /**
-   * 获取数据结束时间点，需在起始时间点之后。日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
-   * 获取数据结束时间点，需在起始时间点之后。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00
-   * @example "2019-06-03T00:00:00+08:00"
-   */
-  EndTime: string;
-  /**
-   * 需要匹配的自定义维度项
-   * 需要匹配的自定义维度项
-   */
-  ExtraDims?: {
-    /**
-     * 自定义维度名称。
-     * :::tip
-     * 您可以通过调用[获取自定义维度列表](https://www.volcengine.com/docs/508/34554)来获取。
-     * :::
-     * 自定义维度名称。
-     * @example "biz_tag"
-     */
-    Dim: string;
-    /**
-     * 需要匹配的对应维度值。
-     * :::tip
-     * 您可以通过调用[获取自定义维度值](https://www.volcengine.com/docs/508/34555)来获取。
-     * :::
-     * 需要匹配的对应维度值
-     */
-    Vals: string[];
-  }[];
-  /**
-   * 需要匹配的图片类型，缺省情况下则匹配所有图片类型。支持以下取值：
-   *
-   * - `GIF`
-   * - `PNG`
-   * - `JPEG`
-   * - `HEIF`
-   * - `HEIC`
-   * - `WEBP`
-   * - `AWEBP`
-   * - `VVIC`
-   * - `其他`
-   * 需要匹配的图片类型，不传则匹配所有图片类型。
-   * GIF
-   * PNG
-   * JPEG
-   * HEIF
-   * HEIC
-   * WEBP
-   * AWEBP
-   * VVIC
-   * 其他
-   * @example "PNG"
-   */
-  ImageType?: string[];
-  /**
-   * 需要匹配的系统类型，不传则匹配非 WEB 端的所有系统。取值如下所示：
-   *
-   * - `iOS`
-   * - `Android`
-   * - `WEB`
-   * 需要匹配的系统类型，不传则匹配非WEB端所有系统。取值如下所示：
-   * iOS
-   * Android
-   * WEB
-   * @example "Android"
-   */
-  OS?: string;
-  /**
-   * 支持以下取值：
-   * - `1`：按上报次数降序排序；
-   * - `2`：按内存大小降序排序。
-   * 支持以下取值：
-   * 1：按上报次数排序；
-   * 2：按内存大小排序。
-   * @example "1"
-   */
-  OrderByIdx: number;
-  /**
-   * 需要匹配的 SDK 版本，不传则匹配所有版本。
-   * 需要匹配的SDK版本，不传则匹配所有版本
-   */
-  SdkVer?: string[];
-  /**
-   * 获取数据起始时间点。日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
-   * 获取数据起始时间点。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00
-   * @example "2019-06-02T00:00:00+08:00"
-   */
-  StartTime: string;
-  /**
-   * 查询 Top URL 条数，取值范围为(0,1000]。缺省情况下默认为 1000。
-   * 查询 Top URL 条数，取值范围为(0,1000]。缺省情况下默认为 1000。
-   * @example "1000"
-   */
-  Top?: number;
-}
-
-export interface DescribeImageXSensibleTopRamURLRes {
-  ResponseMetadata: {
-    /** 请求的接口名，属于请求的公共参数。 */
-    Action: string;
-    /** 请求的Region，例如：cn-north-1 */
-    Region: string;
-    /** RequestID为每次API请求的唯一标识。 */
-    RequestId: string;
-    /** 请求的服务，属于请求的公共参数。 */
-    Service: string;
-    /** 请求的版本号，属于请求的公共参数。 */
-    Version: string;
-  };
-  Result: {
-    /**
-     * Top URL 数据
-     * Top URL 数据
-     */
-    TopUrlData: {
-      /**
-       * Activity+View 树，控件信息。
-       * Activity+View 树，控件信息。
-       * @example "Controller/View"
-       */
-      ActivityViewTree: string;
-      /**
-       * 业务标识
-       * 业务标识
-       * @example "xxxx"
-       */
-      BizTag: string;
-      /**
-       * 上报次数
-       * 上报次数
-       * @example "128"
-       */
-      Count: number;
-      /**
-       * 图片内存大小
-       * 图片内存大小
-       * @example "9860"
-       */
-      RamSize: number;
-      /**
-       * 图片 URL
-       * 图片URL
-       * @example "http://xxx.image"
-       */
-      URL: string;
-    }[];
-  };
-}
-
-export interface DescribeImageXSensibleTopResolutionURLBody {
-  /**
-   * 需要匹配 App 版本，缺省情况下则匹配 App 的所有版本。
-   * 需要匹配 App 版本，缺省情况下则匹配 App 的所有版本。
-   */
-  AppVer?: string[];
-  /**
-   * 应用 ID。默认为空，不传则匹配账号下的所有的 App ID。您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/19511)的方式获取所需的 AppID。
-   * 应用 ID。默认为空，匹配账号下的所有的App ID。
-   * @example "123"
-   */
-  Appid?: string;
-  /**
-   * 获取数据结束时间点，需在起始时间点之后。日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
-   * 获取数据结束时间点，需在起始时间点之后。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00
-   * @example "2019-06-03T00:00:00+08:00"
-   */
-  EndTime: string;
-  /**
-   * 需要匹配的自定义维度项
-   * 需要匹配的自定义维度项
-   */
-  ExtraDims?: {
-    /**
-     * 自定义维度名称。
-     * :::tip
-     * 您可以通过调用[获取自定义维度列表](https://www.volcengine.com/docs/508/34554)来获取。
-     * :::
-     * 自定义维度名称。
-     * @example "biz_tag"
-     */
-    Dim: string;
-    /**
-     * 需要匹配的对应维度值。
-     * :::tip
-     * 您可以通过调用[获取自定义维度值](https://www.volcengine.com/docs/508/34555)来获取。
-     * :::
-     * 需要匹配的对应维度值
-     */
-    Vals: string[];
-  }[];
-  /**
-   * 需要匹配的图片类型，缺省情况下则匹配所有图片类型。支持以下取值：
-   *
-   * - `GIF`
-   * - `PNG`
-   * - `JPEG`
-   * - `HEIF`
-   * - `HEIC`
-   * - `WEBP`
-   * - `AWEBP`
-   * - `VVIC`
-   * - `其他`
-   * 需要匹配的图片类型，不传则匹配所有图片类型。
-   * GIF
-   * PNG
-   * JPEG
-   * HEIF
-   * HEIC
-   * WEBP
-   * AWEBP
-   * VVIC
-   * 其他
-   * @example "PNG"
-   */
-  ImageType?: string[];
-  /**
-   * 需要匹配的系统类型，不传则匹配非 WEB 端的所有系统。取值如下所示：
-   *
-   * - `iOS`
-   * - `Android`
-   * - `WEB`
-   * 需要匹配的系统类型，不传则匹配非WEB端所有系统。取值如下所示：
-   * iOS
-   * Android
-   * WEB
-   * @example "Android"
-   */
-  OS?: string;
-  /**
-   * 支持以下取值：
-   * - `1`：按上报次数排序；
-   * - `2`：按图片分辨率排序；
-   * - `3`：按 view 分辨率排序。
-   * 支持以下取值：
-   * 1：按上报次数排序；
-   * 2：按图片分辨率排序；
-   * 3：按 view 分辨率排序。
-   * @example "1"
-   */
-  OrderByIdx: number;
-  /**
-   * 需要匹配的 SDK 版本，不传则匹配所有版本。
-   * 需要匹配的SDK版本，不传则匹配所有版本
-   */
-  SdkVer?: string[];
-  /**
-   * 获取数据起始时间点。日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
-   * 获取数据起始时间点。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00
-   * @example "2019-06-02T00:00:00+08:00"
-   */
-  StartTime: string;
-  /**
-   * 查询 Top URL 条数，取值范围为(0,1000]。缺省情况下默认为 1000。
-   * 查询 Top URL 条数，取值范围为(0,1000]。缺省情况下默认为 1000。
-   * @example "1000"
-   */
-  Top?: number;
-}
-
-export interface DescribeImageXSensibleTopResolutionURLRes {
-  ResponseMetadata: {
-    /** 请求的接口名，属于请求的公共参数。 */
-    Action: string;
-    /** 请求的Region，例如：cn-north-1 */
-    Region: string;
-    /** RequestID为每次API请求的唯一标识。 */
-    RequestId: string;
-    /** 请求的服务，属于请求的公共参数。 */
-    Service: string;
-    /** 请求的版本号，属于请求的公共参数。 */
-    Version: string;
-  };
-  Result: {
-    /**
-     * 具体数据
-     * 具体数据
-     */
-    TopUrlData: {
-      /**
-       * Activity+View 树，控件信息
-       * Activity+View 树，控件信息。
-       * @example "Controller/View"
-       */
-      ActivityViewTree: string;
-      /**
-       * 业务标识
-       * 业务标识
-       * @example "xxxx"
-       */
-      BizTag: string;
-      /**
-       * 上报次数
-       * 上报次数
-       * @example "124"
-       */
-      Count: number;
-      /**
-       * 图片高
-       * 图片高
-       * @example "833"
-       */
-      ImageHeight: number;
-      /**
-       * 图片宽
-       * 图片宽
-       * @example "481"
-       */
-      ImageWidth: number;
-      /**
-       * 图片 URL
-       * 图片URL
-       * @example "http://xxx.image"
-       */
-      URL: string;
-      /**
-       * 图片展示背景 view 高
-       * 图片展示背景 view 高。
-       * @example "800"
-       */
-      ViewHeight: number;
-      /**
-       * 图片展示背景 view 宽
-       * 图片展示背景 view 宽。
-       * @example "500"
-       */
-      ViewWidth: number;
-    }[];
-  };
-}
-
-export interface DescribeImageXSensibleTopSizeURLBody {
-  /**
-   * 需要匹配 App 版本，缺省情况下则匹配 App 的所有版本。
-   * 需要匹配 App 版本，缺省情况下则匹配 App 的所有版本。
-   */
-  AppVer?: string[];
-  /**
-   * 应用 ID。默认为空，不传则匹配账号下的所有的 App ID。您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/19511)的方式获取所需的 AppID。
-   * 应用 ID。默认为空，匹配账号下的所有的App ID。
-   * @example "123"
-   */
-  Appid?: string;
-  /**
-   * 获取数据结束时间点，需在起始时间点之后。日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
-   * 获取数据结束时间点，需在起始时间点之后。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00
-   * @example "2019-06-03T00:00:00+08:00"
-   */
-  EndTime: string;
-  /**
-   * 需要匹配的自定义维度项
-   * 需要匹配的自定义维度项
-   */
-  ExtraDims?: {
-    /**
-     * 自定义维度名称。
-     * :::tip
-     * 您可以通过调用[获取自定义维度列表](https://www.volcengine.com/docs/508/34554)来获取。
-     * :::
-     * 自定义维度名称。
-     * @example "biz_tag"
-     */
-    Dim: string;
-    /**
-     * 需要匹配的对应维度值。
-     * :::tip
-     * 您可以通过调用[获取自定义维度值](https://www.volcengine.com/docs/508/34555)来获取。
-     * :::
-     * 需要匹配的对应维度值
-     */
-    Vals: string[];
-  }[];
-  /**
-   * 需要匹配的图片类型，缺省情况下则匹配所有图片类型。支持以下取值：
-   *
-   * - `GIF`
-   * - `PNG`
-   * - `JPEG`
-   * - `HEIF`
-   * - `HEIC`
-   * - `WEBP`
-   * - `AWEBP`
-   * - `VVIC`
-   * - `其他`
-   * 需要匹配的图片类型，不传则匹配所有图片类型。
-   * GIF
-   * PNG
-   * JPEG
-   * HEIF
-   * HEIC
-   * WEBP
-   * AWEBP
-   * VVIC
-   * 其他
-   * @example "PNG"
-   */
-  ImageType?: string[];
-  /**
-   * 需要匹配的系统类型，不传则匹配非 WEB 端的所有系统。取值如下所示：
-   *
-   * - `iOS`
-   * - `Android`
-   * - `WEB`
-   * 需要匹配的系统类型，不传则匹配非WEB端所有系统。取值如下所示：
-   * iOS
-   * Android
-   * WEB
-   * @example "Android"
-   */
-  OS?: string;
-  /**
-   * 支持以下取值：
-   * - `1`：按上报次数降序排序；
-   * - `2`：按文件体积降序排序。
-   * 支持以下取值：
-   * 1：按上报次数排序；
-   * 2：按文件体积排序。
-   * @example "1"
-   */
-  OrderByIdx: number;
-  /**
-   * 需要匹配的 SDK 版本，不传则匹配所有版本。
-   * 需要匹配的SDK版本，不传则匹配所有版本
-   */
-  SdkVer?: string[];
-  /**
-   * 获取数据起始时间点。日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
-   * 获取数据起始时间点。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00
-   * @example "2019-06-02T00:00:00+08:00"
-   */
-  StartTime: string;
-  /**
-   * 查询 Top URL 条数，取值范围为(0,1000]。缺省情况下默认为 1000。
-   * 查询 Top URL 条数，取值范围为(0,1000]。缺省情况下默认为 1000。
-   * @example "1000"
-   */
-  Top?: number;
-}
-
-export interface DescribeImageXSensibleTopSizeURLRes {
-  ResponseMetadata: {
-    /** 请求的接口名，属于请求的公共参数。 */
-    Action: string;
-    /** 请求的Region，例如：cn-north-1 */
-    Region: string;
-    /** RequestID为每次API请求的唯一标识。 */
-    RequestId: string;
-    /** 请求的服务，属于请求的公共参数。 */
-    Service: string;
-    /** 请求的版本号，属于请求的公共参数。 */
-    Version: string;
-  };
-  Result: {
-    /**
-     * Top URL数据
-     * Top URL数据
-     */
-    TopUrlData: {
-      /**
-       * Activity+View 树，控件信息。
-       * Activity+View 树，控件信息。
-       * @example "Controller/View"
-       */
-      ActivityViewTree: string;
-      /**
-       * 业务标识
-       * 业务标识
-       * @example "xxxx"
-       */
-      BizTag: string;
-      /**
-       * 上报次数
-       * 上报次数
-       * @example "123"
-       */
-      Count: number;
-      /**
-       * 文件URL
-       * 文件URL
-       * @example "http://xxx.image"
-       */
-      URL: string;
-      /**
-       * 文件体积
-       * 文件体积
-       * @example "6590"
-       */
-      Value: number;
-    }[];
-  };
-}
-
-export interface DescribeImageXSensibleTopUnknownURLBody {
-  /**
-   * 需要匹配 App 版本，缺省情况下则匹配 App 的所有版本。
-   * 需要匹配 App 版本，缺省情况下则匹配 App 的所有版本。
-   */
-  AppVer?: string[];
-  /**
-   * 应用 ID。默认为空，不传则匹配账号下的所有的 App ID。您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/19511)的方式获取所需的 AppID。
-   * 应用 ID。默认为空，匹配账号下的所有的App ID。
-   * @example "123"
-   */
-  Appid?: string;
-  /**
-   * 获取数据结束时间点，需在起始时间点之后。日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
-   * 获取数据结束时间点，需在起始时间点之后。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00
-   * @example "2019-06-03T00:00:00+08:00"
-   */
-  EndTime: string;
-  /**
-   * 需要匹配的自定义维度项
-   * 需要匹配的自定义维度项
-   */
-  ExtraDims?: {
-    /**
-     * 自定义维度名称。
-     * :::tip
-     * 您可以通过调用[获取自定义维度列表](https://www.volcengine.com/docs/508/34554)来获取。
-     * :::
-     * 自定义维度名称。
-     * @example "biz_tag"
-     */
-    Dim: string;
-    /**
-     * 需要匹配的对应维度值。
-     * :::tip
-     * 您可以通过调用[获取自定义维度值](https://www.volcengine.com/docs/508/34555)来获取。
-     * :::
-     * 需要匹配的对应维度值
-     */
-    Vals: string[];
-  }[];
-  /**
-   * 需要匹配的图片类型，缺省情况下则匹配所有图片类型。支持以下取值：
-   *
-   * - `GIF`
-   * - `PNG`
-   * - `JPEG`
-   * - `HEIF`
-   * - `HEIC`
-   * - `WEBP`
-   * - `AWEBP`
-   * - `VVIC`
-   * - `其他`
-   * 需要匹配的图片类型，不传则匹配所有图片类型。
-   * GIF
-   * PNG
-   * JPEG
-   * HEIF
-   * HEIC
-   * WEBP
-   * AWEBP
-   * VVIC
-   * 其他
-   * @example "PNG"
-   */
-  ImageType?: string[];
-  /**
-   * 需要匹配的系统类型，不传则匹配非 WEB 端的所有系统。取值如下所示：
-   *
-   * - `iOS`
-   * - `Android`
-   * - `WEB`
-   * 需要匹配的系统类型，不传则匹配非WEB端所有系统。取值如下所示：
-   * iOS
-   * Android
-   * WEB
-   * @example "Android"
-   */
-  OS?: string;
-  /**
-   * 支持以下取值：
-   * - `1`：按上报量排序
-   * - `2`：按内存大小排序
-   * - `3`：按文件大小排序
-   * - `4`：按图片分辨率排序
-   * - `5`：按 view 分辨率排序
-   * 支持以下取值：
-   * 1：按上报量排序
-   * 2：按内存大小排序
-   * 3：按文件大小排序
-   * 4：按图片分辨率排序
-   * 5：按 view 分辨率排序
-   * @example "2"
-   */
-  OrderByIdx: number;
-  /**
-   * 需要匹配的 SDK 版本，不传则匹配所有版本。
-   * 需要匹配的SDK版本，不传则匹配所有版本
-   */
-  SdkVer?: string[];
-  /**
-   * 获取数据起始时间点。日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
-   * 获取数据起始时间点。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00
-   * @example "2019-06-02T00:00:00+08:00"
-   */
-  StartTime: string;
-  /**
-   * 查询 Top URL 条数，取值范围为(0,1000]。缺省情况下默认为 1000。
-   * 查询 Top URL 条数，取值范围为(0,1000]。缺省情况下默认为 1000。
-   * @example "1000"
-   */
-  Top?: number;
-}
-
-export interface DescribeImageXSensibleTopUnknownURLRes {
-  ResponseMetadata: {
-    /** @example "DescribeImageXSensibleTopUnknownURL" */
-    Action: string;
-    /** @example "cn-north-1" */
-    Region: string;
-    /** @example "202306041104200100100232280022D31" */
-    RequestId: string;
-    /** @example "ImageX" */
-    Service: string;
-    /** @example "2023-05-01" */
-    Version: string;
-  };
-  Result: {
-    TopUrlData: {
-      /** @example "Controller/View" */
-      ActivityViewTree?: string;
-      /** @example "xxxx" */
-      BizTag?: string;
-      /** @example 73 */
-      Count?: number;
-      /** @example 60 */
-      FileSize?: number;
-      /** @example 591 */
-      ImageHeight?: number;
-      /** @example 400 */
-      ImageWidth?: number;
-      /** @example 90 */
-      RamSize?: number;
-      /** @example "http://xxx.image" */
-      URL?: string;
-      /** @example 700 */
-      ViewHeight?: number;
-      /** @example 500 */
-      ViewWidth?: number;
-    }[];
-  };
-}
-
-export interface DescribeImageXServerQPSUsageQuery {
-  /**
-   * 获取数据结束时间点。日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
-   * @example "2019-06-02T00:00:00+08:00"
-   */
-  EndTime: string;
-  /**
-   * 查询数据的时间粒度。单位为秒。支持以下取值：
-   *
-   * - `1`: 单次查询最大时间跨度为 6 小时
-   * - `60`：单次查询最大时间跨度为 6 小时
-   * - `120`：单次查询最大时间跨度为 6 小时
-   * - `300`：单次查询最大时间跨度为 31 天
-   * - `600`：单次查询最大时间跨度为 31 天
-   * - `1200`：单次查询最大时间跨度为 31 天
-   * - `1800`：单次查询最大时间跨度为 31 天
-   * - `3600`：单次查询最大时间跨度为 93 天
-   * - `86400`：单次查询最大时间跨度为 93 天
-   * - `604800`：单次查询最大时间跨度为 93 天
-   * @example "300"
-   */
-  Interval?: string;
-  /**
-   * 服务 ID。为空时表示不筛选，支持查询多个服务，使用逗号分隔不同的服务。
-   *
-   * - 您可以在 veImageX 控制台[服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。
-   * - 您也可以通过 OpenAPI 的方式获取服务 ID，具体请参考 [GetAllImageServices](https://www.volcengine.com/docs/508/9360)。
-   * @example "s1,s2"
-   */
-  ServiceIds?: string;
-  /**
-   * 获取数据起始时间点。日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
-   * :::tip
-   * 由于仅支持查询近 93 天的历史数据，则若此刻时间为`2011-11-21T16:14:00+08:00`，那么您可输入最早的开始时间为`2011-08-21T00:00:00+08:00`。
-   * :::
-   * @example "2019-06-02T00:00:00+08:00"
-   */
-  StartTime: string;
-}
-
-export interface DescribeImageXServerQPSUsageRes {
-  ResponseMetadata: {
-    /** 请求的接口名，属于请求的公共参数。 */
-    Action: string;
-    /** 请求的Region，例如：cn-north-1 */
-    Region: string;
-    /** RequestID为每次API请求的唯一标识。 */
-    RequestId: string;
-    /** 请求的服务，属于请求的公共参数。 */
-    Service: string;
-    /** 请求的版本号，属于请求的公共参数。 */
-    Version: string;
-  };
-  /** 视请求的接口而定 */
-  Result: {
-    /** 数据列表。 */
-    QPSData: {
-      /** 时序数据。 */
-      Data: {
-        /**
-         * 统计时间点，时间片开始时刻，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。
-         * @example "2023-01-01T00:00:00+08:00"
-         */
-        TimeStamp: string;
-        /**
-         * QPS 用量的值。单位为 "次/秒"，表示每秒处理的请求数量。
-         * @example "12"
-         */
-        Value: number;
-      }[];
-      /**
-       * QPS 类型，取值：
-       * - `Request`：专有图像处理和高效压缩
-       * - `Mirror`：资源下载与镜像代理
-       * @example "Request"
-       */
-      QPSType: string;
-    }[];
-  };
-}
-
-export interface DescribeImageXServiceQualityQuery {
-  /**
-   * 获取指定地区的数据。默认为空，表示获取国内数据。
-   * * `cn`：国内。
-   * * `va`：美东。
-   * * `sg`：新加坡。
-   * @example "cn"
-   */
-  Region?: string;
-}
-
-export interface DescribeImageXServiceQualityRes {
-  ResponseMetadata: {
-    /**
-     * 请求的接口名，属于请求的公共参数。
-     * @example "{Action}"
-     */
-    Action: string;
-    /**
-     * 请求的Region，例如：cn-north-1
-     * @example "cn-north-1"
-     */
-    Region: string;
-    /** RequestID为每次API请求的唯一标识。 */
-    RequestId: string;
-    /** 请求的服务，属于请求的公共参数。 */
-    Service: string;
-    /**
-     * 请求的版本号，属于请求的公共参数。
-     * @example "{Version}"
-     */
-    Version: string;
-  };
-  /** 视请求的接口而定 */
-  Result: {
-    /**
-     * 下行概览数据，为当日 0 点至今整体数据。
-     * 下行概览数据，为当日 0 点至今整体数据。
-     */
-    CdnData: {
-      /**
-       * 网络平均耗时，单位为 ms。
-       * 网络平均耗时，单位为 ms。
-       * @format float
-       * @example "356"
-       */
-      AvgDuration: number;
-      /**
-       * 网络成功率
-       * :::tip
-       * 网络成功率 = 1 - 下载失败次数 / 下载总数
-       * :::
-       * 网络成功率
-       * @format float
-       * @example "0.9927386619504328"
-       */
-      SuccessRate: number;
-      /**
-       * 下行总上报数据量。
-       * 下行总上报数据量。
-       * @example "90281"
-       */
-      TotalCount: number;
-    };
-    /**
-     * 客户端概览数据，为当日 0 点查询时间的整体数据。
-     * 客户端概览数据，为当日 0 点查询时间的整体数据。
-     */
-    ClientData: {
-      /**
-       * 平均解码耗时，单位为 ms。
-       * 平均解码耗时，单位为 ms。
-       * @format float
-       * @example "11"
-       */
-      AvgDecodeDuration: number;
-      /**
-       * 平均加载耗时，单位为 ms。
-       * 平均加载耗时，单位为 ms。
-       * @format float
-       * @example "752"
-       */
-      AvgLoadDuration: number;
-      /**
-       * 平均排队耗时，单位为 ms。
-       * 平均排队耗时，单位为 ms。
-       * @format float
-       * @example "370"
-       */
-      AvgQueueDuration: number;
-      /**
-       * 解码成功率
-       * :::tip
-       * 解码成功率 = 1 - 解码失败次数 / 解码总次数
-       * :::
-       * 解码成功率
-       * @format float
-       * @example "0.9996384232001669"
-       */
-      SuccessRate: number;
-      /**
-       * 客户端总上报数据量。
-       * 客户端总上报数据量。
-       * @example "92781"
-       */
-      TotalCount: number;
-    };
-    /**
-     * 用户感知失败率，为当日 0 点至查询时间的整体数据。
-     * 用户感知失败率，为当日 0 点至查询时间的整体数据。
-     * @format float
-     * @example "0.006693045490108962"
-     */
-    FailureRate: number;
-    /**
-     * 上传概览数据，为当日 0 点查询时间的整体数据。
-     * 上传概览数据，为当日 0 点查询时间的整体数据。
-     */
-    UploadData: {
-      /**
-       * 上传平均耗时，单位为 ms。
-       * 上传平均耗时，单位为 ms。
-       * @format float
-       * @example "2428"
-       */
-      AvgDuration: number;
-      /**
-       * 上传文件平均大小，单位字节。
-       * 上传文件平均大小，单位字节。
-       * @format float
-       * @example "377649"
-       */
-      AvgSize: number;
-      /**
-       * 上传成功率。
-       * :::tip
-       * 上传成功率 = 上传成功次数 / 上传总有效次数
-       * :::
-       * 上传成功率
-       * @format float
-       * @example "0.9975451872358082"
-       */
-      SuccessRate: number;
-      /**
-       * 上传总上报数据量。
-       * 上传总上报数据量。
-       * @example "3919"
-       */
-      TotalCount: number;
-      /**
-       * 上传有效次数。
-       * 上传有效次数
-       * @example "7189143"
-       */
-      UploadCount: number;
-    };
-  };
-}
-
 export interface DescribeImageXSummaryQuery {
   /**
-   * 限制查询的服务 ID，传入多个时用英文逗号分割。缺省情况下表示不限制服务 ID。
-   *
-   * - 您可以在 veImageX 控制台[服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。
-   * - 您也可以通过 OpenAPI 的方式获取服务 ID，具体请参考 [GetAllImageServices](https://www.volcengine.com/docs/508/9360)。
+   * 服务 ID。支持查询多个服务，传入多个时用英文逗号“,”分割，缺省情况下表示查询所有服务。您可以在 veImageX 控制台的[服务管理](https://console.volcengine.com/imagex/service_manage/)模块或者调用 [GetAllImageServices](https://www.volcengine.com/docs/508/9360) 接口获取服务 ID。
    * @example "s1,s2"
    */
   ServiceIds?: string;
@@ -12068,7 +12882,10 @@ export interface DescribeImageXSummaryRes {
     Version: string;
   };
   Result: {
-    /** 当月图像处理量 */
+    /**
+     * 当月图像处理量
+     * @example "-"
+     */
     BaseOpData: {
       /**
        * 当月图像处理量，单位为：Byte。
@@ -12078,7 +12895,10 @@ export interface DescribeImageXSummaryRes {
        */
       Value: number;
     };
-    /** 当月带宽用量 */
+    /**
+     * 当月带宽用量
+     * @example "-"
+     */
     CdnBandwidthData: {
       /**
        * 当月带宽用量，单位为：bps。
@@ -12088,7 +12908,10 @@ export interface DescribeImageXSummaryRes {
        */
       Value: number;
     };
-    /** 当月流量用量 */
+    /**
+     * 当月流量用量
+     * @example "-"
+     */
     CdnTrafficData: {
       /**
        * 当月流量用量，单位为：Byte。
@@ -12098,7 +12921,10 @@ export interface DescribeImageXSummaryRes {
        */
       Value: number;
     };
-    /** 当月源站请求次数 */
+    /**
+     * 当月源站请求次数
+     * @example "-"
+     */
     RequestCntData: {
       /**
        * 当月源站请求次数，单位为：次。
@@ -12107,7 +12933,10 @@ export interface DescribeImageXSummaryRes {
        */
       Value: number;
     };
-    /** 当月资源占用量 */
+    /**
+     * 当月资源占用量
+     * @example "-"
+     */
     StorageData: {
       /**
        * 当月最新一日资源占用量，单位为：Byte。
@@ -12124,10 +12953,11 @@ export interface DescribeImageXUploadCountByTimeBody {
   /**
    * 需要匹配的 App 版本，不传则匹配 App 的所有版本。
    * 需要匹配的 App 版本，不传则匹配 App 的所有版本。
+   * @example "["1.0"]"
    */
   AppVer?: string[];
   /**
-   * 应用 ID。默认为空，不传则匹配账号下的所有的 App ID。
+   * 应用 ID。默认为空，不传则匹配账号下的所有的 AppID。
    * :::tip
    * 您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/19511)的方式获取所需的 AppID。
    * :::
@@ -12155,12 +12985,13 @@ export interface DescribeImageXUploadCountByTimeBody {
   /**
    * 需要匹配的自定义维度项。
    * 需要匹配的自定义维度项
+   * @example "-"
    */
   ExtraDims?: {
     /**
      * 自定义维度名称。
      * :::tip
-     * 您可以通过调用[获取自定义维度列表](https://www.volcengine.com/docs/508/34554)来获取。
+     * 您可以通过调用[获取自定义维度列表](https://www.volcengine.com/docs/508/1213048)来获取。
      * :::
      * 自定义维度名称。
      * @example "access"
@@ -12169,14 +13000,15 @@ export interface DescribeImageXUploadCountByTimeBody {
     /**
      * 需要匹配的对应维度值。
      * :::tip
-     * 您可以通过调用[获取自定义维度值](https://www.volcengine.com/docs/508/34555)来获取。
+     * 您可以通过调用[获取自定义维度值](https://www.volcengine.com/docs/508/1213050)来获取。
      * :::
      * 需要匹配的对应维度值
+     * @example "["4g"]"
      */
     Vals: string[];
   }[];
   /**
-   * 返回数据的时间粒度。
+   * 返回数据的时间粒度，取值如下所示：
    * * `5m`： 5 分钟；
    * * `1h`： 1 小时；
    * * `1d`： 1 天；
@@ -12190,13 +13022,13 @@ export interface DescribeImageXUploadCountByTimeBody {
   /**
    * 拆分维度。默认为空，不拆分。  支持取值：
    * - 公共维度：`Appid`、`OS`、`AppVer`、`SdkVer`、`Country`、`Province`、`Isp`
-   * - 自定义维度：您可以通过调用 [GetImageXQueryDims](https://www.volcengine.com/docs/508/34554)接口获取自定义维度指标
+   * - 自定义维度：您可以通过调用[获取自定义维度列表](https://www.volcengine.com/docs/508/1213048)接口获取自定义维度指标
    * 拆分维度。默认为空，不拆分。支持取值：公共维度（Appid,OS,AppVer,SdkVer,Country,Province,Isp），自定义维度（通过"获取自定义维度列表"接口获取）
    * @example "OS"
    */
   GroupBy?: string;
   /**
-   * 需要匹配的运营商名称，不传则匹配所有运营商。支持取值如下：
+   * 需要匹配的运营商名称，不传则匹配所有运营商。取值如下所示：
    * - `电信`
    * - `联通`
    * - `移动`
@@ -12212,6 +13044,7 @@ export interface DescribeImageXUploadCountByTimeBody {
    * 鹏博士
    * 教育网
    * 其他
+   * @example "["电信"]"
    */
   Isp?: string[];
   /**
@@ -12235,6 +13068,7 @@ export interface DescribeImageXUploadCountByTimeBody {
   /**
    * 需要匹配的 SDK 版本，不传则匹配所有版本。
    * 需要匹配的SDK版本，不传则匹配所有版本
+   * @example "["1.1.0"]"
    */
   SdkVer?: string[];
   /**
@@ -12245,7 +13079,7 @@ export interface DescribeImageXUploadCountByTimeBody {
    */
   StartTime: string;
   /**
-   * 上传类型，默认为空，返回上传 1.0 数据。
+   * 上传类型，默认为空，返回上传 1.0 数据。取值如下所示：
    * * `1`：上传 1.0。
    * * `2`：上传 2.0。
    * 上传类型，默认为空，返回上传 1.0 数据。
@@ -12273,6 +13107,7 @@ export interface DescribeImageXUploadCountByTimeRes {
     /**
      * 上传有效次数数据。
      * 上传有效次数数据。
+     * @example "-"
      */
     UploadCountData: {
       /**
@@ -12284,6 +13119,7 @@ export interface DescribeImageXUploadCountByTimeRes {
       /**
        * 对应的上传有效次数数据列表。
        * 对应的上传有效次数数据列表。
+       * @example "-"
        */
       Data: {
         /**
@@ -12293,8 +13129,7 @@ export interface DescribeImageXUploadCountByTimeRes {
          */
         Count: number;
         /**
-         * 数据对应时间点。
-         * * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
+         * 数据对应时间点。日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
          * 数据对应时间点，按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。
          * @example "2023-01-01T00:00:00+08:00"
          */
@@ -12320,12 +13155,13 @@ export interface DescribeImageXUploadDurationBody {
   /**
    * 需要匹配的 App 版本，不传则匹配 App 的所有版本。
    * 需要匹配的 App 版本，不传则匹配 App 的所有版本。
+   * @example "["1.0"]"
    */
   AppVer?: string[];
   /**
    * 应用 ID。默认为空，不传则匹配账号下的所有的 App ID。
    * :::tip
-   * 您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/19511)的方式获取所需的 AppID。
+   * 您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/1213042)的方式获取所需的 AppID。
    * :::
    * 应用 ID。默认为空，匹配账号下的所有的App ID。
    * @example "123"
@@ -12351,12 +13187,13 @@ export interface DescribeImageXUploadDurationBody {
   /**
    * 需要匹配的自定义维度项。
    * 需要匹配的自定义维度项
+   * @example "-"
    */
   ExtraDims?: {
     /**
      * 自定义维度名称。
      * :::tip
-     * 您可以通过调用[获取自定义维度列表](https://www.volcengine.com/docs/508/34554)来获取。
+     * 您可以通过调用[获取自定义维度列表](https://www.volcengine.com/docs/508/1213048)来获取。
      * :::
      * 自定义维度名称。
      * @example "access"
@@ -12365,14 +13202,15 @@ export interface DescribeImageXUploadDurationBody {
     /**
      * 需要匹配的对应维度值。
      * :::tip
-     * 您可以通过调用[获取自定义维度值](https://www.volcengine.com/docs/508/34555)来获取。
+     * 您可以通过调用[获取自定义维度值](https://www.volcengine.com/docs/508/1213050)来获取。
      * :::
      * 需要匹配的对应维度值
+     * @example "["4g"]"
      */
     Vals: string[];
   }[];
   /**
-   * 返回数据的时间粒度。
+   * 返回数据的时间粒度，取值如下所示：
    * * `5m`： 5 分钟；
    * * `1h`： 1 小时；
    * * `1d`： 1 天；
@@ -12388,13 +13226,13 @@ export interface DescribeImageXUploadDurationBody {
    * * `Duration`：表示为分位数据
    * - `Phase`：表示分阶段数据，仅当`UploadType`取值为`2`时支持取值。
    * - 公共维度：`Appid`、`OS`、`AppVer`、`SdkVer`、`Country`、`Province`、`Isp`
-   * - 自定义维度：您可以通过调用 [GetImageXQueryDims](https://www.volcengine.com/docs/508/34554)接口获取自定义维度指标。
+   * - 自定义维度：您可以通过调用 [获取自定义维度列表](https://www.volcengine.com/docs/508/1213048)接口获取自定义维度指标。
    * 拆分维度。默认为空，表示拆分分位数据。支持取值：Duration（分位数据）、Phase（分阶段数据，只有当UploadType=2时才能取该值）、公共维度（Appid,OS,AppVer,SdkVer,Country,Province,Isp），自定义维度（通过"获取自定义维度列表"接口获取）
    * @example "OS"
    */
   GroupBy?: string;
   /**
-   * 需要匹配的运营商名称，不传则匹配所有运营商。支持取值如下：
+   * 需要匹配的运营商名称，不传则匹配所有运营商。取值如下所示：
    * - `电信`
    * - `联通`
    * - `移动`
@@ -12410,6 +13248,7 @@ export interface DescribeImageXUploadDurationBody {
    * 鹏博士
    * 教育网
    * 其他
+   * @example "["电信"]"
    */
   Isp?: string[];
   /**
@@ -12433,6 +13272,7 @@ export interface DescribeImageXUploadDurationBody {
   /**
    * 需要匹配的 SDK 版本，不传则匹配所有版本。
    * 需要匹配的SDK版本，不传则匹配所有版本
+   * @example "["1.1.0"]"
    */
   SdkVer?: string[];
   /**
@@ -12443,7 +13283,7 @@ export interface DescribeImageXUploadDurationBody {
    */
   StartTime: string;
   /**
-   * 上传类型，默认为空，返回上传 1.0 数据。
+   * 上传类型，默认为空，返回上传 1.0 数据。取值如下所示：
    * * `1`：上传 1.0。
    * * `2`：上传 2.0。
    * 上传类型，默认为空，返回上传 1.0 数据。
@@ -12471,6 +13311,7 @@ export interface DescribeImageXUploadDurationRes {
     /**
      * 上传耗时数据
      * 上传耗时数据
+     * @example "-"
      */
     DurationData: {
       /**
@@ -12482,6 +13323,7 @@ export interface DescribeImageXUploadDurationRes {
       /**
        * 上传耗时数据列表。
        * 上传耗时数据列表。
+       * @example "-"
        */
       Data: {
         /**
@@ -12491,8 +13333,7 @@ export interface DescribeImageXUploadDurationRes {
          */
         Count: number;
         /**
-         * 数据对应时间点。
-         * * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`。
+         * 数据对应时间点。日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`。
          * 数据对应时间点，按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。
          * @example "2023-01-01T00:00:00+08:00"
          */
@@ -12525,12 +13366,13 @@ export interface DescribeImageXUploadErrorCodeAllBody {
   /**
    * 需要匹配的 App 版本，不传则匹配 App 的所有版本。
    * 需要匹配的 App 版本，不传则匹配 App 的所有版本。
+   * @example "["1.0"]"
    */
   AppVer?: string[];
   /**
-   * 应用 ID。默认为空，不传则匹配账号下的所有的 App ID。
+   * 应用 ID。默认为空，不传则匹配账号下的所有的 AppID。
    * :::tip
-   * 您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/19511)的方式获取所需的 AppID。
+   * 您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/1213042)的方式获取所需的 AppID。
    * :::
    * 应用 ID。默认为空，匹配账号下的所有的App ID。
    * @example "123"
@@ -12556,12 +13398,13 @@ export interface DescribeImageXUploadErrorCodeAllBody {
   /**
    * 需要匹配的自定义维度项。
    * 需要匹配的自定义维度项
+   * @example "-"
    */
   ExtraDims?: {
     /**
      * 自定义维度名称。
      * :::tip
-     * 您可以通过调用[获取自定义维度列表](https://www.volcengine.com/docs/508/34554)来获取。
+     * 您可以通过调用[获取自定义维度列表](https://www.volcengine.com/docs/508/1213048)来获取。
      * :::
      * 自定义维度名称。
      * @example "access"
@@ -12570,14 +13413,15 @@ export interface DescribeImageXUploadErrorCodeAllBody {
     /**
      * 需要匹配的对应维度值。
      * :::tip
-     * 您可以通过调用[获取自定义维度值](https://www.volcengine.com/docs/508/34555)来获取。
+     * 您可以通过调用[获取自定义维度值](https://www.volcengine.com/docs/508/1213050)来获取。
      * :::
      * 需要匹配的对应维度值
+     * @example "["4g"]"
      */
     Vals: string[];
   }[];
   /**
-   * 聚合维度。
+   * 聚合维度。取值如下所示：
    * * `ErrorCode`：错误码
    * * `Region`：地区
    * * `Isp`：运营商
@@ -12589,7 +13433,7 @@ export interface DescribeImageXUploadErrorCodeAllBody {
    */
   GroupBy: string;
   /**
-   * 需要匹配的运营商名称，不传则匹配所有运营商。支持取值如下：
+   * 需要匹配的运营商名称，不传则匹配所有运营商。取值如下所示：
    * - `电信`
    * - `联通`
    * - `移动`
@@ -12605,6 +13449,7 @@ export interface DescribeImageXUploadErrorCodeAllBody {
    * 鹏博士
    * 教育网
    * 其他
+   * @example "["电信"]"
    */
   Isp?: string[];
   /**
@@ -12620,9 +13465,11 @@ export interface DescribeImageXUploadErrorCodeAllBody {
    */
   OS?: string;
   /**
-   * 是否升序排序。不传则默认为 false，表示降序排序。
+   * 是否升序排序。取值如下所示：
+   * - `true`：是，表示升序排序。
+   * - `false`：（默认）否，表示降序排序。
    * 是否升序排序。不传则默认降序排序。
-   * @example "false"
+   * @example "true"
    */
   OrderAsc?: boolean;
   /**
@@ -12640,6 +13487,7 @@ export interface DescribeImageXUploadErrorCodeAllBody {
   /**
    * 需要匹配的 SDK 版本，不传则匹配所有版本。
    * 需要匹配的SDK版本，不传则匹配所有版本
+   * @example "["1.1.0"]"
    */
   SdkVer?: string[];
   /**
@@ -12650,7 +13498,7 @@ export interface DescribeImageXUploadErrorCodeAllBody {
    */
   StartTime: string;
   /**
-   * 上传类型，默认为空，返回上传 1.0 数据。
+   * 上传类型，默认为空，返回上传 1.0 数据。取值如下所示：
    * * `1`：上传 1.0。
    * * `2`：上传 2.0。
    * 上传类型，默认为空，返回上传 1.0 数据。
@@ -12678,11 +13526,13 @@ export interface DescribeImageXUploadErrorCodeAllRes {
     /**
      * 错误码数据。
      * 错误码数据。
+     * @example "-"
      */
     ErrorCodeData: {
       /**
        * 当`GroupBy`取值**非**`ErrorCode`时出现，表示错误码详细信息。
        * 当GroupBy取值非ErrorCode时出现，表示错误码详细信息。
+       * @example "-"
        */
       Details?: {
         /**
@@ -12752,12 +13602,13 @@ export interface DescribeImageXUploadErrorCodeByTimeBody {
   /**
    * 需要匹配的 App 版本，不传则匹配 App 的所有版本。
    * 需要匹配的 App 版本，不传则匹配 App 的所有版本。
+   * @example "["1.0"]"
    */
   AppVer?: string[];
   /**
-   * 应用 ID。默认为空，不传则匹配账号下的所有的 App ID。
+   * 应用 ID。默认为空，不传则匹配账号下的所有的 AppID。
    * :::tip
-   * 您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/19511)的方式获取所需的 AppID。
+   * 您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/1213042)的方式获取所需的 AppID。
    * :::
    * 应用 ID。默认为空，匹配账号下的所有的App ID。
    * @example "123"
@@ -12783,12 +13634,13 @@ export interface DescribeImageXUploadErrorCodeByTimeBody {
   /**
    * 需要匹配的自定义维度项。
    * 需要匹配的自定义维度项
+   * @example "-"
    */
   ExtraDims?: {
     /**
      * 自定义维度名称。
      * :::tip
-     * 您可以通过调用[获取自定义维度列表](https://www.volcengine.com/docs/508/34554)来获取。
+     * 您可以通过调用[获取自定义维度列表](https://www.volcengine.com/docs/508/1213048)来获取。
      * :::
      * 自定义维度名称。
      * @example "access"
@@ -12797,14 +13649,15 @@ export interface DescribeImageXUploadErrorCodeByTimeBody {
     /**
      * 需要匹配的对应维度值。
      * :::tip
-     * 您可以通过调用[获取自定义维度值](https://www.volcengine.com/docs/508/34555)来获取。
+     * 您可以通过调用[获取自定义维度值](https://www.volcengine.com/docs/508/1213050)来获取。
      * :::
      * 需要匹配的对应维度值
+     * @example "["4g"]"
      */
     Vals: string[];
   }[];
   /**
-   * 返回数据的时间粒度。
+   * 返回数据的时间粒度。取值如下所示：
    * * `5m`： 5 分钟；
    * * `1h`： 1 小时；
    * * `1d`： 1 天；
@@ -12816,7 +13669,7 @@ export interface DescribeImageXUploadErrorCodeByTimeBody {
    */
   Granularity: string;
   /**
-   * 需要匹配的运营商名称，不传则匹配所有运营商。支持取值如下：
+   * 需要匹配的运营商名称，不传则匹配所有运营商。取值如下所示：
    * - `电信`
    * - `联通`
    * - `移动`
@@ -12832,6 +13685,7 @@ export interface DescribeImageXUploadErrorCodeByTimeBody {
    * 鹏博士
    * 教育网
    * 其他
+   * @example "["电信"]"
    */
   Isp?: string[];
   /**
@@ -12855,6 +13709,7 @@ export interface DescribeImageXUploadErrorCodeByTimeBody {
   /**
    * 需要匹配的 SDK 版本，不传则匹配所有版本。
    * 需要匹配的SDK版本，不传则匹配所有版本
+   * @example "["1.1.0"]"
    */
   SdkVer?: string[];
   /**
@@ -12865,7 +13720,7 @@ export interface DescribeImageXUploadErrorCodeByTimeBody {
    */
   StartTime: string;
   /**
-   * 上传类型，默认为空，返回上传 1.0 数据。
+   * 上传类型，默认为空，返回上传 1.0 数据。取值如下所示：
    * * `1`：上传 1.0。
    * * `2`：上传 2.0。
    * 上传类型，默认为空，返回上传 1.0 数据。
@@ -12890,14 +13745,20 @@ export interface DescribeImageXUploadErrorCodeByTimeRes {
     Version: string;
   };
   Result: {
-    /** 所有错误码数据。 */
+    /**
+     * 所有错误码数据。
+     * @example "-"
+     */
     ErrorCodeData: {
       /**
        * 错误码数量。
        * @example "3"
        */
       Count: number;
-      /** 错误码对应的时序数据。 */
+      /**
+       * 错误码对应的时序数据。
+       * @example "-"
+       */
       Data: {
         /**
          * 错误码数量。
@@ -12928,12 +13789,13 @@ export interface DescribeImageXUploadFileSizeBody {
   /**
    * 需要匹配的 App 版本，不传则匹配 App 的所有版本。
    * 需要匹配的 App 版本，不传则匹配 App 的所有版本。
+   * @example "["1.0"]"
    */
   AppVer?: string[];
   /**
-   * 应用 ID。默认为空，不传则匹配账号下的所有的 App ID。
+   * 应用 ID。默认为空，不传则匹配账号下的所有的 AppID。
    * :::tip
-   * 您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/19511)的方式获取所需的 AppID。
+   * 您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/1213042)的方式获取所需的 AppID。
    * :::
    * 应用 ID。默认为空，匹配账号下的所有的App ID。
    * @example "123"
@@ -12959,12 +13821,13 @@ export interface DescribeImageXUploadFileSizeBody {
   /**
    * 需要匹配的自定义维度项。
    * 需要匹配的自定义维度项
+   * @example "-"
    */
   ExtraDims?: {
     /**
      * 自定义维度名称。
      * :::tip
-     * 您可以通过调用[获取自定义维度列表](https://www.volcengine.com/docs/508/34554)来获取。
+     * 您可以通过调用[获取自定义维度列表](https://www.volcengine.com/docs/508/1213048)来获取。
      * :::
      * 自定义维度名称。
      * @example "access"
@@ -12973,14 +13836,15 @@ export interface DescribeImageXUploadFileSizeBody {
     /**
      * 需要匹配的对应维度值。
      * :::tip
-     * 您可以通过调用[获取自定义维度值](https://www.volcengine.com/docs/508/34555)来获取。
+     * 您可以通过调用[获取自定义维度值](https://www.volcengine.com/docs/508/1213050)来获取。
      * :::
      * 需要匹配的对应维度值
+     * @example "["4g"]"
      */
     Vals: string[];
   }[];
   /**
-   * 返回数据的时间粒度。
+   * 返回数据的时间粒度。取值如下所示：
    * * `5m`： 5 分钟；
    * * `1h`： 1 小时；
    * * `1d`： 1 天；
@@ -12995,13 +13859,13 @@ export interface DescribeImageXUploadFileSizeBody {
    * 拆分维度。默认为空，表示拆分分位数据。支持取值：
    * - `Duration`：表示分位数据
    * - 公共维度：`Appid`、`OS`、`AppVer`、`SdkVer`、`Country`、`Province`、`Isp`
-   * - 自定义维度：您可以通过调用 [GetImageXQueryDims](https://www.volcengine.com/docs/508/34554)接口获取自定义维度指标
+   * - 自定义维度：您可以通过调用 [获取自定义维度列表](https://www.volcengine.com/docs/508/1213048)接口获取自定义维度指标
    * 拆分维度。默认为空，表示拆分分位数据。支持取值：Duration（分位数据）、公共维度（Appid,OS,AppVer,SdkVer,Country,Province,Isp），自定义维度（通过"获取自定义维度列表"接口获取）
    * @example "OS"
    */
   GroupBy?: string;
   /**
-   * 需要匹配的运营商名称，不传则匹配所有运营商。支持取值如下：
+   * 需要匹配的运营商名称，不传则匹配所有运营商。取值如下所示：
    * - `电信`
    * - `联通`
    * - `移动`
@@ -13017,6 +13881,7 @@ export interface DescribeImageXUploadFileSizeBody {
    * 鹏博士
    * 教育网
    * 其他
+   * @example "["电信"]"
    */
   Isp?: string[];
   /**
@@ -13040,6 +13905,7 @@ export interface DescribeImageXUploadFileSizeBody {
   /**
    * 需要匹配的 SDK 版本，不传则匹配所有版本。
    * 需要匹配的SDK版本，不传则匹配所有版本
+   * @example "["1.1.0"]"
    */
   SdkVer?: string[];
   /**
@@ -13050,7 +13916,7 @@ export interface DescribeImageXUploadFileSizeBody {
    */
   StartTime: string;
   /**
-   * 上传类型，默认为空，返回上传 1.0 数据。
+   * 上传类型，默认为空，返回上传 1.0 数据。取值如下所示：
    * * `1`：上传 1.0。
    * * `2`：上传 2.0。
    * 上传类型，默认为空，返回上传 1.0 数据。
@@ -13078,6 +13944,7 @@ export interface DescribeImageXUploadFileSizeRes {
     /**
      * 上传文件大小分布数据。
      * 上传文件大小分布数据。
+     * @example "-"
      */
     FSizeData: {
       /**
@@ -13089,6 +13956,7 @@ export interface DescribeImageXUploadFileSizeRes {
       /**
        * 对应的文件大小数据列表。
        * 对应的文件大小数据列表。
+       * @example "-"
        */
       Data: {
         /**
@@ -13098,8 +13966,7 @@ export interface DescribeImageXUploadFileSizeRes {
          */
         Count: number;
         /**
-         * 数据对应时间点。
-         * * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`。
+         * 数据对应时间点。日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`。
          * 数据对应时间点，按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。
          * @example "2023-01-01T00:00:00+08:00"
          */
@@ -13133,12 +14000,13 @@ export interface DescribeImageXUploadSegmentSpeedByTimeBody {
   /**
    * 需要匹配的 App 版本，不传则匹配 App 的所有版本。
    * 需要匹配的 App 版本，不传则匹配 App 的所有版本。
+   * @example "["1.0"]"
    */
   AppVer?: string[];
   /**
-   * 应用 ID。默认为空，不传则匹配账号下的所有的 App ID。
+   * 应用 ID。默认为空，不传则匹配账号下的所有的 AppID。
    * :::tip
-   * 您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/19511)的方式获取所需的 AppID。
+   * 您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/1213042)的方式获取所需的 AppID。
    * :::
    * 应用 ID。默认为空，匹配账号下的所有的App ID。
    * @example "123"
@@ -13164,12 +14032,13 @@ export interface DescribeImageXUploadSegmentSpeedByTimeBody {
   /**
    * 需要匹配的自定义维度项。
    * 需要匹配的自定义维度项
+   * @example "-"
    */
   ExtraDims?: {
     /**
      * 自定义维度名称。
      * :::tip
-     * 您可以通过调用[获取自定义维度列表](https://www.volcengine.com/docs/508/34554)来获取。
+     * 您可以通过调用[获取自定义维度列表](https://www.volcengine.com/docs/508/1213048)来获取。
      * :::
      * 自定义维度名称。
      * @example "access"
@@ -13178,14 +14047,15 @@ export interface DescribeImageXUploadSegmentSpeedByTimeBody {
     /**
      * 需要匹配的对应维度值。
      * :::tip
-     * 您可以通过调用[获取自定义维度值](https://www.volcengine.com/docs/508/34555)来获取。
+     * 您可以通过调用[获取自定义维度值](https://www.volcengine.com/docs/508/1213050)来获取。
      * :::
      * 需要匹配的对应维度值
+     * @example "["4g"]"
      */
     Vals: string[];
   }[];
   /**
-   * 返回数据的时间粒度。
+   * 返回数据的时间粒度。取值如下所示：
    * * `5m`： 5 分钟；
    * * `1h`： 1 小时；
    * * `1d`： 1 天；
@@ -13200,13 +14070,13 @@ export interface DescribeImageXUploadSegmentSpeedByTimeBody {
    * 拆分维度。默认为空，表示拆分分位数据。 支持取值：
    * - `Duration`：表示分位数据
    * - 公共维度：`Appid`、`OS`、`AppVer`、`SdkVer`、`Country`、`Province`、`Isp`
-   * - 自定义维度：您可以通过调用 [GetImageXQueryDims](https://www.volcengine.com/docs/508/34554)接口获取自定义维度指标。
+   * - 自定义维度：您可以通过调用 [获取自定义维度列表](https://www.volcengine.com/docs/508/1213048)接口获取自定义维度指标。
    * 拆分维度。默认为空，表示拆分分位数据。支持取值：Duration（分位数据）、公共维度（Appid,OS,AppVer,SdkVer,Country,Province,Isp），自定义维度（通过"获取自定义维度列表"接口获取）
    * @example "OS"
    */
   GroupBy?: string;
   /**
-   * 需要匹配的运营商名称，不传则匹配所有运营商。支持取值如下：
+   * 需要匹配的运营商名称，不传则匹配所有运营商。取值如下所示：
    * - `电信`
    * - `联通`
    * - `移动`
@@ -13222,6 +14092,7 @@ export interface DescribeImageXUploadSegmentSpeedByTimeBody {
    * 鹏博士
    * 教育网
    * 其他
+   * @example "["电信"]"
    */
   Isp?: string[];
   /**
@@ -13245,6 +14116,7 @@ export interface DescribeImageXUploadSegmentSpeedByTimeBody {
   /**
    * 需要匹配的 SDK 版本，不传则匹配所有版本。
    * 需要匹配的SDK版本，不传则匹配所有版本
+   * @example "["1.1.0"]"
    */
   SdkVer?: string[];
   /**
@@ -13279,6 +14151,7 @@ export interface DescribeImageXUploadSegmentSpeedByTimeRes {
     /**
      * 上传速度数据。
      * 上传速度数据
+     * @example "-"
      */
     SpeedData: {
       /**
@@ -13290,6 +14163,7 @@ export interface DescribeImageXUploadSegmentSpeedByTimeRes {
       /**
        * 具体数据
        * 具体数据
+       * @example "-"
        */
       Data: {
         /**
@@ -13330,12 +14204,13 @@ export interface DescribeImageXUploadSpeedBody {
   /**
    * 需要匹配的 App 版本，不传则匹配 App 的所有版本。
    * 需要匹配的 App 版本，不传则匹配 App 的所有版本。
+   * @example "["1.0"]"
    */
   AppVer?: string[];
   /**
-   * 应用 ID。默认为空，不传则匹配账号下的所有的 App ID。
+   * 应用 ID。默认为空，不传则匹配账号下的所有的 AppID。
    * :::tip
-   * 您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/19511)的方式获取所需的 AppID。
+   * 您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/1213042)的方式获取所需的 AppID。
    * :::
    * 应用 ID。默认为空，匹配账号下的所有的App ID。
    * @example "123"
@@ -13361,12 +14236,13 @@ export interface DescribeImageXUploadSpeedBody {
   /**
    * 需要匹配的自定义维度项。
    * 需要匹配的自定义维度项
+   * @example "-"
    */
   ExtraDims?: {
     /**
      * 自定义维度名称。
      * :::tip
-     * 您可以通过调用[获取自定义维度列表](https://www.volcengine.com/docs/508/34554)来获取。
+     * 您可以通过调用[获取自定义维度列表](https://www.volcengine.com/docs/508/1213048)来获取。
      * :::
      * 自定义维度名称。
      * @example "access"
@@ -13375,14 +14251,15 @@ export interface DescribeImageXUploadSpeedBody {
     /**
      * 需要匹配的对应维度值。
      * :::tip
-     * 您可以通过调用[获取自定义维度值](https://www.volcengine.com/docs/508/34555)来获取。
+     * 您可以通过调用[获取自定义维度值](https://www.volcengine.com/docs/508/1213050)来获取。
      * :::
      * 需要匹配的对应维度值
+     * @example "["4g"]"
      */
     Vals: string[];
   }[];
   /**
-   * 返回数据的时间粒度。
+   * 返回数据的时间粒度。取值如下所示：
    * * `5m`： 5 分钟；
    * * `1h`： 1 小时；
    * * `1d`： 1 天；
@@ -13397,13 +14274,13 @@ export interface DescribeImageXUploadSpeedBody {
    * 拆分维度。默认为空，表示拆分分位数据。 支持取值：
    * - `Duration`：表示分位数据
    * - 公共维度：`Appid`、`OS`、`AppVer`、`SdkVer`、`Country`、`Province`、`Isp`
-   * - 自定义维度：您可以通过调用 [GetImageXQueryDims](https://www.volcengine.com/docs/508/34554)接口获取自定义维度指标。
+   * - 自定义维度：您可以通过调用 [获取自定义维度列表](https://www.volcengine.com/docs/508/1213048)接口获取自定义维度指标。
    * 拆分维度。默认为空，表示拆分分位数据。支持取值：Duration（分位数据）、公共维度（Appid,OS,AppVer,SdkVer,Country,Province,Isp），自定义维度（通过"获取自定义维度列表"接口获取）
    * @example "OS"
    */
   GroupBy?: string;
   /**
-   * 需要匹配的运营商名称，不传则匹配所有运营商。支持取值如下：
+   * 需要匹配的运营商名称，不传则匹配所有运营商。取值如下所示：
    * - `电信`
    * - `联通`
    * - `移动`
@@ -13419,6 +14296,7 @@ export interface DescribeImageXUploadSpeedBody {
    * 鹏博士
    * 教育网
    * 其他
+   * @example "["电信"]"
    */
   Isp?: string[];
   /**
@@ -13442,6 +14320,7 @@ export interface DescribeImageXUploadSpeedBody {
   /**
    * 需要匹配的 SDK 版本，不传则匹配所有版本。
    * 需要匹配的SDK版本，不传则匹配所有版本
+   * @example "["1.1.0"]"
    */
   SdkVer?: string[];
   /**
@@ -13452,7 +14331,7 @@ export interface DescribeImageXUploadSpeedBody {
    */
   StartTime: string;
   /**
-   * 上传类型，默认为空，返回上传 1.0 数据。
+   * 上传类型，默认为空，返回上传 1.0 数据。取值如下所示：
    * * `1`：上传 1.0。
    * * `2`：上传 2.0。
    * 上传类型，默认为空，返回上传 1.0 数据。
@@ -13480,6 +14359,7 @@ export interface DescribeImageXUploadSpeedRes {
     /**
      * 上传速度数据。
      * 上传速度数据
+     * @example "-"
      */
     SpeedData: {
       /**
@@ -13491,6 +14371,7 @@ export interface DescribeImageXUploadSpeedRes {
       /**
        * 对应的上传速度数据列表。
        * 对应的上传速度数据列表。
+       * @example "-"
        */
       Data: {
         /**
@@ -13500,8 +14381,7 @@ export interface DescribeImageXUploadSpeedRes {
          */
         Count: number;
         /**
-         * 数据对应时间点。
-         * * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`。
+         * 数据对应时间点。日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`。
          * 数据对应时间点，按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。
          * @example "2023-01-01T00:00:00+08:00"
          */
@@ -13532,12 +14412,13 @@ export interface DescribeImageXUploadSuccessRateByTimeBody {
   /**
    * 需要匹配的 App 版本，不传则匹配 App 的所有版本。
    * 需要匹配的 App 版本，不传则匹配 App 的所有版本。
+   * @example "["1.0"]"
    */
   AppVer?: string[];
   /**
-   * 应用 ID。默认为空，不传则匹配账号下的所有的 App ID。
+   * 应用 ID。默认为空，不传则匹配账号下的所有的 AppID。
    * :::tip
-   * 您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/19511)的方式获取所需的 AppID。
+   * 您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/1213042)的方式获取所需的 AppID。
    * :::
    * 应用 ID。默认为空，匹配账号下的所有的App ID。
    * @example "123"
@@ -13563,12 +14444,13 @@ export interface DescribeImageXUploadSuccessRateByTimeBody {
   /**
    * 需要匹配的自定义维度项。
    * 需要匹配的自定义维度项
+   * @example "-"
    */
   ExtraDims?: {
     /**
      * 自定义维度名称。
      * :::tip
-     * 您可以通过调用[获取自定义维度列表](https://www.volcengine.com/docs/508/34554)来获取。
+     * 您可以通过调用[获取自定义维度列表](https://www.volcengine.com/docs/508/1213048)来获取。
      * :::
      * 自定义维度名称。
      * @example "access"
@@ -13577,14 +14459,15 @@ export interface DescribeImageXUploadSuccessRateByTimeBody {
     /**
      * 需要匹配的对应维度值。
      * :::tip
-     * 您可以通过调用[获取自定义维度值](https://www.volcengine.com/docs/508/34555)来获取。
+     * 您可以通过调用[获取自定义维度值](https://www.volcengine.com/docs/508/1213050)来获取。
      * :::
      * 需要匹配的对应维度值
+     * @example "["4g"]"
      */
     Vals: string[];
   }[];
   /**
-   * 返回数据的时间粒度。
+   * 返回数据的时间粒度。取值如下所示：
    * * `5m`： 5 分钟；
    * * `1h`： 1 小时；
    * * `1d`： 1 天；
@@ -13598,13 +14481,13 @@ export interface DescribeImageXUploadSuccessRateByTimeBody {
   /**
    * 拆分维度。默认为空，不拆分。  支持取值：
    * - 公共维度：`Appid`、`OS`、`AppVer`、`SdkVer`、`Country`、`Province`、`Isp`
-   * - 自定义维度：您可以通过调用 [GetImageXQueryDims](https://www.volcengine.com/docs/508/34554)接口获取自定义维度指标
+   * - 自定义维度：您可以通过调用 [获取自定义维度列表](https://www.volcengine.com/docs/508/1213048)接口获取自定义维度指标
    * 拆分维度。默认为空，不拆分。支持取值：公共维度（Appid,OS,AppVer,SdkVer,Country,Province,Isp），自定义维度（通过"获取自定义维度列表"接口获取）
    * @example "OS"
    */
   GroupBy?: string;
   /**
-   * 需要匹配的运营商名称，不传则匹配所有运营商。支持取值如下：
+   * 需要匹配的运营商名称，不传则匹配所有运营商。取值如下所示：
    * - `电信`
    * - `联通`
    * - `移动`
@@ -13620,6 +14503,7 @@ export interface DescribeImageXUploadSuccessRateByTimeBody {
    * 鹏博士
    * 教育网
    * 其他
+   * @example "["电信"]"
    */
   Isp?: string[];
   /**
@@ -13643,6 +14527,7 @@ export interface DescribeImageXUploadSuccessRateByTimeBody {
   /**
    * 需要匹配的 SDK 版本，不传则匹配所有版本。
    * 需要匹配的SDK版本，不传则匹配所有版本
+   * @example "["1.1.0"]"
    */
   SdkVer?: string[];
   /**
@@ -13653,7 +14538,7 @@ export interface DescribeImageXUploadSuccessRateByTimeBody {
    */
   StartTime: string;
   /**
-   * 上传类型，默认为空，返回上传 1.0 数据。
+   * 上传类型，默认为空，返回上传 1.0 数据。取值如下所示：
    * * `1`：上传 1.0。
    * * `2`：上传 2.0。
    * 上传类型，默认为空，返回上传 1.0 数据。
@@ -13681,6 +14566,7 @@ export interface DescribeImageXUploadSuccessRateByTimeRes {
     /**
      * 上传成功率数据。
      * 上传成功率数据。
+     * @example "-"
      */
     SuccessRateData: {
       /**
@@ -13692,6 +14578,7 @@ export interface DescribeImageXUploadSuccessRateByTimeRes {
       /**
        * 对应的上传成功率数据列表。
        * 对应的上传成功率数据列表。
+       * @example "-"
        */
       Data: {
         /**
@@ -13701,8 +14588,7 @@ export interface DescribeImageXUploadSuccessRateByTimeRes {
          */
         Count: number;
         /**
-         * 数据对应时间点。
-         * * 日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
+         * 数据对应时间点。日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
          * 数据对应时间点，按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。
          * @example "2023-01-01T00:00:00+08:00"
          */
@@ -13727,22 +14613,33 @@ export interface DescribeImageXUploadSuccessRateByTimeRes {
 
 export interface DescribeImageXVideoClipDurationUsageQuery {
   /**
-   * 获取数据结束时间点。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00。
+   * 获取数据结束时间点。日期格式按照 ISO8601 表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如`2019-06-02T00:00:00+08:00`。
    * @example "2019-06-02T00:00:00+08:00"
    */
   EndTime: string;
   /**
-   * 查询数据的时间粒度。单位：秒。支持300,600,1200,1800,3600,86400,604800。缺省时查询StartTime和EndTime时间段全部数据。
+   * 查询数据的时间粒度。单位为秒。缺省时查询 `StartTime` 和 `EndTime` 时间段全部数据，此时单次查询最大时间跨度为 93 天。取值如下所示：
+   *
+   * - `300`：单次查询最大时间跨度为 31 天
+   * - `600`：单次查询最大时间跨度为 31 天
+   * - `1200`：单次查询最大时间跨度为 31 天
+   * - `1800`：单次查询最大时间跨度为 31 天
+   * - `3600`：单次查询最大时间跨度为 93 天
+   * - `86400`：单次查询最大时间跨度为 93 天
+   * - `604800`：单次查询最大时间跨度为 93 天
    * @example "300"
    */
   Interval?: string;
   /**
-   * 为空时表示不筛选，支持查询多个 Service，不同的 Service 使用逗号（,）分隔。
+   * 服务 ID。支持查询多个服务，传入多个时用英文逗号“,”分割，缺省情况下表示查询所有服务。您可以在 veImageX 控制台的[服务管理](https://console.volcengine.com/imagex/service_manage/)模块或者调用 [GetAllImageServices](https://www.volcengine.com/docs/508/9360) 接口获取服务 ID。
    * @example "s1,s2"
    */
   ServiceIds?: string;
   /**
-   * 获取数据起始时间点。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00。
+   * 获取数据起始时间点。日期格式按照 ISO8601 表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如`2019-06-02T00:00:00+08:00`。
+   * :::tip
+   * 由于仅支持查询近一年历史数据，则若此刻时间为`2011-11-21T16:14:00+08:00`，那么您可输入最早的开始时间为`2010-11-21T00:00:00+08:00`。
+   * :::
    * @example "2019-06-02T00:00:00+08:00"
    */
   StartTime: string;
@@ -13762,14 +14659,24 @@ export interface DescribeImageXVideoClipDurationUsageRes {
     Version: string;
   };
   Result: {
+    /**
+     * 小视频转动图转换时长
+     * @example "-"
+     */
     VideoClipDurationData: {
+      /**
+       * 时序数据
+       * @example "-"
+       */
       Data: {
         /**
+         * 数据对应时间点，时间片开始时刻。日期格式按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`，比如`2019-06-02T00:00:00+08:00`。
          * 统计时间点。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00。
          * @example "2023-01-01T00:00:00+08:00"
          */
         TimeStamp: string;
         /**
+         * 转换时长，单位为 ms。
          * 转换时长，单位ms
          * @example "12.3"
          */
@@ -13784,7 +14691,6 @@ export interface ExportFailedMigrateTaskQuery {
    * 任务地区（即任务目标服务的地区），默认空，返回国内任务。
    *
    * - `cn`：国内
-   * - `va`：美东
    * - `sg`：新加坡
    * @example "cn"
    */
@@ -13822,7 +14728,7 @@ export interface ExportFailedMigrateTaskRes {
   Result?: {
     /**
      * 迁移失败文件列表。仅当任务状态为`Partial`时有值。
-     * @example ""
+     * @example "-"
      */
     Entries: {
       /**
@@ -13877,12 +14783,10 @@ export interface FetchImageUrlBody {
   CallbackBody?: string;
   /**
    * 透传给业务的回调内容，当`Callback`不为空时为必填，取值需要符合`CallbackBodyType`指定格式。
-   * @example "```json
-   * {
+   * @example "{
    *   "param1": "value1",
    *   "param2": "value2"
-   * }
-   * ```"
+   * }"
    */
   CallbackBodyType?: string;
   /**
@@ -13912,23 +14816,21 @@ export interface FetchImageUrlBody {
   IgnoreSameKey?: boolean;
   /**
    * 请求 header
-   * @example "```json
-   * {
+   * @example "{
    *     "X-Function-Id": ["test"]
-   * }
-   * ```"
+   * }"
    */
   RequestHeader?: Record<string, string[]>;
   /**
    * 目标服务 ID，迁移后的文件将上传至该服务绑定的存储。
    *
-   * - 您可以在 veImageX 控制台 [服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。
+   * - 您可以在 veImageX 控制台[服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。
    * - 您也可以通过 OpenAPI 的方式获取服务 ID，具体请参考[获取所有服务信息](https://www.volcengine.com/docs/508/9360)。
-   * @example "jh**9"
+   * @example "jh**9k"
    */
   ServiceId: string;
   /**
-   * 指定存储 key，不包含 bucket 部分。默认使用随机生成的 key。
+   * 指定抓取成功后的文件存储 key，不包含 bucket 部分。默认使用随机生成的 key。
    * :::tip
    * 若指定 key 已存在，则会覆盖服务中 StoreKey 对应的已有文件，此时服务中保存文件的数量未发生变化。
    * :::
@@ -13989,6 +14891,7 @@ export interface FetchImageUrlRes {
     /**
      * 文件大小，单位为 byte。同步处理情况下有返回值。
      * @format int64
+     * @example "9084"
      */
     FSize?: number;
     /**
@@ -13996,7 +14899,10 @@ export interface FetchImageUrlRes {
      * @example "100"
      */
     FrameCnt?: number;
-    /** 图片类型，在同步处理情况下、迁移至图像处理服务且为图片资源时有返回值。 */
+    /**
+     * 图片类型，在同步处理情况下、迁移至图像处理服务且为图片资源时有返回值。
+     * @example "png"
+     */
     ImageFormat?: string;
     /**
      * 图片高，在同步处理情况下、迁移至图像处理服务且为图片资源时有返回值。
@@ -16325,11 +17231,12 @@ export interface GetImageAuditTasksRes {
 
 export interface GetImageAuthKeyQuery {
   /**
-   * 服务 ID。 \
-   * - 您可以在 veImageX 控制台 [服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。
+   * 服务 ID。
+   * - 您可以在 veImageX 控制台[服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。
    * - 您也可以通过 OpenAPI 的方式获取服务 ID，具体请参考[获取所有服务信息](https://www.volcengine.com/docs/508/9360)。
+   * @example "y7****w7"
    */
-  ServiceId?: string;
+  ServiceId: string;
 }
 
 export interface GetImageAuthKeyRes {
@@ -16356,11 +17263,20 @@ export interface GetImageAuthKeyRes {
   };
   /** 视请求的接口而定 */
   Result?: {
-    /** 该服务的主鉴权 Key。 */
+    /**
+     * 该服务的主鉴权 Key。
+     * @example "hi2d8h***e6td2h"
+     */
     PrimaryKey: string;
-    /** 该服务的备鉴权 Key。 */
+    /**
+     * 该服务的备鉴权 Key。
+     * @example "8uw19***e1guw80"
+     */
     SecondaryKey: string;
-    /** 指定的服务 ID。 */
+    /**
+     * 指定的服务 ID。
+     * @example "y7****w7"
+     */
     ServiceId: string;
   };
 }
@@ -17117,12 +18033,15 @@ export interface GetImageEraseResultRes {
 
 export interface GetImageMigrateTasksQuery {
   /**
-   * 分页条数。默认值为 10，最大值为 1000。
+   * 分页查询时，显示的每页数据的最大条数。默认值为 10，最大值为 1000。
    * @example "10"
    */
   Limit?: number;
   /**
-   * 分页偏移量。默认值为 0，表示从最新一个开始获取。
+   * 分页偏移量，用于控制分页查询返回结果的起始位置，以便对数据进行分页展示和浏览。默认值为 0。
+   * :::tip
+   * 例如，指定分页条数 Limit = 10，分页偏移量 Offset = 10，表示从查询结果的第 11 条记录开始返回数据，共展示 10 条数据。
+   * :::
    * @format int64
    * @example "0"
    */
@@ -17131,7 +18050,6 @@ export interface GetImageMigrateTasksQuery {
    * 任务地区（即任务目标服务的地区），缺省时将返回国内列表。取值如下所示：
    *
    * - `cn`：国内
-   * - `va`：美东
    * - `sg`：新加坡
    * @example "cn"
    */
@@ -17142,7 +18060,7 @@ export interface GetImageMigrateTasksQuery {
    */
   ServiceId?: string;
   /**
-   * 任务状态，填入多个时使用半角逗号分隔。取值如下所示：
+   * 任务状态，填入多个时使用英文逗号分隔。取值如下所示：
    * - `Initial`：创建中
    * - `Running`：运行中
    * - `Done`：全部迁移完成
@@ -17244,13 +18162,13 @@ export interface GetImageMigrateTasksRes {
        */
       Progress: {
         /**
-         * 失败错误码。仅当 Status=Failed 时有值
+         * 失败错误码。仅当 `Status`=`Failed` 时有值。
          *
          * @example "613100"
          */
         ErrCode: number;
         /**
-         * 失败原因。仅当 Status=Failed 时有值
+         * 失败原因。仅当 `Status`=`Failed` 时有值。
          *
          * @example "下载URL列表文件失败"
          */
@@ -17316,12 +18234,14 @@ export interface GetImageMigrateTasksRes {
          * 源下载 QPS 限制。如值不为空，则长度必须为 24，表示一天 24 小时内各小时的 QPS 限制值。
          * - 取值为负值时，表示无限制
          * - 取值为 0 时，表示对应时间不允许迁移
+         * @example "[100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 1100, 1200, 1300, 1400, 1500, 1600, 1700, 1800, 1900, 2000, 2100, 2200, 2300, 2400]"
          */
         ReadQps: number[];
         /**
          * 源下载流量限制。单位为 Byte。如值不为空，则长度必须为24，表示一天 24 小时内各小时的流量限制值。
          * - 取值为负值时，表示无限制
          * - 取值为 0 时，表示对应时间不允许迁移
+         * @example "[100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 1100, 1200, 1300, 1400, 1500, 1600, 1700, 1800, 1900, 2000, 2100, 2200, 2300, 2400]"
          */
         ReadRate: number[];
       };
@@ -17331,7 +18251,7 @@ export interface GetImageMigrateTasksRes {
        */
       Source: {
         /**
-         * ak
+         * Access Key
          * @example "AKL****UwNWViYmJmYWI	"
          */
         AK: string;
@@ -17356,13 +18276,13 @@ export interface GetImageMigrateTasksRes {
         /**
          * 迁移前缀列表
          *
-         * @example "base	"
+         * @example "["base"]	"
          */
         Prefix: string[];
         /**
          * 迁移正则表达式列表
          *
-         * @example "/.png/"
+         * @example "["/.png/"]"
          */
         Regex: string[];
         /**
@@ -17372,8 +18292,7 @@ export interface GetImageMigrateTasksRes {
          */
         Region: string;
         /**
-         * sk
-         *
+         * Secret Key
          * @example "Wm1J***1ZamMwWlRSbVpqZw==	"
          */
         SK: string;
@@ -19481,7 +20400,7 @@ export interface GetImageUploadFilesRes {
 
 export interface GetImageXQueryAppsQuery {
   /**
-   * 数据来源，账号下近 60 天内有数据上报的应用 ID，缺省情况下返回账号对应的全部应用 ID。
+   * 数据来源，账号下近 60 天内有数据上报的应用 ID，缺省情况下返回账号对应的全部应用 ID。取值如下所示：
    * * `upload`：上传 1.0 数据。
    * * `cdn`：下行网络数据。
    * * `client`：客户端数据。
@@ -19507,7 +20426,10 @@ export interface GetImageXQueryAppsRes {
     Version: string;
   };
   Result: {
-    /** 火山引擎账号内的所有 App 信息。 */
+    /**
+     * 火山引擎账号内的所有 App 信息。
+     * @example "-"
+     */
     Apps: {
       /**
        * 应用 ID。
@@ -19522,9 +20444,8 @@ export interface GetImageXQueryAppsRes {
        */
       AppName: string;
       /**
-       * App 所属地区。
+       * App 所属地区，取值如下所示：
        * * `cn`：国内。
-       * * `va`：美东。
        * * `sg`：新加坡。
        * App 所属地区。  cn：国内。 va：美东。 sg：新加坡。
        * @example "cn"
@@ -19548,9 +20469,9 @@ export interface GetImageXQueryAppsRes {
 
 export interface GetImageXQueryDimsQuery {
   /**
-   * 应用 ID。默认为空，匹配账号下所有的 App ID。
+   * 应用 ID。默认为空，匹配账号下所有的 AppID。
    * :::tip
-   * 您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/19511)的方式获取所需的 AppID。
+   * 您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/1213042)的方式获取所需的 AppID。
    * :::
    * @example "123"
    */
@@ -19564,13 +20485,14 @@ export interface GetImageXQueryDimsQuery {
    */
   OS?: string;
   /**
-   * 数据来源。
+   * 数据来源，取值如下所示：
    * * `upload`：上传 1.0 数据。
    * * `cdn`：下行网络数据。
    * * `client`：客户端数据。
    * * `sensible`：感知数据。
    * * `uploadv2`：上传 2.0 数据。
-   * * `exceed`：大图监控数据。
+   * * `exceed`：大图监控数据，包含大图样本量和大图明细。
+   * * `exceed_all`：大图分布数据。
    * @example "upload"
    */
   Source: string;
@@ -19593,6 +20515,7 @@ export interface GetImageXQueryDimsRes {
     /**
      * 上报数据中出现的维度信息。
      * 上报数据中出现的维度信息。
+     * @example "["biz_tag"]"
      */
     Dim: string[];
   };
@@ -19600,9 +20523,9 @@ export interface GetImageXQueryDimsRes {
 
 export interface GetImageXQueryRegionsQuery {
   /**
-   * 应用 ID。默认为空，匹配账号下所有的 App ID。
+   * 应用 ID。默认为空，匹配账号下所有的 AppID。
    * :::tip
-   * 您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/19511)的方式获取所需的 Appid。
+   * 您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/1213042)的方式获取所需的应用 ID。
    * :::
    * @example "13"
    */
@@ -19616,7 +20539,7 @@ export interface GetImageXQueryRegionsQuery {
    */
   OS?: string;
   /**
-   * 数据来源。
+   * 数据来源，取值如下所示：
    * * `upload`：上传 1.0 数据。
    * * `cdn`：下行网络数据。
    * * `client`：客户端数据。
@@ -19645,13 +20568,13 @@ export interface GetImageXQueryRegionsRes {
     /**
      * 60 天内上报数据中出现的海外国家，按出现次数降序排列。
      * 60 天内上报数据中出现的海外国家，按出现次数降序排列。
-     * @example ""
+     * @example "-"
      */
     Country: string[];
     /**
      * 60 天内上报数据中出现的国内省份，按出现次数降序排列。
      * 60 天内上报数据中出现的国内省份，按出现次数降序排列。
-     * @example ""
+     * @example "-"
      */
     Province: string[];
   };
@@ -19659,9 +20582,9 @@ export interface GetImageXQueryRegionsRes {
 
 export interface GetImageXQueryValsQuery {
   /**
-   * 应用 ID。默认为空，匹配中账号下所有的 App ID。
+   * 应用 ID。默认为空，匹配中账号下所有的 AppID。
    * :::tip
-   * 您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/19511)的方式获取所需的 AppID。
+   * 您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/1213042)的方式获取所需的 AppID。
    * :::
    * @example "123"
    */
@@ -19669,7 +20592,7 @@ export interface GetImageXQueryValsQuery {
   /**
    * 自定义维度名称。
    * :::tip
-   * 您可以通过调用[获取自定义维度列表](https://www.volcengine.com/docs/508/34554)获取所需的维度名称。
+   * 您可以通过调用[获取自定义维度列表](https://www.volcengine.com/docs/508/1213048)获取所需的维度名称。
    * :::
    * @example "biz_tag"
    */
@@ -19689,7 +20612,8 @@ export interface GetImageXQueryValsQuery {
    * * `client`：客户端数据。
    * * `sensible`：感知数据。
    * * `uploadv2`：上传 2.0 数据。
-   * * `exceed`：大图监控数据。
+   * * `exceed`：大图监控数据，包含大图样本量和大图明细。
+   * * `exceed_all`：大图分布数据。
    * @example "upload"
    */
   Source: string;
@@ -19712,6 +20636,7 @@ export interface GetImageXQueryValsRes {
     /**
      * 60 天内上报数据中出现的维度值信息，按出现次数降序排列。
      * 60 天内上报数据中出现的维度值信息，按出现次数降序排列。
+     * @example "["wifi"]"
      */
     DimVal: string[];
   };
@@ -19909,7 +20834,10 @@ export interface GetResponseHeaderValidateKeysRes {
   };
   /** 视请求的接口而定 */
   Result?: {
-    /** 合法的响应头 key 列表 */
+    /**
+     * 合法的响应头 key 列表
+     * @example "["Content-Disposition","Content-Language","Access-Control-Allow-Origin","Access-Control-Expose-Headers","Access-Control-Max-Age","Cache-Control","Access-Control-Allow-Methods","Timing-Allow-Origin","Access-Control-Allow-Headers","Access-Control-Allow-Credentials","Access-Control-Max-Age"]"
+     */
     ValidateRespHdrKeys: string[];
   };
 }
@@ -20559,7 +21487,6 @@ export interface RerunImageMigrateTaskQuery {
    * 任务地区（即任务目标服务的地区），默认空，返回国内任务。
    *
    * - `cn`：国内
-   * - `va`：美东
    * - `sg`：新加坡
    * @example "cn"
    */
@@ -20600,7 +21527,10 @@ export interface RerunImageMigrateTaskRes {
 
 /** 描述 */
 export interface SetDefaultDomainBody {
-  /** 域名，您可以通过[获取服务下全部域名](https://www.volcengine.com/docs/508/9379)获取服务下域名信息。 */
+  /**
+   * 指定新的默认域名，您可以通过[获取服务下全部域名](https://www.volcengine.com/docs/508/9379)获取服务下域名信息。
+   * @example "test.com.cn"
+   */
   Domain: string;
 }
 
@@ -20641,10 +21571,9 @@ export interface SetDefaultDomainRes {
 
 export interface TerminateImageMigrateTaskQuery {
   /**
-   * 任务地区(即任务目标服务的地区)，默认空，返回国内任务。
+   * 任务地区（即任务目标服务的地区），默认空，返回国内任务。
    *
    * - `cn`：国内
-   * - `va`：美东
    * - `sg`：新加坡
    * @example "cn"
    */
@@ -21173,15 +22102,26 @@ export interface UpdateImageAuditTaskStatusRes {
 }
 
 export interface UpdateImageAuthKeyBody {
-  /** 主鉴权 key，长度为 8-32 字节，为空则不更新主鉴权值。 */
+  /**
+   * 主鉴权 key，长度为 8-32 字节，为空则不更新主鉴权值。
+   * @example "899z09z***121u2e9w"
+   */
   PrimaryKey?: string;
-  /** 备鉴权 key，长度为 8-32 字节，为空则不更新备鉴权值。 */
+  /**
+   * 备鉴权 key，长度为 8-32 字节，为空则不更新备鉴权值。
+   * @example "030fwe8***j9wqhiqs"
+   */
   SecondaryKey?: string;
 }
 
 export interface UpdateImageAuthKeyQuery {
-  /** 服务 ID。 */
-  ServiceId?: string;
+  /**
+   * 待更新配置的服务 ID。
+   * - 您可以在 veImageX 控制台[服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。
+   * - 您也可以通过 OpenAPI 的方式获取服务 ID，具体请参考[获取所有服务信息](https://www.volcengine.com/docs/508/9360)。
+   * @example "2y***s2"
+   */
+  ServiceId: string;
 }
 
 export interface UpdateImageAuthKeyRes {
@@ -21307,19 +22247,21 @@ export interface UpdateImageMirrorConfRes {
 export interface UpdateImageObjectAccessBody {
   /**
    * 是否开启源地址访问，取值如下所示：
-   * * true：开启源地址访问
-   * * false：关闭源地址访问
+   * * `true`：开启源地址访问
+   * * `false`：关闭源地址访问
+   * @example "false"
    */
   ObjectAccess?: boolean;
 }
 
 export interface UpdateImageObjectAccessQuery {
   /**
-   * 服务 ID。
-   * - 您可以在 veImageX 控制台 [服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。
+   * 待更新配置的服务 ID。
+   * - 您可以在 veImageX 控制台[服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。
    * - 您也可以通过 OpenAPI 的方式获取服务 ID，具体请参考[获取所有服务信息](https://www.volcengine.com/docs/508/9360)。
+   * @example "9jh**b2d"
    */
-  ServiceId?: string;
+  ServiceId: string;
 }
 
 export interface UpdateImageObjectAccessRes {
@@ -21441,6 +22383,7 @@ export interface UpdateImageTaskStrategyBody {
      *
      * - 取值为负值时，表示无限制
      * - 取值为 0 时，表示对应时间不允许迁移
+     * @example "[100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 1100, 1200, 1300, 1400, 1500, 1600, 1700, 1800, 1900, 2000, 2100, 2200, 2300, 2400]"
      */
     ReadQps?: number[];
     /**
@@ -21448,6 +22391,7 @@ export interface UpdateImageTaskStrategyBody {
      *
      * - 取值为负值时，表示无限制
      * - 取值为 0 时，表示对应时间不允许迁移
+     * @example "[100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 1100, 1200, 1300, 1400, 1500, 1600, 1700, 1800, 1900, 2000, 2100, 2200, 2300, 2400]"
      */
     ReadRate?: number[];
   };
@@ -21785,15 +22729,19 @@ export interface UpdateResponseHeaderRes {
 }
 
 export interface UpdateServiceNameBody {
-  /** 服务名称，最多不超过 32 个字符。 */
+  /**
+   * 服务名称，最多不超过 32 个字符。
+   * @example "新服务"
+   */
   ServiceName: string;
 }
 
 export interface UpdateServiceNameQuery {
   /**
-   * 服务 ID。
-   * * 您可以在 veImageX 控制台 [服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。
+   * 待修改名称的服务 ID。
+   * * 您可以在 veImageX 控制台[服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。
    * * 您也可以通过 OpenAPI 的方式获取服务 ID，具体请参考[获取所有服务信息](https://www.volcengine.com/docs/508/9360)。
+   * @example "uh1**89i"
    */
   ServiceId: string;
 }

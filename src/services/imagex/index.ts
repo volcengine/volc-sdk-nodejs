@@ -52,6 +52,12 @@ function formatApiErrMsg(params: OpenApiResponseMetadataParams) {
   }, Code: ${params.Error?.Code || "-"}, ErrMessage: ${params.Error?.Message}`;
 }
 
+const formatUploadErrMsg = (res: UploadPutResult) => {
+  return `uri ${res.uri} upload error, ${Object.entries(res.putErr || {})
+    .map(([k, v]) => `${k}: ${v || "-"}`)
+    .join(", ")}`;
+};
+
 export class ImagexService extends ImagexAutoService {
   constructor(options?: ServiceOptions) {
     super({
@@ -130,22 +136,16 @@ export class ImagexService extends ImagexAutoService {
       uploadHosts[0],
       newStoreInfos.length ? newStoreInfos : storeInfos
     );
-    // 存在失败文件 则 error 提示,但是不阻塞流程
-    for (const res of uploadTaskResults) {
-      if (!res.success) {
-        console.error(
-          `uri ${res.uri} upload error, ${
-            !res.putErr
-              ? ""
-              : Object.entries(res.putErr)
-                  .map(([k, v]) => `${k}: ${v || "-"}`)
-                  .join(", ")
-          }`
-        );
-      }
+    // 没有一个文件上传成功 则抛错
+    if (!uploadTaskResults.filter((item) => item.success).length) {
+      throw Error(
+        `All files have failed to upload.\n${uploadTaskResults.map(formatUploadErrMsg).join("\n")}`
+      );
     }
-    // 跳过 commmit 阶段或者没有一个文件上传成功
-    if (params.SkipCommit || !uploadTaskResults.filter((item) => item.success).length) {
+
+    // 跳过 commmit 阶段, uploadTaskResults 包含成功和失败两种结果
+    // 此时模拟CommitImageUpload接口的返回
+    if (params.SkipCommit) {
       return {
         Results: uploadTaskResults.map((item) => {
           if (item.success) {
@@ -174,6 +174,13 @@ export class ImagexService extends ImagexAutoService {
     if (commitRes.ResponseMetadata?.Error) {
       throw new Error(formatApiErrMsg(commitRes.ResponseMetadata));
     }
+    // 补充上传失败文件的失败原因
+    commitRes.Result?.Results?.forEach((commitItem) => {
+      if (commitItem.UriStatus === 2001) {
+        const uploadErr = uploadTaskResults.find((item) => item.uri === commitItem.Uri);
+        (commitItem as any).PutError = uploadErr?.putErr;
+      }
+    });
     return commitRes;
   };
 
@@ -227,19 +234,44 @@ export class ImagexService extends ImagexAutoService {
           Authorization: auth,
         },
         data: fileCopy,
+        maxContentLength: Infinity,
+        maxBodyLength: Infinity,
       });
       return { uri: oid, success: true };
     } catch (error) {
-      return {
+      const errorItem: UploadPutResult = {
         uri: oid,
         success: false,
-        putErr: {
-          errStatus: get(error, "response.data.error.code"),
-          errCodeN: get(error, "response.data.error.error_code"),
-          errMsg: get(error, "response.data.error.message"),
-          errCode: get(error, "response.data.error.error"),
-        },
       };
+      if (error.response) {
+        // 请求成功发出且服务器也响应了状态码，但状态代码超出了 2xx 的范围
+        // 服务器响应分为网关和具体服务
+        const isJsonType = typeof get(error, "response.data") === "object";
+        errorItem.putErr = {
+          errStatus: isJsonType
+            ? get(error, "response.data.error.code", "-")
+            : get(error, "response.status", "-"),
+          errCodeN: get(error, "response.data.error.error_code", "-"),
+          errMsg: isJsonType
+            ? get(error, "response.data.error.message", "-")
+            : get(error, "response.statusText", "-"),
+          errCode: get(error, "response.data.error.error", "-"),
+          reqId: get(error, "response.headers.x-tt-logid", "-"),
+        };
+      } else if (error.request) {
+        // console.log(error.request);
+        errorItem.putErr = {
+          errMsg: `The request was made but no response was received: ${error.message}`,
+          errCode: error.code,
+        };
+      } else {
+        // console.log("Error", error.message);
+        errorItem.putErr = {
+          errMsg: `Error happened in setting up the request: ${error.message}`,
+          errCode: error.code,
+        };
+      }
+      return errorItem;
     }
   };
 
