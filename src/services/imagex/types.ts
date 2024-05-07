@@ -128,13 +128,17 @@ export interface GetUploadAuthTokenParams {
   "X-Expires": number;
 }
 
+type PutError = {
+  errMsg: string;
+  errCode?: string;
+  errStatus?: string | number;
+  errCodeN?: string;
+  reqId?: string;
+  uploadid?: string;
+};
+
 export type UploadPutResult = {
   success: boolean;
   uri: string;
-  putErr?: {
-    errCode?: string;
-    errCodeN?: string | number;
-    errStatus?: number;
-    errMsg?: string;
-  };
+  putErr?: PutError;
 };
