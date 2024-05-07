@@ -1,3 +1,7 @@
+2024-05-07 Bumped to version v1.18.2
+- imagex:
+  - 修复文件上传问题
+
 2024-04-18 Bumped to version v1.18.1
 - 升级 crypto-js 解决安全问题
 - vod:
