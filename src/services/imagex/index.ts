@@ -1,7 +1,8 @@
 import fs from "fs";
-import axios from "axios";
+import axios, { AxiosRequestConfig } from "axios";
 import { promisify } from "util";
 import get from "lodash.get";
+import dayjs from "dayjs";
 import { getDefaultOption } from "../../base/utils";
 import Signer, { queryParamsToString } from "../../base/sign";
 import {
@@ -25,6 +26,9 @@ import ImagexAutoService from "./client";
 
 const fsAccess = promisify(fs.access);
 
+const BizName = "ImageX";
+const DateFormat = "YYYY-MM-DD HH:mm:ss.SSS";
+
 const defaultUploadAuthParams: GetUploadAuthParams = {
   serviceIds: [],
   storeKeys: [],
@@ -47,7 +51,7 @@ function getEncodedUri(originUri: string): string {
 }
 
 function formatApiErrMsg(params: OpenApiResponseMetadataParams) {
-  return `API ${params.Action} error, reqId: ${params.RequestId}, CodeN: ${
+  return `${BizName} API ${params.Action} error, reqId: ${params.RequestId}, CodeN: ${
     params.Error?.CodeN || "-"
   }, Code: ${params.Error?.Code || "-"}, ErrMessage: ${params.Error?.Message}`;
 }
@@ -57,6 +61,53 @@ const formatUploadErrMsg = (res: UploadPutResult) => {
     .map(([k, v]) => `${k}: ${v || "-"}`)
     .join(", ")}`;
 };
+
+const handleErrorResponse = (error, action) => {
+  // 2xx but error
+  if (error.message?.includes("ImageX API")) {
+    throw new Error(error.message);
+  }
+  let errorMessage;
+  if (error.response) {
+    // not 2xx
+    const isJsonType = typeof error.response.data === "object";
+    const errStatus = get(error, "response.status", "-");
+    const errStatusText = get(error, "response.statusText", "-");
+    errorMessage = `${action} response error. errStatus: ${errStatus}, errMsg: ${errStatusText}, ${
+      isJsonType ? JSON.stringify(error.response.data) : error.response.data
+    }, reqId: ${get(error, "response.headers.x-tt-logid", "-")}`;
+  } else if (error.request) {
+    // request but no response
+    errorMessage = `The ${action} request was made but no response was received. errCode: ${error.code}, errMsg:  ${error.message}`;
+  } else {
+    errorMessage = `Error happened in setting up the ${action} request. errCode: ${error.code}, errMsg: ${error.message}`;
+  }
+  throw new Error(errorMessage);
+};
+
+class Logger {
+  public name: string;
+  public startTime: number;
+  constructor(config) {
+    this.name = config.name;
+    this.startTime = dayjs().valueOf(); // ms
+  }
+  print = (params: { identifier: string; endTime?: number; extra?: string }) => {
+    const { identifier, endTime, extra } = params || {};
+    const msgList: Array<string | number> = [
+      `[${BizName}:${this.name}] unique_id:${identifier} ${endTime ? "end" : "start"}`,
+      dayjs(endTime ?? this.startTime).format(DateFormat),
+    ];
+    if (endTime) {
+      msgList.push(`duration: ${endTime - this.startTime}ms`);
+    }
+    if (extra) {
+      msgList.push(extra);
+    }
+
+  console.log(msgList.join(', ')); // eslint-disable-line
+  };
+}
 
 export class ImagexService extends ImagexAutoService {
   constructor(options?: ServiceOptions) {
@@ -69,9 +120,11 @@ export class ImagexService extends ImagexAutoService {
 
   UploadImages = async (
     params: {
-      ApplyParams: ApplyImageUploadQuery;
-      CommitParams?: CommitImageUploadQuery & CommitImageUploadBody;
+      ApplyParams: ApplyImageUploadQuery & { requestOptions?: AxiosRequestConfig };
+      CommitParams?: CommitImageUploadQuery &
+        CommitImageUploadBody & { requestOptions?: AxiosRequestConfig };
       SkipCommit?: boolean;
+      ShowDuration?: boolean;
     },
     files: string[] | NodeJS.ReadableStream[] | ArrayBuffer[] | ArrayBufferView[]
   ): Promise<OpenApiResponse<CommitImageUploadRes["Result"]>> => {
@@ -84,6 +137,7 @@ export class ImagexService extends ImagexAutoService {
       ...params.ApplyParams,
       UploadNum: files.length,
     };
+    delete applyFinalParams.requestOptions;
     let originalApplyStoreKeys: string[] = [];
     const applyStoreKeys = params.ApplyParams.StoreKeys;
     if (Array.isArray(applyStoreKeys)) {
@@ -95,9 +149,36 @@ export class ImagexService extends ImagexAutoService {
       applyFinalParams.StoreKeys = applyStoreKeys.slice(0).sort(); // top 参数鉴权需要将数组按字母序排列
     }
 
-    const applyRes = await this.ApplyImageUpload(applyFinalParams);
-    if (applyRes.ResponseMetadata?.Error) {
-      throw new Error(formatApiErrMsg(applyRes.ResponseMetadata));
+    let logIdentifier = "";
+    if (params.ShowDuration) {
+      logIdentifier = `${
+        originalApplyStoreKeys?.length
+          ? originalApplyStoreKeys?.join(", ")
+          : Math.floor(Math.random() * 1000000)
+      }`;
+    }
+
+    let applyLogger: Logger | undefined;
+    if (params.ShowDuration) {
+      applyLogger = new Logger({ name: "ApplyImageUpload" });
+      applyLogger.print({ identifier: logIdentifier });
+    }
+
+    let applyRes;
+    try {
+      applyRes = await this.ApplyImageUpload(applyFinalParams, {
+        Action: "ApplyImageUpload",
+        ...(params.ApplyParams?.requestOptions || {}),
+      });
+      if (applyRes.ResponseMetadata?.Error) {
+        throw new Error(formatApiErrMsg(applyRes.ResponseMetadata));
+      }
+    } catch (error) {
+      handleErrorResponse(error, "ApplyImageUpload");
+    } finally {
+      if (params.ShowDuration && applyLogger) {
+        applyLogger.print({ endTime: dayjs().valueOf(), identifier: logIdentifier });
+      }
     }
     const reqId = applyRes.Result?.RequestId;
     const uploadAddr = applyRes.Result?.UploadAddress;
@@ -129,6 +210,11 @@ export class ImagexService extends ImagexAutoService {
         targetStoreInfo && newStoreInfos.push(targetStoreInfo);
       }
     }
+    let putLogger: Logger | undefined;
+    if (params.ShowDuration) {
+      putLogger = new Logger({ name: "DoUpload" });
+      putLogger.print({ identifier: logIdentifier });
+    }
     // 2. upload
     // 记录上传任务的执行结果
     const uploadTaskResults = await this.DoUpload(
@@ -136,6 +222,9 @@ export class ImagexService extends ImagexAutoService {
       uploadHosts[0],
       newStoreInfos.length ? newStoreInfos : storeInfos
     );
+    if (params.ShowDuration && putLogger) {
+      putLogger.print({ endTime: dayjs().valueOf(), identifier: logIdentifier });
+    }
     // 没有一个文件上传成功 则抛错
     if (!uploadTaskResults.filter((item) => item.success).length) {
       throw Error(
@@ -163,6 +252,11 @@ export class ImagexService extends ImagexAutoService {
       } as any;
     }
 
+    let commitLogger: Logger | undefined;
+    if (params.ShowDuration) {
+      commitLogger = new Logger({ name: "CommitImageUpload" });
+      commitLogger.print({ identifier: logIdentifier });
+    }
     // 3. commit
     const commitParams = {
       ServiceId: params.ApplyParams.ServiceId,
@@ -170,9 +264,23 @@ export class ImagexService extends ImagexAutoService {
       SuccessOids: uploadTaskResults.filter((item) => item.success).map((item) => item.uri),
       ...params.CommitParams,
     };
-    const commitRes = await this.CommitImageUpload(commitParams);
-    if (commitRes.ResponseMetadata?.Error) {
-      throw new Error(formatApiErrMsg(commitRes.ResponseMetadata));
+    delete commitParams.requestOptions;
+
+    let commitRes;
+    try {
+      commitRes = await this.CommitImageUpload(commitParams, {
+        Action: "CommitImageUpload",
+        ...(params.CommitParams?.requestOptions || {}),
+      });
+      if (commitRes.ResponseMetadata?.Error) {
+        throw new Error(formatApiErrMsg(commitRes.ResponseMetadata));
+      }
+    } catch (error) {
+      handleErrorResponse(error, "CommitImageUpload");
+    } finally {
+      if (params.ShowDuration && commitLogger) {
+        commitLogger.print({ endTime: dayjs().valueOf(), identifier: logIdentifier });
+      }
     }
     // 补充上传失败文件的失败原因
     commitRes.Result?.Results?.forEach((commitItem) => {
@@ -261,13 +369,13 @@ export class ImagexService extends ImagexAutoService {
       } else if (error.request) {
         // console.log(error.request);
         errorItem.putErr = {
-          errMsg: `The request was made but no response was received: ${error.message}`,
+          errMsg: `The put request was made but no response was received: ${error.message}`,
           errCode: error.code,
         };
       } else {
         // console.log("Error", error.message);
         errorItem.putErr = {
-          errMsg: `Error happened in setting up the request: ${error.message}`,
+          errMsg: `Error happened in setting up the put request: ${error.message}`,
           errCode: error.code,
         };
       }
