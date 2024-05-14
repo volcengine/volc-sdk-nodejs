@@ -1,3 +1,8 @@
+2024-05-14 Bumped to version v1.18.3
+- imagex:
+  - 支持指定文件上传中 API 调用的超时时间
+  - 优化文件上传报错信息
+
 2024-05-07 Bumped to version v1.18.2
 - imagex:
   - 修复文件上传问题
