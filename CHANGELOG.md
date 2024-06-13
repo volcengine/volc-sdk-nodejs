@@ -1,3 +1,7 @@
+2024-06-13 Bumped to version v1.19.0
+- vikingdb :
+  - 新增向量数据库 Nodejs SDK，包含数据集、索引、搜索数据、检索、Embedding 相关 API
+
 2024-05-14 Bumped to version v1.18.3
 - imagex:
   - 支持指定文件上传中 API 调用的超时时间
