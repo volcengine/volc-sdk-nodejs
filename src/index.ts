@@ -16,6 +16,7 @@ import * as sts from "./services/sts";
 import * as cdn from "./services/cdn";
 import * as sms from "./services/sms";
 import * as maas from "./services/maas";
+import * as vikingdb from "./services/vikingdb";
 
 export {
   Service,
@@ -36,4 +37,5 @@ export {
   cdn,
   sms,
   maas,
+  vikingdb,
 };
