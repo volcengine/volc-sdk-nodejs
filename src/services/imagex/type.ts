@@ -4,9 +4,20 @@ export interface ApplyImageUploadQuery {
    * :::tip
    * 仅当未指定`StoreKeys`时生效。
    * :::
+   * @example "png"
    */
   FileExtension?: string;
-  /** 覆盖上传 */
+  /**
+   * 是否开启重名文件覆盖上传，取值如下所示：
+   *
+   * - `true`：开启
+   * - `false`：（默认）关闭
+   *
+   * :::warning
+   * 在指定 `Overwrite` 为 `true` 前，请确保您指定的 `ServiceId` 对应服务已[开启了覆盖上传](https://www.volcengine.com/docs/508/1119912)能力。
+   * :::
+   * @example "false"
+   */
   Overwrite?: boolean;
   /**
    * 指定的上传文件路径。
@@ -15,12 +26,14 @@ export interface ApplyImageUploadQuery {
    * :::tip
    * 仅当未指定`StoreKeys`时生效。
    * :::
+   * @example "a/b"
    */
   Prefix?: string;
   /**
    * 服务 ID。
    * - 您可以在 veImageX 控制台 [服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。
    * - 您也可以通过 OpenAPI 的方式获取服务 ID，具体请参考[获取所有服务信息](https://www.volcengine.com/docs/508/9360)。
+   * @example "WMK**UXe"
    */
   ServiceId: string;
   /**
@@ -28,6 +41,7 @@ export interface ApplyImageUploadQuery {
    * :::tip
    * 本接口上一次请求的`SessionKey`，可在重试时带上，作为服务端的再次选路时的一个参考。
    * :::
+   * @example "eyJh**In0="
    */
   SessionKey?: string;
   /**
@@ -38,9 +52,13 @@ export interface ApplyImageUploadQuery {
    * :::tip
    * 仅对于 veImageX 上传场景生效。
    * :::
+   * @example "312**ea6.png"
    */
   StoreKeys?: string[];
-  /** 上传文件的数量，将决定下发的 StoreUri 的数量，取值范围为[1,10]，默认为 1。 */
+  /**
+   * 上传文件的数量，将决定下发的 StoreUri 的数量，取值范围为[1,10]，默认为 1。
+   * @example "1"
+   */
   UploadNum?: number;
 }
 
@@ -82,31 +100,43 @@ export interface ApplyImageUploadRes {
     Version: string;
   };
   Result: {
-    /** 请求的唯一标识 ID。 */
+    /**
+     * 请求的唯一标识 ID。
+     * @example "20221110162951010212162157127244C2"
+     */
     RequestId: string;
     /** 上传地址 */
     UploadAddress: {
       /**
        * 一次上传会话 Key。
-       *
        * 上传完成上报时使用该值，该 Key 可以在解码后提取信息及参数校验。
-       *
+       * @example "eyJh**In0="
        */
       SessionKey: string;
       /**
        * 上传 Uri
        *
+       * :::tip
        * 数量由请求参数中的 `UploadNum` 决定。
-       *
-       *
+       * :::
+       * @example "-"
        */
       StoreInfos: {
-        /** 上传凭证 */
+        /**
+         * 上传凭证。
+         * @example "6F**JL:-fU**zI=:Mz**5n"
+         */
         Auth: string;
-        /** 资源 URI */
+        /**
+         * 资源 ID。
+         * @example "tos-cn-i-mm**w2/31**a6.png"
+         */
         StoreUri: string;
       }[];
-      /** 上传域名列表，可以用于客户端容灾，并行上传等。 */
+      /**
+       * 上传域名列表，可以用于客户端容灾，并行上传等。
+       * @example "tos.test.com"
+       */
       UploadHosts: string[];
     };
   };
@@ -229,12 +259,19 @@ export interface CommitImageUploadRes {
 
 export interface CreateHiddenWatermarkImageBody {
   /**
-   * 获取盲水印图的算法模型，仅支持取值 `tracev1`。该模型可以生成带有水印的透明图像，但仅适用于纯色网页泄露溯源场景。该模型可有效抵抗常见的社交软件传播。然而，该算法对页面背景色的影响相对较大，因此不适合用于保护多彩页面或图片，例如商品页面。
-   * @example "tracev1"
+   * 盲水印模型，取值如下所示：
+   * - `tracev1`：前景图层水印模型（纯色背景适用）。
+   *
+   * 	该模型可以生成带有水印的透明图像，但仅适用于**纯色**网页泄露溯源场景。该模型可有效抵抗常见的社交软件传播。然而，该算法对页面背景色的影响相对较大，因此不适合用于保护多彩页面或图片，例如商品页面。
+   *
+   * - `tracev2`：前景图层水印模型（彩色背景通用）
+   *
+   * 	该模型可以生成含水印的透明图像，主要应用在前端页面截图泄露溯源场景。该模型生成的水印纹理密集，在正常界面添加后肉眼基本不可见（截图放大后存在肉眼可见的水印纹理），可抵抗常见的社交软件传播。
+   * @example "tracev1，tracev2"
    */
   Algorithm: string;
   /**
-   * 自定义盲水印文本信息。最大支持 128 个字符，若全部是中文则不超过 42 个字符。
+   * 自定义盲水印文本信息，最多支持 128 个字符。
    * @example "你好"
    */
   Info: string;
@@ -250,7 +287,7 @@ export interface CreateHiddenWatermarkImageBody {
 
 export interface CreateHiddenWatermarkImageQuery {
   /**
-   * 服务 ID。
+   * 用于存储结果图和计量计费的服务 ID。
    * - 您可以在 veImageX 控制台 [服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。
    * - 您也可以通过 OpenAPI 的方式获取服务 ID，具体请参考[获取所有服务信息](https://www.volcengine.com/docs/508/9360)。
    * @example "h1**0k"
@@ -283,11 +320,9 @@ export interface CreateHiddenWatermarkImageRes {
   /** 视请求的接口而定 */
   Result?: {
     /**
-     * 盲水印图片 Url，当前仅支持输出 png 格式。
-     * :::warning
-     * 经裁剪后仍可提取水印的原图最小尺寸限制为 320 * 192。
-     * :::
-     * @example "https://test.com/tos-cn-i-h1**0k-example.png"
+     * 盲水印图片 Uri，当前仅支持输出 png 格式。
+     *
+     * @example "tos-cn-i-h1**0k-example.png"
      */
     StoreUri: string;
   };
@@ -711,7 +746,7 @@ export interface CreateImageContentTaskBody {
    * - `preload_url`：预热 URL
    * - `block_url`：禁用 URL
    * - `unblock_url`：解禁 URL
-   * refresh_url 刷新URL;refresh_dir 刷新目录;preload_url 预热URL;block_url 禁用URL;unblock_url 解禁URL
+   * @example "refresh_url"
    */
   TaskType: string;
   /**
@@ -721,12 +756,16 @@ export interface CreateImageContentTaskBody {
    * - 当`TaskType`取值`preload_url`，一次可提交的最大限额为 2000 个；
    * - 当`TaskType`取值`block_url`，一次可提交的最大限额为 2000 个；
    * - 当`TaskType`取值`unblock_url`，一次可提交的最大限额为 2000 个。
+   * @example "["url1", "url2"]"
    */
   Urls: string[];
 }
 
 export interface CreateImageContentTaskQuery {
-  /** 服务 ID。您可以在veImageX 控制台 [服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。您也可以通过 OpenAPI 的方式获取服务 ID，具体请参考[获取所有服务信息](https://www.volcengine.com/docs/508/9360)。 */
+  /**
+   * 服务 ID。您可以在veImageX 控制台 [服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。您也可以通过 OpenAPI 的方式获取服务 ID，具体请参考[获取所有服务信息](https://www.volcengine.com/docs/508/9360)。
+   * @example "8h**9q"
+   */
   ServiceId: string;
 }
 
@@ -934,28 +973,35 @@ export interface CreateImageHmEmbedRes {
 export interface CreateImageHmExtractQuery {
   /**
    * 算法模型，取值如下所示：
-   * * `default`：文本嵌入模型，默认文本嵌入模型；
-   * * `adapt_resize`：画质自适应文本嵌入模型。
-   * * `adapt`: 画质自适应文本嵌入模型。
-   * * `tracev1`：获取暗水印前、背景图。
-   * * `natural`: 适用于自然色彩的图片
+   *
+   * - `default`：文本嵌入基础模型
+   * - `adapt_resize`：画质自适应文本嵌入模型。
+   * - `adapt`: 文本嵌入自适应模型（AIGC 适用）
+   * - `natural`：文本嵌入基础模型（彩色图片通用）
+   * - `tracev1`：前景图层水印模型（纯色背景适用）
+   * - `tracev2`：前景图层水印模型（彩色背景通用）
+   *
+   * :::warning
+   * 指定 `tracev1` 或 `tracev2` 模型时，请传入已添加对应模型水印的背景网页的**截图**。若模型错误，则无法提取水印。
+   * :::
    * @example "default"
    */
   Algorithm: string;
   /**
-   * 待提取盲水印文件 URL，StoreUri 和 ImageUrl 都不为空时，以 StoreUri 为准。
+   * 待提取盲水印图片的 URL。`StoreUri` 和 `ImageUrl` 都不为空时，以 `StoreUri` 为准。
    * @example "https://test.com/example.png"
    */
   ImageUrl: string;
   /**
-   * 服务 ID。
+   * 待提取水印图对应的服务 ID。
+   *
    * - 您可以在 veImageX 控制台 [服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。
    * - 您也可以通过 OpenAPI 的方式获取服务 ID，具体请参考[获取所有服务信息](https://www.volcengine.com/docs/508/9360)。
    * @example "97**sh"
    */
   ServiceId: string;
   /**
-   * 待提取盲水印的图片 Uri，StoreUri 和 ImageUrl 都不为空时，以 StoreUri 为准。
+   * 待提取盲水印的图片的 URI。`StoreUri` 和 `ImageUrl` 都不为空时，以 `StoreUri` 为准。
    * @example "tos-cn-i-97**sh/example"
    */
   StoreUri: string;
@@ -991,6 +1037,51 @@ export interface CreateImageHmExtractRes {
   };
   Result: {
     /**
+     * 仅当 `Algorithm` 取值为 `tracev2` 时，有返回值。
+     *
+     * 编码附加信息。
+     * @example "-"
+     */
+    AdditionInfo?: {
+      /**
+       * 所提取的水印背景图层的生成周期，从 0 开始，表示处于生成的第一周内。
+       * @example "1"
+       */
+      HmCode?: number;
+      /**
+       * 生成周期所对应的起始与结束时间段，固定为 7 天。
+       * @example "-"
+       */
+      HmDateInfo?: {
+        /**
+         * 使用 `tracev2` 模型生成背景水印图层的生成周期的结束时间，Unix 时间戳，精度为秒。
+         * 结束时间戳
+         * @example "1719244800"
+         */
+        EndDate?: number;
+        /**
+         * 使用 `tracev2` 模型生成背景水印图层的生成周期的开始时间，Unix 时间戳，精度为秒。
+         *
+         * :::tip
+         * 例如：您于 6 月 5 日上午 9 时许调用 CreateHiddenWatermarkImage 接口生成 `tracev2` 模型的水印图层，在 6 月 10 日提取该模型网页截图的水印时，API 将会返回自生成时刻起至当前提取时刻所处的一个时间区间（无法精准至时分秒），该时间区间长度固定为 7 天。返回值如下所示：
+         *
+         * - `HmCode` 为 `0`，表示处于生成的第一周内
+         * - `StartDate` 为 `1717516800`，表示 2024 年 6 月 5 日 00:00:00
+         * - `EndDate` 为 `1718121600`，表示 2024 年 6 月 12 日 00:00:00
+         * :::
+         * 开始时间戳
+         * @example "1718640000"
+         */
+        StartDate?: number;
+      };
+      /**
+       * 水印类型，返回值固定为 `date`，表示日期。
+       * 水印类型
+       * @example "date"
+       */
+      HmType?: string;
+    };
+    /**
      * 提取出的盲水印文本信息。
      * @example "你好 abc123%^$%"
      */
@@ -1020,13 +1111,19 @@ export interface CreateImageMigrateTaskBody {
      */
     CallbackCfg?: {
       /**
-       * 回调地址。`Method`取值`http`时，填写公网可访问的 URL 地址，任务结束将向该地址发送 HTTP POST 请求。具体回调参数请参考[回调内容](#回调内容)。
+       * 回调地址。`Method`取值`http`时，填写公网可访问的 URL 地址，任务结束将向该地址发送 HTTP POST 请求。具体回调参数请参考[回调内容](#回调参数)。
        * @example "http://test.com"
        */
       Addr: string;
       /**
+       * 任务维度自定义回调参数，最多可输入 1024 个任意类型字符，并在回调的 `CallbackArgs` 中返回。
+       * 任务维度自定义回调参数，最大长度为1024
+       * @example "App1"
+       */
+      CallbackArgs?: string;
+      /**
        * 回调信息中是否包含具体迁移任务条目信息。取值如下所示：
-       * - `true`：包含。仅包含迁移成功的任务条目信息，迁移失败的任务列表请在迁移完成后调用 [ExportFailedMigrateTask](https://www.volcengine.com/docs/508/1108675) 接口获取。
+       * - `true`：包含。仅包含迁移成功的任务条目信息，迁移失败的任务列表请在迁移完成后调用 [ExportFailedMigrateTask](https://www.volcengine.com/docs/508/1261309) 接口获取。
        * - `false`：（默认）不包含。
        * :::warning
        * 若任务中包含的条目数量过多，会导致回调消息体过大，增加回调失败的风险。因此建议仅在任务中条目量级不超过十万时使用该参数。
@@ -1130,7 +1227,7 @@ export interface CreateImageMigrateTaskBody {
        *
        * - 仅当`Vendor`为`URL`时，需填写 URL 列表文件地址（公网 URL 地址）。
        *  :::tip
-       * 若您需要对迁移后文件批量重命名，请在 URL 的同一行内增加指定迁移后文件的 StoreKey，URL 和对应的 StoreKey 之间使用`;`分隔。StoreKey 填写规则详见[自定义迁移文件名规则](#自定义迁移文件名规则)。
+       * 支持指定迁移文件和转码后迁移文件进行重命名，详见 [URL 列表迁移文件说明](https://www.volcengine.com/docs/508/1263268)。
        *  :::
        * - 当`Vendor`为其他时，请填写对应云服务商所需迁移数据的 Bucket 名称。您可参考[云数据迁移准备](https://www.volcengine.com/docs/508/129213)获取对应阿里云OSS、腾讯云COS、七牛云KODO、百度云BOS、华为云OBS、 优刻得（Ucloud File)、AWS国际站的 Bucket 名称。
        * @example "storage-test"
@@ -1161,7 +1258,7 @@ export interface CreateImageMigrateTaskBody {
        * - 多条正则表达式之间是"或"的关系，即源文件匹配任何一条正则表达式即视为符合迁移条件。
        * - 正则过滤规则需要遍历源桶中的全部文件，如果源桶中文件数量较多会降低迁移速度。
        * :::
-       * @example "["\.png\]"
+       * @example "[".png"]"
        */
       Regex?: string[];
       /**
@@ -1223,6 +1320,16 @@ export interface CreateImageMigrateTaskBody {
      */
     Transcode?: {
       /**
+       * 仅当转码/降级格式为 heic、webp、jpeg 时生效。
+       *
+       * 是否开启自适应转码。
+       * - `true`：开启。开启后，将根据 `Format` 或者 `DemotionFmt` 指定格式进行自适应转码处理。
+       * - `false`：（默认）关闭
+       * 是否开启自适应编码。仅编码/降级格式为heic/webp/jpeg时生效
+       * @example "false"
+       */
+      Adapt?: boolean;
+      /**
        * 包含透明通道的图片是否编码为降级格式。取值如下所示：
        *
        * - `true`：降级
@@ -1253,6 +1360,14 @@ export interface CreateImageMigrateTaskBody {
        * @example "75"
        */
       Quality: number;
+      /**
+       * 对带有 CMYK 色彩空间的图片，是否跳过转码处理直接存储原图。取值如下所示：
+       *
+       * - `true`：是
+       * - `false`：（默认）否
+       * @example "false"
+       */
+      SkipCMYK?: boolean;
     };
   };
 }
@@ -1634,6 +1749,7 @@ export interface CreateImageTemplateBody {
    * @example "-"
    */
   OutputExtra?: {
+    "avif.demfmt"?: string;
     /**
      * 仅当OutputFormat取值为heic时配置有效
      * 是否带透明通道编码，取值如下所示：
@@ -1648,6 +1764,9 @@ export interface CreateImageTemplateBody {
      * @example "false"
      */
     "heic.alpha.reserve"?: string;
+    /** @example "1" */
+    "heic.aq.mode"?: string;
+    "heic.demfmt"?: string;
     /**
      * 仅当OutputFormat取值为heic时配置有效
      * 色位深度，值越大则提供的图像色彩范围越多，使图像颜色变化的更细腻，但图像体积也会增大。取值如下所示：
@@ -1662,6 +1781,10 @@ export interface CreateImageTemplateBody {
      * @example "8"
      */
     "heic.encode.depth"?: string;
+    /** @example "1000000" */
+    "heic.quality.adapt.pixlimit"?: string;
+    /** @example "3" */
+    "heic.quality.adapt.version"?: string;
     /**
      * 仅当OutputFormat取值为heic时配置有效
      * 是否开启 ROI 编码，取值如下所示：
@@ -1688,7 +1811,7 @@ export interface CreateImageTemplateBody {
      * jpeg 的 alpha 图片是否降级为 png，指定为 `png` 时表示降级为 png 格式。缺省情况下默认为空，表示不降级。
      * @example "png"
      */
-    "jpeg.alpha.demotion.png"?: string;
+    "jpeg.alpha.demotion"?: string;
     /**
      * 是否采用 jpeg 渐进编码格式，取值如下所示：
      *
@@ -1701,6 +1824,10 @@ export interface CreateImageTemplateBody {
      * @example "false"
      */
     "jpeg.progressive"?: string;
+    /** @example "1000000" */
+    "jpeg.quality.adapt.pixlimit"?: string;
+    /** @example "3" */
+    "jpeg.quality.adapt.version"?: string;
     /**
      * 指定 jpeg 体积的输出大小，需同时设置 `jpeg.size.fixed.padding`，二者缺一不可。
      * 指定输出体积大小，单位为 Byte。
@@ -1725,6 +1852,10 @@ export interface CreateImageTemplateBody {
      * @example "false"
      */
     "png.use_quant"?: string;
+    /** @example "1000000" */
+    "webp.quality.adapt.pixlimit"?: string;
+    /** @example "3" */
+    "webp.quality.adapt.version"?: string;
   };
   /**
    * 该模板计划使用的输出格式。
@@ -1796,7 +1927,7 @@ export interface CreateImageTemplateBody {
    * - `true`：是
    * - `false`：否
    * 是否同步处理，仅对heic图有效
-   * @example "是"
+   * @example "true"
    */
   Sync?: boolean;
   /**
@@ -2052,19 +2183,20 @@ export interface CreateImageTranscodeTaskBody {
     Method: string;
   };
   /**
-   * 待转码的图片 uri 或 url 列表。
-   * `DataList`和`Filelist`都不为空时，`DataList`优先生效。
-   * :::warning
-   * 若`DataType`取值`uri`，则待转码图片 URI 必须为指定ServiceId下的存储 URI。您可通过调用 [GetImageUploadFiles](https://www.volcengine.com/docs/508/9392) 获取指定服务下全部的上传文件存储 URI。
-   * :::
-   * @example "tos-cn-i-5s****fo/mask.png"
+   * `DataList`和`Filelist`二选一必填，同时配置时，`DataList`优先生效。
+   *
+   * 待转码的图片 uri 或 url 列表，最多支持 10 万条。
+   *
+   * - 若`DataType`取值`uri`，此处请传入指定 ServiceId 下的存储 URI。
+   * - 若`DataType`取值`url`，此处请传入公网可访问的 URL。
+   * @example "["http://demo.com/example.png"]"
    */
   DataList: string[];
   /**
    * 数据类型，取值如下所示：
    *
-   * - uri
-   * - url
+   * - `uri`：指定 ServiceId 下存储 URI。
+   * - `url`：公网可访问的 URL。
    * @example "uri"
    */
   DataType: string;
@@ -2077,23 +2209,33 @@ export interface CreateImageTranscodeTaskBody {
    */
   EnableExif?: boolean;
   /**
-   * 待转码的图片 uri 或 url 文件列表。
-   * `DataList`和`Filelist`都不为空时，`DataList`优先生效。
-   * @example "["tos-cn-i-5s***fo/a.txt","tos-cn-i-5s***fo/uri demo.txt"]"
+   * `DataList`和`Filelist`二选一必填，同时配置时，`DataList`优先生效。
+   *
+   * 待转码的图片 uri 或 url 文件列表。具体使用方式如下：
+   *
+   * 1. 在 txt、csv 文件内填写指定数据类型的待转码图片地址，每行填写一个，最多不超过 10 万条。
+   * 2. 将该文件上传至指定服务后，获取其存储 URI。
+   * 3. 将该存储 URI，传入 `FileList`。
+   * @example "["tos-cn-i-5s***fo/a.txt","tos-cn-i-5s***fo/uridemo.txt"]"
    */
   FileList: string[];
   /**
-   * 任务队列名称 ID。缺省情况下提交至账号默认任务队列。您可通过调用[GetImageTranscodeQueues](https://www.volcengine.com/docs/508/1107341)获取该账号下全部任务队列 ID。
+   * 任务队列名称 ID。缺省情况下提交至账号默认任务队列。您可通过调用[GetImageTranscodeQueues](https://www.volcengine.com/docs/508/1160404)获取该账号下全部任务队列 ID。
    * @example "649a9dbc3***64d44cf5b0"
    */
   QueueId?: string;
   /**
-   * 转码产物的 Storekey 列表，仅当`DataList`不为空时有效，长度需与`DataList`长度一致。不传时默认使用固定规则生成产物的 Storekey。
-   * @example "b6c5c8be***fca9550181"
+   * 转码产物的 Storekey 列表，仅当`DataList`不为空时有效，长度需与`DataList`长度一致。不传时默认使用固定规则生成产物的 Storekey。填写规则如下：
+   *
+   * - 使用 UTF-8 编码。
+   * - 长度必须在 1～1024 个字符之间。
+   * - 不能以反斜线（\）开头。
+   * - 不支持 `\a`、`\b`、`\t`、`\n`、`\v`、`\f`、`\r` 字符。
+   * @example "["name1","name2"]"
    */
   ResKeyList?: string[];
   /**
-   * 服务 ID。若`DataType`取值`uri`，则提交的图片 URI 列表需在该服务可访问范围内。
+   * 服务 ID。
    *
    * - 您可以在 veImageX 控制台 [服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。
    * - 您也可以通过 OpenAPI 的方式获取服务 ID，具体请参考[获取所有服务信息](https://www.volcengine.com/docs/508/9360)。
@@ -2135,6 +2277,7 @@ export interface CreateTemplatesFromBinBody {
    * :::tip
    * 您可以通过调用[获取回收站中所有模板](https://www.volcengine.com/docs/508/132241)获取所需的模板名称。
    * :::
+   * @example "["TemplateName1","TemplateName2"]"
    */
   TemplateNames: string[];
 }
@@ -2144,6 +2287,7 @@ export interface CreateTemplatesFromBinQuery {
    * 服务 ID。
    * - 您可以在 veImageX 控制台 [服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。
    * - 您也可以通过 OpenAPI 的方式获取服务 ID，具体请参考[获取所有服务信息](https://www.volcengine.com/docs/508/9360)。
+   * @example "8h**9q"
    */
   ServiceId: string;
 }
@@ -2415,12 +2559,16 @@ export interface DeleteImageTemplateBody {
    * 您可以通过调用[获取服务下所有图片模板](https://www.volcengine.com/docs/508/9386)获取所需的模板名称。
    * :::
    * 待删除模板名称，不能超过100个。模板需要从属于参数中的service。
+   * @example "["TemplateName1", "TemplateName2"]"
    */
   TemplateNames: string[];
 }
 
 export interface DeleteImageTemplateQuery {
-  /** imagex服务ID */
+  /**
+   * imagex服务ID
+   * @example "8h**9q"
+   */
   ServiceId: string;
 }
 
@@ -2530,7 +2678,7 @@ export interface DeleteImageUploadFilesQuery {
    * 服务 ID。
    * - 您可以在 veImageX 控制台 [服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。
    * - 您也可以通过 OpenAPI 的方式获取服务 ID，具体请参考[获取所有服务信息](https://www.volcengine.com/docs/508/9360)。
-   * @example "balabalabala"
+   * @example "8h**9q"
    */
   ServiceId: string;
 }
@@ -2578,6 +2726,7 @@ export interface DeleteTemplatesFromBinBody {
    * :::tip
    * 您可以通过调用[获取回收站中所有模板](https://www.volcengine.com/docs/508/132241)获取所需的模板名称。
    * :::
+   * @example "["TemplateName1","TemplateName2"]"
    */
   TemplateNames: string[];
 }
@@ -2587,6 +2736,7 @@ export interface DeleteTemplatesFromBinQuery {
    * 服务 ID。
    * - 您可以在 veImageX 控制台 [服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。
    * - 您也可以通过 OpenAPI 的方式获取服务 ID，具体请参考[获取所有服务信息](https://www.volcengine.com/docs/508/9360)。
+   * @example "8h**9q"
    */
   ServiceId: string;
 }
@@ -2682,7 +2832,7 @@ export interface DescribeImageVolcCdnAccessLogQuery {
    * 服务 ID。
    * - 您可以在veImageX 控制台 [服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。
    * - 您也可以通过 OpenAPI 的方式获取服务 ID，具体请参考[获取所有服务信息](https://www.volcengine.com/docs/508/9360)。
-   * @example "ylqndedkyn"
+   * @example "yl**yn"
    */
   ServiceId: string;
 }
@@ -2786,6 +2936,11 @@ export interface DescribeImageXBaseOpUsageQuery {
    */
   EndTime: string;
   /**
+   * 需要分组查询的参数，当前仅支持取值 `ServiceId`，表示按服务 ID 进行分组。
+   * @example "ServiceId"
+   */
+  GroupBy?: string;
+  /**
    * 查询数据的时间粒度。单位为秒。缺省时查询 `StartTime` 和 `EndTime` 时间段全部数据，此时单次查询最大时间跨度为 93 天。取值如下所示：
    *
    * - `300`：单次查询最大时间跨度为 31 天
@@ -2850,6 +3005,12 @@ export interface DescribeImageXBaseOpUsageRes {
          */
         Value: number;
       }[];
+      /**
+       * 服务 ID。当 `GroupBy` 中包含 `ServiceId` 时，有返回值。
+       * 当GroupBy中包含ServiceId时出现
+       * @example "s1"
+       */
+      ServiceId?: string;
     }[];
   };
 }
@@ -8844,6 +9005,11 @@ export interface DescribeImageXCompressUsageQuery {
    */
   EndTime: string;
   /**
+   * 需要分组查询的参数，当前仅支持取值 `ServiceId`，表示按服务 ID 进行分组。
+   * @example "ServiceId"
+   */
+  GroupBy?: string;
+  /**
    * 查询数据的时间粒度。单位为秒。缺省时查询 `StartTime` 和 `EndTime` 时间段全部数据，此时单次查询最大时间跨度为 93 天。取值如下所示：
    *
    * - `300`：单次查询最大时间跨度为 31 天
@@ -8926,6 +9092,12 @@ export interface DescribeImageXCompressUsageRes {
          */
         Value: number;
       }[];
+      /**
+       * 服务 ID。当 `GroupBy` 中包含 `ServiceId` 时，有返回值。
+       * 当GroupBy中包含ServiceId时出现
+       * @example "s1"
+       */
+      ServiceId?: string;
     }[];
   };
 }
@@ -9108,6 +9280,12 @@ export interface DescribeImageXDomainBandwidthNinetyFiveDataRes {
      * @example "123.1"
      */
     BpsData: number;
+    /**
+     * 统计时间点。日期格式按照 ISO8601 表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00。
+     * 统计时间点。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00。
+     * @example "2023-01-01T00:00:00+08:00"
+     */
+    TimeStamp: string;
   };
 }
 
@@ -13048,14 +13226,20 @@ export interface DescribeImageXUploadCountByTimeBody {
    */
   Isp?: string[];
   /**
-   * 需要匹配的系统类型，不传则匹配非 WEB 端的所有系统。取值如下所示：
-   * - `iOS`
-   * - `Android`
-   * - `WEB`
-   * 需要匹配的系统类型，不传则匹配非WEB端所有系统。取值如下所示：
-   * iOS
-   * Android
-   * WEB
+   * 需要匹配的系统类型。取值如下所示：
+   * - 不传或传空字符串：Android+iOS。
+   * - `iOS`：iOS。
+   * - `Android`：Android。
+   * - `WEB`：web+小程序。
+   * - `Web`：web。
+   * - `Imp`：小程序。
+   * 需要匹配的系统类型。取值如下所示：
+   * - 不传或传空字符串：Android+iOS。
+   * - `iOS`：iOS。
+   * - `Android`：Android。
+   * - `WEB`：web+小程序。
+   * - `Web`：web。
+   * - `Imp`：小程序。
    * @example "iOS"
    */
   OS?: string;
@@ -13252,14 +13436,20 @@ export interface DescribeImageXUploadDurationBody {
    */
   Isp?: string[];
   /**
-   * 需要匹配的系统类型，不传则匹配非 WEB 端的所有系统。取值如下所示：
-   * - `iOS`
-   * - `Android`
-   * - `WEB`
-   * 需要匹配的系统类型，不传则匹配非WEB端所有系统。取值如下所示：
-   * iOS
-   * Android
-   * WEB
+   * 需要匹配的系统类型。取值如下所示：
+   * - 不传或传空字符串：Android+iOS。
+   * - `iOS`：iOS。
+   * - `Android`：Android。
+   * - `WEB`：web+小程序。
+   * - `Web`：web。
+   * - `Imp`：小程序。
+   * 需要匹配的系统类型。取值如下所示：
+   * - 不传或传空字符串：Android+iOS。
+   * - `iOS`：iOS。
+   * - `Android`：Android。
+   * - `WEB`：web+小程序。
+   * - `Web`：web。
+   * - `Imp`：小程序。
    * @example "iOS"
    */
   OS?: string;
@@ -13453,14 +13643,20 @@ export interface DescribeImageXUploadErrorCodeAllBody {
    */
   Isp?: string[];
   /**
-   * 需要匹配的系统类型，不传则匹配非 WEB 端的所有系统。取值如下所示：
-   * - `iOS`
-   * - `Android`
-   * - `WEB`
-   * 需要匹配的系统类型，不传则匹配非WEB端所有系统。取值如下所示：
-   * iOS
-   * Android
-   * WEB
+   * 需要匹配的系统类型。取值如下所示：
+   * - 不传或传空字符串：Android+iOS。
+   * - `iOS`：iOS。
+   * - `Android`：Android。
+   * - `WEB`：web+小程序。
+   * - `Web`：web。
+   * - `Imp`：小程序。
+   * 需要匹配的系统类型。取值如下所示：
+   * - 不传或传空字符串：Android+iOS。
+   * - `iOS`：iOS。
+   * - `Android`：Android。
+   * - `WEB`：web+小程序。
+   * - `Web`：web。
+   * - `Imp`：小程序。
    * @example "iOS"
    */
   OS?: string;
@@ -13689,14 +13885,20 @@ export interface DescribeImageXUploadErrorCodeByTimeBody {
    */
   Isp?: string[];
   /**
-   * 需要匹配的系统类型，不传则匹配非 WEB 端的所有系统。取值如下所示：
-   * - `iOS`
-   * - `Android`
-   * - `WEB`
-   * 需要匹配的系统类型，不传则匹配非WEB端所有系统。取值如下所示：
-   * iOS
-   * Android
-   * WEB
+   * 需要匹配的系统类型。取值如下所示：
+   * - 不传或传空字符串：Android+iOS。
+   * - `iOS`：iOS。
+   * - `Android`：Android。
+   * - `WEB`：web+小程序。
+   * - `Web`：web。
+   * - `Imp`：小程序。
+   * 需要匹配的系统类型。取值如下所示：
+   * - 不传或传空字符串：Android+iOS。
+   * - `iOS`：iOS。
+   * - `Android`：Android。
+   * - `WEB`：web+小程序。
+   * - `Web`：web。
+   * - `Imp`：小程序。
    * @example "iOS"
    */
   OS?: string;
@@ -13885,14 +14087,20 @@ export interface DescribeImageXUploadFileSizeBody {
    */
   Isp?: string[];
   /**
-   * 需要匹配的系统类型，不传则匹配非 WEB 端的所有系统。取值如下所示：
-   * - `iOS`
-   * - `Android`
-   * - `WEB`
-   * 需要匹配的系统类型，不传则匹配非WEB端所有系统。取值如下所示：
-   * iOS
-   * Android
-   * WEB
+   * 需要匹配的系统类型。取值如下所示：
+   * - 不传或传空字符串：Android+iOS。
+   * - `iOS`：iOS。
+   * - `Android`：Android。
+   * - `WEB`：web+小程序。
+   * - `Web`：web。
+   * - `Imp`：小程序。
+   * 需要匹配的系统类型。取值如下所示：
+   * - 不传或传空字符串：Android+iOS。
+   * - `iOS`：iOS。
+   * - `Android`：Android。
+   * - `WEB`：web+小程序。
+   * - `Web`：web。
+   * - `Imp`：小程序。
    * @example "iOS"
    */
   OS?: string;
@@ -14096,14 +14304,20 @@ export interface DescribeImageXUploadSegmentSpeedByTimeBody {
    */
   Isp?: string[];
   /**
-   * 需要匹配的系统类型，不传则匹配非 WEB 端的所有系统。取值如下所示：
-   * - `iOS`
-   * - `Android`
-   * - `WEB`
-   * 需要匹配的系统类型，不传则匹配非WEB端所有系统。取值如下所示：
-   * iOS
-   * Android
-   * WEB
+   * 需要匹配的系统类型。取值如下所示：
+   * - 不传或传空字符串：Android+iOS。
+   * - `iOS`：iOS。
+   * - `Android`：Android。
+   * - `WEB`：web+小程序。
+   * - `Web`：web。
+   * - `Imp`：小程序。
+   * 需要匹配的系统类型。取值如下所示：
+   * - 不传或传空字符串：Android+iOS。
+   * - `iOS`：iOS。
+   * - `Android`：Android。
+   * - `WEB`：web+小程序。
+   * - `Web`：web。
+   * - `Imp`：小程序。
    * @example "iOS"
    */
   OS?: string;
@@ -14300,14 +14514,20 @@ export interface DescribeImageXUploadSpeedBody {
    */
   Isp?: string[];
   /**
-   * 需要匹配的系统类型，不传则匹配非 WEB 端的所有系统。取值如下所示：
-   * - `iOS`
-   * - `Android`
-   * - `WEB`
-   * 需要匹配的系统类型，不传则匹配非WEB端所有系统。取值如下所示：
-   * iOS
-   * Android
-   * WEB
+   * 需要匹配的系统类型。取值如下所示：
+   * - 不传或传空字符串：Android+iOS。
+   * - `iOS`：iOS。
+   * - `Android`：Android。
+   * - `WEB`：web+小程序。
+   * - `Web`：web。
+   * - `Imp`：小程序。
+   * 需要匹配的系统类型。取值如下所示：
+   * - 不传或传空字符串：Android+iOS。
+   * - `iOS`：iOS。
+   * - `Android`：Android。
+   * - `WEB`：web+小程序。
+   * - `Web`：web。
+   * - `Imp`：小程序。
    * @example "iOS"
    */
   OS?: string;
@@ -14507,14 +14727,20 @@ export interface DescribeImageXUploadSuccessRateByTimeBody {
    */
   Isp?: string[];
   /**
-   * 需要匹配的系统类型，不传则匹配非 WEB 端的所有系统。取值如下所示：
-   * - `iOS`
-   * - `Android`
-   * - `WEB`
-   * 需要匹配的系统类型，不传则匹配非WEB端所有系统。取值如下所示：
-   * iOS
-   * Android
-   * WEB
+   * 需要匹配的系统类型。取值如下所示：
+   * - 不传或传空字符串：Android+iOS。
+   * - `iOS`：iOS。
+   * - `Android`：Android。
+   * - `WEB`：web+小程序。
+   * - `Web`：web。
+   * - `Imp`：小程序。
+   * 需要匹配的系统类型。取值如下所示：
+   * - 不传或传空字符串：Android+iOS。
+   * - `iOS`：iOS。
+   * - `Android`：Android。
+   * - `WEB`：web+小程序。
+   * - `Web`：web。
+   * - `Imp`：小程序。
    * @example "iOS"
    */
   OS?: string;
@@ -15326,19 +15552,30 @@ export interface GetAllImageTemplatesQuery {
    * 是否按照模板创建时间升序查询，默认为`false`。
    * * 取值为`true`时，表示按升序查询。
    * * 取值为`false`时，表示降序查询。
+   * @example "true"
    */
   Asc?: string;
-  /** 分页获取条数，默认 10。 */
+  /**
+   * 分页获取条数，默认 10。
+   * @example "10"
+   */
   Limit?: number;
-  /** 分页偏移量，默认 0。取值为 1 时，表示跳过第一条数据，从第二条数据取值。 */
+  /**
+   * 分页偏移量，默认 0。取值为 1 时，表示跳过第一条数据，从第二条数据取值。
+   * @example "0"
+   */
   Offset?: number;
   /**
    * 服务ID
    * - 您可以在 veImageX 控制台 [服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。
    * - 您也可以通过 OpenAPI 的方式获取服务 ID，具体请参考[获取所有服务信息](https://www.volcengine.com/docs/508/9360)。
+   * @example "8h**9q"
    */
   ServiceId: string;
-  /** 支持的字符正则集合为[a-zA-Z0-9_-]。指定时返回模板名称包含该字符串的图片模板，不填或者为空则返回所有模板。 */
+  /**
+   * 支持的字符正则集合为[a-zA-Z0-9_-]。指定时返回模板名称包含该字符串的图片模板，不填或者为空则返回所有模板。
+   * @example "pic"
+   */
   TemplateNamePattern?: string;
 }
 
@@ -15522,37 +15759,48 @@ export interface GetAuditEntrysCountRes {
 }
 
 export interface GetComprehensiveEnhanceImageBody {
-  /** 去压缩失真强度，取值范围为[0,1]。取值为`0`时表示不处理，取值越大去压缩失真强度越大。 */
+  /**
+   * 去压缩失真强度，取值范围为[0,1]。取值为`0`时表示不处理，取值越大去压缩失真强度越大。
+   * @example "0.2"
+   */
   ArStrength?: number;
   /**
+   * `EnableConfig` 取值为 `true` 时，为必填。
+   *
    * 亮度，取值范围为[90,100]。取值越小，亮度提升越明显。
    * @example "95"
    */
   Brightness?: number;
-  /** 去模糊强度，取值范围为[0,1]。取值为`0`时表示不处理，取值越大去模糊强度越大。 */
+  /**
+   * 去模糊强度，取值范围为[0,1]。取值为`0`时表示不处理，取值越大去模糊强度越大。
+   * @example "0.2"
+   */
   DeblurStrength?: number;
-  /** 降噪强度，取值范围为[0,1]。取值为`0`时表示不降噪，取值越大降噪强度越大。 */
+  /**
+   * 降噪强度，取值范围为[0,1]。取值为`0`时表示不降噪，取值越大降噪强度越大。
+   * @example "0.2"
+   */
   DenoiseStrength?: number;
   /**
    * 下采样模式，取值如下所示：
    * - `0`: 仅缩小，图片大于设置的“宽/高”时，将缩小图片
    * - `1`: 仅放大，图片小于设置的“宽/高”时，将放大图片
    * - `2`: 既缩小又放大，即按照自定义“宽/高”输出结果图，该操作可能导致图片变形
-   * @example 1
+   * @example "1"
    */
   DownsampleMode?: number;
   /**
    * 下采样输出图片高度，图片将适配对应大小。单位为 px。
-   * @example 10
+   * @example "10"
    */
   DownsampleOutHeight?: number;
   /**
    * 下采样输出图片宽度，图片将适配对应大小。单位为 px。
-   * @example 10
+   * @example "10"
    */
   DownsampleOutWidth?: number;
   /**
-   * 内是否启用高级配置，取值如下所示：
+   * 是否启用高级配置，取值如下所示：
    * - `true`：开启。开启后，下述高级配置才会生效。
    * - `false`：（默认）关闭。
    * :::tip
@@ -15582,10 +15830,15 @@ export interface GetComprehensiveEnhanceImageBody {
    */
   EnableSuperResolution?: boolean;
   /**
-   * 图片存储 URI 或访问 URL。
-   *
-   * - 图片 URI 格式，例如：tos-example/7a7979974.jpeg
-   * - 图片 URL 格式，可公网访问。例如：https://example.org/tos-example/7a7979974.jpeg~tplv.png
+   * 是否使用文字增强，取值如下所示：
+   * - `false`：（默认）不使用
+   * - `true`：使用
+   * 默认值为false
+   * @example "false"
+   */
+  EnableTextEnhance?: boolean;
+  /**
+   * 待增强图片的存储 URI 或访问 URL（公网可访问）。您可在控制台资源管理获取图片的[存储 URI](https://www.volcengine.com/docs/508/1205057) 以及[访问 URL](https://www.volcengine.com/docs/508/1205054)。
    * @example "tos-example/7a7979974.jpeg"
    */
   ImageUri: string;
@@ -15614,7 +15867,7 @@ export interface GetComprehensiveEnhanceImageBody {
    * :::tip
    * 4 倍超分辨率只适用于 4000 x 4000 以内分辨率图像的画质增强。
    * :::
-   * @example 2
+   * @example "2"
    */
   Multiple?: number;
   /**
@@ -15625,21 +15878,31 @@ export interface GetComprehensiveEnhanceImageBody {
   /**
    * 服务 ID。
    *
-   * - 您可以在 veImageX 控制台 [服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。
-   * - 您也可以通过 OpenAPI 的方式获取服务 ID，具体请参考[获取所有服务信息](https://www.volcengine.com/docs/508/9360)。
+   *
    * @example "i2****hg"
    */
   ServiceId: string;
   /**
+   * `EnableSuperResolution` 取值为 `true` 时，为必填。
+   *
    * 执行超分处理的短边范围最大值，仅当满足图像边界输入的图像执行超分处理。单位为 px。
    * @example "700"
    */
   ShortMax?: number;
   /**
+   * `EnableSuperResolution` 取值为 `true` 时，为必填。
+   *
    * 执行超分处理的短边范围最小值，仅当满足图像边界输入的图像执行超分处理。单位为 px。
    * @example "200"
    */
   ShortMin?: number;
+  /**
+   * 文字增强强度，取值范围[0,1]，默认值为 0.5。取值越大文字增强效果越强，但也更容易出现白边、色偏、对比度增大、非 CG 文字与背景产生割裂感等问题。
+   * 取值范围[0,1]
+   * @format float
+   * @example "0.5"
+   */
+  TextEnhanceStrength?: number;
 }
 
 export interface GetComprehensiveEnhanceImageRes {
@@ -15667,7 +15930,7 @@ export interface GetComprehensiveEnhanceImageRes {
   /** 视请求的接口而定 */
   Result?: {
     /**
-     * 结果图地址
+     * 结果图 URI。您可使用结果图 URI（即 `ResUri`）[拼接完整访问 URL](https://www.volcengine.com/docs/508/105405#%E9%A2%84%E8%A7%88%E8%BF%94%E5%9B%9E%E7%9A%84%E7%BB%93%E6%9E%9C%E5%9B%BE) 后，在浏览器查看图像增强效果。
      * @example "tos-i-v0***bf/a957dcc7cb89b0a4e2889466f2fdc9d7"
      */
     ResUri: string;
@@ -16737,6 +17000,7 @@ export interface GetImageAnalyzeTasksRes {
        * @example "false"
        */
       EvalPerStage?: boolean;
+      Id: string;
       /**
        * 离线评估任务名称
        * @example "test"
@@ -17232,6 +17496,7 @@ export interface GetImageAuditTasksRes {
 export interface GetImageAuthKeyQuery {
   /**
    * 服务 ID。
+   *
    * - 您可以在 veImageX 控制台[服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。
    * - 您也可以通过 OpenAPI 的方式获取服务 ID，具体请参考[获取所有服务信息](https://www.volcengine.com/docs/508/9360)。
    * @example "y7****w7"
@@ -17453,6 +17718,7 @@ export interface GetImageContentBlockListQuery {
    * 服务 ID。
    * - 您可以在veImageX 控制台 [服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。
    * - 您也可以通过 OpenAPI 的方式获取服务 ID，具体请参考[获取所有服务信息](https://www.volcengine.com/docs/508/9360)。
+   * @example "8h**9q"
    */
   ServiceId: string;
 }
@@ -17559,7 +17825,10 @@ export interface GetImageContentTaskDetailBody {
    * - `failed`：失败
    */
   State?: string;
-  /** 待查询任务 ID */
+  /**
+   * 待查询任务 ID
+   * @example "123***89"
+   */
   TaskId: string;
   /**
    * 内容管理任务类型，取值如下所示：
@@ -17569,6 +17838,7 @@ export interface GetImageContentTaskDetailBody {
    * * `unblock_url`：解禁 URL
    * * `preload_url`：预热 URL
    * * `refresh_dir`：目录刷新（支持根目录刷新）
+   * @example "refresh_url"
    */
   TaskType: string;
   /** 资源 URL 或者目录，可精确匹配，取值为空时表示查询全部任务。 */
@@ -17743,7 +18013,7 @@ export interface GetImageDuplicateDetectionBody {
   Async?: boolean;
   /**
    * 当`Async`取值为`true`即启用异步时需要添加回调地址，地址使用 POST 请求方式。
-   * @example "http://localhost:6901/top/v1/test"
+   * @example "http://example.callback.com/test"
    */
   Callback?: string;
   /**
@@ -17764,7 +18034,7 @@ export interface GetImageDuplicateDetectionQuery {
    * 服务 ID。
    * - 您可以在 veImageX 控制台 [服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。
    * - 您也可以通过 OpenAPI 的方式获取服务 ID，具体请参考[获取所有服务信息](https://www.volcengine.com/docs/508/9360)。
-   * @example "服务 ID。"
+   * @example "7k**1k"
    */
   ServiceId: string;
 }
@@ -17960,7 +18230,7 @@ export interface GetImageEraseResultBody {
     /**
      * 待修复区域左上角的 Y 坐标，取值范围为[0,1]。
      * @format float
-     * @example "0,1"
+     * @example "0.1"
      */
     Y1: number;
     /**
@@ -18067,7 +18337,7 @@ export interface GetImageMigrateTasksQuery {
    * - `Partial`：部分迁移完成
    * - `Failed`：迁移失败
    * - `Terminated`：中止
-   * @example ""Initial","Done""
+   * @example "Done"
    */
   Status?: string;
   /**
@@ -19218,6 +19488,24 @@ export interface GetImageServiceRes {
   };
 }
 
+export interface GetImageServiceSubscriptionQuery {
+  /**
+   * 附加组件ID，获取指定附加组件的开通情况。默认返回ImageX服务开通情况
+   * @example "xxxx"
+   */
+  AddOnId?: string;
+  /**
+   * 附加组件英文标识，获取指定附加组件的开通情况。默认返回ImageX服务开通情况。
+   * @example "enhance"
+   */
+  AddOnKey?: string;
+  /**
+   * 附加组件类型，取值AI获取服务端智能处理开通情况。默认返回ImageX服务开通情况
+   * @example "AI"
+   */
+  AddOnType?: string;
+}
+
 export interface GetImageServiceSubscriptionRes {
   ResponseMetadata: {
     /**
@@ -19308,8 +19596,6 @@ export interface GetImageServiceSubscriptionRes {
      * @example 2
      */
     InstanceType: number;
-    /** 实例对应的价格版本 */
-    PriceVersion: string;
     /**
      * 购买的商品，仅返回参数`imagex`。
      * 购买的商品
@@ -19697,11 +19983,13 @@ export interface GetImageTemplateQuery {
    * 服务 ID。
    * - 您可以在 veImageX 控制台 [服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。
    * - 您也可以通过 OpenAPI 的方式获取服务 ID，具体请参考[获取所有服务信息](https://www.volcengine.com/docs/508/9360)。
+   * @example "8h**9q"
    */
   ServiceId: string;
   /**
    * 模板名称。
    * * 您可以通过调用[获取服务下所有模板](https://www.volcengine.com/docs/508/9386)获取所需的模板名称。
+   * @example "TemplateName1"
    */
   TemplateName: string;
 }
@@ -20179,28 +20467,35 @@ export interface GetImageTranscodeQueuesRes {
 }
 
 export interface GetImageUpdateFilesQuery {
-  /** 获取 URL 个数，最大值为 100。 */
+  /**
+   * 获取 URL 个数，最大值为 100。
+   * @example "50"
+   */
   Limit?: number;
   /**
    * 分页偏移，默认 0。
    * 当取值为 1 时，表示跳过一条 URL，从第二条 URL 开始取值。
+   * @example "0"
    */
   Offset?: number;
   /**
    * 服务 ID。
    * - 您可以在veImageX 控制台 [服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。
    * - 您也可以通过 OpenAPI 的方式获取服务 ID，具体请参考[获取所有服务信息](https://www.volcengine.com/docs/508/9360)。
+   * @example "8h**9q"
    */
   ServiceId: string;
   /**
    * 获取类型，取值如下所示：
    * * 0：获取刷新 URL 列表；
    * * 1：获取禁用 URL 列表。
+   * @example "1"
    */
   Type?: number;
   /**
    * URL 格式，若指定 URL 格式则仅返回 URL 中包含该字符串的 URL 列表。
    * 默认为空，缺省情况下返回所有 URL 列表。
+   * @example "pic"
    */
   UrlPattern?: string;
 }
@@ -20356,7 +20651,7 @@ export interface GetImageUploadFilesQuery {
    * 服务 ID。
    * - 您可以在 veImageX 控制台 [服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。
    * - 您也可以通过 OpenAPI 的方式获取服务 ID，具体请参考[获取所有服务信息](https://www.volcengine.com/docs/508/9360)。
-   * @example "balabalabala"
+   * @example "8h**9q"
    */
   ServiceId: string;
 }
@@ -20477,10 +20772,13 @@ export interface GetImageXQueryDimsQuery {
    */
   Appid?: string;
   /**
-   * 需要匹配的系统类型，不传则匹配非 WEB 端的所有系统。取值如下所示：
-   * - `iOS`
-   * - `Android`
-   * - `WEB`
+   * 需要匹配的系统类型。取值如下所示：
+   * - 不传或传空字符串：Android+iOS。
+   * - `iOS`：iOS。
+   * - `Android`：Android。
+   * - `WEB`：web+小程序。
+   * - `Web`：web，仅当`Source`为`upload`或`uploadv2`时可传。
+   * - `Imp`：小程序，仅当`Source`为`upload`或`uploadv2`时可传。
    * @example "iOS"
    */
   OS?: string;
@@ -20531,10 +20829,13 @@ export interface GetImageXQueryRegionsQuery {
    */
   Appid?: string;
   /**
-   * 需要匹配的系统类型，不传则匹配非 WEB 端的所有系统。取值如下所示：
-   * - `iOS`
-   * - `Android`
-   * - `WEB`
+   * 需要匹配的系统类型。取值如下所示：
+   * - 不传或传空字符串：Android+iOS。
+   * - `iOS`：iOS。
+   * - `Android`：Android。
+   * - `WEB`：web+小程序。
+   * - `Web`：web，仅当`Source`为`upload`或`uploadv2`时可传。
+   * - `Imp`：小程序，仅当`Source`为`upload`或`uploadv2`时可传。
    * @example "Android"
    */
   OS?: string;
@@ -20543,9 +20844,7 @@ export interface GetImageXQueryRegionsQuery {
    * * `upload`：上传 1.0 数据。
    * * `cdn`：下行网络数据。
    * * `client`：客户端数据。
-   * * `sensible`：感知数据。
    * * `uploadv2`：上传 2.0 数据。
-   * * `exceed`：大图监控数据。
    * @example "client"
    */
   Source: string;
@@ -20598,10 +20897,18 @@ export interface GetImageXQueryValsQuery {
    */
   Dim: string;
   /**
-   * 需要匹配的系统类型，不传则匹配非 WEB 端的所有系统。取值如下所示：
-   * - `iOS`
-   * - `Android`
-   * - `WEB`
+   * 需要过滤的关键词（包含），不传则不过滤关键词。
+   * @example "transcode"
+   */
+  Keyword?: string;
+  /**
+   * 需要匹配的系统类型。取值如下所示：
+   * - 不传或传空字符串：Android+iOS。
+   * - `iOS`：iOS。
+   * - `Android`：Android。
+   * - `WEB`：web+小程序。
+   * - `Web`：web，仅当`Source`为`upload`或`uploadv2`时可传。
+   * - `Imp`：小程序，仅当`Source`为`upload`或`uploadv2`时可传。
    * @example "iOS"
    */
   OS?: string;
@@ -20634,8 +20941,8 @@ export interface GetImageXQueryValsRes {
   };
   Result: {
     /**
-     * 60 天内上报数据中出现的维度值信息，按出现次数降序排列。
-     * 60 天内上报数据中出现的维度值信息，按出现次数降序排列。
+     * 90 天内上报数据中出现的维度值列表，按上报次数降序排列，仅返回前1000条数据。
+     * 90 天内上报数据中出现的维度值列表，按上报次数降序排列，仅返回前1000条数据。
      * @example "["wifi"]"
      */
     DimVal: string[];
@@ -20732,6 +21039,7 @@ export interface GetResourceURLQuery {
   /**
    * 域名。
    * 您可以通过调用 OpenAPI [获取服务下所有域名](https://www.volcengine.com/docs/508/9379)查看 domain 返回值。
+   * @example "example.test.com"
    */
   Domain: string;
   /**
@@ -20739,15 +21047,19 @@ export interface GetResourceURLQuery {
    * - image：表示输出原格式；
    * - 静图格式：png、jpeg、heic、avif、webp;
    * - 动图格式：awebp、heif、avis。
+   * @example "image"
    */
   Format?: string;
-  /** 协议，默认为 http，隐私图片使用 https，公开图片支持取值 http 以及 https。 */
+  /**
+   * 协议，默认为 http，隐私图片使用 https，公开图片支持取值 http 以及 https。
+   * @example "https"
+   */
   Proto?: string;
   /**
    * 服务 ID。
    * - 您可以在 veImageX 控制台 [服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。
    * - 您也可以通过 OpenAPI 的方式获取服务 ID，具体请参考[获取所有服务信息](https://www.volcengine.com/docs/508/9360)。
-   * @example "xxxxx"
+   * @example "8h**9q"
    */
   ServiceId: string;
   /** 过期时长，最大限制为 1 年，默认1800s。 */
@@ -20755,11 +21067,13 @@ export interface GetResourceURLQuery {
   /**
    * 模板名称。缺省情况下表示无模板处理图片。
    * 您可以通过调用 OpenAPI [获取服务下所有图片模板](https://www.volcengine.com/docs/508/9386)里查看 TemplateName 返回值。
+   * @example "tplv-8h**9q-1-v**83"
    */
   Tpl?: string;
   /**
    * 图片资源 Uri。
    * 您可以通过调用 OpenAPI [获取文件上传成功信息](https://www.volcengine.com/docs/508/9398)查看 ImageUri 返回值。
+   * @example "tos-i-xxxxx/test.png"
    */
   URI: string;
 }
@@ -21090,19 +21404,32 @@ export interface GetServiceDomainsRes {
 }
 
 export interface GetTemplatesFromBinQuery {
-  /** 是否按照模板创建时间升序查询，支持取值：`true、false`，默认为`false`。 */
+  /**
+   * 是否按照模板创建时间升序查询，支持取值：`true、false`，默认为`false`。
+   * @example "true"
+   */
   Asc?: string;
-  /** 分页获取条数，默认 10。 */
+  /**
+   * 分页获取条数，默认 10。
+   * @example "10"
+   */
   Limit?: number;
-  /** 分页偏移。默认 0。取值为1，表示跳过第一条数据，从第二条数据开始取值。 */
+  /**
+   * 分页偏移。默认 0。取值为1，表示跳过第一条数据，从第二条数据开始取值。
+   * @example "0"
+   */
   Offset?: number;
   /**
    * 服务 ID
    * - 您可以在 veImageX 控制台 [服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。
    * - 您也可以通过 OpenAPI 的方式获取服务 ID，具体请参考[获取所有服务信息](https://www.volcengine.com/docs/508/9360)。
+   * @example "8h**9q"
    */
   ServiceId: string;
-  /** 仅返回模板名称包含该字符串的图片模板，不填或者为空则返回所有模板。 */
+  /**
+   * 仅返回模板名称包含该字符串的图片模板，不填或者为空则返回所有模板。
+   * @example "pic"
+   */
   TemplateNamePattern?: string;
 }
 
@@ -21427,12 +21754,14 @@ export interface PreviewImageUploadFileQuery {
    * 服务 ID。
    * - 您可以在 veImageX 控制台 [服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。
    * - 您也可以通过 OpenAPI 的方式获取服务 ID，具体请参考[获取所有服务信息](https://www.volcengine.com/docs/508/9360)。
+   * @example "8h**9q"
    */
   ServiceId: string;
   /**
    * 文件 Uri。
    * - 您可以在 veImageX 控制台 [资源管理](https://console.volcengine.com/imagex/resource_manage/)页面，在已上传文件的名称列获取资源 Uri。
    * - 您也可以通过 OpenAPI 的方式获取Uri，具体请参考[文件上传完成上报](https://www.volcengine.com/docs/508/9398)。
+   * @example "uri1"
    */
   StoreUri: string;
 }
@@ -21970,9 +22299,8 @@ export interface UpdateImageAuditTaskBody {
    *
    * - `0`：（默认）不限范围
    * - `1`：指定范围
-   * @example "0"
    */
-  EnableAuditRange?: string;
+  EnableAuditRange?: number;
   /**
    * 是否开启回调，取值如下所示：
    * - `true`：开启
@@ -22152,14 +22480,30 @@ export interface UpdateImageAuthKeyRes {
 
 /** 描述 */
 export interface UpdateImageFileKeyBody {
-  /** 重命名后的文件名 */
+  /**
+   * 重命名后的文件名
+   * 重命名后的文件名。输入限制如下所示：
+   *
+   * - 不支持空格，如果中间有空格将会导致重命名失败。
+   * - 不支持以/开头或结尾，不支持/连续出现，Key 值最大长度限制为 180 个字节。
+   * @example "image"
+   */
   DstKey: string;
-  /** 源文件名 */
+  /**
+   * 源文件名
+   * 源文件名，即上传文件的 storekey。
+   * @example "bb6d0430d***7feac525023d52"
+   */
   OriKey: string;
 }
 
 export interface UpdateImageFileKeyQuery {
-  /** 服务ID */
+  /**
+   * 服务 ID。
+   * - 您可以在 veImageX 控制台 [服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。
+   * - 您也可以通过 OpenAPI 的方式获取服务 ID，具体请参考[获取所有服务信息](https://www.volcengine.com/docs/508/9360)。
+   * @example "8h**9q"
+   */
   ServiceId: string;
 }
 
@@ -22194,7 +22538,10 @@ export interface UpdateImageMirrorConfBody {
   Headers: Record<string, string>;
   /** 镜像回源域名。 */
   Host: string;
-  /** 带权重回源域名。key 为 String 类型，代表镜像回源域名；value 为 Integer 类型，代表域名权重。 */
+  /**
+   * 带权重回源域名。key 为 String 类型，代表镜像回源域名；value 为 Integer 类型，代表域名权重。
+   * @example "{ "www.pic1.com": 95, "www.pic2.com": 5 }"
+   */
   Hosts?: Record<string, number>;
   /** 镜像站 */
   Origin?: {
@@ -22203,17 +22550,24 @@ export interface UpdateImageMirrorConfBody {
     /** 镜像站类型 */
     Type: string;
   };
-  /** 下载图片的协议，取值为：http、https。 */
+  /**
+   * 下载图片的协议，取值为：http、https。
+   * @example "https"
+   */
   Schema: string;
-  /** 镜像源 URI，其中图片名用 %s 占位符替代，比如/obj/%s。 */
+  /**
+   * 镜像源 URI，其中图片名用 %s 占位符替代，比如/obj/%s。
+   * @example "/obj/%s"
+   */
   Source?: string;
 }
 
 export interface UpdateImageMirrorConfQuery {
   /**
-   * 服务 ID。 \
+   * 服务 ID。
    * - 您可以在 veImageX 控制台 [服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。
    * - 您也可以通过 OpenAPI 的方式获取服务 ID，具体请参考[获取所有服务信息](https://www.volcengine.com/docs/508/9360)。
+   * @example "8h**9q"
    */
   ServiceId: string;
 }
@@ -22291,13 +22645,34 @@ export interface UpdateImageObjectAccessRes {
 }
 
 export interface UpdateImageResourceStatusBody {
-  /** @example "" */
+  /**
+   * 待修改封禁状态的资源存储 Key（不携带 Bucket 信息），可在控制台资源管理页面查看。
+   * 待修改封禁状态的资源存储 Key（不携带 Bucket 信息），可在控制台资源管理页面查看。
+   * @example "demo1.png"
+   */
   ObjectName: string;
-  /** @example "disable/enable" */
+  /**
+   * 资源的封禁状态，取值如下所示：
+   *
+   * - `disable`：禁用。禁用状态，您无法访问该资源。
+   * - `enable`：启用。启用状态，您可正常访问该资源。
+   * 资源的封禁状态，取值如下所示：
+   *
+   * - `disable`：禁用。禁用状态，您无法访问该资源。
+   * - `enable`：启用。启用状态，您可正常访问该资源。
+   * @example "disable/enable"
+   */
   Status: string;
 }
 
 export interface UpdateImageResourceStatusQuery {
+  /**
+   * 指定配置资源封禁的服务 ID。
+   *
+   * - 您可以在 veImageX 控制台 [服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。
+   * - 您也可以通过 OpenAPI 的方式获取服务 ID，具体请参考[GetAllImageServices](https://www.volcengine.com/docs/508/9360)。
+   * @example "serviceid"
+   */
   ServiceId: string;
 }
 
@@ -22624,7 +22999,7 @@ export interface UpdateReferBody {
     is_white_mode?: boolean;
     /**
      * Referer 的正则表达式的列表，仅支持填写 IPv4 和 IPv6 格式的 IP 地址，参数长度范围为（1，1024）。不支持域名、泛域名、CIDR 网段。
-     * @example "\192\.23\.1\.8\b"
+     * @example "192.1.1.1"
      */
     regex_values?: string[];
     /**

@@ -105,7 +105,7 @@ class Logger {
       msgList.push(extra);
     }
 
-  console.log(msgList.join(', ')); // eslint-disable-line
+    console.log(msgList.join(", ")); // eslint-disable-line
   };
 }
 
@@ -125,12 +125,20 @@ export class ImagexService extends ImagexAutoService {
         CommitImageUploadBody & { requestOptions?: AxiosRequestConfig };
       SkipCommit?: boolean;
       ShowDuration?: boolean;
+      ContentTypes?: string[];
     },
     files: string[] | NodeJS.ReadableStream[] | ArrayBuffer[] | ArrayBufferView[]
   ): Promise<OpenApiResponse<CommitImageUploadRes["Result"]>> => {
     // 1. apply
     if (!files.length || files.length > 10) {
       throw Error(`files num ${files.length} is invalid, the range is [1, 10]`);
+    }
+    if ((params.ContentTypes?.length || 0) > files.length) {
+      throw Error(
+        `ContentTypes num ${
+          params.ContentTypes?.length || 0
+        } is invalid and cannot be greater than files num`
+      );
     }
 
     const applyFinalParams = {
@@ -220,7 +228,8 @@ export class ImagexService extends ImagexAutoService {
     const uploadTaskResults = await this.DoUpload(
       files,
       uploadHosts[0],
-      newStoreInfos.length ? newStoreInfos : storeInfos
+      newStoreInfos.length ? newStoreInfos : storeInfos,
+      params.ContentTypes
     );
     if (params.ShowDuration && putLogger) {
       putLogger.print({ endTime: dayjs().valueOf(), identifier: logIdentifier });
@@ -295,7 +304,8 @@ export class ImagexService extends ImagexAutoService {
   DoUpload = async (
     files: string[] | NodeJS.ReadableStream[] | ArrayBuffer[] | ArrayBufferView[],
     uploadHost: string,
-    storeInfos: ApplyImageUploadRes["Result"]["UploadAddress"]["StoreInfos"]
+    storeInfos: ApplyImageUploadRes["Result"]["UploadAddress"]["StoreInfos"],
+    fileContentTypes?: string[]
   ) => {
     const promiseArray: Promise<UploadPutResult>[] = [];
     for (let i = 0; i < files.length; i++) {
@@ -306,6 +316,7 @@ export class ImagexService extends ImagexAutoService {
           oid,
           auth,
           file: files[i],
+          contentType: fileContentTypes?.[i],
         })
       );
     }
@@ -317,8 +328,9 @@ export class ImagexService extends ImagexAutoService {
     oid: string;
     auth: string;
     file: string | NodeJS.ReadableStream | ArrayBuffer | ArrayBufferView;
+    contentType?: string;
   }): Promise<UploadPutResult> => {
-    const { uploadHost, oid, auth, file } = params;
+    const { uploadHost, oid, auth, file, contentType } = params;
     let fileCopy = file;
     if (Object.prototype.toString.call(fileCopy) === "[object String]") {
       try {
@@ -334,13 +346,17 @@ export class ImagexService extends ImagexAutoService {
         };
       }
     }
+    const headers = {
+      "Content-CRC32": "Ignore",
+      Authorization: auth,
+    };
+    if (contentType) {
+      headers["Specified-Content-Type"] = contentType;
+    }
     try {
       await axios(`http://${uploadHost}/${getEncodedUri(oid)}`, {
         method: "post",
-        headers: {
-          "Content-CRC32": "Ignore",
-          Authorization: auth,
-        },
+        headers,
         data: fileCopy,
         maxContentLength: Infinity,
         maxBodyLength: Infinity,
