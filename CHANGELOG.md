@@ -1,3 +1,8 @@
+2024-08-08 Bumped to version v1.20.0
+- imagex:
+  - 上传文件支持通过 ContentTypes 参数指定对应文件类型（ContentType）
+  - 数据查询部分 API 新增 query 参数
+
 2024-06-13 Bumped to version v1.19.0
 - vikingdb :
   - 新增向量数据库 Nodejs SDK，包含数据集、索引、搜索数据、检索、Embedding 相关 API
