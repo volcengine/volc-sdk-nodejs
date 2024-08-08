@@ -449,7 +449,7 @@ export default class ImagexService extends Service {
     method: "get",
     contentType: "json",
     Version: "2023-05-01",
-    queryKeys: ["ServiceIds", "StartTime", "EndTime", "Interval"],
+    queryKeys: ["ServiceIds", "GroupBy", "StartTime", "EndTime", "Interval"],
   });
 
   /**
@@ -462,7 +462,7 @@ export default class ImagexService extends Service {
     method: "get",
     contentType: "json",
     Version: "2023-05-01",
-    queryKeys: ["ServiceIds", "StartTime", "EndTime", "Interval"],
+    queryKeys: ["ServiceIds", "GroupBy", "StartTime", "EndTime", "Interval"],
   });
 
   /**
@@ -803,7 +803,7 @@ export default class ImagexService extends Service {
     method: "get",
     contentType: "json",
     Version: "2023-05-01",
-    queryKeys: ["Dim", "Source", "Appid", "OS"],
+    queryKeys: ["Dim", "Source", "Appid", "OS", "Keyword"],
   });
 
   /**
@@ -1428,12 +1428,13 @@ export default class ImagexService extends Service {
    * @function GetImageServiceSubscription
    */
   public GetImageServiceSubscription = this.createAPI<
-    Record<string, any>,
+    types.GetImageServiceSubscriptionQuery,
     types.GetImageServiceSubscriptionRes["Result"]
   >("GetImageServiceSubscription", {
     method: "get",
     contentType: "json",
     Version: "2023-05-01",
+    queryKeys: ["AddOnType", "AddOnId", "AddOnKey"],
   });
 
   /**
@@ -1547,7 +1548,7 @@ export default class ImagexService extends Service {
   >("CreateImageFromUri", {
     method: "post",
     contentType: "json",
-    Version: "2018-08-01",
+    Version: "2023-05-01",
     queryKeys: ["ServiceId"],
   });
 
@@ -1907,7 +1908,7 @@ export default class ImagexService extends Service {
     method: "post",
     contentType: "json",
     Version: "2023-05-01",
-    queryKeys: ["ServiceId", "StoreUri", "Algorithm", "ImageUrl"],
+    queryKeys: ["ServiceId", "StoreUri", "ImageUrl", "Algorithm"],
   });
 
   /**
