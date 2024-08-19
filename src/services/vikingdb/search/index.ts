@@ -46,7 +46,7 @@ export class SearchService extends AbstractService {
     return {
       op: Operation,
       field: FieldName,
-      conditions: Conditions,
+      conds: Conditions,
     };
   }
 
