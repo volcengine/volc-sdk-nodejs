@@ -12,7 +12,7 @@ export enum SearchOperation {
 export interface BackendMustTypeCondition {
   op: Extract<SearchOperation, SearchOperation.Must | SearchOperation.MustNot>;
   field: string;
-  conditions: Array<number | string | boolean>;
+  conds: Array<number | string | boolean>;
 }
 
 export interface BackendRangeTypeCondition {
