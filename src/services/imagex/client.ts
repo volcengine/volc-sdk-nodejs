@@ -25,7 +25,7 @@ export default class ImagexService extends Service {
     types.DelDomainQuery & types.DelDomainBody,
     types.DelDomainRes["Result"]
   >("DelDomain", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
     queryKeys: ["ServiceId"],
@@ -38,7 +38,7 @@ export default class ImagexService extends Service {
     types.UpdateReferQuery & types.UpdateReferBody,
     types.UpdateReferRes["Result"]
   >("UpdateRefer", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2018-08-01",
     queryKeys: ["ServiceId"],
@@ -51,7 +51,7 @@ export default class ImagexService extends Service {
     types.UpdateHttpsQuery & types.UpdateHttpsBody,
     types.UpdateHttpsRes["Result"]
   >("UpdateHttps", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2018-08-01",
     queryKeys: ["ServiceId"],
@@ -64,7 +64,7 @@ export default class ImagexService extends Service {
     types.UpdateResponseHeaderQuery & types.UpdateResponseHeaderBody,
     types.UpdateResponseHeaderRes["Result"]
   >("UpdateResponseHeader", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2018-08-01",
     queryKeys: ["ServiceId"],
@@ -77,7 +77,7 @@ export default class ImagexService extends Service {
     types.SetDefaultDomainBody,
     types.SetDefaultDomainRes["Result"]
   >("SetDefaultDomain", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
   });
@@ -89,7 +89,7 @@ export default class ImagexService extends Service {
     types.DescribeImageVolcCdnAccessLogQuery & types.DescribeImageVolcCdnAccessLogBody,
     types.DescribeImageVolcCdnAccessLogRes["Result"]
   >("DescribeImageVolcCdnAccessLog", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2018-08-01",
     queryKeys: ["ServiceId"],
@@ -102,7 +102,7 @@ export default class ImagexService extends Service {
     Record<string, any>,
     types.GetResponseHeaderValidateKeysRes["Result"]
   >("GetResponseHeaderValidateKeys", {
-    method: "get",
+    method: "GET",
     contentType: "json",
     Version: "2023-05-01",
   });
@@ -114,7 +114,7 @@ export default class ImagexService extends Service {
     types.GetDomainConfigQuery,
     types.GetDomainConfigRes["Result"]
   >("GetDomainConfig", {
-    method: "get",
+    method: "GET",
     contentType: "json",
     Version: "2018-08-01",
     queryKeys: ["DomainName", "ServiceId"],
@@ -127,7 +127,7 @@ export default class ImagexService extends Service {
     types.GetServiceDomainsQuery,
     types.GetServiceDomainsRes["Result"]
   >("GetServiceDomains", {
-    method: "get",
+    method: "GET",
     contentType: "json",
     Version: "2018-08-01",
     queryKeys: ["ServiceId"],
@@ -140,7 +140,7 @@ export default class ImagexService extends Service {
     types.CreateImageMigrateTaskBody,
     types.CreateImageMigrateTaskRes["Result"]
   >("CreateImageMigrateTask", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
   });
@@ -152,7 +152,7 @@ export default class ImagexService extends Service {
     types.DeleteImageMigrateTaskQuery,
     types.DeleteImageMigrateTaskRes["Result"]
   >("DeleteImageMigrateTask", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
     queryKeys: ["Region", "TaskId"],
@@ -165,7 +165,7 @@ export default class ImagexService extends Service {
     types.ExportFailedMigrateTaskQuery,
     types.ExportFailedMigrateTaskRes["Result"]
   >("ExportFailedMigrateTask", {
-    method: "get",
+    method: "GET",
     contentType: "json",
     Version: "2023-05-01",
     queryKeys: ["Region", "TaskId"],
@@ -178,7 +178,7 @@ export default class ImagexService extends Service {
     types.UpdateImageTaskStrategyBody,
     types.UpdateImageTaskStrategyRes["Result"]
   >("UpdateImageTaskStrategy", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
   });
@@ -190,7 +190,7 @@ export default class ImagexService extends Service {
     types.TerminateImageMigrateTaskQuery,
     types.TerminateImageMigrateTaskRes["Result"]
   >("TerminateImageMigrateTask", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
     queryKeys: ["Region", "TaskId"],
@@ -203,7 +203,7 @@ export default class ImagexService extends Service {
     types.GetVendorBucketsBody,
     types.GetVendorBucketsRes["Result"]
   >("GetVendorBuckets", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
   });
@@ -215,7 +215,7 @@ export default class ImagexService extends Service {
     types.GetImageMigrateTasksQuery,
     types.GetImageMigrateTasksRes["Result"]
   >("GetImageMigrateTasks", {
-    method: "get",
+    method: "GET",
     contentType: "json",
     Version: "2023-05-01",
     queryKeys: ["Region", "TaskId", "ServiceId", "Offset", "Limit", "TaskNamePtn", "Status"],
@@ -228,7 +228,7 @@ export default class ImagexService extends Service {
     types.RerunImageMigrateTaskQuery,
     types.RerunImageMigrateTaskRes["Result"]
   >("RerunImageMigrateTask", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
     queryKeys: ["Region", "TaskId"],
@@ -241,7 +241,7 @@ export default class ImagexService extends Service {
     types.DescribeImageXSourceRequestBandwidthQuery,
     types.DescribeImageXSourceRequestBandwidthRes["Result"]
   >("DescribeImageXSourceRequestBandwidth", {
-    method: "get",
+    method: "GET",
     contentType: "json",
     Version: "2023-05-01",
     queryKeys: [
@@ -266,7 +266,7 @@ export default class ImagexService extends Service {
     types.DescribeImageXSourceRequestTrafficQuery,
     types.DescribeImageXSourceRequestTrafficRes["Result"]
   >("DescribeImageXSourceRequestTraffic", {
-    method: "get",
+    method: "GET",
     contentType: "json",
     Version: "2023-05-01",
     queryKeys: [
@@ -291,7 +291,7 @@ export default class ImagexService extends Service {
     types.DescribeImageXSourceRequestQuery,
     types.DescribeImageXSourceRequestRes["Result"]
   >("DescribeImageXSourceRequest", {
-    method: "get",
+    method: "GET",
     contentType: "json",
     Version: "2023-05-01",
     queryKeys: [
@@ -318,7 +318,7 @@ export default class ImagexService extends Service {
     types.DescribeImageXBucketRetrievalUsageQuery,
     types.DescribeImageXBucketRetrievalUsageRes["Result"]
   >("DescribeImageXBucketRetrievalUsage", {
-    method: "get",
+    method: "GET",
     contentType: "json",
     Version: "2023-05-01",
     queryKeys: ["ServiceIds", "BucketNames", "GroupBy", "StartTime", "EndTime"],
@@ -331,7 +331,7 @@ export default class ImagexService extends Service {
     types.DescribeImageXSummaryQuery,
     types.DescribeImageXSummaryRes["Result"]
   >("DescribeImageXSummary", {
-    method: "get",
+    method: "GET",
     contentType: "json",
     Version: "2023-05-01",
     queryKeys: ["ServiceIds", "Timestamp"],
@@ -344,7 +344,7 @@ export default class ImagexService extends Service {
     types.DescribeImageXDomainTrafficDataQuery,
     types.DescribeImageXDomainTrafficDataRes["Result"]
   >("DescribeImageXDomainTrafficData", {
-    method: "get",
+    method: "GET",
     contentType: "json",
     Version: "2023-05-01",
     queryKeys: [
@@ -365,7 +365,7 @@ export default class ImagexService extends Service {
     types.DescribeImageXDomainBandwidthDataQuery,
     types.DescribeImageXDomainBandwidthDataRes["Result"]
   >("DescribeImageXDomainBandwidthData", {
-    method: "get",
+    method: "GET",
     contentType: "json",
     Version: "2023-05-01",
     queryKeys: [
@@ -386,7 +386,7 @@ export default class ImagexService extends Service {
     types.DescribeImageXDomainBandwidthNinetyFiveDataQuery,
     types.DescribeImageXDomainBandwidthNinetyFiveDataRes["Result"]
   >("DescribeImageXDomainBandwidthNinetyFiveData", {
-    method: "get",
+    method: "GET",
     contentType: "json",
     Version: "2023-05-01",
     queryKeys: ["ServiceIds", "DomainNames", "BillingRegion", "StartTime", "EndTime"],
@@ -399,7 +399,7 @@ export default class ImagexService extends Service {
     types.DescribeImageXBucketUsageQuery,
     types.DescribeImageXBucketUsageRes["Result"]
   >("DescribeImageXBucketUsage", {
-    method: "get",
+    method: "GET",
     contentType: "json",
     Version: "2023-05-01",
     queryKeys: ["ServiceIds", "BucketNames", "GroupBy", "StartTime", "EndTime"],
@@ -412,7 +412,7 @@ export default class ImagexService extends Service {
     types.DescribeImageXBillingRequestCntUsageQuery,
     types.DescribeImageXBillingRequestCntUsageRes["Result"]
   >("DescribeImageXBillingRequestCntUsage", {
-    method: "get",
+    method: "GET",
     contentType: "json",
     Version: "2023-05-01",
     queryKeys: ["ServiceIds", "AdvFeats", "GroupBy", "StartTime", "EndTime", "Interval"],
@@ -425,7 +425,7 @@ export default class ImagexService extends Service {
     types.DescribeImageXRequestCntUsageQuery,
     types.DescribeImageXRequestCntUsageRes["Result"]
   >("DescribeImageXRequestCntUsage", {
-    method: "get",
+    method: "GET",
     contentType: "json",
     Version: "2023-05-01",
     queryKeys: [
@@ -446,7 +446,7 @@ export default class ImagexService extends Service {
     types.DescribeImageXBaseOpUsageQuery,
     types.DescribeImageXBaseOpUsageRes["Result"]
   >("DescribeImageXBaseOpUsage", {
-    method: "get",
+    method: "GET",
     contentType: "json",
     Version: "2023-05-01",
     queryKeys: ["ServiceIds", "GroupBy", "StartTime", "EndTime", "Interval"],
@@ -459,7 +459,7 @@ export default class ImagexService extends Service {
     types.DescribeImageXCompressUsageQuery,
     types.DescribeImageXCompressUsageRes["Result"]
   >("DescribeImageXCompressUsage", {
-    method: "get",
+    method: "GET",
     contentType: "json",
     Version: "2023-05-01",
     queryKeys: ["ServiceIds", "GroupBy", "StartTime", "EndTime", "Interval"],
@@ -472,7 +472,7 @@ export default class ImagexService extends Service {
     types.DescribeImageXScreenshotUsageQuery,
     types.DescribeImageXScreenshotUsageRes["Result"]
   >("DescribeImageXScreenshotUsage", {
-    method: "get",
+    method: "GET",
     contentType: "json",
     Version: "2023-05-01",
     queryKeys: ["ServiceIds", "StartTime", "EndTime", "Interval"],
@@ -485,7 +485,7 @@ export default class ImagexService extends Service {
     types.DescribeImageXVideoClipDurationUsageQuery,
     types.DescribeImageXVideoClipDurationUsageRes["Result"]
   >("DescribeImageXVideoClipDurationUsage", {
-    method: "get",
+    method: "GET",
     contentType: "json",
     Version: "2023-05-01",
     queryKeys: ["ServiceIds", "StartTime", "EndTime", "Interval"],
@@ -498,7 +498,7 @@ export default class ImagexService extends Service {
     types.DescribeImageXMultiCompressUsageQuery,
     types.DescribeImageXMultiCompressUsageRes["Result"]
   >("DescribeImageXMultiCompressUsage", {
-    method: "get",
+    method: "GET",
     contentType: "json",
     Version: "2023-05-01",
     queryKeys: ["ServiceIds", "StartTime", "EndTime", "Interval"],
@@ -511,7 +511,7 @@ export default class ImagexService extends Service {
     types.DescribeImageXEdgeRequestQuery,
     types.DescribeImageXEdgeRequestRes["Result"]
   >("DescribeImageXEdgeRequest", {
-    method: "get",
+    method: "GET",
     contentType: "json",
     Version: "2023-05-01",
     queryKeys: [
@@ -538,7 +538,7 @@ export default class ImagexService extends Service {
     types.DescribeImageXEdgeRequestBandwidthQuery,
     types.DescribeImageXEdgeRequestBandwidthRes["Result"]
   >("DescribeImageXEdgeRequestBandwidth", {
-    method: "get",
+    method: "GET",
     contentType: "json",
     Version: "2023-05-01",
     queryKeys: [
@@ -563,7 +563,7 @@ export default class ImagexService extends Service {
     types.DescribeImageXEdgeRequestTrafficQuery,
     types.DescribeImageXEdgeRequestTrafficRes["Result"]
   >("DescribeImageXEdgeRequestTraffic", {
-    method: "get",
+    method: "GET",
     contentType: "json",
     Version: "2023-05-01",
     queryKeys: [
@@ -588,7 +588,7 @@ export default class ImagexService extends Service {
     types.DescribeImageXEdgeRequestRegionsQuery,
     types.DescribeImageXEdgeRequestRegionsRes["Result"]
   >("DescribeImageXEdgeRequestRegions", {
-    method: "get",
+    method: "GET",
     contentType: "json",
     Version: "2023-05-01",
     queryKeys: ["StartTime", "EndTime"],
@@ -601,7 +601,7 @@ export default class ImagexService extends Service {
     types.DescribeImageXMirrorRequestHttpCodeByTimeBody,
     types.DescribeImageXMirrorRequestHttpCodeByTimeRes["Result"]
   >("DescribeImageXMirrorRequestHttpCodeByTime", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
   });
@@ -613,7 +613,7 @@ export default class ImagexService extends Service {
     types.DescribeImageXMirrorRequestHttpCodeOverviewBody,
     types.DescribeImageXMirrorRequestHttpCodeOverviewRes["Result"]
   >("DescribeImageXMirrorRequestHttpCodeOverview", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
   });
@@ -625,7 +625,7 @@ export default class ImagexService extends Service {
     types.DescribeImageXMirrorRequestTrafficBody,
     types.DescribeImageXMirrorRequestTrafficRes["Result"]
   >("DescribeImageXMirrorRequestTraffic", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
   });
@@ -637,7 +637,7 @@ export default class ImagexService extends Service {
     types.DescribeImageXMirrorRequestBandwidthBody,
     types.DescribeImageXMirrorRequestBandwidthRes["Result"]
   >("DescribeImageXMirrorRequestBandwidth", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
   });
@@ -649,7 +649,7 @@ export default class ImagexService extends Service {
     types.DescribeImageXServerQPSUsageQuery,
     types.DescribeImageXServerQPSUsageRes["Result"]
   >("DescribeImageXServerQPSUsage", {
-    method: "get",
+    method: "GET",
     contentType: "json",
     Version: "2023-05-01",
     queryKeys: ["ServiceIds", "StartTime", "EndTime", "Interval"],
@@ -662,7 +662,7 @@ export default class ImagexService extends Service {
     types.DescribeImageXHitRateTrafficDataQuery,
     types.DescribeImageXHitRateTrafficDataRes["Result"]
   >("DescribeImageXHitRateTrafficData", {
-    method: "get",
+    method: "GET",
     contentType: "json",
     Version: "2023-05-01",
     queryKeys: ["ServiceIds", "DomainNames", "GroupBy", "StartTime", "EndTime", "Interval"],
@@ -675,7 +675,7 @@ export default class ImagexService extends Service {
     types.DescribeImageXHitRateRequestDataQuery,
     types.DescribeImageXHitRateRequestDataRes["Result"]
   >("DescribeImageXHitRateRequestData", {
-    method: "get",
+    method: "GET",
     contentType: "json",
     Version: "2023-05-01",
     queryKeys: ["ServiceIds", "DomainNames", "GroupBy", "StartTime", "EndTime", "Interval"],
@@ -688,7 +688,7 @@ export default class ImagexService extends Service {
     types.DescribeImageXCDNTopRequestDataQuery,
     types.DescribeImageXCDNTopRequestDataRes["Result"]
   >("DescribeImageXCDNTopRequestData", {
-    method: "get",
+    method: "GET",
     contentType: "json",
     Version: "2023-05-01",
     queryKeys: [
@@ -712,7 +712,7 @@ export default class ImagexService extends Service {
     types.DescribeImageXExceedResolutionRatioAllBody,
     types.DescribeImageXExceedResolutionRatioAllRes["Result"]
   >("DescribeImageXExceedResolutionRatioAll", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
   });
@@ -724,7 +724,7 @@ export default class ImagexService extends Service {
     types.DescribeImageXExceedFileSizeBody,
     types.DescribeImageXExceedFileSizeRes["Result"]
   >("DescribeImageXExceedFileSize", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
   });
@@ -736,7 +736,7 @@ export default class ImagexService extends Service {
     types.DescribeImageXExceedCountByTimeBody,
     types.DescribeImageXExceedCountByTimeRes["Result"]
   >("DescribeImageXExceedCountByTime", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
   });
@@ -748,7 +748,7 @@ export default class ImagexService extends Service {
     types.DescribeImageXServiceQualityQuery,
     types.DescribeImageXServiceQualityRes["Result"]
   >("DescribeImageXServiceQuality", {
-    method: "get",
+    method: "GET",
     contentType: "json",
     Version: "2023-05-01",
     queryKeys: ["Region"],
@@ -761,7 +761,7 @@ export default class ImagexService extends Service {
     types.GetImageXQueryAppsQuery,
     types.GetImageXQueryAppsRes["Result"]
   >("GetImageXQueryApps", {
-    method: "get",
+    method: "GET",
     contentType: "json",
     Version: "2023-05-01",
     queryKeys: ["Source"],
@@ -774,7 +774,7 @@ export default class ImagexService extends Service {
     types.GetImageXQueryRegionsQuery,
     types.GetImageXQueryRegionsRes["Result"]
   >("GetImageXQueryRegions", {
-    method: "get",
+    method: "GET",
     contentType: "json",
     Version: "2023-05-01",
     queryKeys: ["Source", "Appid", "OS"],
@@ -787,7 +787,7 @@ export default class ImagexService extends Service {
     types.GetImageXQueryDimsQuery,
     types.GetImageXQueryDimsRes["Result"]
   >("GetImageXQueryDims", {
-    method: "get",
+    method: "GET",
     contentType: "json",
     Version: "2023-05-01",
     queryKeys: ["Source", "Appid", "OS"],
@@ -800,7 +800,7 @@ export default class ImagexService extends Service {
     types.GetImageXQueryValsQuery,
     types.GetImageXQueryValsRes["Result"]
   >("GetImageXQueryVals", {
-    method: "get",
+    method: "GET",
     contentType: "json",
     Version: "2023-05-01",
     queryKeys: ["Dim", "Source", "Appid", "OS", "Keyword"],
@@ -813,7 +813,7 @@ export default class ImagexService extends Service {
     types.DescribeImageXUploadCountByTimeBody,
     types.DescribeImageXUploadCountByTimeRes["Result"]
   >("DescribeImageXUploadCountByTime", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
   });
@@ -825,7 +825,7 @@ export default class ImagexService extends Service {
     types.DescribeImageXUploadDurationBody,
     types.DescribeImageXUploadDurationRes["Result"]
   >("DescribeImageXUploadDuration", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
   });
@@ -837,7 +837,7 @@ export default class ImagexService extends Service {
     types.DescribeImageXUploadSuccessRateByTimeBody,
     types.DescribeImageXUploadSuccessRateByTimeRes["Result"]
   >("DescribeImageXUploadSuccessRateByTime", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
   });
@@ -849,7 +849,7 @@ export default class ImagexService extends Service {
     types.DescribeImageXUploadFileSizeBody,
     types.DescribeImageXUploadFileSizeRes["Result"]
   >("DescribeImageXUploadFileSize", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
   });
@@ -861,7 +861,7 @@ export default class ImagexService extends Service {
     types.DescribeImageXUploadErrorCodeByTimeBody,
     types.DescribeImageXUploadErrorCodeByTimeRes["Result"]
   >("DescribeImageXUploadErrorCodeByTime", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
   });
@@ -873,7 +873,7 @@ export default class ImagexService extends Service {
     types.DescribeImageXUploadErrorCodeAllBody,
     types.DescribeImageXUploadErrorCodeAllRes["Result"]
   >("DescribeImageXUploadErrorCodeAll", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
   });
@@ -885,7 +885,7 @@ export default class ImagexService extends Service {
     types.DescribeImageXUploadSpeedBody,
     types.DescribeImageXUploadSpeedRes["Result"]
   >("DescribeImageXUploadSpeed", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
   });
@@ -897,7 +897,7 @@ export default class ImagexService extends Service {
     types.DescribeImageXUploadSegmentSpeedByTimeBody,
     types.DescribeImageXUploadSegmentSpeedByTimeRes["Result"]
   >("DescribeImageXUploadSegmentSpeedByTime", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
   });
@@ -909,7 +909,7 @@ export default class ImagexService extends Service {
     types.DescribeImageXCdnSuccessRateByTimeBody,
     types.DescribeImageXCdnSuccessRateByTimeRes["Result"]
   >("DescribeImageXCdnSuccessRateByTime", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
   });
@@ -921,7 +921,7 @@ export default class ImagexService extends Service {
     types.DescribeImageXCdnSuccessRateAllBody,
     types.DescribeImageXCdnSuccessRateAllRes["Result"]
   >("DescribeImageXCdnSuccessRateAll", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
   });
@@ -933,7 +933,7 @@ export default class ImagexService extends Service {
     types.DescribeImageXCdnErrorCodeByTimeBody,
     types.DescribeImageXCdnErrorCodeByTimeRes["Result"]
   >("DescribeImageXCdnErrorCodeByTime", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
   });
@@ -945,7 +945,7 @@ export default class ImagexService extends Service {
     types.DescribeImageXCdnErrorCodeAllBody,
     types.DescribeImageXCdnErrorCodeAllRes["Result"]
   >("DescribeImageXCdnErrorCodeAll", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
   });
@@ -957,7 +957,7 @@ export default class ImagexService extends Service {
     types.DescribeImageXCdnDurationDetailByTimeBody,
     types.DescribeImageXCdnDurationDetailByTimeRes["Result"]
   >("DescribeImageXCdnDurationDetailByTime", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
   });
@@ -969,7 +969,7 @@ export default class ImagexService extends Service {
     types.DescribeImageXCdnDurationAllBody,
     types.DescribeImageXCdnDurationAllRes["Result"]
   >("DescribeImageXCdnDurationAll", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
   });
@@ -981,7 +981,7 @@ export default class ImagexService extends Service {
     types.DescribeImageXCdnReuseRateByTimeBody,
     types.DescribeImageXCdnReuseRateByTimeRes["Result"]
   >("DescribeImageXCdnReuseRateByTime", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
   });
@@ -993,7 +993,7 @@ export default class ImagexService extends Service {
     types.DescribeImageXCdnReuseRateAllBody,
     types.DescribeImageXCdnReuseRateAllRes["Result"]
   >("DescribeImageXCdnReuseRateAll", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
   });
@@ -1005,7 +1005,7 @@ export default class ImagexService extends Service {
     types.DescribeImageXCdnProtocolRateByTimeBody,
     types.DescribeImageXCdnProtocolRateByTimeRes["Result"]
   >("DescribeImageXCdnProtocolRateByTime", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
   });
@@ -1017,7 +1017,7 @@ export default class ImagexService extends Service {
     types.DescribeImageXClientFailureRateBody,
     types.DescribeImageXClientFailureRateRes["Result"]
   >("DescribeImageXClientFailureRate", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
   });
@@ -1029,7 +1029,7 @@ export default class ImagexService extends Service {
     types.DescribeImageXClientDecodeSuccessRateByTimeBody,
     types.DescribeImageXClientDecodeSuccessRateByTimeRes["Result"]
   >("DescribeImageXClientDecodeSuccessRateByTime", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
   });
@@ -1041,7 +1041,7 @@ export default class ImagexService extends Service {
     types.DescribeImageXClientDecodeDurationByTimeBody,
     types.DescribeImageXClientDecodeDurationByTimeRes["Result"]
   >("DescribeImageXClientDecodeDurationByTime", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
   });
@@ -1053,7 +1053,7 @@ export default class ImagexService extends Service {
     types.DescribeImageXClientQueueDurationByTimeBody,
     types.DescribeImageXClientQueueDurationByTimeRes["Result"]
   >("DescribeImageXClientQueueDurationByTime", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
   });
@@ -1065,7 +1065,7 @@ export default class ImagexService extends Service {
     types.DescribeImageXClientErrorCodeByTimeBody,
     types.DescribeImageXClientErrorCodeByTimeRes["Result"]
   >("DescribeImageXClientErrorCodeByTime", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
   });
@@ -1077,7 +1077,7 @@ export default class ImagexService extends Service {
     types.DescribeImageXClientErrorCodeAllBody,
     types.DescribeImageXClientErrorCodeAllRes["Result"]
   >("DescribeImageXClientErrorCodeAll", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
   });
@@ -1089,7 +1089,7 @@ export default class ImagexService extends Service {
     types.DescribeImageXClientLoadDurationBody,
     types.DescribeImageXClientLoadDurationRes["Result"]
   >("DescribeImageXClientLoadDuration", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
   });
@@ -1101,7 +1101,7 @@ export default class ImagexService extends Service {
     types.DescribeImageXClientLoadDurationAllBody,
     types.DescribeImageXClientLoadDurationAllRes["Result"]
   >("DescribeImageXClientLoadDurationAll", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
   });
@@ -1113,7 +1113,7 @@ export default class ImagexService extends Service {
     types.DescribeImageXClientSdkVerByTimeBody,
     types.DescribeImageXClientSdkVerByTimeRes["Result"]
   >("DescribeImageXClientSdkVerByTime", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
   });
@@ -1125,7 +1125,7 @@ export default class ImagexService extends Service {
     types.DescribeImageXClientFileSizeBody,
     types.DescribeImageXClientFileSizeRes["Result"]
   >("DescribeImageXClientFileSize", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
   });
@@ -1137,7 +1137,7 @@ export default class ImagexService extends Service {
     types.DescribeImageXClientTopFileSizeBody,
     types.DescribeImageXClientTopFileSizeRes["Result"]
   >("DescribeImageXClientTopFileSize", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
   });
@@ -1149,7 +1149,7 @@ export default class ImagexService extends Service {
     types.DescribeImageXClientCountByTimeBody,
     types.DescribeImageXClientCountByTimeRes["Result"]
   >("DescribeImageXClientCountByTime", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
   });
@@ -1161,7 +1161,7 @@ export default class ImagexService extends Service {
     types.DescribeImageXClientQualityRateByTimeBody,
     types.DescribeImageXClientQualityRateByTimeRes["Result"]
   >("DescribeImageXClientQualityRateByTime", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
   });
@@ -1173,7 +1173,7 @@ export default class ImagexService extends Service {
     types.DescribeImageXClientTopQualityURLBody,
     types.DescribeImageXClientTopQualityURLRes["Result"]
   >("DescribeImageXClientTopQualityURL", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
   });
@@ -1185,7 +1185,7 @@ export default class ImagexService extends Service {
     types.DescribeImageXClientDemotionRateByTimeBody,
     types.DescribeImageXClientDemotionRateByTimeRes["Result"]
   >("DescribeImageXClientDemotionRateByTime", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
   });
@@ -1197,7 +1197,7 @@ export default class ImagexService extends Service {
     types.DescribeImageXClientTopDemotionURLBody,
     types.DescribeImageXClientTopDemotionURLRes["Result"]
   >("DescribeImageXClientTopDemotionURL", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
   });
@@ -1209,7 +1209,7 @@ export default class ImagexService extends Service {
     types.DescribeImageXClientScoreByTimeBody,
     types.DescribeImageXClientScoreByTimeRes["Result"]
   >("DescribeImageXClientScoreByTime", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
   });
@@ -1221,7 +1221,7 @@ export default class ImagexService extends Service {
     types.DescribeImageXSensibleCountByTimeBody,
     types.DescribeImageXSensibleCountByTimeRes["Result"]
   >("DescribeImageXSensibleCountByTime", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
   });
@@ -1233,7 +1233,7 @@ export default class ImagexService extends Service {
     types.DescribeImageXSensibleCacheHitRateByTimeBody,
     types.DescribeImageXSensibleCacheHitRateByTimeRes["Result"]
   >("DescribeImageXSensibleCacheHitRateByTime", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
   });
@@ -1245,7 +1245,7 @@ export default class ImagexService extends Service {
     types.DescribeImageXSensibleTopSizeURLBody,
     types.DescribeImageXSensibleTopSizeURLRes["Result"]
   >("DescribeImageXSensibleTopSizeURL", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
   });
@@ -1257,7 +1257,7 @@ export default class ImagexService extends Service {
     types.DescribeImageXSensibleTopResolutionURLBody,
     types.DescribeImageXSensibleTopResolutionURLRes["Result"]
   >("DescribeImageXSensibleTopResolutionURL", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
   });
@@ -1269,7 +1269,7 @@ export default class ImagexService extends Service {
     types.DescribeImageXSensibleTopRamURLBody,
     types.DescribeImageXSensibleTopRamURLRes["Result"]
   >("DescribeImageXSensibleTopRamURL", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
   });
@@ -1281,7 +1281,7 @@ export default class ImagexService extends Service {
     types.DescribeImageXSensibleTopUnknownURLBody,
     types.DescribeImageXSensibleTopUnknownURLRes["Result"]
   >("DescribeImageXSensibleTopUnknownURL", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
   });
@@ -1293,7 +1293,7 @@ export default class ImagexService extends Service {
     types.UpdateImageResourceStatusQuery & types.UpdateImageResourceStatusBody,
     types.UpdateImageResourceStatusRes["Result"]
   >("UpdateImageResourceStatus", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
     queryKeys: ["ServiceId"],
@@ -1306,7 +1306,7 @@ export default class ImagexService extends Service {
     types.GetImageStorageFilesQuery,
     types.GetImageStorageFilesRes["Result"]
   >("GetImageStorageFiles", {
-    method: "get",
+    method: "GET",
     contentType: "json",
     Version: "2018-08-01",
     queryKeys: ["ServiceId", "Marker", "Limit", "Prefix", "Delimiter"],
@@ -1319,7 +1319,7 @@ export default class ImagexService extends Service {
     types.DeleteImageUploadFilesQuery & types.DeleteImageUploadFilesBody,
     types.DeleteImageUploadFilesRes["Result"]
   >("DeleteImageUploadFiles", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2018-08-01",
     queryKeys: ["ServiceId"],
@@ -1332,7 +1332,7 @@ export default class ImagexService extends Service {
     types.UpdateImageUploadFilesQuery & types.UpdateImageUploadFilesBody,
     types.UpdateImageUploadFilesRes["Result"]
   >("UpdateImageUploadFiles", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
     queryKeys: ["ServiceId"],
@@ -1345,7 +1345,7 @@ export default class ImagexService extends Service {
     types.CommitImageUploadQuery & types.CommitImageUploadBody,
     types.CommitImageUploadRes["Result"]
   >("CommitImageUpload", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2018-08-01",
     queryKeys: ["ServiceId", "SkipMeta"],
@@ -1358,7 +1358,7 @@ export default class ImagexService extends Service {
     types.ApplyImageUploadQuery,
     types.ApplyImageUploadRes["Result"]
   >("ApplyImageUpload", {
-    method: "get",
+    method: "GET",
     contentType: "json",
     Version: "2018-08-01",
     queryKeys: [
@@ -1379,7 +1379,7 @@ export default class ImagexService extends Service {
     types.GetImageUploadFileQuery,
     types.GetImageUploadFileRes["Result"]
   >("GetImageUploadFile", {
-    method: "get",
+    method: "GET",
     contentType: "json",
     Version: "2023-05-01",
     queryKeys: ["ServiceId", "StoreUri"],
@@ -1392,7 +1392,7 @@ export default class ImagexService extends Service {
     types.GetImageUploadFilesQuery,
     types.GetImageUploadFilesRes["Result"]
   >("GetImageUploadFiles", {
-    method: "get",
+    method: "GET",
     contentType: "json",
     Version: "2018-08-01",
     queryKeys: ["ServiceId", "Limit", "Marker"],
@@ -1405,7 +1405,7 @@ export default class ImagexService extends Service {
     types.GetImageUpdateFilesQuery,
     types.GetImageUpdateFilesRes["Result"]
   >("GetImageUpdateFiles", {
-    method: "get",
+    method: "GET",
     contentType: "json",
     Version: "2023-05-01",
     queryKeys: ["ServiceId", "Type", "UrlPattern", "Offset", "Limit"],
@@ -1418,23 +1418,10 @@ export default class ImagexService extends Service {
     types.PreviewImageUploadFileQuery,
     types.PreviewImageUploadFileRes["Result"]
   >("PreviewImageUploadFile", {
-    method: "get",
+    method: "GET",
     contentType: "json",
     Version: "2023-05-01",
     queryKeys: ["ServiceId", "StoreUri"],
-  });
-
-  /**
-   * @function GetImageServiceSubscription
-   */
-  public GetImageServiceSubscription = this.createAPI<
-    types.GetImageServiceSubscriptionQuery,
-    types.GetImageServiceSubscriptionRes["Result"]
-  >("GetImageServiceSubscription", {
-    method: "get",
-    contentType: "json",
-    Version: "2023-05-01",
-    queryKeys: ["AddOnType", "AddOnId", "AddOnKey"],
   });
 
   /**
@@ -1444,7 +1431,7 @@ export default class ImagexService extends Service {
     types.GetImageServiceQuery,
     types.GetImageServiceRes["Result"]
   >("GetImageService", {
-    method: "get",
+    method: "GET",
     contentType: "json",
     Version: "2018-08-01",
     queryKeys: ["ServiceId"],
@@ -1457,7 +1444,7 @@ export default class ImagexService extends Service {
     types.GetAllImageServicesQuery,
     types.GetAllImageServicesRes["Result"]
   >("GetAllImageServices", {
-    method: "get",
+    method: "GET",
     contentType: "json",
     Version: "2018-08-01",
     queryKeys: ["SearchPtn"],
@@ -1470,7 +1457,7 @@ export default class ImagexService extends Service {
     types.CreateImageCompressTaskQuery & types.CreateImageCompressTaskBody,
     types.CreateImageCompressTaskRes["Result"]
   >("CreateImageCompressTask", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2018-08-01",
     queryKeys: ["ServiceId"],
@@ -1482,7 +1469,7 @@ export default class ImagexService extends Service {
   public FetchImageUrl = this.createAPI<types.FetchImageUrlBody, types.FetchImageUrlRes["Result"]>(
     "FetchImageUrl",
     {
-      method: "post",
+      method: "POST",
       contentType: "json",
       Version: "2023-05-01",
     }
@@ -1495,7 +1482,7 @@ export default class ImagexService extends Service {
     types.UpdateImageStorageTTLBody,
     types.UpdateImageStorageTTLRes["Result"]
   >("UpdateImageStorageTTL", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
   });
@@ -1507,7 +1494,7 @@ export default class ImagexService extends Service {
     types.GetCompressTaskInfoQuery,
     types.GetCompressTaskInfoRes["Result"]
   >("GetCompressTaskInfo", {
-    method: "get",
+    method: "GET",
     contentType: "json",
     Version: "2018-08-01",
     queryKeys: ["TaskId", "ServiceId"],
@@ -1520,7 +1507,7 @@ export default class ImagexService extends Service {
     types.GetUrlFetchTaskQuery,
     types.GetUrlFetchTaskRes["Result"]
   >("GetUrlFetchTask", {
-    method: "get",
+    method: "GET",
     contentType: "json",
     Version: "2018-08-01",
     queryKeys: ["Id", "ServiceId"],
@@ -1533,7 +1520,7 @@ export default class ImagexService extends Service {
     types.GetResourceURLQuery,
     types.GetResourceURLRes["Result"]
   >("GetResourceURL", {
-    method: "get",
+    method: "GET",
     contentType: "json",
     Version: "2023-05-01",
     queryKeys: ["ServiceId", "Domain", "URI", "Tpl", "Proto", "Format", "Timestamp"],
@@ -1546,7 +1533,7 @@ export default class ImagexService extends Service {
     types.CreateImageFromUriQuery & types.CreateImageFromUriBody,
     types.CreateImageFromUriRes["Result"]
   >("CreateImageFromUri", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
     queryKeys: ["ServiceId"],
@@ -1559,7 +1546,7 @@ export default class ImagexService extends Service {
     types.UpdateImageFileKeyQuery & types.UpdateImageFileKeyBody,
     types.UpdateImageFileKeyRes["Result"]
   >("UpdateImageFileKey", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2018-08-01",
     queryKeys: ["ServiceId"],
@@ -1572,7 +1559,7 @@ export default class ImagexService extends Service {
     types.CreateImageContentTaskQuery & types.CreateImageContentTaskBody,
     types.CreateImageContentTaskRes["Result"]
   >("CreateImageContentTask", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
     queryKeys: ["ServiceId"],
@@ -1585,7 +1572,7 @@ export default class ImagexService extends Service {
     types.GetImageContentTaskDetailBody,
     types.GetImageContentTaskDetailRes["Result"]
   >("GetImageContentTaskDetail", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
   });
@@ -1597,7 +1584,7 @@ export default class ImagexService extends Service {
     types.GetImageContentBlockListQuery & types.GetImageContentBlockListBody,
     types.GetImageContentBlockListRes["Result"]
   >("GetImageContentBlockList", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
     queryKeys: ["ServiceId"],
@@ -1610,7 +1597,7 @@ export default class ImagexService extends Service {
     types.CreateImageTranscodeQueueBody,
     types.CreateImageTranscodeQueueRes["Result"]
   >("CreateImageTranscodeQueue", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
   });
@@ -1622,7 +1609,7 @@ export default class ImagexService extends Service {
     types.DeleteImageTranscodeQueueBody,
     types.DeleteImageTranscodeQueueRes["Result"]
   >("DeleteImageTranscodeQueue", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
   });
@@ -1634,7 +1621,7 @@ export default class ImagexService extends Service {
     types.UpdateImageTranscodeQueueBody,
     types.UpdateImageTranscodeQueueRes["Result"]
   >("UpdateImageTranscodeQueue", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
   });
@@ -1646,7 +1633,7 @@ export default class ImagexService extends Service {
     types.UpdateImageTranscodeQueueStatusBody,
     types.UpdateImageTranscodeQueueStatusRes["Result"]
   >("UpdateImageTranscodeQueueStatus", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
   });
@@ -1658,7 +1645,7 @@ export default class ImagexService extends Service {
     types.GetImageTranscodeQueuesQuery,
     types.GetImageTranscodeQueuesRes["Result"]
   >("GetImageTranscodeQueues", {
-    method: "get",
+    method: "GET",
     contentType: "json",
     Version: "2023-05-01",
     queryKeys: ["Region", "SearchPtn", "Limit", "Offset"],
@@ -1671,7 +1658,7 @@ export default class ImagexService extends Service {
     types.CreateImageTranscodeTaskBody,
     types.CreateImageTranscodeTaskRes["Result"]
   >("CreateImageTranscodeTask", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
   });
@@ -1683,7 +1670,7 @@ export default class ImagexService extends Service {
     types.GetImageTranscodeDetailsQuery,
     types.GetImageTranscodeDetailsRes["Result"]
   >("GetImageTranscodeDetails", {
-    method: "get",
+    method: "GET",
     contentType: "json",
     Version: "2023-05-01",
     queryKeys: [
@@ -1705,7 +1692,7 @@ export default class ImagexService extends Service {
     types.CreateImageTranscodeCallbackBody,
     types.CreateImageTranscodeCallbackRes["Result"]
   >("CreateImageTranscodeCallback", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
   });
@@ -1717,7 +1704,7 @@ export default class ImagexService extends Service {
     types.DeleteImageTranscodeDetailBody,
     types.DeleteImageTranscodeDetailRes["Result"]
   >("DeleteImageTranscodeDetail", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
   });
@@ -1729,7 +1716,7 @@ export default class ImagexService extends Service {
     types.GetImagePSDetectionQuery & types.GetImagePSDetectionBody,
     types.GetImagePSDetectionRes["Result"]
   >("GetImagePSDetection", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
     queryKeys: ["ServiceId"],
@@ -1742,7 +1729,7 @@ export default class ImagexService extends Service {
     types.GetImageEraseResultBody,
     types.GetImageEraseResultRes["Result"]
   >("GetImageEraseResult", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
   });
@@ -1754,7 +1741,7 @@ export default class ImagexService extends Service {
     types.GetImageSuperResolutionResultBody,
     types.GetImageSuperResolutionResultRes["Result"]
   >("GetImageSuperResolutionResult", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
   });
@@ -1766,7 +1753,7 @@ export default class ImagexService extends Service {
     types.GetImageDuplicateDetectionQuery & types.GetImageDuplicateDetectionBody,
     types.GetImageDuplicateDetectionRes["Result"]
   >("GetImageDuplicateDetection", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2018-08-01",
     queryKeys: ["ServiceId"],
@@ -1779,7 +1766,7 @@ export default class ImagexService extends Service {
     types.GetImageOCRV2Query & types.GetImageOCRV2Body,
     types.GetImageOCRV2Res["Result"]
   >("GetImageOCRV2", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2018-08-01",
     queryKeys: ["ServiceId"],
@@ -1792,7 +1779,7 @@ export default class ImagexService extends Service {
     types.GetImageBgFillResultBody,
     types.GetImageBgFillResultRes["Result"]
   >("GetImageBgFillResult", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
   });
@@ -1804,7 +1791,7 @@ export default class ImagexService extends Service {
     types.GetSegmentImageQuery & types.GetSegmentImageBody,
     types.GetSegmentImageRes["Result"]
   >("GetSegmentImage", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
     queryKeys: ["ServiceId"],
@@ -1817,7 +1804,7 @@ export default class ImagexService extends Service {
     types.GetImageSmartCropResultBody,
     types.GetImageSmartCropResultRes["Result"]
   >("GetImageSmartCropResult", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
   });
@@ -1829,7 +1816,7 @@ export default class ImagexService extends Service {
     types.GetImageComicResultBody,
     types.GetImageComicResultRes["Result"]
   >("GetImageComicResult", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
   });
@@ -1841,7 +1828,7 @@ export default class ImagexService extends Service {
     types.GetImageEnhanceResultBody,
     types.GetImageEnhanceResultRes["Result"]
   >("GetImageEnhanceResult", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2018-08-01",
   });
@@ -1853,7 +1840,7 @@ export default class ImagexService extends Service {
     types.GetImageQualityQuery & types.GetImageQualityBody,
     types.GetImageQualityRes["Result"]
   >("GetImageQuality", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2018-08-01",
     queryKeys: ["ServiceId"],
@@ -1866,7 +1853,7 @@ export default class ImagexService extends Service {
     types.GetPrivateImageTypeQuery & types.GetPrivateImageTypeBody,
     types.GetPrivateImageTypeRes["Result"]
   >("GetPrivateImageType", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2018-08-01",
     queryKeys: ["ServiceId"],
@@ -1879,7 +1866,7 @@ export default class ImagexService extends Service {
     types.CreateHiddenWatermarkImageQuery & types.CreateHiddenWatermarkImageBody,
     types.CreateHiddenWatermarkImageRes["Result"]
   >("CreateHiddenWatermarkImage", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
     queryKeys: ["ServiceId"],
@@ -1892,7 +1879,7 @@ export default class ImagexService extends Service {
     types.GetImageDetectResultQuery & types.GetImageDetectResultBody,
     types.GetImageDetectResultRes["Result"]
   >("GetImageDetectResult", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
     queryKeys: ["ServiceId"],
@@ -1905,7 +1892,7 @@ export default class ImagexService extends Service {
     types.CreateImageHmExtractQuery,
     types.CreateImageHmExtractRes["Result"]
   >("CreateImageHmExtract", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
     queryKeys: ["ServiceId", "StoreUri", "ImageUrl", "Algorithm"],
@@ -1918,7 +1905,7 @@ export default class ImagexService extends Service {
     types.CreateImageHmEmbedBody,
     types.CreateImageHmEmbedRes["Result"]
   >("CreateImageHmEmbed", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
   });
@@ -1930,7 +1917,7 @@ export default class ImagexService extends Service {
     types.GetComprehensiveEnhanceImageBody,
     types.GetComprehensiveEnhanceImageRes["Result"]
   >("GetComprehensiveEnhanceImage", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
   });
@@ -1942,7 +1929,7 @@ export default class ImagexService extends Service {
     types.GetImageEraseModelsQuery,
     types.GetImageEraseModelsRes["Result"]
   >("GetImageEraseModels", {
-    method: "get",
+    method: "GET",
     contentType: "json",
     Version: "2023-05-01",
     queryKeys: ["Type"],
@@ -1955,7 +1942,7 @@ export default class ImagexService extends Service {
     types.GetDedupTaskStatusQuery,
     types.GetDedupTaskStatusRes["Result"]
   >("GetDedupTaskStatus", {
-    method: "get",
+    method: "GET",
     contentType: "json",
     Version: "2018-08-01",
     queryKeys: ["TaskId"],
@@ -1968,7 +1955,7 @@ export default class ImagexService extends Service {
     types.CreateImageServiceBody,
     types.CreateImageServiceRes["Result"]
   >("CreateImageService", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
   });
@@ -1980,7 +1967,7 @@ export default class ImagexService extends Service {
     types.DeleteImageServiceQuery,
     types.DeleteImageServiceRes["Result"]
   >("DeleteImageService", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
     queryKeys: ["ServiceId"],
@@ -1993,7 +1980,7 @@ export default class ImagexService extends Service {
     types.UpdateImageAuthKeyQuery & types.UpdateImageAuthKeyBody,
     types.UpdateImageAuthKeyRes["Result"]
   >("UpdateImageAuthKey", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
     queryKeys: ["ServiceId"],
@@ -2006,7 +1993,7 @@ export default class ImagexService extends Service {
     types.UpdateServiceNameQuery & types.UpdateServiceNameBody,
     types.UpdateServiceNameRes["Result"]
   >("UpdateServiceName", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
     queryKeys: ["ServiceId"],
@@ -2019,7 +2006,7 @@ export default class ImagexService extends Service {
     types.UpdateImageObjectAccessQuery & types.UpdateImageObjectAccessBody,
     types.UpdateImageObjectAccessRes["Result"]
   >("UpdateImageObjectAccess", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
     queryKeys: ["ServiceId"],
@@ -2032,10 +2019,23 @@ export default class ImagexService extends Service {
     types.UpdateImageMirrorConfQuery & types.UpdateImageMirrorConfBody,
     types.UpdateImageMirrorConfRes["Result"]
   >("UpdateImageMirrorConf", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2018-08-01",
     queryKeys: ["ServiceId"],
+  });
+
+  /**
+   * @function GetImageServiceSubscription
+   */
+  public GetImageServiceSubscription = this.createAPI<
+    types.GetImageServiceSubscriptionQuery,
+    types.GetImageServiceSubscriptionRes["Result"]
+  >("GetImageServiceSubscription", {
+    method: "GET",
+    contentType: "json",
+    Version: "2023-05-01",
+    queryKeys: ["AddOnType", "AddOnId", "AddOnKey"],
   });
 
   /**
@@ -2045,7 +2045,7 @@ export default class ImagexService extends Service {
     types.GetImageAuthKeyQuery,
     types.GetImageAuthKeyRes["Result"]
   >("GetImageAuthKey", {
-    method: "get",
+    method: "GET",
     contentType: "json",
     Version: "2023-05-01",
     queryKeys: ["ServiceId"],
@@ -2058,7 +2058,7 @@ export default class ImagexService extends Service {
     types.CreateImageAnalyzeTaskBody,
     types.CreateImageAnalyzeTaskRes["Result"]
   >("CreateImageAnalyzeTask", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
   });
@@ -2070,7 +2070,7 @@ export default class ImagexService extends Service {
     types.DeleteImageAnalyzeTaskRunBody,
     types.DeleteImageAnalyzeTaskRunRes["Result"]
   >("DeleteImageAnalyzeTaskRun", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
   });
@@ -2082,7 +2082,7 @@ export default class ImagexService extends Service {
     types.DeleteImageAnalyzeTaskBody,
     types.DeleteImageAnalyzeTaskRes["Result"]
   >("DeleteImageAnalyzeTask", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
   });
@@ -2094,7 +2094,7 @@ export default class ImagexService extends Service {
     types.UpdateImageAnalyzeTaskStatusBody,
     types.UpdateImageAnalyzeTaskStatusRes["Result"]
   >("UpdateImageAnalyzeTaskStatus", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
   });
@@ -2106,7 +2106,7 @@ export default class ImagexService extends Service {
     types.UpdateImageAnalyzeTaskBody,
     types.UpdateImageAnalyzeTaskRes["Result"]
   >("UpdateImageAnalyzeTask", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
   });
@@ -2118,7 +2118,7 @@ export default class ImagexService extends Service {
     types.GetImageAnalyzeTasksQuery,
     types.GetImageAnalyzeTasksRes["Result"]
   >("GetImageAnalyzeTasks", {
-    method: "get",
+    method: "GET",
     contentType: "json",
     Version: "2023-05-01",
     queryKeys: ["Region", "SearchPtn", "Limit", "Offset"],
@@ -2131,7 +2131,7 @@ export default class ImagexService extends Service {
     types.GetImageAnalyzeResultQuery,
     types.GetImageAnalyzeResultRes["Result"]
   >("GetImageAnalyzeResult", {
-    method: "get",
+    method: "GET",
     contentType: "json",
     Version: "2023-05-01",
     queryKeys: ["TaskId", "StartTime", "EndTime", "RunId", "Limit", "Offset", "File"],
@@ -2144,7 +2144,7 @@ export default class ImagexService extends Service {
     types.GetImageStyleResultQuery & types.GetImageStyleResultBody,
     types.GetImageStyleResultRes["Result"]
   >("GetImageStyleResult", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2018-08-01",
     queryKeys: ["ServiceId"],
@@ -2157,7 +2157,7 @@ export default class ImagexService extends Service {
     types.CreateImageTemplateQuery & types.CreateImageTemplateBody,
     types.CreateImageTemplateRes["Result"]
   >("CreateImageTemplate", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2018-08-01",
     queryKeys: ["ServiceId"],
@@ -2170,7 +2170,7 @@ export default class ImagexService extends Service {
     types.DeleteTemplatesFromBinQuery & types.DeleteTemplatesFromBinBody,
     types.DeleteTemplatesFromBinRes["Result"]
   >("DeleteTemplatesFromBin", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
     queryKeys: ["ServiceId"],
@@ -2183,7 +2183,7 @@ export default class ImagexService extends Service {
     types.DeleteImageTemplateQuery & types.DeleteImageTemplateBody,
     types.DeleteImageTemplateRes["Result"]
   >("DeleteImageTemplate", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
     queryKeys: ["ServiceId"],
@@ -2196,7 +2196,7 @@ export default class ImagexService extends Service {
     types.CreateTemplatesFromBinQuery & types.CreateTemplatesFromBinBody,
     types.CreateTemplatesFromBinRes["Result"]
   >("CreateTemplatesFromBin", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
     queryKeys: ["ServiceId"],
@@ -2209,7 +2209,7 @@ export default class ImagexService extends Service {
     types.GetImageTemplateQuery,
     types.GetImageTemplateRes["Result"]
   >("GetImageTemplate", {
-    method: "get",
+    method: "GET",
     contentType: "json",
     Version: "2018-08-01",
     queryKeys: ["ServiceId", "TemplateName"],
@@ -2222,7 +2222,7 @@ export default class ImagexService extends Service {
     types.GetTemplatesFromBinQuery,
     types.GetTemplatesFromBinRes["Result"]
   >("GetTemplatesFromBin", {
-    method: "get",
+    method: "GET",
     contentType: "json",
     Version: "2018-08-01",
     queryKeys: ["ServiceId", "TemplateNamePattern", "Offset", "Limit", "Asc"],
@@ -2235,7 +2235,7 @@ export default class ImagexService extends Service {
     types.GetAllImageTemplatesQuery,
     types.GetAllImageTemplatesRes["Result"]
   >("GetAllImageTemplates", {
-    method: "get",
+    method: "GET",
     contentType: "json",
     Version: "2018-08-01",
     queryKeys: ["ServiceId", "TemplateNamePattern", "Offset", "Limit", "Asc"],
@@ -2248,7 +2248,7 @@ export default class ImagexService extends Service {
     types.CreateImageAuditTaskBody,
     types.CreateImageAuditTaskRes["Result"]
   >("CreateImageAuditTask", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
   });
@@ -2260,7 +2260,7 @@ export default class ImagexService extends Service {
     types.DeleteImageAuditResultBody,
     types.DeleteImageAuditResultRes["Result"]
   >("DeleteImageAuditResult", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
   });
@@ -2272,7 +2272,7 @@ export default class ImagexService extends Service {
     types.UpdateImageAuditTaskStatusBody,
     types.UpdateImageAuditTaskStatusRes["Result"]
   >("UpdateImageAuditTaskStatus", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
   });
@@ -2284,7 +2284,7 @@ export default class ImagexService extends Service {
     types.UpdateImageAuditTaskBody,
     types.UpdateImageAuditTaskRes["Result"]
   >("UpdateImageAuditTask", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
   });
@@ -2296,7 +2296,7 @@ export default class ImagexService extends Service {
     types.UpdateAuditImageStatusBody,
     types.UpdateAuditImageStatusRes["Result"]
   >("UpdateAuditImageStatus", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
   });
@@ -2308,7 +2308,7 @@ export default class ImagexService extends Service {
     types.GetImageAuditTasksQuery,
     types.GetImageAuditTasksRes["Result"]
   >("GetImageAuditTasks", {
-    method: "get",
+    method: "GET",
     contentType: "json",
     Version: "2023-05-01",
     queryKeys: ["Region", "Type", "AuditAbility", "Status", "TaskType", "Limit", "Offset"],
@@ -2321,7 +2321,7 @@ export default class ImagexService extends Service {
     types.GetImageAuditResultQuery,
     types.GetImageAuditResultRes["Result"]
   >("GetImageAuditResult", {
-    method: "get",
+    method: "GET",
     contentType: "json",
     Version: "2023-05-01",
     queryKeys: ["TaskId", "Type", "Problem", "ImageType", "AuditSuggestion", "Limit", "Marker"],
@@ -2334,7 +2334,7 @@ export default class ImagexService extends Service {
     types.GetAuditEntrysCountQuery,
     types.GetAuditEntrysCountRes["Result"]
   >("GetAuditEntrysCount", {
-    method: "get",
+    method: "GET",
     contentType: "json",
     Version: "2023-05-01",
     queryKeys: ["TaskId"],
@@ -2347,7 +2347,7 @@ export default class ImagexService extends Service {
     types.CreateImageRetryAuditTaskBody,
     types.CreateImageRetryAuditTaskRes["Result"]
   >("CreateImageRetryAuditTask", {
-    method: "post",
+    method: "POST",
     contentType: "json",
     Version: "2023-05-01",
   });
