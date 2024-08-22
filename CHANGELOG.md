@@ -1,3 +1,9 @@
+2024-08-22 Bumped to version v1.20.1
+- vikingdb:
+  - fix: must type 检索字段错误
+- imagex:
+  - fix: 去除get请求的body参数
+
 2024-08-08 Bumped to version v1.20.0
 - imagex:
   - 上传文件支持通过 ContentTypes 参数指定对应文件类型（ContentType）
