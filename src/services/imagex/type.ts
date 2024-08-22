@@ -18005,25 +18005,31 @@ export interface GetImageDetectResultRes {
 
 export interface GetImageDuplicateDetectionBody {
   /**
-   * 是否使用异步，支持取值如下所示：
+   * 是否使用异步，取值如下所示：
    * * `true`：使用异步去重
-   * * `false`：不使用异步去重
+   * * `false`：（默认）不使用异步去重
    * @example "true"
    */
   Async?: boolean;
   /**
-   * 当`Async`取值为`true`即启用异步时需要添加回调地址，地址使用 POST 请求方式。
+   * 当`Async`取值为`true`即启用异步时需要添加回调地址，地址使用 POST 请求方式。回调内容详见[回调参数](#回调参数)。
    * @example "http://example.callback.com/test"
    */
   Callback?: string;
   /**
-   * 当`Async`取值为`true`即启用异步时，该配置生效。
-   * 相似度阈值，系统将对原图中满足该阈值的图片进行分组。取值范围为 [0,1]，默认值为 0.84。最多支持两位小数。
+   * 图像特征提取类型，取值如下所示：
+   * - `hash`：（默认）基于图像的像素值、颜色分布、纹理等特征生成哈希码，并通过哈希码进行比较来判定图片的相似度。该方式处理速度快，但对图片的旋转和颜色的敏感度较高，适用于大规模且纹理相对简单的图片的快速去重。
+   * - `cnn`：通过深度学习技术来提取图像的高级语义特征，如对象、场景和纹理等，这些特征用于比较不同图像之间的相似性。该提取方式鲁棒性较好，对旋转、缩放和变形的敏感度较低，适用于纹理复杂、细节丰富的图片去重。
+   * @example "hash"
+   */
+  ExtractorType?: string;
+  /**
+   * 相似度阈值。上传图片数量超过 2 张并执行去重分组时，系统将对原图中满足该阈值的图片进行分组。取值范围为 [0,1]，默认值为 0.84。最多支持两位小数。
    * @example "0.84"
    */
   Similarity?: number;
   /**
-   * 需要去重的图片 URL，以英文逗号分割，输入图片格式 PNG，JPEG，支持格式混合输入。
+   * 需要去重的图片 URL，多个地址以英文逗号分割。图片格式仅支持 JPEG（.jpeg 或 .jpg）和 PNG，支持格式混合输入。
    * @example "["https://test.imagex.cn/obj/tos-cn-i-jc****ko/ee****7e","https://test.imagex.cn/obj/tos-cn-i-jc****ko/ee****7e"]"
    */
   Urls: string[];
@@ -18064,7 +18070,7 @@ export interface GetImageDuplicateDetectionRes {
   /** 视请求的接口而定 */
   Result?: {
     /**
-     * 回调地址。
+     * 回调地址，与请求参数中的`Callback`相同。具体异步去重信息请参考 [GetDedupTaskStatus](https://www.volcengine.com/docs/508/138909)接口。具体回调内容请参考[回调参数](https://www.volcengine.com/docs/508/138658#%E5%9B%9E%E8%B0%83%E5%8F%82%E6%95%B0) 。
      * @example "http://localhost:6901/top/v1/test"
      */
     Callback?: string;
@@ -18985,7 +18991,7 @@ export interface GetImageQualityBody {
    * :::tip
    * nr_index 工具支持评估 contrast、brightness 等多个维度。您也可以单独指定各维度，获取指定维度估值。
    * :::
-   * @example "nr_index,vqscore,advcolor,blockiness,noise,aesmod,blur,cg,contrast,texture,brightness,overexposure,hue,saturation,psnr,ssim,vmaf,green,cmartifacts"
+   * @example "nr_index,vqscore,advcolor,blockiness,noise,aesmod,blur,cg,contrast,texture,brightness,overexposure,hue,saturation,psnr,ssim,vmaf,green,cmartifacts,text_detect"
    */
   VqType: string;
 }
@@ -19057,6 +19063,11 @@ export interface GetImageQualityRes {
       OverExposure: number;
       /** @example 60.11 */
       Saturation: number;
+      /**
+       * 文字质量分数
+       * @example "11.1"
+       */
+      TextQualityScore: number;
       /** @example 60.11 */
       Texture: number;
       /** @example 40.11 */
