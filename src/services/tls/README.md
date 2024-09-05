@@ -801,3 +801,77 @@
   // 上传日志
   defaultService.PutLogs(IPutLogsReq);
 ```
+
+### Trace
+
+```typescript
+interface ITraceInsDescribeResp {
+  CreateTime: string;
+  DependencyTopicId: string;
+  DependencyTopicTopicName: string;
+  Description: string;
+  ModifyTime: string;
+  ProjectId: string;
+  ProjectName: string;
+  TraceInstanceId: string;
+  TraceInstanceName: string;
+  TraceInstanceStatus: Enums.TraceInstanceStatus;
+  TraceTopicId: string;
+  TraceTopicName: string;
+}
+
+interface IDescribeTraceInstancesReq {
+  /** 分页，默认从1开始。 */
+  PageNumber?: number;
+  /** 分页大小限制，默认为20，最大为100。 */
+  PageSize?: number;
+  /** Trace实例名称，作为模糊查询使用。TraceInstanceName和TraceInstanceId只能提供一个。 */
+  TraceInstanceName?: string;
+  /** Trace实例ID，作为模糊查询使用。 */
+  TraceInstanceId?: string;
+  /** 日志项目ID */
+  ProjectId?: string;
+  /** 日志项目名称。 */
+  ProjectName?: string;
+  /** Trace实例的状态。 */
+  Status?: string;
+  /** IAM日志项目名称 */
+  IamProjectName?: string;
+}
+
+tlsOpenapiService.DescribeTraceInstances(IDescribeTraceInstancesReq);
+
+interface ITraceInsCreateReq {
+  /** Trace实例描述信息：不支持<>、'、、；长度为0-64个字符。 */
+  Description?: string;
+  /** 日志主题所属的日志项目uuid。 */
+  ProjectId: string;
+  /** Trace实例名称:同一个日志项目下，日志主题名称不可重复;只能包括小写字母、数字、中文和短划线（-）;必须以小写字母、中文或者数字开头和结尾;长度为3~30字符。 */
+  TraceInstanceName: string;
+}
+
+tlsOpenapiService.CreateTraceInstance(ITraceInsCreateReq);
+
+interface IDescribeTraceInstanceReq {
+  /** Trace实例id */
+  TraceInstanceId: string;
+}
+
+tlsOpenapiService.DescribeTraceInstance(IDescribeTraceInstanceReq);
+
+interface ITraceInsModifyReq {
+  /** 日志主题描述信息：不支持<>、'、、；长度为0-64个字符。 */
+  Description?: string;
+  /** Trace实例ID。 */
+  TraceInstanceId: string;
+}
+
+tlsOpenapiService.ModifyTraceInstance(ITraceInsModifyReq);
+
+interface ITraceInsDeleteReq {
+  /** Trace实例ID。 */
+  TraceInstanceId: string;
+}
+
+tlsOpenapiService.DeleteTraceInstance(ITraceInsDeleteReq);
+```

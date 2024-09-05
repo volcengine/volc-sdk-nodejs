@@ -78,7 +78,17 @@ import {
   ITopicDescribeTopicsResp,
   ITopicModifyReq,
   ITopicModifyResp,
+  IDescribeTraceInstanceReq,
+  ITraceInsDescribeResp,
+  IDescribeTraceInstancesReq,
+  ITraceInsDescribeTraceInstancesResp,
+  ITraceInsCreateResp,
+  ITraceInsDeleteResp,
+  ITraceInsModifyResp,
   TlsServiceOptions,
+  ITraceInsCreateReq,
+  ITraceInsModifyReq,
+  ITraceInsDeleteReq,
 } from "./types";
 
 const SERVICE = "TLS";
@@ -298,5 +308,40 @@ export class TlsService extends Base {
   SearchLogs = this.createAPI<IIndexSearchLogsReq, IEsclientResult>("SearchLogs", {
     method: "POST",
   });
+
+  DescribeTraceInstances = this.createAPI<
+    IDescribeTraceInstancesReq,
+    ITraceInsDescribeTraceInstancesResp
+  >("DescribeTraceInstances", {
+    method: "GET",
+  });
+
+  DeleteTraceInstance = this.createAPI<ITraceInsDeleteReq, ITraceInsDeleteResp>(
+    "DeleteTraceInstance",
+    {
+      method: "delete",
+    }
+  );
+
+  CreateTraceInstance = this.createAPI<ITraceInsCreateReq, ITraceInsCreateResp>(
+    "CreateTraceInstance",
+    {
+      method: "POST",
+    }
+  );
+
+  ModifyTraceInstance = this.createAPI<ITraceInsModifyReq, ITraceInsModifyResp>(
+    "ModifyTraceInstance",
+    {
+      method: "PUT",
+    }
+  );
+
+  DescribeTraceInstance = this.createAPI<IDescribeTraceInstanceReq, ITraceInsDescribeResp>(
+    "DescribeTraceInstance",
+    {
+      method: "GET",
+    }
+  );
 }
 export const defaultService = new TlsService();
