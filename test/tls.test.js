@@ -9,6 +9,7 @@ import {
   rulesValidate,
   shardsValidate,
   topicValidate,
+  traceValidate,
 } from "./schema/tls";
 
 const tlsOpenapiService = tlsOpenapi.defaultService;
@@ -476,5 +477,44 @@ describe("tlsOpenapi test", () => {
     await tlsOpenapiService.DeleteProject({
       ProjectId: projectCreated.ProjectId,
     });
+  });
+
+  test("tlsOpenapi:Trace", async () => {
+    const ProjectId = "d0b016d4-5ba0-454d-bd87-2d7cabf78cab";
+    const random1 = (Math.random() * 100).toFixed(0);
+    const random2 = (Math.random() * 100).toFixed(0);
+    const traceName = `单元测试${random1}-${random2}`;
+
+    const traceList = await tlsOpenapiService.DescribeTraceInstances({
+      PageNumber: 1,
+      PageSize: 20,
+    });
+
+    expect(traceValidate.list(traceList)).toBe(true);
+
+    const traceCreate = await tlsOpenapiService.CreateTraceInstance({
+      ProjectId: ProjectId,
+      TraceInstanceName: traceName,
+    });
+
+    expect(traceValidate.create(traceCreate)).toBe(true);
+
+    const traceInstanceId = traceCreate.TraceInstanceId;
+
+    const traceDetail = await tlsOpenapiService.DescribeTraceInstance({
+      TraceInstanceId: traceInstanceId,
+    });
+    expect(traceValidate.detail(traceDetail)).toBe(true);
+
+    const traceModify = await tlsOpenapiService.ModifyTraceInstance({
+      TraceInstanceId: traceInstanceId,
+      Description: "jest-modify",
+    });
+    expect(traceValidate.modify(traceModify)).toBe(true);
+
+    const traceDelete = await tlsOpenapiService.DeleteTraceInstance({
+      TraceInstanceId: traceInstanceId,
+    });
+    expect(traceValidate.delete(traceDelete)).toBe(true);
   });
 });

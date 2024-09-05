@@ -878,3 +878,75 @@ export const alarmValidate = {
   delete: ajv.compile(getSchema(null)),
   deleteNotifyGroup: ajv.compile(getSchema(null)),
 };
+
+const traceSchema = {
+  CreateTime: {
+    type: "string",
+  },
+  DependencyTopicId: {
+    type: "string",
+  },
+  DependencyTopicTopicName: {
+    type: "string",
+  },
+  Description: {
+    type: "string",
+  },
+  ProjectId: {
+    type: "string",
+  },
+  ProjectName: {
+    type: "string",
+  },
+  TraceInstanceId: {
+    type: "string",
+  },
+  TraceInstanceName: {
+    type: "string",
+  },
+  TraceInstanceStatus: {
+    type: "string",
+  },
+  TraceTopicId: {
+    type: "string",
+  },
+  TraceTopicName: {
+    type: "string",
+  },
+};
+
+export const traceValidate = {
+  create: ajv.compile(
+    getSchema({
+      TraceInstanceId: {
+        type: "string",
+      },
+    })
+  ),
+  detail: ajv.compile(
+    getSchema({
+      ...traceSchema,
+    })
+  ),
+
+  modify: ajv.compile(getSchema(null)),
+
+  delete: ajv.compile(getSchema(null)),
+
+  list: ajv.compile(
+    getSchema({
+      Total: {
+        type: "number",
+      },
+      TraceInstances: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            ...traceSchema,
+          },
+        },
+      },
+    })
+  ),
+};
