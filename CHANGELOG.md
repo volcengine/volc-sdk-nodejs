@@ -1,3 +1,7 @@
+2024-09-05 Bumped to version v1.21.0
+- tls:
+  - 新增 trace 接口
+
 2024-08-22 Bumped to version v1.20.1
 - vikingdb:
   - fix: must type 检索字段错误
