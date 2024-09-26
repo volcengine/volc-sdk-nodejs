@@ -1,3 +1,8 @@
+2024-09-26 Bumped to version v1.22.0
+- vikingdb
+  - 新建数据集时，Text 字段类型 Pipeline 新增支持 `text_doubao_embedding`、`text_split_doubao_embedding`、`text_doubao_embedding_and_m3` 和 `text_split_doubao_embedding_and_m3`
+  - Embedding ModuleName 新增支持 `doubao-embedding` 和 `doubao-embedding-and-m3`
+
 2024-09-05 Bumped to version v1.21.0
 - tls:
   - 新增 trace 接口
