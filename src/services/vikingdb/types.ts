@@ -136,7 +136,11 @@ export type PipelineName =
   | "text_split_bge_m3"
   | "text_bge_m3"
   | "text_split_bge_large_and_m3"
-  | "text_bge_large_and_m3";
+  | "text_bge_large_and_m3"
+  | "text_doubao_embedding"
+  | "text_split_doubao_embedding"
+  | "text_doubao_embedding_and_m3"
+  | "text_split_doubao_embedding_and_m3";
 
 /** 文本字段信息 */
 export interface TextFieldInfo {
@@ -184,3 +188,8 @@ export type GetPrimaryKeys<T extends Record<string, any>> = {
 }[keyof T];
 
 export type PrimaryKeys = Array<ScalarFieldType2JsType[PrimaryKeyFieldType]>;
+
+export interface RequestOptions {
+  headers?: any;
+  timeout?: number;
+}

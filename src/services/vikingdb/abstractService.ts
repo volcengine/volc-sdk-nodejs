@@ -1,4 +1,5 @@
 import {
+  type RequestOptions,
   VikingdbError,
   VikingdbErrorCode,
   type VikingdbRegion,
@@ -36,12 +37,13 @@ export abstract class AbstractService {
     private sessionToken?: string
   ) {}
 
-  private sign(pathname: string, body: string) {
+  private sign(pathname: string, body: string, headers: RequestOptions["headers"]) {
     const requestObj: RequestObj = {
       region: this.region,
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
+        ...headers,
       },
       method: "POST",
       pathname,
@@ -58,18 +60,21 @@ export abstract class AbstractService {
 
   protected async request<T extends NonNullable<unknown>, R = void>(
     pathname: string,
-    data: T = {} as T
+    data: T = {} as T,
+    { timeout = 30 * 1000, ...rest }: RequestOptions = {
+      timeout: 30 * 1000,
+    }
   ): Promise<Response<R>> {
     const body = this.encode(data);
-    const headers = this.sign(pathname, body);
+    const headers = this.sign(pathname, body, rest.headers);
     try {
       const response = await axios({
         baseURL: this.basename,
         url: pathname,
         method: "POST",
-        data: body,
-        timeout: 30 * 1000,
+        timeout,
         headers,
+        data: body,
       });
       const result: BackendResponse<R> = response.data;
       return {

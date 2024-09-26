@@ -1,5 +1,11 @@
 /** @link https://www.volcengine.com/docs/84313/1254554 */
-export type ModelName = "bge-large-zh" | "bge-m3" | "bge-large-zh-and-m3" | "bge-visualized-m3";
+export type ModelName =
+  | "bge-large-zh"
+  | "bge-m3"
+  | "bge-large-zh-and-m3"
+  | "bge-visualized-m3"
+  | "doubao-embedding"
+  | "doubao-embedding-and-m3";
 
 export enum DataType {
   Text = "text",
