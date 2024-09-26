@@ -4,6 +4,7 @@ import { IndexService } from "./index/index";
 import { DataService } from "./data";
 import { EmbeddingService } from "./embedding";
 import { SearchService } from "./search";
+import { CustomService } from "./custom";
 
 interface ModuleService {
   collection: CollectionService;
@@ -11,6 +12,7 @@ interface ModuleService {
   data: DataService;
   embedding: EmbeddingService;
   search: SearchService;
+  custom: CustomService;
 }
 
 interface Options {
@@ -56,6 +58,7 @@ export class VikingdbService implements ModuleService {
   readonly data: DataService;
   readonly embedding: EmbeddingService;
   readonly search: SearchService;
+  readonly custom: CustomService;
 
   constructor({ ak, sk, region = "cn-beijing", sessionToken }: Options) {
     this.collection = new CollectionService(ak, sk, region, sessionToken);
@@ -63,6 +66,7 @@ export class VikingdbService implements ModuleService {
     this.data = new DataService(ak, sk, region, sessionToken);
     this.embedding = new EmbeddingService(ak, sk, region, sessionToken);
     this.search = new SearchService(ak, sk, region, sessionToken);
+    this.custom = new CustomService(ak, sk, region, sessionToken);
   }
 }
 
