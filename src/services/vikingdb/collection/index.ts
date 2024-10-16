@@ -24,8 +24,6 @@ import {
   type PrimaryKeyFieldInfo,
   type ScalarFieldInfo,
   type TextFieldInfo,
-  VikingdbError,
-  VikingdbErrorCode,
   VikingdbResponse,
 } from "../types";
 
@@ -69,17 +67,22 @@ export class CollectionService extends AbstractService {
     }, this);
   }
 
+  private getPrimaryKey(fields: FieldInfo[]) {
+    const primaryFields = fields.filter((item) => "IsPrimary" in item && item.IsPrimary);
+    if (!primaryFields.length) {
+      return "__AUTO_ID__";
+    }
+    const [{ FieldName }] = primaryFields;
+    return FieldName;
+  }
+
   async CreateCollection({
     CollectionAliases,
     CollectionName,
     Description,
     Fields,
   }: CreateCollectionRequest): Promise<VikingdbResponse> {
-    const primaryFields = Fields.filter((item) => "IsPrimary" in item && item.IsPrimary);
-    if (!primaryFields.length) {
-      throw new VikingdbError(VikingdbErrorCode.ErrInvalidRequest, "Missing primary key");
-    }
-    const [{ FieldName: primaryKey }] = primaryFields;
+    const primaryKey = this.getPrimaryKey(Fields);
     const response = await this.request<BackendCreateCollectionRequest>(Pathname.CreateCollection, {
       collection_name: CollectionName,
       collection_aliases: CollectionAliases,
