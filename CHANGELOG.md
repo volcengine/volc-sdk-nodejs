@@ -1,3 +1,7 @@
+2024-10-17 Bumped to version v1.23.0
+- vikingdb:
+  - 向量数据库创建数据集新增支持自动主键；当创建的数据集没有指定主键时，系统会自动分配一个主键
+
 2024-09-26 Bumped to version v1.22.0
 - vikingdb
   - 新建数据集时，Text 字段类型 Pipeline 新增支持 `text_doubao_embedding`、`text_split_doubao_embedding`、`text_doubao_embedding_and_m3` 和 `text_split_doubao_embedding_and_m3`
