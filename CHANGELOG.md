@@ -1,3 +1,7 @@
+2024-11-14 Bumped to version v1.24.0
+- imagex:
+  - 新增豆包 AIGC 相关 API
+
 2024-10-17 Bumped to version v1.23.0
 - vikingdb:
   - 向量数据库创建数据集新增支持自动主键；当创建的数据集没有指定主键时，系统会自动分配一个主键
