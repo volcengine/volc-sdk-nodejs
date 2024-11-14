@@ -15758,6 +15758,791 @@ export interface GetAuditEntrysCountRes {
   };
 }
 
+export interface GetCVAnimeGenerateImageBody {
+  /**
+   * 服务下绑定的域名，域名状态需正常可用。
+   * - 您可以在 veImageX 控制台 [服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取绑定的域名信息。
+   * - 您也可以通过 OpenAPI 的方式获取域名，具体请参考[获取服务下全部域名](https://www.volcengine.com/docs/508/9379)。
+   * @example "test.example.com"
+   */
+  Domain: string;
+  /**
+   * [文生图系列模型](#使用说明)的接口 Action 名称。
+   *
+   * 例如，使用[动漫 1.3.X-文生图/图生图](https://www.volcengine.com/docs/6791/1213131)，则 `ModelAction` 需要取值为 `CVProcess`。
+   * 模型操作action
+   * @example "CVProcess"
+   */
+  ModelAction: string;
+  /**
+   * [文生图系列模型](#使用说明)的接口 Version 名称。
+   *
+   * 例如，使用[动漫 1.3.X-文生图/图生图](https://www.volcengine.com/docs/6791/1213131)，则 `ModelVersion` 需要取值为 `2022-08-31`。
+   * 模型版本。
+   * @example "2022-08-31"
+   */
+  ModelVersion: string;
+  /**
+   * 指定输出图片的文件名，输入限制如下所示：
+   * - 数组长度为 1，若指定多个文件名，仅第一个取值生效。
+   * - 不支持空格。
+   * - 不支持以/开头或结尾，不支持/连续出现，最大长度限制为 180 个字节。
+   * 输出结果。
+   * @example "["AI/demo.png"]"
+   */
+  Outputs: string[];
+  /**
+   * 是否覆盖服务下同名文件，取值如下所示：
+   * - `false`：（默认）不覆盖
+   * - `true`：覆盖
+   * :::tip
+   * 请确保您已开启[重名覆盖上传](https://www.volcengine.com/docs/508/1119912)功能，否则，此处配置无效。
+   * :::
+   * 是否覆盖现有文件。
+   * @example "true"
+   */
+  Overwrite?: boolean;
+  /**
+   * [文生图系列模型](#使用说明)的接口的请求 JSON 字符串。
+   *
+   * 例如，使用[动漫 1.3.X-文生图/图生图](https://www.volcengine.com/docs/6791/1213131)，则 `ReqJson` 需要取值为：
+   * ```json
+   * {
+   *     "req_key": "high_aes",
+   *     "prompt": "千军万马",
+   *     "model_version": "anime_v1.3",
+   *     "binary_data_base64": [""],
+   *     "strength": 0.7,
+   *     "seed": -1,
+   *     "scale": 7,
+   *     "ddim_steps": 20,
+   *     "width": 1024,
+   *     "height": 1024,
+   *     "return_url": False,
+   *     "logo_info": {
+   *         "add_logo": False,
+   *         "position": 0,
+   *         "language": 0,
+   *         "logo_text_content": "这里是明水印内容"
+   *     }
+   * }
+   * ```
+   * 请求的JSON数据。
+   * @example "{
+   *     "req_key": "high_aes",
+   *     "prompt": "千军万马",
+   *     "model_version": "anime_v1.3",
+   *     "binary_data_base64": [""],
+   *     "strength": 0.7,
+   *     "seed": -1,
+   *     "scale": 7,
+   *     "ddim_steps": 20,
+   *     "width": 1024,
+   *     "height": 1024,
+   *     "return_url": False,
+   *     "logo_info": {
+   *         "add_logo": False,
+   *         "position": 0,
+   *         "language": 0,
+   *         "logo_text_content": "这里是明水印内容"
+   *     }
+   * }"
+   */
+  ReqJson: Record<string, Record<string, unknown>>;
+  /**
+   * 服务下创建的图片处理模板名称，指定后，将按照模板中的处理配置对豆包大模型生成的图片进行图片处理。
+   *
+   * 您可在 veImageX 控制台的处理配置页面，参考[新建模板](https://www.volcengine.com/docs/508/8087)配置模板并获取模版名称，例如 `tplv-f0****5k-test`。
+   * @example "tplv-serviceid-test"
+   */
+  Template: string;
+}
+
+export interface GetCVAnimeGenerateImageQuery {
+  /**
+   * 指定存储结果图并计量计费的服务 ID。
+   * - 您可以在 veImageX 控制台 [服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。
+   * - 您也可以通过 OpenAPI 的方式获取服务 ID，具体请参考[获取所有服务信息](https://www.volcengine.com/docs/508/9360)。
+   * @example "serviceid"
+   */
+  ServiceId: string;
+}
+
+export interface GetCVAnimeGenerateImageRes {
+  ResponseMetadata: {
+    /**
+     * 请求的接口名，属于请求的公共参数。
+     * @example "{Action}"
+     */
+    Action: string;
+    /**
+     * 请求的Region，例如：cn-north-1
+     * @example "cn-north-1"
+     */
+    Region: string;
+    /** RequestId为每次API请求的唯一标识。 */
+    RequestId: string;
+    /** 请求的服务，属于请求的公共参数。 */
+    Service: string;
+    /**
+     * 请求的版本号，属于请求的公共参数。
+     * @example "{Version}"
+     */
+    Version: string;
+  };
+  /** 视请求的接口而定 */
+  Result?: {
+    /**
+     * 最终上传至 veImageX 服务的结果图访问 URL，数量为 1。
+     * 存储URI列表。
+     * @example "["http://test.example.cn/tos-cn-i-serviceid/demo1~tplv-serviceid-image.image"]"
+     */
+    ImageUrls: string[];
+    /**
+     * 根据指定的文生图模型接口信息，接收的该接口响应的 JSON 数据。
+     *
+     * 例如，使用[动漫 1.3.X-文生图/图生图](https://www.volcengine.com/docs/6791/1213131)，则 RespJson 接收到的相应信息为：
+     * ```json
+     * {
+     *     "code":10000,
+     *     "data":{
+     *         "binary_data_base64":["xxx"]
+     *     },
+     *     "message":"Success",
+     *     "request_id":"20220926182941010212157201024017C6",
+     *     "status":10000,
+     *     "time_elapsed":"456.790505ms"
+     * }
+     * ```
+     * 响应的JSON数据。
+     * @example "{
+     *     "code":10000,
+     *     "data":{
+     *         "binary_data_base64":["xxx"]
+     *     },
+     *     "message":"Success",
+     *     "request_id":"20220926182941010212157201024017C6",
+     *     "status":10000,
+     *     "time_elapsed":"456.790505ms"
+     * }"
+     */
+    RespJson: Record<string, Record<string, unknown>>;
+    /** 存储URI。 */
+    StoreUris: string[];
+  };
+}
+
+export interface GetCVImageGenerateResultBody {
+  /**
+   * 服务下绑定的域名，域名状态需正常可用。
+   * - 您可以在 veImageX 控制台 [服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取绑定的域名信息。
+   * - 您也可以通过 OpenAPI 的方式获取域名，具体请参考[获取服务下全部域名](https://www.volcengine.com/docs/508/9379)。
+   * @example "test.example.com"
+   */
+  Domain: string;
+  /**
+   * 基于该图片智能生图，支持传入该服务下的图片存储 URI 或公网访问 URL。图片输入限制如下所示：
+   * 1. 图片格式：JPG(JPEG)、PNG、BMP 等常见格式，建议使用 JPG 格式。
+   * 2. 图片要求：图片体积小于 5MB，分辨率小于 4096\*4096，宽高均尽可能在 1024 左右。宽高比例不建议过于极端，否则出图效果不佳，且延迟过长的概率也会显著增加。输出图片宽高与输入图一致。
+   * :::tip
+   * 指定 `ImageUrl` 后，`ReqJson` 中指定的图片地址无效。
+   * :::
+   * 图片URL
+   * @example "http://app1.cpm/example.jpg"
+   */
+  ImageUrl?: string;
+  /**
+   * [通用 XL pro-图生图](https://www.volcengine.com/docs/6791/1330203)模型接口的 Action 名称，即 `Img2ImgXLSft`。
+   * 模型操作action
+   * @example "Img2ImgXLSft"
+   */
+  ModelAction: string;
+  /**
+   * [通用 XL pro-图生图](https://www.volcengine.com/docs/6791/1330203)模型接口的 Version 名称，即 `2022-08-31`。
+   * 模型版本。
+   * @example "2022-08-31"
+   */
+  ModelVersion: string;
+  /**
+   * 指定输出图片的文件名，输入限制如下所示：
+   * - 数组长度为 1，若指定多个文件名，仅第一个取值生效。
+   * - 不支持空格。
+   * - 不支持以/开头或结尾，不支持/连续出现，最大长度限制为 180 个字节。
+   * 输出结果。
+   * @example "["AI/demo.png"]"
+   */
+  Outputs: string[];
+  /**
+   * 是否覆盖服务下同名文件，取值如下所示：
+   * - `true`：覆盖
+   * - `false`：（默认）不覆盖
+   * :::tip
+   * 请确保您已开启[重名覆盖上传](https://www.volcengine.com/docs/508/1119912)功能，否则，此处配置无效。
+   * :::
+   * 是否覆盖现有文件。
+   * @example "true"
+   */
+  Overwrite?: boolean;
+  /**
+   * [通用 XL pro-图生图](https://www.volcengine.com/docs/6791/1330203)模型接口的请求 JSON 字符串。
+   * 请求的JSON字符串。
+   * @example "{
+   *     "req_key": "i2i_xl_sft",
+   *     "image_urls": [
+   *         "https://xxx"
+   *     ],
+   *     "prompt": "美女",
+   *     "seed": -1,
+   *     "ddim_steps": 20,
+   *     "scale": 7.0,
+   *     "controlnet_args": [
+   *         {
+   *             "type": "canny",
+   *             "strength": 0.4,
+   *             "binary_data_index": 0
+   *         }
+   *     ],
+   *     "style_reference_args": {
+   *         "id_weight": 0.2,
+   *         "style_weight": 0.0,
+   *         "binary_data_index": 0
+   *     },
+   *     "etta_args": {
+   *         "binary_data_index": 0
+   *     },
+   *     "return_url": true,
+   *     "logo_info": {
+   *         "add_logo": true,
+   *         "position": 2,
+   *         "language": 0,
+   *         "logo_text_content": "这里是明水印内容"
+   *     }
+   * }"
+   */
+  ReqJson: Record<string, Record<string, unknown>>;
+  /**
+   * 服务下创建的图片处理模板名称，指定后，将按照模板中的处理配置对豆包大模型生成的图片进行图片处理。
+   *
+   * 您可在 veImageX 控制台的处理配置页面，参考[新建模板](https://www.volcengine.com/docs/508/8087)配置模板并获取模版名称，例如 `tplv-f0****5k-test`。
+   * @example "tplv-serviceid-test"
+   */
+  Template: string;
+}
+
+export interface GetCVImageGenerateResultQuery {
+  /**
+   * 指定存储结果图并计量计费的服务 ID。
+   * - 您可以在 veImageX 控制台 [服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。
+   * - 您也可以通过 OpenAPI 的方式获取服务 ID，具体请参考[获取所有服务信息](https://www.volcengine.com/docs/508/9360)。
+   * @example "serviceid"
+   */
+  ServiceId: string;
+}
+
+export interface GetCVImageGenerateResultRes {
+  ResponseMetadata: {
+    /**
+     * 请求的接口名，属于请求的公共参数。
+     * @example "{Action}"
+     */
+    Action: string;
+    /**
+     * 请求的Region，例如：cn-north-1
+     * @example "cn-north-1"
+     */
+    Region: string;
+    /** RequestId为每次API请求的唯一标识。 */
+    RequestId: string;
+    /** 请求的服务，属于请求的公共参数。 */
+    Service: string;
+    /**
+     * 请求的版本号，属于请求的公共参数。
+     * @example "{Version}"
+     */
+    Version: string;
+  };
+  /** 视请求的接口而定 */
+  Result?: {
+    /**
+     * 最终上传至 veImageX 服务的结果图访问 URL，数量为 1。
+     * 图片URL列表。
+     * @example "["http://test.example.cn/tos-cn-i-serviceid/demo1~tplv-serviceid-image.image"]"
+     */
+    ImageUrls: string[];
+    /**
+     * 根据指定的[通用 XL pro-图生图](https://www.volcengine.com/docs/6791/1330203)模型接口信息，接收的该接口响应的 JSON 数据。
+     * 响应的JSON内容。
+     * @example "{
+     *     "code": 10000,
+     *     "data": {
+     *         "algorithm_base_resp": {
+     *             "status_code": 0,
+     *             "status_message": "Success"
+     *         },
+     *         "custom_prompt": "美女",
+     *         "image_urls": [
+     *             "https://xxx",
+     *             "https://xxx"
+     *         ],
+     *         "multi_pipeline_select_key": "t2i",
+     *         "prompt": "beautiful woman",
+     *         "prompt_translated": "beautiful woman",
+     *         ...
+     * 		}
+     *     "message": "Success",
+     *     "request_id": "20240**5716A",
+     *     "status": 10000,
+     *     "time_elapsed": "12.696326169s"
+     * }"
+     */
+    RespJson: Record<string, Record<string, unknown>>;
+    /** 存储URI。 */
+    StoreUris: string[];
+  };
+}
+
+export interface CreateCVImageGenerateTaskBody {
+  /**
+   * 服务下绑定的域名，域名状态需正常可用。
+   * - 您可以在 veImageX 控制台 [服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取绑定的域名信息。
+   * - 您也可以通过 OpenAPI 的方式获取域名，具体请参考[获取服务下全部域名](https://www.volcengine.com/docs/508/9379)。
+   * @example "domain.test.com"
+   */
+  Domain: string;
+  /**
+   * [文生图系列模型](#使用说明)的接口 Action 名称。
+   *
+   * 例如，使用[通用 2.0S-文生图异步](https://www.volcengine.com/docs/6791/1347773)，则 `ModelAction` 需要取值为 `CVSync2AsyncSubmitTask`。
+   * 模型接口action
+   * @example "CVSync2AsyncSubmitTask"
+   */
+  ModelAction: string;
+  /**
+   * [文生图系列模型](#使用说明)的接口 Version 名称。
+   *
+   * 例如，使用[通用 2.0S-文生图异步](https://www.volcengine.com/docs/6791/1347773)，则 `ModelVersion` 需要取值为 `2022-08-31`。
+   * @example "2022-08-31"
+   */
+  ModelVersion: string;
+  /** 参数输出。 */
+  Outputs: string[];
+  /**
+   * 是否覆盖服务下同名文件，取值如下所示：
+   * - `false`：（默认）不覆盖
+   * - `true`：覆盖
+   * :::tip
+   * 请确保您已开启[重名覆盖上传](https://www.volcengine.com/docs/508/1119912)功能，否则，此处配置无效。
+   * :::
+   * 是否覆盖现有内容。<ul><li>`false`：不覆盖；</li><li>`true`：覆盖。</li></ul>默认值为`false`。
+   * @example "true"
+   */
+  Overwrite?: boolean;
+  /**
+   * [文生图系列模型](#使用说明)的接口的请求 JSON 字符串。
+   *
+   * 例如，使用[通用 2.0S-文生图异步](https://www.volcengine.com/docs/6791/1347773)，则 `ReqJson` 需要取值为：
+   * ```json
+   * {
+   *     "req_key":"high_aes_general_v20",
+   *     "prompt":"千军万马",
+   *     "model_version":"general_v2.0",
+   *     "seed":-1,
+   *     "scale":3.5,
+   *     "ddim_steps":16,
+   *     "width":512,
+   *     "height":512,
+   *     "use_sr":true
+   * }
+   * ```
+   * 请求的JSON字符串。
+   * @example "{
+   *     "req_key":"high_aes_general_v20",
+   *     "prompt":"千军万马",
+   *     "model_version":"general_v2.0",
+   *     "seed":-1,
+   *     "scale":3.5,
+   *     "ddim_steps":16,
+   *     "width":512,
+   *     "height":512,
+   *     "use_sr":true
+   * }"
+   */
+  ReqJson: Record<string, Record<string, unknown>>;
+  /**
+   * 服务下创建的图片处理模板名称，指定后，将按照模板中的处理配置对生成的原始图片进行图片处理。
+   *
+   * 您可在 veImageX 控制台的处理配置页面，参考[新建模板](https://www.volcengine.com/docs/508/8087)配置模板并获取模版名称，例如 `tplv-f0****5k-test`。
+   * @example "tplv-serviceid-test"
+   */
+  Template: string;
+}
+
+export interface CreateCVImageGenerateTaskQuery {
+  /**
+   * 指定存储结果图并计量计费的服务 ID。
+   * - 您可以在 veImageX 控制台 [服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。
+   * - 您也可以通过 OpenAPI 的方式获取服务 ID，具体请参考[获取所有服务信息](https://www.volcengine.com/docs/508/9360)。
+   * @example "serviceid"
+   */
+  ServiceId: string;
+}
+
+export interface CreateCVImageGenerateTaskRes {
+  ResponseMetadata: {
+    /**
+     * 请求的接口名，属于请求的公共参数。
+     * @example "{Action}"
+     */
+    Action: string;
+    /**
+     * 请求的Region，例如：cn-north-1
+     * @example "cn-north-1"
+     */
+    Region: string;
+    /** RequestId为每次API请求的唯一标识。 */
+    RequestId: string;
+    /** 请求的服务，属于请求的公共参数。 */
+    Service: string;
+    /**
+     * 请求的版本号，属于请求的公共参数。
+     * @example "{Version}"
+     */
+    Version: string;
+  };
+  /** 视请求的接口而定 */
+  Result?: {
+    /**
+     * 根据指定的文生图模型接口信息，接收的该接口响应的 JSON 数据。
+     *
+     * 例如，例如使用[通用 2.0S-文生图异步](https://www.volcengine.com/docs/6791/1347773)，则 RespJson 接收到的相应信息为：
+     * ```json
+     * {
+     *     "code": 10000,
+     *     "data": {
+     *         "task_id": "7418048504813240370"
+     *     },
+     *     "message": "Success",
+     *     "request_id": "2024092411365866C579D2A96A35DA62A9",
+     *     "status": 10000,
+     *     "time_elapsed": "23.099216ms"
+     * }
+     * ```
+     * 响应的JSON数据。
+     * @example "{
+     *     "code": 10000,
+     *     "data": {
+     *         "task_id": "7418048504813240370"
+     *     },
+     *     "message": "Success",
+     *     "request_id": "2024092411365866C579D2A96A35DA62A9",
+     *     "status": 10000,
+     *     "time_elapsed": "23.099216ms"
+     * }"
+     */
+    RespJson: Record<string, Record<string, unknown>>;
+    /**
+     * 任务 ID，用于查询结果。
+     * @example "7418048504813240370"
+     */
+    TaskId: string;
+  };
+}
+
+export interface GetCVImageGenerateTaskBody {
+  /**
+   * 创建文生图任务时，使用的[文生图系列模型](#使用说明)的接口 Action 名称。
+   *
+   * 例如，使用[查询通用 2.0L-文生图异步任务](https://www.volcengine.com/docs/6791/1359424#%E6%9F%A5%E8%AF%A2%E4%BB%BB%E5%8A%A1)，则 `ModelAction` 需要取值为 `CVSync2AsyncGetResult`。
+   * 操作模型。
+   * @example "CVSync2AsyncSubmitTask"
+   */
+  ModelAction: string;
+  /**
+   * 创建文生图任务时，使用的[文生图系列模型](#使用说明)的接口 Version 名称。
+   *
+   * 例如，使用[查询通用 2.0L-文生图异步任务](https://www.volcengine.com/docs/6791/1359424#%E6%9F%A5%E8%AF%A2%E4%BB%BB%E5%8A%A1)，则 `ModelVersion` 需要取值为 `2022-08-31`。
+   * 模型版本。
+   * @example "2022-08-31"
+   */
+  ModelVersion: string;
+  /**
+   * 创建文生图任务时，使用的[文生图系列模型](#使用说明)的接口的请求 JSON 字符串。
+   *
+   * 例如，使用[查询通用 2.0L-文生图异步任务](https://www.volcengine.com/docs/6791/1359424#%E6%9F%A5%E8%AF%A2%E4%BB%BB%E5%8A%A1)，则 `ReqJson` 需要按示例进行传值。
+   *
+   * 请求的JSON数据。
+   * @example "{
+   *     "req_key": "high_aes_general_v20_L",
+   *     "task_id": "7418049665255653414",
+   *     "req_json": "{
+   * 	    "logo_info":{
+   * 		    "add_logo":true,
+   * 		    "position":0,
+   * 		    "language":0,
+   * 		    "logo_text_content":"这里是明水印内容"
+   * 		    },
+   * 		  "return_url":true
+   * 		}"
+   * }"
+   */
+  ReqJson: Record<string, Record<string, unknown>>;
+  /**
+   * 指定文生图异步任务的任务 ID。
+   * @example "7418048504813240370"
+   */
+  TaskId: string;
+}
+
+export interface GetCVImageGenerateTaskQuery {
+  /**
+   * 指定要查询的服务 ID。
+   * @example "serviceid"
+   */
+  ServiceId: string;
+}
+
+export interface GetCVImageGenerateTaskRes {
+  ResponseMetadata: {
+    /**
+     * 请求的接口名，属于请求的公共参数。
+     * @example "{Action}"
+     */
+    Action: string;
+    /**
+     * 请求的Region，例如：cn-north-1
+     * @example "cn-north-1"
+     */
+    Region: string;
+    /** RequestId为每次API请求的唯一标识。 */
+    RequestId: string;
+    /** 请求的服务，属于请求的公共参数。 */
+    Service: string;
+    /**
+     * 请求的版本号，属于请求的公共参数。
+     * @example "{Version}"
+     */
+    Version: string;
+  };
+  /** 视请求的接口而定 */
+  Result?: {
+    /**
+     * 最终上传至 veImageX 服务的结果图访问 URL，数量为 1。
+     * @example "["http://test.example.cn/tos-cn-i-serviceid/demo1~tplv-serviceid-image.image"]"
+     */
+    ImageUrls: string[];
+    /**
+     * 根据指定的文生图模型接口信息，接收的该接口响应的 JSON 数据。
+     * 响应的 JSON 数据。
+     * @example "{
+     *     "code": 10000,
+     *     "data": {
+     *         "binary_data_base64": [],
+     *         "image_urls": [
+     *             "https://xxx"
+     *         ],
+     *         "resp_data": "{
+     * 	        "pe_result":"",
+     * 	        "predict_tags_result":"",
+     * 	        "rephraser_result":"壮观***草原。",
+     * 	        "request_id":"ff**2"
+     * 	        }",
+     *         "status": "done"
+     *     },
+     *     "message": "Success",
+     *     "request_id": "2024***BE5",
+     *     "status": 10000,
+     *     "time_elapsed": "1.616183051s"
+     * }"
+     */
+    RespJson: Record<string, Record<string, unknown>>;
+    /**
+     * 任务状态，取值如下所示：
+     * - `in_queue`：任务已提交
+     * - `generating`：任务处理中
+     * - `done`：任务处理完成
+     * - `not_found`：任务未找到，可能原因是无此任务或任务已过期（12小时）
+     * @example "done"
+     */
+    Status: string;
+    /**
+     * 结果图访问 URL，数量为 1。
+     * 存储URI。
+     * @example "http://test.example.cn/demo1~tplv-serviceid-image.image"
+     */
+    StoreUris: string[];
+    /**
+     * 任务 ID
+     * @example "7418048504813240370"
+     */
+    TaskId: string;
+  };
+}
+
+export interface GetCVTextGenerateImageBody {
+  /**
+   * 服务下绑定的域名，域名状态需正常可用。
+   * - 您可以在 veImageX 控制台 [服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取绑定的域名信息。
+   * - 您也可以通过 OpenAPI 的方式获取域名，具体请参考[获取服务下全部域名](https://www.volcengine.com/docs/508/9379)。
+   * @example "test.example.com"
+   */
+  Domain: string;
+  /**
+   * 在[文生图系列模型](#使用说明)中选择一个本次调用的智能生图模型，并并传入该模型对应接口的 Action 名称。
+   *
+   * 例如，使用[通用 2.0S-文生图异步](https://www.volcengine.com/docs/6791/1347773)，则 `ModelAction` 需要取值为 `CVSync2AsyncSubmitTask`。
+   * 操作模型action
+   * @example "CVProcess"
+   */
+  ModelAction: string;
+  /**
+   * 在[文生图系列模型](#使用说明)中选择一个本次调用的智能生图模型，并并传入该模型对应接口的 Version 名称。
+   *
+   * 例如，使用[通用 2.0S-文生图异步](https://www.volcengine.com/docs/6791/1347773)，则 `ModelVersion` 需要取值为 `2022-08-31`。
+   * 模型版本。
+   * @example "2022-08-31"
+   */
+  ModelVersion: string;
+  /**
+   * 指定输出图片的文件名，输入限制如下所示：
+   * - 数组长度为 1，若指定多个文件名，仅第一个取值生效。
+   * - 不支持空格。
+   * - 不支持以/开头或结尾，不支持/连续出现，最大长度限制为 180 个字节。
+   * 输出结果。
+   * @example "["AI/demo.png"]"
+   */
+  Outputs: string[];
+  /**
+   * 是否覆盖服务下同名文件，取值如下所示：
+   * - `false`：（默认）不覆盖
+   * - `true`：覆盖
+   * :::tip
+   * 请确保您已开启[重名覆盖上传](https://www.volcengine.com/docs/508/1119912)功能，否则，此处配置无效。
+   * :::
+   * 覆盖现有内容。
+   * @example "true"
+   */
+  Overwrite?: boolean;
+  /**
+   * 在[文生图系列模型](#使用说明)中选择一个本次调用的智能生图模型，并并传入该模型对应接口的请求 JSON 字符串。
+   *
+   * 例如，使用[通用 2.0S-文生图异步](https://www.volcengine.com/docs/6791/1347773)，则 `ReqJson` 需要取值为：
+   * ```json
+   * {
+   *     "req_key":"high_aes_general_v20",
+   *     "prompt":"千军万马",
+   *     "model_version":"general_v2.0",
+   *     "seed":-1,
+   *     "scale":3.5,
+   *     "ddim_steps":16,
+   *     "width":512,
+   *     "height":512,
+   *     "use_sr":true
+   * }
+   * ```
+   * 请求的JSON数据。
+   * @example "{
+   *     "req_key":"high_aes_general_v20",
+   *     "prompt":"千军万马",
+   *     "model_version":"general_v2.0",
+   *     "seed":-1,
+   *     "scale":3.5,
+   *     "ddim_steps":16,
+   *     "width":512,
+   *     "height":512,
+   *     "use_sr":true,
+   *     "return_url":true,
+   *     "logo_info": {
+   *         "add_logo": false,
+   *         "position": 0,
+   *         "language": 0,
+   *         "logo_text_content": "这里是明水印内容"
+   *     }
+   * }"
+   */
+  ReqJson: Record<string, Record<string, unknown>>;
+  /**
+   * 服务下创建的图片处理模板名称，指定后，将按照模板中的处理配置对豆包大模型生成的图片进行图片处理。
+   *
+   * 您可在 veImageX 控制台的处理配置页面，参考[新建模板](https://www.volcengine.com/docs/508/8087)配置模板并获取模版名称，例如 `tplv-f0****5k-test`。
+   * @example "tplv-serviceid-test"
+   */
+  Template: string;
+}
+
+export interface GetCVTextGenerateImageQuery {
+  /**
+   * 指定存储结果图并计量计费的服务 ID。
+   * - 您可以在 veImageX 控制台 [服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。
+   * - 您也可以通过 OpenAPI 的方式获取服务 ID，具体请参考[获取所有服务信息](https://www.volcengine.com/docs/508/9360)。
+   * @example "serviceid"
+   */
+  ServiceId: string;
+}
+
+export interface GetCVTextGenerateImageRes {
+  ResponseMetadata: {
+    /**
+     * 请求的接口名，属于请求的公共参数。
+     * @example "{Action}"
+     */
+    Action: string;
+    /**
+     * 请求的Region，例如：cn-north-1
+     * @example "cn-north-1"
+     */
+    Region: string;
+    /** RequestId为每次API请求的唯一标识。 */
+    RequestId: string;
+    /** 请求的服务，属于请求的公共参数。 */
+    Service: string;
+    /**
+     * 请求的版本号，属于请求的公共参数。
+     * @example "{Version}"
+     */
+    Version: string;
+  };
+  /** 视请求的接口而定 */
+  Result?: {
+    /**
+     * 最终上传至 veImageX 服务的结果图访问 URL，数量为 1。
+     * 存储URI列表。
+     * @example "["http://test.example.cn/tos-cn-i-serviceid/demo1~tplv-serviceid-image.image"]"
+     */
+    ImageUrls: string[];
+    /**
+     * 根据指定的文生图模型接口信息，接收的该接口响应的 JSON 数据。
+     *
+     * 例如，使用[通用 2.0S-文生图异步](https://www.volcengine.com/docs/6791/1347773)，则 RespJson 接收到的相应信息为：
+     * ```json
+     * {
+     *     "code": 10000,
+     *     "data": {
+     *         "task_id": "7418048504813240370"
+     *     },
+     *     "message": "Success",
+     *     "request_id": "2024092411365866C579D2A96A35DA62A9",
+     *     "status": 10000,
+     *     "time_elapsed": "23.099216ms"
+     * }
+     * ```
+     * 响应的JSON字符串。
+     * @example "{
+     *     "code": 10000,
+     *     "data": {
+     *         "task_id": "7418048504813240370"
+     *     },
+     *     "message": "Success",
+     *     "request_id": "2024092411365866C579D2A96A35DA62A9",
+     *     "status": 10000,
+     *     "time_elapsed": "23.099216ms"
+     * }"
+     */
+    RespJson: Record<string, Record<string, unknown>>;
+    /** 存储URI。 */
+    StoreUris: string[];
+  };
+}
+
 export interface GetComprehensiveEnhanceImageBody {
   /**
    * 去压缩失真强度，取值范围为[0,1]。取值为`0`时表示不处理，取值越大去压缩失真强度越大。

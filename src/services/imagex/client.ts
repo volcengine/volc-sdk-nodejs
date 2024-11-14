@@ -1860,6 +1860,19 @@ export default class ImagexService extends Service {
   });
 
   /**
+   * @function CreateCVImageGenerateTask
+   */
+  public CreateCVImageGenerateTask = this.createAPI<
+    types.CreateCVImageGenerateTaskQuery & types.CreateCVImageGenerateTaskBody,
+    types.CreateCVImageGenerateTaskRes["Result"]
+  >("CreateCVImageGenerateTask", {
+    method: "POST",
+    contentType: "json",
+    Version: "2023-05-01",
+    queryKeys: ["ServiceId"],
+  });
+
+  /**
    * @function CreateHiddenWatermarkImage
    */
   public CreateHiddenWatermarkImage = this.createAPI<
@@ -1886,6 +1899,19 @@ export default class ImagexService extends Service {
   });
 
   /**
+   * @function GetCVImageGenerateResult
+   */
+  public GetCVImageGenerateResult = this.createAPI<
+    types.GetCVImageGenerateResultQuery & types.GetCVImageGenerateResultBody,
+    types.GetCVImageGenerateResultRes["Result"]
+  >("GetCVImageGenerateResult", {
+    method: "POST",
+    contentType: "json",
+    Version: "2023-05-01",
+    queryKeys: ["ServiceId"],
+  });
+
+  /**
    * @function CreateImageHmExtract
    */
   public CreateImageHmExtract = this.createAPI<
@@ -1899,6 +1925,32 @@ export default class ImagexService extends Service {
   });
 
   /**
+   * @function GetCVTextGenerateImage
+   */
+  public GetCVTextGenerateImage = this.createAPI<
+    types.GetCVTextGenerateImageQuery & types.GetCVTextGenerateImageBody,
+    types.GetCVTextGenerateImageRes["Result"]
+  >("GetCVTextGenerateImage", {
+    method: "POST",
+    contentType: "json",
+    Version: "2023-05-01",
+    queryKeys: ["ServiceId"],
+  });
+
+  /**
+   * @function GetCVImageGenerateTask
+   */
+  public GetCVImageGenerateTask = this.createAPI<
+    types.GetCVImageGenerateTaskQuery & types.GetCVImageGenerateTaskBody,
+    types.GetCVImageGenerateTaskRes["Result"]
+  >("GetCVImageGenerateTask", {
+    method: "POST",
+    contentType: "json",
+    Version: "2023-05-01",
+    queryKeys: ["ServiceId"],
+  });
+
+  /**
    * @function CreateImageHmEmbed
    */
   public CreateImageHmEmbed = this.createAPI<
@@ -1908,6 +1960,19 @@ export default class ImagexService extends Service {
     method: "POST",
     contentType: "json",
     Version: "2023-05-01",
+  });
+
+  /**
+   * @function GetCVAnimeGenerateImage
+   */
+  public GetCVAnimeGenerateImage = this.createAPI<
+    types.GetCVAnimeGenerateImageQuery & types.GetCVAnimeGenerateImageBody,
+    types.GetCVAnimeGenerateImageRes["Result"]
+  >("GetCVAnimeGenerateImage", {
+    method: "POST",
+    contentType: "json",
+    Version: "2023-05-01",
+    queryKeys: ["ServiceId"],
   });
 
   /**
