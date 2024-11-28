@@ -1,3 +1,7 @@
+2024-11-28 Bumped to version v1.25.0
+- imagex:
+  - 新增一批接口，对齐火山引擎文档
+
 2024-11-14 Bumped to version v1.24.0
 - imagex:
   - 新增豆包 AIGC 相关 API
