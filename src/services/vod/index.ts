@@ -90,7 +90,7 @@ export class VodService extends Service {
       const bufferInit = Buffer.alloc(size);
       fd = await fsOpen(filePath, "r");
       const { buffer } = await fsRead(fd, bufferInit, 0, size, 0);
-      await axios(`http://${host}/${getEncodedUri(oid)}`, {
+      await axios(`https://${host}/${getEncodedUri(oid)}`, {
         method: "put",
         headers: {
           "Content-CRC32": crc32(buffer).toString(16).padStart(8, "0"),
@@ -197,7 +197,7 @@ export class VodService extends Service {
     isLargeFile: boolean
   ) => {
     try {
-      const url = `http://${host}/${getEncodedUri(oid)}?uploads`;
+      const url = `https://${host}/${getEncodedUri(oid)}?uploads`;
       const headers = { Authorization: auth };
       if (isLargeFile) {
         headers["X-Storage-Mode"] = "gateway";
@@ -226,7 +226,7 @@ export class VodService extends Service {
     isLargeFile: boolean
   ) => {
     try {
-      const url = `http://${host}/${getEncodedUri(
+      const url = `https://${host}/${getEncodedUri(
         oid
       )}?partNumber=${partNumber}&uploadID=${uploadID}`;
       const check_sum: string = crc32(data).toString(16).padStart(8, "0");
@@ -255,7 +255,7 @@ export class VodService extends Service {
     isLargeFile: boolean
   ) => {
     try {
-      const url = `http://${host}/${getEncodedUri(oid)}?uploadID=${uploadID}`;
+      const url = `https://${host}/${getEncodedUri(oid)}?uploadID=${uploadID}`;
       const data = this.generateMergeBody(checkSumList);
       const headers = { Authorization: auth };
       if (isLargeFile) {
