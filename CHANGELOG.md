@@ -1,3 +1,7 @@
+2024-12-16 Bumped to version v1.26.0
+- vod:
+  - 上传切换https协议
+
 2024-11-28 Bumped to version v1.25.0
 - imagex:
   - 新增一批接口，对齐火山引擎文档
