@@ -112,6 +112,7 @@ class Logger {
 export class ImagexService extends ImagexAutoService {
   constructor(options?: ServiceOptions) {
     super({
+      host: "imagex.volcengineapi.com",
       ...options,
       defaultVersion: "2018-08-01",
       serviceName: "imagex",
@@ -354,7 +355,7 @@ export class ImagexService extends ImagexAutoService {
       headers["Specified-Content-Type"] = contentType;
     }
     try {
-      await axios(`http://${uploadHost}/${getEncodedUri(oid)}`, {
+      await axios(`https://${uploadHost}/${getEncodedUri(oid)}`, {
         method: "post",
         headers,
         data: fileCopy,
