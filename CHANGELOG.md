@@ -1,3 +1,8 @@
+2024-12-26 Bumped to version v1.27.0
+- imagex:
+  - 上传文件时，使用https
+  - 默认 host 修改为 imagex.volcengineapi.com
+
 2024-12-16 Bumped to version v1.26.0
 - vod:
   - 上传切换https协议
