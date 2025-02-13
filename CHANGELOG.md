@@ -1,3 +1,6 @@
+2025-02-13 Bumped to version v1.27.1
+- fix: Upgrade protobufjs to fix CVE-2023-36665
+
 2024-12-26 Bumped to version v1.27.0
 - imagex:
   - 上传文件时，使用https
