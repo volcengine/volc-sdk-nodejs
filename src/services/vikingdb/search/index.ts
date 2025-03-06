@@ -6,6 +6,8 @@ import {
   type LogicTypeCondition,
   type MustTypeCondition,
   type NumberRangeTypeCondition,
+  SearchAggRequest,
+  SearchAggResponse,
   type SearchByPrimaryKeyRequest,
   type SearchByScalarRequest,
   type SearchByTextRequest,
@@ -19,11 +21,14 @@ import {
   type BackendLogicTypeCondition,
   type BackendMustTypeCondition,
   type BackendRangeTypeCondition,
+  BackendSearchAggRequest,
+  BackendSearchAggResponse,
   type BackendSearchCommonRequest,
   type BackendSearchData,
   type BackendSearchRequest,
   SearchOperation,
 } from "./backend";
+import { VikingdbResponse } from "../types";
 
 export class SearchService extends AbstractService {
   private encodeSearchRequest(
@@ -138,6 +143,8 @@ export class SearchService extends AbstractService {
     Partition,
     DenseVectors,
     SparseVectors,
+    PrimaryKeyIn,
+    PrimaryKeyNotIn,
     ...rest
   }: SearchByVectorRequest): Promise<SearchResponse<Data>> {
     const request = this.encodeSearchRequest(
@@ -158,6 +165,12 @@ export class SearchService extends AbstractService {
     );
     if (!this.isNil(Filter)) {
       request.search.filter = this.encodeFilter(Filter);
+    }
+    if (!this.isNil(PrimaryKeyIn)) {
+      request.search.primary_key_in = PrimaryKeyIn;
+    }
+    if (!this.isNil(PrimaryKeyNotIn)) {
+      request.search.primary_key_not_in = PrimaryKeyNotIn;
     }
     return this.decodeSearchData<Data>(request as BackendSearchRequest);
   }
@@ -254,6 +267,34 @@ export class SearchService extends AbstractService {
       request.search.filter = this.encodeFilter(Filter);
     }
     return this.decodeSearchData(request);
+  }
+
+  async SearchAgg({
+    IndexName,
+    Search,
+    Agg,
+    ...rest
+  }: SearchAggRequest): Promise<VikingdbResponse> {
+    const request: BackendSearchAggRequest = this.isCollectionNameRequest(rest)
+      ? {
+          collection_name: rest.CollectionName,
+          index_name: IndexName,
+          agg: Agg,
+        }
+      : {
+          collection_alias: rest.CollectionAlias,
+          index_name: IndexName,
+          agg: Agg,
+        };
+    if (!this.isNil(Search)) {
+      request.search = Search;
+    }
+    const response = await this.request<BackendSearchAggRequest, BackendSearchAggResponse>(
+      Pathname.Search,
+      request
+    );
+
+    return new SearchAggResponse(response.data, response.original_request, response.request_id);
   }
 }
 

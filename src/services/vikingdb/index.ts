@@ -5,6 +5,7 @@ import { DataService } from "./data";
 import { EmbeddingService } from "./embedding";
 import { SearchService } from "./search";
 import { CustomService } from "./custom";
+import { TaskService } from "./task";
 
 interface ModuleService {
   collection: CollectionService;
@@ -13,6 +14,7 @@ interface ModuleService {
   embedding: EmbeddingService;
   search: SearchService;
   custom: CustomService;
+  task: TaskService;
 }
 
 interface Options {
@@ -59,6 +61,7 @@ export class VikingdbService implements ModuleService {
   readonly embedding: EmbeddingService;
   readonly search: SearchService;
   readonly custom: CustomService;
+  readonly task: TaskService;
 
   constructor({ ak, sk, region = "cn-beijing", sessionToken }: Options) {
     this.collection = new CollectionService(ak, sk, region, sessionToken);
@@ -67,6 +70,7 @@ export class VikingdbService implements ModuleService {
     this.embedding = new EmbeddingService(ak, sk, region, sessionToken);
     this.search = new SearchService(ak, sk, region, sessionToken);
     this.custom = new CustomService(ak, sk, region, sessionToken);
+    this.task = new TaskService(ak, sk, region, sessionToken);
   }
 }
 
@@ -75,6 +79,7 @@ export { index } from "./index/index";
 export { data } from "./data";
 export { embedding } from "./embedding";
 export { search } from "./search";
+export { task } from "./task";
 export {
   VikingdbResponse,
   VikingdbErrorCode,

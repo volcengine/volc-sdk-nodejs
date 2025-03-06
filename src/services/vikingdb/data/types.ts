@@ -10,6 +10,7 @@ import {
 interface UpsertDataCommonRequest {
   Fields: Record<string, unknown>[];
   TTL?: number;
+  Async?: boolean;
 }
 
 interface UpsertDataByCollectionNameRequest extends UpsertDataCommonRequest {
@@ -130,3 +131,18 @@ export class FetchIndexDataResponse<
   }
 }
 /* FetchIndexData end */
+
+/* UpdateData start */
+interface UpdateDataByCollectionNameRequest extends UpsertDataCommonRequest {
+  CollectionName: string;
+}
+
+interface UpdateDataByCollectionAliasRequest extends UpsertDataCommonRequest {
+  CollectionAlias: string;
+}
+
+export type UpdateDataRequest =
+  | UpdateDataByCollectionNameRequest
+  | UpdateDataByCollectionAliasRequest;
+
+/* UpdateData end */

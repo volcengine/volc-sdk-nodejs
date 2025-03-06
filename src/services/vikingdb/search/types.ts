@@ -1,4 +1,4 @@
-import type { SearchOperation } from "./backend";
+import type { BackendFilter, BackendSearchAggResponse, SearchOperation } from "./backend";
 import { VikingdbResponse } from "../types";
 
 export { SearchOperation } from "./backend";
@@ -97,6 +97,8 @@ interface SearchByVectorCommonRequest extends SearchCommonRequest {
   DenseVectors: number[][];
   /** 当索引为混合检索时 */
   SparseVectors?: Record<string, number>[];
+  PrimaryKeyIn?: Array<string | number>;
+  PrimaryKeyNotIn?: Array<string | number>;
 }
 
 interface SearchByVectorByCollectionNameRequest extends SearchByVectorCommonRequest {
@@ -168,3 +170,33 @@ export type SearchByScalarRequest =
   | SearchByScalarByCollectionNameRequest
   | SearchByScalarByCollectionAliasRequest;
 /* SearchByScalar end */
+
+/* SearchAgg start*/
+
+interface SearchAggCommonRequest extends SearchCommonRequest {
+  Search: {
+    partition?: unknown;
+    filter?: BackendFilter;
+  };
+  Agg: {
+    op: string;
+    field?: string;
+    cond?: Record<string, unknown>;
+  };
+}
+interface SearchAggByCollectionNameRequest extends SearchAggCommonRequest {
+  CollectionName: string;
+}
+
+interface SearchAggByCollectionAliasRequest extends SearchAggCommonRequest {
+  CollectionAlias: string;
+}
+
+export type SearchAggRequest = SearchAggByCollectionNameRequest | SearchAggByCollectionAliasRequest;
+
+export class SearchAggResponse extends VikingdbResponse {
+  constructor(public Data: BackendSearchAggResponse, OriginalRequest: string, LogId: string) {
+    super(OriginalRequest, LogId);
+  }
+}
+/* SearchAgg end*/

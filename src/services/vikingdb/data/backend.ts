@@ -3,6 +3,7 @@ import type { PrimaryKeyFieldType, PrimaryKeys, ScalarFieldType2JsType } from ".
 interface BackendUpsertDataCommonRequest {
   fields: Record<string, unknown>[];
   ttl?: number;
+  async?: boolean;
 }
 
 interface BackendUpsertDataByCollectionNameRequest extends BackendUpsertDataCommonRequest {
@@ -79,3 +80,23 @@ export type BackendFetchIndexDataRequest =
 export interface BackendFetchIndexDataInfo<T extends Record<string, any>> {
   fields: T[];
 }
+
+/* UpdateData start */
+interface BackendUpdateDataCommonRequest {
+  fields: Record<string, unknown>[];
+  ttl?: number;
+}
+
+interface BackendUpdateDataByCollectionNameRequest extends BackendUpdateDataCommonRequest {
+  collection_name: string;
+}
+
+interface BackendUpdateDataByCollectionAliasRequest extends BackendUpdateDataCommonRequest {
+  collection_alias: string;
+}
+
+export type BackendUpdateDataRequest =
+  | BackendUpdateDataByCollectionNameRequest
+  | BackendUpdateDataByCollectionAliasRequest;
+
+/* UpdateData end */

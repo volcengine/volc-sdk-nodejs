@@ -65,6 +65,8 @@ export interface BackendSearchCommonRequest {
       order: "asc" | "desc";
       field_name: string;
     };
+    primary_key_in?: Array<string | number>;
+    primary_key_not_in?: Array<string | number>;
   };
 }
 
@@ -85,3 +87,34 @@ export type BackendSearchData<Data extends Record<string, unknown>> = {
   fields?: Data;
   [key: string]: unknown;
 }[][];
+
+export interface BackendSearchAggCommonRequest {
+  index_name: string;
+  search?: {
+    partition?: unknown;
+    filter?: BackendFilter;
+  };
+  agg: {
+    op: string;
+    field?: string;
+    cond?: Record<string, unknown>;
+  };
+}
+
+interface BackendSearchAggByCollectionNameRequest extends BackendSearchAggCommonRequest {
+  collection_name: string;
+}
+
+interface BackendSearchAggByCollectionAliasRequest extends BackendSearchAggCommonRequest {
+  collection_alias: string;
+}
+
+export type BackendSearchAggRequest =
+  | BackendSearchAggByCollectionNameRequest
+  | BackendSearchAggByCollectionAliasRequest;
+
+export type BackendSearchAggResponse = {
+  agg_op: string;
+  group_by_field?: string;
+  agg_result?: Record<string, unknown>;
+};
