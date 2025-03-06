@@ -81,6 +81,7 @@ export class CollectionService extends AbstractService {
     CollectionName,
     Description,
     Fields,
+    Vectorize,
   }: CreateCollectionRequest): Promise<VikingdbResponse> {
     const primaryKey = this.getPrimaryKey(Fields);
     const response = await this.request<BackendCreateCollectionRequest>(Pathname.CreateCollection, {
@@ -89,6 +90,7 @@ export class CollectionService extends AbstractService {
       description: Description,
       primary_key: primaryKey,
       fields: this.encodeCollectionFields(Fields),
+      ...(Vectorize ? { vectorize: Vectorize } : {}),
     });
     return new VikingdbResponse(response.original_request, response.request_id);
   }

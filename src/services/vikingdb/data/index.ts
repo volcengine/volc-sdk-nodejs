@@ -5,6 +5,7 @@ import {
   FetchCollectionDataResponse,
   type FetchIndexDataRequest,
   FetchIndexDataResponse,
+  UpdateDataRequest,
   type UpsertDataRequest,
 } from "./types";
 import { type GetPrimaryKeys, VikingdbResponse } from "../types";
@@ -13,22 +14,30 @@ import type {
   BackendFetchCollectionDataRequest,
   BackendFetchIndexDataInfo,
   BackendFetchIndexDataRequest,
+  BackendUpdateDataRequest,
   BackendUpsertDataRequest,
 } from "./backend";
 import { Pathname } from "./pathname";
 
 export class DataService extends AbstractService {
-  async UpsertData({ Fields, TTL, ...rest }: UpsertDataRequest): Promise<VikingdbResponse> {
+  async UpsertData({
+    Fields,
+    TTL,
+    Async = false,
+    ...rest
+  }: UpsertDataRequest): Promise<VikingdbResponse> {
     const request: BackendUpsertDataRequest = this.isCollectionNameRequest(rest)
       ? {
           collection_name: rest.CollectionName,
           fields: Fields,
           ttl: TTL,
+          async: Async,
         }
       : {
           collection_alias: rest.CollectionAlias,
           fields: Fields,
           ttl: TTL,
+          async: Async,
         };
     const response = await this.request<BackendUpsertDataRequest>(Pathname.UpsertData, request);
     return new VikingdbResponse(response.original_request, response.request_id);
@@ -65,6 +74,22 @@ export class DataService extends AbstractService {
       }
     }
     const response = await this.request<BackendDeleteDataRequest>(Pathname.DeleteData, data);
+    return new VikingdbResponse(response.original_request, response.request_id);
+  }
+
+  async UpdateData({ Fields, TTL, ...rest }: UpdateDataRequest): Promise<VikingdbResponse> {
+    const request: BackendUpdateDataRequest = this.isCollectionNameRequest(rest)
+      ? {
+          collection_name: rest.CollectionName,
+          fields: Fields,
+          ttl: TTL,
+        }
+      : {
+          collection_alias: rest.CollectionAlias,
+          fields: Fields,
+          ttl: TTL,
+        };
+    const response = await this.request<BackendUpsertDataRequest>(Pathname.UpdateData, request);
     return new VikingdbResponse(response.original_request, response.request_id);
   }
 

@@ -3,4 +3,5 @@ export enum Pathname {
   FetchCollectionData = "/api/collection/fetch_data",
   DeleteData = "/api/collection/del_data",
   FetchIndexData = "/api/index/fetch_data",
+  UpdateData = "/api/collection/update_data",
 }

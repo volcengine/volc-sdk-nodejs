@@ -1,11 +1,23 @@
 import { VikingdbResponse } from "../types";
 import type { FieldInfo } from "../types";
 
+export type VectorizeMap = {
+  text_field?: string;
+  image_field?: string;
+  dim?: number;
+  model_name?: string;
+  model_version?: string;
+};
+export interface CollectionVectorize {
+  dense?: VectorizeMap;
+  sparse?: VectorizeMap;
+}
 export interface CreateCollectionRequest {
   CollectionName: string;
   Description?: string;
   CollectionAliases?: string[];
   Fields: FieldInfo[];
+  Vectorize?: CollectionVectorize;
 }
 /* CreateCollection end */
 
