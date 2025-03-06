@@ -1,3 +1,7 @@
+2025-03-06 Bumped to version v1.28.0
+- vikingdb:
+  - 补充向量库sdk
+
 2025-02-13 Bumped to version v1.27.1
 - fix: Upgrade protobufjs to fix CVE-2023-36665
 
