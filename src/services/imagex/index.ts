@@ -1,4 +1,4 @@
-import fs from "fs";
+import fs, { promises as fsPromises } from "fs";
 import axios, { AxiosRequestConfig } from "axios";
 import { promisify } from "util";
 import get from "lodash.get";
@@ -23,11 +23,23 @@ import {
   CommitImageUploadRes,
 } from "./type";
 import ImagexAutoService from "./client";
+import pLimit from "p-limit";
+import { crc32 } from "crc";
 
+const fsStat = fsPromises ? fsPromises.stat : promisify(fs.stat);
+const fsOpen = promisify(fs.open);
+const fsRead = promisify(fs.read);
+const fsClose = promisify(fs.close);
 const fsAccess = promisify(fs.access);
 
 const BizName = "ImageX";
 const DateFormat = "YYYY-MM-DD HH:mm:ss.SSS";
+
+const MIN_CHUNK_SIZE = 1024 * 1024 * 20;
+const LARGE_FILE_SIZE = 1024 * 1024 * 1024;
+
+// 进程级chunk上传并发数限制
+const maxLimit = pLimit(20);
 
 const defaultUploadAuthParams: GetUploadAuthParams = {
   serviceIds: [],
@@ -127,8 +139,10 @@ export class ImagexService extends ImagexAutoService {
       SkipCommit?: boolean;
       ShowDuration?: boolean;
       ContentTypes?: string[];
+      StorageClasses?: string[];
     },
-    files: string[] | NodeJS.ReadableStream[] | ArrayBuffer[] | ArrayBufferView[]
+    files: string[] | NodeJS.ReadableStream[] | ArrayBuffer[] | ArrayBufferView[],
+    enableChunkUpload?: boolean
   ): Promise<OpenApiResponse<CommitImageUploadRes["Result"]>> => {
     // 1. apply
     if (!files.length || files.length > 10) {
@@ -138,6 +152,14 @@ export class ImagexService extends ImagexAutoService {
       throw Error(
         `ContentTypes num ${
           params.ContentTypes?.length || 0
+        } is invalid and cannot be greater than files num`
+      );
+    }
+
+    if ((params.StorageClasses?.length || 0) > files.length) {
+      throw Error(
+        `StorageClasses num ${
+          params.StorageClasses?.length || 0
         } is invalid and cannot be greater than files num`
       );
     }
@@ -230,7 +252,9 @@ export class ImagexService extends ImagexAutoService {
       files,
       uploadHosts[0],
       newStoreInfos.length ? newStoreInfos : storeInfos,
-      params.ContentTypes
+      params.ContentTypes,
+      params.StorageClasses,
+      enableChunkUpload
     );
     if (params.ShowDuration && putLogger) {
       putLogger.print({ endTime: dayjs().valueOf(), identifier: logIdentifier });
@@ -242,24 +266,34 @@ export class ImagexService extends ImagexAutoService {
       );
     }
 
-    // 跳过 commmit 阶段, uploadTaskResults 包含成功和失败两种结果
+    // 跳过 commit 阶段, uploadTaskResults 包含成功和失败两种结果
     // 此时模拟CommitImageUpload接口的返回
     if (params.SkipCommit) {
-      return {
-        Results: uploadTaskResults.map((item) => {
-          if (item.success) {
-            return {
-              Uri: item.uri,
-              UriStatus: 2000, //上传成功
-            };
-          }
+      const results = uploadTaskResults.map((item) => {
+        if (item.success) {
           return {
             Uri: item.uri,
-            UriStatus: 2001, // 上传失败
-            PutError: item.putErr,
+            UriStatus: 2000, //上传成功
           };
-        }),
-      } as any;
+        }
+        return {
+          Uri: item.uri,
+          UriStatus: 2001, // 上传失败
+          PutError: item.putErr,
+        };
+      });
+      const openapiLikeResults = {
+        ResponseMetadata: {
+          RequestId: "skip commit",
+          Service: "imagex",
+        },
+        Result: {
+          RequestId: "skip commit",
+          Results: results,
+        },
+        Results: results, // 额外返回这个字段兼容旧返回值
+      } as OpenApiResponse<CommitImageUploadRes["Result"]>;
+      return openapiLikeResults;
     }
 
     let commitLogger: Logger | undefined;
@@ -306,22 +340,348 @@ export class ImagexService extends ImagexAutoService {
     files: string[] | NodeJS.ReadableStream[] | ArrayBuffer[] | ArrayBufferView[],
     uploadHost: string,
     storeInfos: ApplyImageUploadRes["Result"]["UploadAddress"]["StoreInfos"],
-    fileContentTypes?: string[]
+    fileContentTypes?: string[],
+    fileStorageClasses?: string[],
+    chunkUpload?: boolean
   ) => {
     const promiseArray: Promise<UploadPutResult>[] = [];
     for (let i = 0; i < files.length; i++) {
       const { StoreUri: oid, Auth: auth } = storeInfos[i];
-      promiseArray.push(
-        this.directUpload({
-          uploadHost,
-          oid,
-          auth,
-          file: files[i],
-          contentType: fileContentTypes?.[i],
-        })
-      );
+      const file = files[i];
+
+      let size = 0;
+      // 根据不同类型获取文件大小
+      if (typeof file === "string") {
+        const stat = await fsStat(file);
+        size = stat.size;
+      } else if (file instanceof ArrayBuffer || ArrayBuffer.isView(file)) {
+        size = file.byteLength; // 直接获取二进制数据大小
+      }
+      // ReadableStream获取不到size，此处为false，默认直传
+      const enableChunkUpload = chunkUpload && size > MIN_CHUNK_SIZE;
+      if (enableChunkUpload) {
+        promiseArray.push(
+          this.chunkUpload({
+            uploadHost,
+            oid,
+            auth,
+            file: file as string | ArrayBuffer | ArrayBufferView,
+            size,
+            isLargeFile: size > LARGE_FILE_SIZE,
+            contentType: fileContentTypes?.[i],
+            storageClass: fileStorageClasses?.[i],
+          })
+        );
+      } else {
+        promiseArray.push(
+          this.directUpload({
+            uploadHost,
+            oid,
+            auth,
+            file: files[i],
+            contentType: fileContentTypes?.[i],
+            storageClass: fileStorageClasses?.[i],
+          })
+        );
+      }
     }
     return await Promise.all(promiseArray);
+  };
+
+  // 大文件分片上传
+  private chunkUpload = async (params: {
+    uploadHost: string;
+    oid: string;
+    auth: string;
+    file: string | ArrayBuffer | ArrayBufferView;
+    size: number;
+    isLargeFile: boolean;
+    contentType?: string;
+    storageClass?: string;
+    maxConcurrency?: number;
+  }) => {
+    const {
+      uploadHost: host,
+      oid,
+      auth,
+      file,
+      size,
+      isLargeFile,
+      contentType,
+      storageClass,
+      maxConcurrency = 4,
+    } = params;
+    const limit = pLimit(maxConcurrency);
+    let fd: number | undefined;
+    try {
+      if (typeof file === "string") {
+        fd = await fsOpen(file, "r");
+      }
+      const uploadId = await this.initUploadPart(
+        host,
+        oid,
+        auth,
+        isLargeFile,
+        contentType,
+        storageClass
+      );
+
+      // 统一分片计算逻辑
+      const n = Math.floor(size / MIN_CHUNK_SIZE);
+      const lastSize = size % MIN_CHUNK_SIZE;
+      const lastNum = n - 1;
+      const parts: string[] = [];
+      const tasks: Promise<void>[] = [];
+
+      // 分片上传核心逻辑
+      for (let i = 0; i < lastNum; i++) {
+        let partNum = i;
+        if (isLargeFile) {
+          // gateway模式下分片序号从1开始
+          partNum = i + 1;
+        }
+        tasks.push(
+          limit(() =>
+            this.createUploadTask(
+              host,
+              oid,
+              auth,
+              uploadId,
+              file,
+              fd, // 仅当file为string时有效
+              i * MIN_CHUNK_SIZE,
+              MIN_CHUNK_SIZE,
+              partNum,
+              isLargeFile,
+              contentType,
+              storageClass
+            )
+          ).then((checksum) => {
+            parts[i] = checksum;
+          })
+        );
+      }
+
+      // 处理最后分片
+      tasks.push(
+        limit(() =>
+          this.createUploadTask(
+            host,
+            oid,
+            auth,
+            uploadId,
+            file,
+            fd, // 仅当file为string时有效
+            lastNum * MIN_CHUNK_SIZE,
+            MIN_CHUNK_SIZE + lastSize,
+            isLargeFile ? lastNum + 1 : lastNum,
+            isLargeFile,
+            contentType,
+            storageClass
+          )
+        ).then((checksum) => {
+          parts[lastNum] = checksum;
+        })
+      );
+
+      await Promise.all(tasks);
+      await this.uploadMergePart(
+        host,
+        oid,
+        auth,
+        uploadId,
+        parts,
+        isLargeFile,
+        contentType,
+        storageClass
+      );
+      return { uri: oid, success: true };
+    } catch (error) {
+      const errorItem: UploadPutResult = {
+        uri: oid,
+        success: false,
+      };
+      if (error.response) {
+        // 请求成功发出且服务器也响应了状态码，但状态代码超出了 2xx 的范围
+        // 服务器响应分为网关和具体服务
+        const isJsonType = typeof get(error, "response.data") === "object";
+        errorItem.putErr = {
+          errStatus: isJsonType
+            ? get(error, "response.data.error.code", "-")
+            : get(error, "response.status", "-"),
+          errCodeN: get(error, "response.data.error.error_code", "-"),
+          errMsg: isJsonType
+            ? get(error, "response.data.error.message", "-")
+            : get(error, "response.statusText", "-"),
+          errCode: get(error, "response.data.error.error", "-"),
+          reqId: get(error, "response.headers.x-tt-logid", "-"),
+        };
+      } else if (error.request) {
+        // console.log(error.request);
+        errorItem.putErr = {
+          errMsg: `The put request was made but no response was received: ${error.message}`,
+          errCode: error.code,
+        };
+      } else {
+        // console.log("Error", error.message);
+        errorItem.putErr = {
+          errMsg: `Error happened in setting up the put request: ${error.message}`,
+          errCode: error.code,
+        };
+      }
+      return errorItem;
+    } finally {
+      if (fd !== undefined) {
+        await fsClose(fd);
+      }
+    }
+  };
+
+  private async createUploadTask(
+    host: string,
+    oid: string,
+    auth: string,
+    uploadId: string,
+    file: string | ArrayBuffer | ArrayBufferView,
+    fd: number | undefined,
+    offset: number,
+    chunkSize: number,
+    partNum: number,
+    isLargeFile: boolean,
+    contentType?: string,
+    storageClass?: string
+  ) {
+    return maxLimit(async () => {
+      let buffer: Buffer;
+
+      if (typeof file === "string") {
+        // 此处无需关闭 fd，上传完成后统一处理
+        const buf = Buffer.alloc(chunkSize);
+        await fsRead(fd!, buf, 0, chunkSize, offset);
+        buffer = buf;
+      } else {
+        // 二进制数据直接切片
+        const sourceBuffer = Buffer.from(file instanceof ArrayBuffer ? file : file.buffer);
+        buffer = sourceBuffer.subarray(offset, offset + chunkSize);
+      }
+
+      return this.uploadPart(
+        host,
+        oid,
+        auth,
+        uploadId,
+        partNum,
+        buffer,
+        isLargeFile,
+        contentType,
+        storageClass
+      );
+    });
+  }
+
+  private initUploadPart = async (
+    host: string,
+    oid: string,
+    auth: string,
+    isLargeFile: boolean,
+    contentType: string | undefined,
+    storageClass: string | undefined
+  ) => {
+    const url = `https://${host}/${getEncodedUri(oid)}?uploads`;
+    const headers = { Authorization: auth };
+    if (isLargeFile) {
+      headers["X-Storage-Mode"] = "gateway";
+    }
+    if (contentType) {
+      headers["Specified-Content-Type"] = contentType;
+    }
+    if (storageClass) {
+      headers["X-Veimagex-Storage-Class"] = storageClass;
+    }
+    const res = await axios(url, {
+      method: "put",
+      headers,
+    });
+    const uploadID = get(res, "data.payload.uploadID", "");
+    if (uploadID.length === 0) {
+      throw new Error("get empty uploadID");
+    }
+    return uploadID;
+  };
+
+  private uploadPart = async (
+    host: string,
+    oid: string,
+    auth: string,
+    uploadID: string,
+    partNumber: number,
+    data: Buffer,
+    isLargeFile: boolean,
+    contentType: string | undefined,
+    storageClass: string | undefined
+  ) => {
+    const url = `https://${host}/${getEncodedUri(
+      oid
+    )}?partNumber=${partNumber}&uploadID=${uploadID}`;
+    const checkSum: string = crc32(data).toString(16).padStart(8, "0");
+    const headers = { "Content-CRC32": checkSum, Authorization: auth };
+    if (isLargeFile) {
+      headers["X-Storage-Mode"] = "gateway";
+    }
+    if (contentType) {
+      headers["Specified-Content-Type"] = contentType;
+    }
+    if (storageClass) {
+      headers["X-Veimagex-Storage-Class"] = storageClass;
+    }
+    await axios(url, {
+      method: "put",
+      headers,
+      data,
+      maxBodyLength: MIN_CHUNK_SIZE * 2,
+    });
+    return checkSum;
+  };
+
+  private uploadMergePart = async (
+    host: string,
+    oid: string,
+    auth: string,
+    uploadID: number,
+    checkSumList: string[],
+    isLargeFile: boolean,
+    contentType: string | undefined,
+    storageClass: string | undefined
+  ) => {
+    const url = `https://${host}/${getEncodedUri(oid)}?uploadID=${uploadID}`;
+    const data = this.generateMergeBody(checkSumList);
+    const headers = { Authorization: auth };
+    if (isLargeFile) {
+      headers["X-Storage-Mode"] = "gateway";
+    }
+    if (contentType) {
+      headers["Specified-Content-Type"] = contentType;
+    }
+    if (storageClass) {
+      headers["X-Veimagex-Storage-Class"] = storageClass;
+    }
+    await axios(url, {
+      method: "put",
+      headers,
+      data,
+      maxBodyLength: MIN_CHUNK_SIZE * 3,
+    });
+  };
+
+  private generateMergeBody = (checkSumList: string[]) => {
+    if (checkSumList.length === 0) {
+      throw new Error("crc32 list empty");
+    }
+    const s: string[] = [];
+    for (let i = 0; i < checkSumList.length; i++) {
+      s.push(`${i}:${checkSumList[i]}`);
+    }
+    return s.join(",");
   };
 
   private directUpload = async (params: {
@@ -330,8 +690,9 @@ export class ImagexService extends ImagexAutoService {
     auth: string;
     file: string | NodeJS.ReadableStream | ArrayBuffer | ArrayBufferView;
     contentType?: string;
+    storageClass?: string;
   }): Promise<UploadPutResult> => {
-    const { uploadHost, oid, auth, file, contentType } = params;
+    const { uploadHost, oid, auth, file, contentType, storageClass } = params;
     let fileCopy = file;
     if (Object.prototype.toString.call(fileCopy) === "[object String]") {
       try {
@@ -353,6 +714,9 @@ export class ImagexService extends ImagexAutoService {
     };
     if (contentType) {
       headers["Specified-Content-Type"] = contentType;
+    }
+    if (storageClass) {
+      headers["X-Veimagex-Storage-Class"] = storageClass;
     }
     try {
       await axios(`https://${uploadHost}/${getEncodedUri(oid)}`, {
