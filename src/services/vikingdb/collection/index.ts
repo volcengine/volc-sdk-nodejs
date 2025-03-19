@@ -1,6 +1,7 @@
 import { type Response, AbstractService } from "../abstractService";
 import {
   type CollectionInfo,
+  CollectionVectorize,
   type CreateCollectionRequest,
   type DropCollectionRequest,
   type GetCollectionInfoRequest,
@@ -84,13 +85,21 @@ export class CollectionService extends AbstractService {
     Vectorize,
   }: CreateCollectionRequest): Promise<VikingdbResponse> {
     const primaryKey = this.getPrimaryKey(Fields);
+    let VectorizeParams: CollectionVectorize[] = [];
+    if (Vectorize) {
+      if (Array.isArray(Vectorize)) {
+        VectorizeParams = Vectorize;
+      } else {
+        VectorizeParams = [Vectorize];
+      }
+    }
     const response = await this.request<BackendCreateCollectionRequest>(Pathname.CreateCollection, {
       collection_name: CollectionName,
       collection_aliases: CollectionAliases,
       description: Description,
       primary_key: primaryKey,
       fields: this.encodeCollectionFields(Fields),
-      ...(Vectorize ? { vectorize: Vectorize } : {}),
+      ...(VectorizeParams.length > 0 ? { vectorize: VectorizeParams } : {}),
     });
     return new VikingdbResponse(response.original_request, response.request_id);
   }

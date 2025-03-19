@@ -12,12 +12,14 @@ export interface CollectionVectorize {
   dense?: VectorizeMap;
   sparse?: VectorizeMap;
 }
+
+export type Vectorize = CollectionVectorize | CollectionVectorize[];
 export interface CreateCollectionRequest {
   CollectionName: string;
   Description?: string;
   CollectionAliases?: string[];
   Fields: FieldInfo[];
-  Vectorize?: CollectionVectorize;
+  Vectorize?: Vectorize;
 }
 /* CreateCollection end */
 
