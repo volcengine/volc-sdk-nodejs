@@ -1,3 +1,7 @@
+2025-03-20 Bumped to version v1.28.1
+- vikingdb:
+  - 向量库创建数据集传参修复
+
 2025-03-06 Bumped to version v1.28.0
 - vikingdb:
   - 补充向量库sdk
