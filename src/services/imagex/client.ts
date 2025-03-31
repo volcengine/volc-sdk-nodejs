@@ -563,6 +563,19 @@ export default class ImagexService extends Service {
   });
 
   /**
+   * @function DescribeImageXCubeUsage
+   */
+  public DescribeImageXCubeUsage = this.createAPI<
+    types.DescribeImageXCubeUsageQuery,
+    types.DescribeImageXCubeUsageRes["Result"]
+  >("DescribeImageXCubeUsage", {
+    method: "GET",
+    contentType: "json",
+    Version: "2023-05-01",
+    queryKeys: ["ServiceIds", "StartTime", "EndTime", "Interval"],
+  });
+
+  /**
    * @function DescribeImageXSourceRequestBandwidth
    */
   public DescribeImageXSourceRequestBandwidth = this.createAPI<
@@ -650,6 +663,28 @@ export default class ImagexService extends Service {
     contentType: "json",
     Version: "2023-05-01",
     queryKeys: ["ServiceIds", "BucketNames", "GroupBy", "StartTime", "EndTime"],
+  });
+
+  /**
+   * @function DescribeImageXAIRequestCntUsage
+   */
+  public DescribeImageXAIRequestCntUsage = this.createAPI<
+    types.DescribeImageXAIRequestCntUsageQuery,
+    types.DescribeImageXAIRequestCntUsageRes["Result"]
+  >("DescribeImageXAIRequestCntUsage", {
+    method: "GET",
+    contentType: "json",
+    Version: "2023-05-01",
+    queryKeys: [
+      "ServiceIds",
+      "AdvFeats",
+      "Templates",
+      "EnableBillingRate",
+      "GroupBy",
+      "StartTime",
+      "EndTime",
+      "Interval",
+    ],
   });
 
   /**
@@ -1726,6 +1761,74 @@ export default class ImagexService extends Service {
   });
 
   /**
+   * @function AIProcess
+   */
+  public AIProcess = this.createAPI<types.AIProcessBody, types.AIProcessRes["Result"]>(
+    "AIProcess",
+    {
+      method: "POST",
+      contentType: "json",
+      Version: "2023-05-01",
+    }
+  );
+
+  /**
+   * @function CreateImageAITask
+   */
+  public CreateImageAITask = this.createAPI<
+    types.CreateImageAITaskBody,
+    types.CreateImageAITaskRes["Result"]
+  >("CreateImageAITask", {
+    method: "POST",
+    contentType: "json",
+    Version: "2023-05-01",
+  });
+
+  /**
+   * @function GetImageAITasks
+   */
+  public GetImageAITasks = this.createAPI<
+    types.GetImageAITasksQuery,
+    types.GetImageAITasksRes["Result"]
+  >("GetImageAITasks", {
+    method: "GET",
+    contentType: "json",
+    Version: "2023-05-01",
+    queryKeys: [
+      "ServiceId",
+      "QueueId",
+      "TaskId",
+      "Marker",
+      "Limit",
+      "Status",
+      "StartTime",
+      "EndTime",
+    ],
+  });
+
+  /**
+   * @function GetImageAIDetails
+   */
+  public GetImageAIDetails = this.createAPI<
+    types.GetImageAIDetailsQuery,
+    types.GetImageAIDetailsRes["Result"]
+  >("GetImageAIDetails", {
+    method: "GET",
+    contentType: "json",
+    Version: "2023-05-01",
+    queryKeys: [
+      "QueueId",
+      "TaskId",
+      "StartTime",
+      "EndTime",
+      "Status",
+      "SearchPtn",
+      "Limit",
+      "Offset",
+    ],
+  });
+
+  /**
    * @function UpdateImageResourceStatus
    */
   public UpdateImageResourceStatus = this.createAPI<
@@ -1827,6 +1930,29 @@ export default class ImagexService extends Service {
     contentType: "json",
     Version: "2018-08-01",
     queryKeys: ["ServiceId"],
+  });
+
+  /**
+   * @function ApplyVpcUploadInfo
+   */
+  public ApplyVpcUploadInfo = this.createAPI<
+    types.ApplyVpcUploadInfoQuery,
+    types.ApplyVpcUploadInfoRes["Result"]
+  >("ApplyVpcUploadInfo", {
+    method: "GET",
+    contentType: "json",
+    Version: "2023-05-01",
+    queryKeys: [
+      "ServiceId",
+      "StoreKey",
+      "Prefix",
+      "FileExtension",
+      "ContentType",
+      "StorageClass",
+      "FileSize",
+      "PartSize",
+      "Overwrite",
+    ],
   });
 
   /**
@@ -2151,6 +2277,7 @@ export default class ImagexService extends Service {
     Version: "2023-05-01",
     queryKeys: [
       "QueueId",
+      "TaskId",
       "Region",
       "StartTime",
       "EndTime",
@@ -2625,6 +2752,19 @@ export default class ImagexService extends Service {
     types.UpdateStorageRulesQuery & types.UpdateStorageRulesBody,
     types.UpdateStorageRulesRes["Result"]
   >("UpdateStorageRules", {
+    method: "POST",
+    contentType: "json",
+    Version: "2023-05-01",
+    queryKeys: ["ServiceId"],
+  });
+
+  /**
+   * @function UpdateStorageRulesV2
+   */
+  public UpdateStorageRulesV2 = this.createAPI<
+    types.UpdateStorageRulesV2Query & types.UpdateStorageRulesV2Body,
+    types.UpdateStorageRulesV2Res["Result"]
+  >("UpdateStorageRulesV2", {
     method: "POST",
     contentType: "json",
     Version: "2023-05-01",

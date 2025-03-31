@@ -1,75 +1,147 @@
+export interface AIProcessBody {
+  /**
+   * 服务 ID。
+   * * 您可以在 veImageX 控制台[服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。
+   * * 您也可以通过 OpenAPI 的方式获取服务 ID，具体请参考[获取所有服务信息](https://www.volcengine.com/docs/508/9360)。
+   * 服务 ID。
+   * * 您可以在 veImageX 控制台 [服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。
+   * * 您也可以通过 OpenAPI 的方式获取服务 ID，具体请参考[获取所有服务信息](https://www.volcengine.com/docs/508/9360)。
+   * @example "91**2g"
+   */
+  ServiceId: string;
+  /**
+   * AI 图像处理模板参数，需要将 JSON 压缩并转义为字符串。根据您需要的图像处理功能，参看 [AI 图像处理模板](https://www.volcengine.com/docs/508/1515840)页面获取模板 ID 和参数信息。
+   * 工作流模板参数。
+   * * 您可以在 [AI图像处理工作流](TODO)页面查看所有支持的工作流ID及参数信息。
+   * @example "{\"Input\":{\"ObjectKey\":\"example.webp\",\"DataType\":\"uri\"},\"GenDREnhanceParam\":{\"Multiple\":1.2}}"
+   */
+  WorkflowParameter: string;
+  /**
+   * AI 图像处理模板 ID。根据您需要的图像处理功能，参看 [AI 图像处理模板](https://www.volcengine.com/docs/508/1515840)页面获取模板 ID 和参数信息。
+   * 工作流模板 ID。
+   * * 您可以在 [AI图像处理工作流](TODO)页面查看所有支持的工作流ID及参数信息。
+   * @example "system_workflow_ai_super_resolution"
+   */
+  WorkflowTemplateId: string;
+}
+
+export interface AIProcessRes {
+  ResponseMetadata: {
+    /**
+     * 请求的接口名，属于请求的公共参数。
+     * @example "{Action}"
+     */
+    Action: string;
+    /**
+     * 请求的Region，例如：cn-north-1
+     * @example "cn-north-1"
+     */
+    Region: string;
+    /** RequestId为每次API请求的唯一标识。 */
+    RequestId: string;
+    /** 请求的服务，属于请求的公共参数。 */
+    Service: string;
+    /**
+     * 请求的版本号，属于请求的公共参数。
+     * @example "{Version}"
+     */
+    Version: string;
+  };
+  /** 视请求的接口而定 */
+  Result: {
+    /**
+     * AI 图像处理结果，是 JSON 压缩并转义后的字符串。参看 [AI 图像处理模板](https://www.volcengine.com/docs/508/1515840)页面获取模板 ID 和参数信息，根据具体的工作流的说明进行解析。
+     * AI图像处理结果，是JSON序列化后的字符串。
+     * * 您可以在 [AI图像处理工作流](TODO)页面查看所有支持的工作流ID及参数信息，根据具体工作流的说明进行解析。
+     * @example "{\"ObjectKey\":\"veImageX-store/ai_super_resolution/67***\/example.webp\",\"Size\":54509,\"Format\":\"webp\"}"
+     */
+    Output: string;
+  };
+}
+
 export interface AddDomainV1Body {
   /**
-   * 访问控制配置
-   * @example ""
+   * 访问控制配置。
+   * @example "-"
    */
   access_control?: {
     /**
-     * Refer 配置
-     * @example ""
+     * Referer 配置。
+     * @example "-"
      */
     refer_link?: {
       /**
-       * 是否允许空 Refer，取值如下所示：
-       * @example ""
+       * 是否允许空 Referer，取值如下所示：
+       * - `true`：允许空 Referer
+       * - `false`：不允许空 Referer
+       * @example "false"
        */
       allow_empty_refer?: boolean;
       /**
-       * 是否开启黑白名单配置，取值如下所示：* true：允许空 Refer* false：不允许空 Refer
-       * @example ""
+       * 是否开启 Referer 防盗链，取值如下所示：
+       * * `true`：开启
+       * * `false`：关闭
+       * @example "true"
        */
       enabled: boolean;
       /**
-       * 是否选择白名单，取值如下所示：
-       * @example ""
+       * 是否配置白名单，取值如下所示：
+       *
+       * - `true`：配置白名单
+       * - `false`：配置黑名单
+       * @example "true"
        */
       is_white_mode?: boolean;
       /**
        * 根据是否为白名单，为对应的白/黑名单的值。
-       * @example ""
+       * @example "["s.com", "y.com", "q.com"]"
        */
       values?: string[];
     }[];
   }[];
   /**
-   * 域名，您可以通过调用 [获取服务下全部域名](https://www.volcengine.com/docs/508/9379) 获取当前服务下所有域名。
-   * @example ""
+   * 新增域名。
+   * @example "test456.volcimagextest.com"
    */
   domain: string;
   /**
    * 证书配置，海外加速或者全球加速为必选，否则审核不通过。
-   * @example ""
+   * @example "-"
    */
   https?: {
     /**
      * 证书 ID，若`enable_https`为`true`，则为必选。
-     * @example ""
+     * @example "cert-bce71503813******84072a423610471"
      */
     cert_id?: string;
     /**
-     * 是否开启 Https，取值如下所示：* true：强制* false：不强制
-     * @example ""
+     * 是否开启 Https，取值如下所示：
+     * - `true`：开启
+     * - `false`：关闭
+     * @example "true"
      */
     enable_https?: boolean;
     /**
      * 是否强制使用 Https，取值如下所示：
-     * @example ""
+     * - `true`：强制
+     * - `false`：不强制
+     * @example "false"
      */
     force_https?: boolean;
   }[];
   /**
-   * 请求需要添加的响应头
-   * @example ""
+   * 请求需要添加的响应头。
+   * @example "-"
    */
   resp_hdrs?: {
     /**
-     * Header Key
-     * @example ""
+     * Header Key，请见[支持配置的响应头](https://www.volcengine.com/docs/508/196704#%E6%94%AF%E6%8C%81%E9%85%8D%E7%BD%AE%E7%9A%84%E5%93%8D%E5%BA%94%E5%A4%B4)。
+     * @example "Access-Control-Allow-Origin"
      */
     key: string;
     /**
-     * Header Value
-     * @example ""
+     * Header Value，设置该响应头字段的值。字段值不能超过 1,024 个字符，可以包含除美元符号（$），Delete（ASCII code 127）外的可打印 ASCII 字符。
+     * @example "*"
      */
     value?: string;
   }[];
@@ -80,6 +152,7 @@ export interface AddDomainV1Query {
    * 服务 ID。
    * - 您可以在veImageX 控制台 [服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。
    * - 您也可以通过 OpenAPI 的方式获取服务 ID，具体请参考[获取所有服务信息](https://www.volcengine.com/docs/508/9360)。
+   * @example "qhc**nuslz"
    */
   ServiceId: string;
 }
@@ -115,16 +188,9 @@ export interface AddDomainV1Res {
   /** @example "ok" */
   Result?: {
     /**
-     * 新增域名内容安全审核工单ID，仅对内
-     * @example ""
+     * 新增的域名。
+     * @example "test456.volcimagextest.com"
      */
-    BPMID?: string;
-    /**
-     * 新增域名内容安全审核工单，仅对内
-     * @example ""
-     */
-    BPMLink?: string;
-    /** @example "" */
     Domain?: string;
   };
 }
@@ -295,17 +361,13 @@ export interface ApplyImageUploadQuery {
   /**
    * 上传文件的存储 Key。默认使用随机生成的字符串作为存储 Key。
    * * 数组长度和`UploadNum`保持一致。
-   * * 不支持空格，如果中间有空格将会导致上传失败。
-   * * 不支持以/开头或结尾，不支持/连续出现，Key 值最大长度限制为 180 个字节。
-   * :::tip
-   * 仅对于 veImageX 上传场景生效。
-   * :::
+   * * 存储 Key 详细命名规范请参看 [veImageX 存储 Key 通用字符规则](https://www.volcengine.com/docs/508/1458331)。
    * @example "312**ea6.png"
    */
   StoreKeys?: string[];
   /**
    * 上传文件的数量，将决定下发的 StoreUri 的数量，取值范围为[1,10]，默认为 1。
-   * @example "1"
+   * @example 1
    */
   UploadNum?: number;
 }
@@ -387,6 +449,200 @@ export interface ApplyImageUploadRes {
        */
       UploadHosts: string[];
     };
+  };
+}
+
+export interface ApplyVpcUploadInfoQuery {
+  /**
+   * 上传文件的 Content-Type 值。
+   *
+   * 需确保指定值在服务维度的白名单内，否则无法成功上传，参看[上传 Content-Type 限制](https://www.volcengine.com/docs/508/1319948)。
+   * @example "image/jpeg"
+   */
+  ContentType?: string;
+  /**
+   * 文件扩展名，最大长度限制为 8 个字节。
+   *
+   * :::tip
+   * 仅当未指定 `StoreKeys` 时生效。
+   * :::
+   * @example ".jpg"
+   */
+  FileExtension?: string;
+  /**
+   * 文件大小。
+   * @format int64
+   * @example 123
+   */
+  FileSize?: number;
+  /**
+   * 是否开启重名文件覆盖上传，取值如下所示：
+   *
+   * - `true`：开启
+   * - `false`：（默认）关闭
+   *
+   * :::tip
+   * 在指定 `Overwrite` 为 `true` 前，请确保您指定的 `ServiceId` 对应服务已[开启了覆盖上传](https://www.volcengine.com/docs/508/1119912)能力。
+   * :::
+   * @example "true"
+   */
+  Overwrite?: boolean;
+  /**
+   * 分片大小，单位为字节，默认值为 200 MB。
+   * 当 `FileSize` 大于 `PartSize` 时，下发分片上传的 URL。
+   * @format int64
+   * @example 5242880
+   */
+  PartSize?: number;
+  /**
+   * 指定的上传文件路径。指定 `Prefix` 时，下发的存储 Key 为：`Prefix/{随机Key}.{FileExtension}`，拼接形成的存储 Key 需满足 [veImageX 存储 Key 通用字符规则](https://www.volcengine.com/docs/508/1458331)。
+   *
+   *
+   * :::tip
+   * 仅当未指定 `StoreKeys` 时生效。
+   * :::
+   * @example "test"
+   */
+  Prefix?: string;
+  /**
+   * 服务 ID。
+   *
+   * - 您可以在 veImageX 控制台 [服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。
+   * - 您也可以通过 OpenAPI 的方式获取服务 ID，具体请参考[获取所有服务信息](https://www.volcengine.com/docs/508/9360)。
+   * @example "u3*k"
+   */
+  ServiceId: string;
+  /**
+   * 存储类型。
+   *
+   * - `STANDARD`：标准存储
+   * - `IA`：低频存储
+   * - `ARCHIVE_FR`：归档闪回存储
+   * - `ARCHIVE`：归档存储
+   * - `COLD_ARCHIVE`：冷归档存储
+   * @example "ARCHIVE"
+   */
+  StorageClass?: string;
+  /**
+   * 上传文件的存储 Key。默认使用随机生成的字符串作为存储 Key。
+   *
+   * 存储 Key 详细命名规范请参看 [veImageX 存储 Key 通用字符规则](https://www.volcengine.com/docs/508/1458331)。
+   * @example "test.jpg"
+   */
+  StoreKey?: string;
+}
+
+export interface ApplyVpcUploadInfoRes {
+  ResponseMetadata: {
+    /**
+     * 请求的接口名，属于请求的公共参数。
+     * @example "{Action}"
+     */
+    Action: string;
+    /**
+     * 请求的Region，例如：cn-north-1
+     * @example "cn-north-1"
+     */
+    Region: string;
+    /** RequestId为每次API请求的唯一标识。 */
+    RequestId: string;
+    /** 请求的服务，属于请求的公共参数。 */
+    Service: string;
+    /**
+     * 请求的版本号，属于请求的公共参数。
+     * @example "{Version}"
+     */
+    Version: string;
+  };
+  Result?: {
+    /**
+     * 参数的唯一标识符。
+     * 参数的唯一标识符
+     * @example "demo"
+     */
+    Oid: string;
+    /**
+     * 分片上传信息。
+     * @example "-"
+     */
+    PartUploadInfo: {
+      /**
+       * 合并分片的 URL。
+       * 完整部分的URL。
+       * @example "https://ouy.*.com"
+       */
+      CompletePartURL: string;
+      /**
+       * 上传分片请求头信息，用于合并分片请求。
+       * 合并分片请求头信息，map结构
+       * @example "-"
+       */
+      CompletePartURLHeaders: {
+        /**
+         * 请求头的键（Header key）。
+         * 请提供具体的Key和string值，我将根据这些信息生成参数的一句话描述。
+         * @example "X-Tos-Forbid-Overwrite"
+         */
+        Key: string;
+        /**
+         * 请求头的值（Header value）。
+         * 请提供参数的名字和类型。
+         * @example "true"
+         */
+        Value: string;
+      }[];
+      /**
+       * 分块上传 URL 列表。
+       * 分块上传URL列表。
+       * @example "["https://tos.xxx","https://tos.yyy"]"
+       */
+      PartPutURLs: string[];
+      /**
+       * 上传分片大小，默认为 200MB。
+       * @format int64
+       * @example 4194304
+       */
+      PartSize: number;
+    };
+    /**
+     * 直接上传的 URL。
+     * 上传URL。
+     * @example "https://ll.xxx"
+     */
+    PutURL: string;
+    /**
+     * 直接上传的请求头。
+     * 自定义请求头。
+     * @example "-"
+     */
+    PutURLHeaders: {
+      /**
+       * 请求头的键（Header key）。
+       * 请提供具体的Key和string值，我将根据这些信息生成参数描述。
+       * @example "Content-Type"
+       */
+      Key: string;
+      /**
+       * 请求头的值（Header value）。
+       * 参数的值。
+       * @example "image/jpeg"
+       */
+      Value: string;
+    }[];
+    /**
+     * 一次上传会话 Key。
+     * 上传完成上报时使用该值，该 Key 可以在解码后提取信息及参数校验。
+     * 上传会话
+     * @example "eyJh**In0="
+     */
+    SessionKey: string;
+    /**
+     * 上传模式。
+     * - `direct`：直接上传
+     * - `part`：分片上传
+     * @example "part"
+     */
+    UploadMode: string;
   };
 }
 
@@ -741,7 +997,7 @@ export interface CreateCVImageGenerateTaskRes {
 export interface CreateFileRestoreBody {
   /**
    * 恢复时长，取值范围为[1,365]，单位为天。
-   * @example "30"
+   * @example 30
    */
   Duration: number;
   /**
@@ -751,6 +1007,8 @@ export interface CreateFileRestoreBody {
    * @example "demo.png"
    */
   StoreUri: string;
+  /** 取回方式： Expedited：快速取回 Standard：标准取回 Bulk：批量取回；不设置默认standard */
+  Tier?: string;
 }
 
 export interface CreateFileRestoreQuery {
@@ -861,20 +1119,117 @@ export interface CreateHiddenWatermarkImageRes {
 }
 
 /** title */
+export interface CreateImageAITaskBody {
+  /**
+   * 任务回调配置，缺省情况下默认使用队列回调配置。
+   * @example "-"
+   */
+  CallbackConf?: {
+    /**
+     * 业务自定义回调参数，将在回调消息的 `callback_args` 中透传。具体回调参数请参考[回调内容](https://www.volcengine.com/docs/508/1104726#%E5%9B%9E%E8%B0%83%E5%86%85%E5%AE%B9)。
+     * @example "product id"
+     */
+    Args?: string;
+    /**
+     * 回调数据格式，仅支持取值 `JSON`。
+     * @example "JSON"
+     */
+    DataFormat?: string;
+    /**
+     * 回调 HTTP 请求地址，用于接收转码结果详情。支持使用 https 和 http 协议。
+     * @example "https://demo.com"
+     */
+    Endpoint: string;
+    /**
+     * 回调方式，仅支持取值 `HTTP`。
+     * HTTP
+     * @example "HTTP"
+     */
+    Method: string;
+    /**
+     * 回调的维度类型，缺省情况下按照条目级别进行回调。取值如下所示：
+     *
+     * - `task`：将按照任务级别进行回调。可分批回调，一个批次内最多一次性可回调 5000 条图片转码条目执行信息。
+     * - `entry`：将按照条目级别进行回调。当该条目执行完毕，将立即产生回调。
+     * 参数类型。
+     * @example "task"
+     */
+    Type?: string;
+  };
+  /**
+   * 待进行 AI 处理的图片 URI 或 URL 列表，其中 URI 不需要带 `tos-cn-i-***` 前缀。
+   *
+   * :::warning
+   * 若 `DataType` 取值 `uri`，则待转码图片 URI 必须为指定服务 ID 下的存储 URI。您可通过调用 [GetImageUploadFiles](https://www.volcengine.com/docs/508/9392) 获取指定服务下全部的上传文件存储 URI。
+   * :::
+   * 数据列表。
+   * @example "["a.png","uridemo.png"]"
+   */
+  DataList: string[];
+  /**
+   * 需要提交的图片数据类型，取值如下所示：
+   *
+   * - `uri`：指定 ServiceId 下存储 URI。
+   * - `url`：公网可访问的 URL。
+   * @example "uri"
+   */
+  DataType: string;
+  /**
+   * 服务 ID。若 `DataType` 取值 `uri`，则提交的图片 URI 列表需在该服务内。
+   *
+   * - 您可以在 veImageX 控制台 [服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。
+   * - 您也可以通过 OpenAPI 的方式获取服务 ID，具体请参考[获取所有服务信息](https://www.volcengine.com/docs/508/9360)。
+   * @example "5s****fo"
+   */
+  ServiceId: string;
+  /**
+   * AI 图像处理模板参数，需要将 JSON 压缩并转义为字符串。根据您需要的图像处理功能，参看 [AI 图像处理模板](https://www.volcengine.com/docs/508/1515840)页面获取模板 ID 和参数信息。
+   * 工作流参数，序列化的 JSON 字符串。
+   * @example "{\"GenDREnhanceParam\":{\"Multiple\":1.2}}"
+   */
+  WorkflowParameter: string;
+  /**
+   * AI 图像处理模板 ID。根据您需要的图像处理功能，参看 [AI 图像处理模板](https://www.volcengine.com/docs/508/1515840)页面获取模板 ID 和参数信息。
+   * 工作流ID。
+   * @example "system_workflow_ai_super_resolution"
+   */
+  WorkflowTemplateld: string;
+}
+
+export interface CreateImageAITaskRes {
+  ResponseMetadata: {
+    /** @example "CreateImageTranscodeTask" */
+    Action: string;
+    /** @example "cn-north-1" */
+    Region: string;
+    /** @example "201806041104200100100232280022D30" */
+    RequestId: string;
+    /** @example "imagex" */
+    Service: string;
+    /** @example "2018-08-01" */
+    Version: string;
+  };
+  Result: {
+    /**
+     * 队列 ID。查询接口需要使用，请注意保存。
+     * @example "67d****"
+     */
+    QueueId: string;
+    /**
+     * 任务 ID。查询接口需要使用，请注意保存。
+     * @example "649b9d3****5537684010a7"
+     */
+    TaskId: string;
+  };
+}
+
+/** title */
 export interface CreateImageAnalyzeTaskBody {
   /**
    * 任务描述，可作为该条任务的备注信息。
    * @example "备注"
    */
   Desc?: string;
-  /**
-   * 仅当`Type` 取值 `UriFile` 时，配置有效。
-   * 是否模拟模板每阶段输出，取值如下所示：
-   * - `true`：是，一个模版中可以选择多种图像处理, 模拟输出时会将所有的处理逐步叠加并编码为最终图片格式运行并输出评估结果。
-   * - `false`：否。
-   * @example "false"
-   */
-  EvalPerStage?: boolean;
   /**
    * 自定义离线评估任务名称
    * @example "test"
@@ -945,7 +1300,7 @@ export interface CreateImageAuditTaskBody {
    * 审核能力，取值如下所示：
    * - `0`：基础审核能力
    * - `1`：智能审核能力
-   * @example "1"
+   * @example 1
    */
   AuditAbility: number;
   /**
@@ -1043,7 +1398,7 @@ export interface CreateImageAuditTaskBody {
    * - `0`：（默认）不限范围
    * - `1`：指定范围
    * 默认0
-   * @example "1"
+   * @example 1
    */
   EnableAuditRange?: number;
   /**
@@ -1233,7 +1588,7 @@ export interface CreateImageCompressTaskBody {
    *
    * - `0`：使用 ZIP DEFLATE 压缩方法，将文件进行压缩并打包为 ZIP 包。该方式适用于需要长期存储大量未经压缩的文件的场景，以节省存储空间。但需注意的是，若文件本身已经过压缩处理，将会因为文件的可压缩空间有限，导致该方式的压缩效果不明显。
    * - `1`：仅将文件打包为 ZIP 包，但不执行压缩操作。该方式适用于快速整理文件而无需节省存储空间的场景。例如已经过压缩的文件的打包存储，以便于传输或归档。
-   * @example "0"
+   * @example 0
    */
   ZipMode: number;
 }
@@ -1440,7 +1795,7 @@ export interface CreateImageHmEmbedBody {
    * * adapt_resize：画质自适应文本嵌入模型。
    * @example "default"
    */
-  Algorithm?: string;
+  Algorithm: string;
   /**
    * 待添加盲水印的可公网访问原图 Url。当 StoreUri 和 ImageUrl 均不为空，以 StoreUri 取值为准。
    * @example "https://test.com/example.png"
@@ -1461,7 +1816,7 @@ export interface CreateImageHmEmbedBody {
   /**
    * 输出图片质量参数。取值范围为 [1,100]，默认为 75。
    * 对于 PNG 无损压缩，其他格式下其值越小，压缩率越高，画质越差。
-   * @example "75"
+   * @example 75
    */
   OutQuality?: number;
   /**
@@ -1599,7 +1954,7 @@ export interface CreateImageHmExtractRes {
     AdditionInfo?: {
       /**
        * 所提取的水印背景图层的生成周期，从 0 开始，表示处于生成的第一周内。
-       * @example "1"
+       * @example 1
        */
       HmCode?: number;
       /**
@@ -1610,7 +1965,7 @@ export interface CreateImageHmExtractRes {
         /**
          * 使用 `tracev2` 模型生成背景水印图层的生成周期的结束时间，Unix 时间戳，精度为秒。
          * 结束时间戳
-         * @example "1719244800"
+         * @example 1719244800
          */
         EndDate?: number;
         /**
@@ -1624,7 +1979,7 @@ export interface CreateImageHmExtractRes {
          * - `EndDate` 为 `1718121600`，表示 2024 年 6 月 12 日 00:00:00
          * :::
          * 开始时间戳
-         * @example "1718640000"
+         * @example 1718640000
          */
         StartDate?: number;
       };
@@ -1647,7 +2002,7 @@ export interface CreateImageHmExtractRes {
      * :::tip
      * 提取失败时显示接口错误。
      * :::
-     * @example "0"
+     * @example 0
      */
     StatusCode: number;
   };
@@ -1731,7 +2086,7 @@ export interface CreateImageMigrateTaskBody {
        * :::tip
        * 同名文件指文件在对象存储中的访问 Key 相同的文件，调用 veImageX 服务时会用到文件访问 Key。
        * :::
-       * @example "0"
+       * @example 0
        */
       UploadConf?: number;
     };
@@ -1952,7 +2307,7 @@ export interface CreateImageMigrateTaskBody {
       Format: string;
       /**
        * 转码质量参数，取值范围为 \[1,100\]。对于 PNG 为无损压缩，其他格式下其值越小，压缩率越高，画质越差。
-       * @example "75"
+       * @example 75
        */
       Quality: number;
       /**
@@ -2018,12 +2373,12 @@ export interface CreateImageMonitorRuleBody {
          *
          * - `5`
          * - `10`
-         * @example "5"
+         * @example 5
          */
         AggrInterval: number;
         /**
          * 样本量阈值。被监控指标超过该值时触发告警。
-         * @example "200"
+         * @example 200
          */
         CntThreshold?: number;
         /**
@@ -2075,12 +2430,12 @@ export interface CreateImageMonitorRuleBody {
          * - `1`
          * - `3`
          * - `5`
-         * @example "3"
+         * @example 3
          */
         RepeatCnt: number;
         /**
          * 指标比较阈值，需要与 `CntThreshold` 同时被满足才会触发告警。
-         * @example "50"
+         * @example 50
          */
         Threshold: number;
       }[];
@@ -2148,7 +2503,7 @@ export interface CreateImageMonitorRuleBody {
      * - `30`
      * - `40`
      * - `50`
-     * @example "5"
+     * @example 5
      */
     Frequency: number;
     /**
@@ -2211,7 +2566,7 @@ export interface CreateImageMonitorRuleBody {
        * - `30`
        * - `60`
        * - `360`
-       * @example "30"
+       * @example 30
        */
       SilentDur: number;
       /**
@@ -2538,7 +2893,7 @@ export enum CreateImageStyleBodyUnitEnum {
 export interface CreateImageStyleBody {
   /**
    * 样式画布的高度，取值范围为[0,1000]。
-   * @example "600"
+   * @example 600
    */
   Height: number;
   /**
@@ -2562,7 +2917,7 @@ export interface CreateImageStyleBody {
   Unit?: CreateImageStyleBodyUnitEnum;
   /**
    * 样式画布的宽度，取值范围为[0,1000]。
-   * @example "400"
+   * @example 400
    */
   Width: number;
 }
@@ -2644,12 +2999,12 @@ export interface CreateImageTemplateBody {
      * 动图截帧策略，取值如下所示：
      * - `0`：智能模式，从动图首帧开始逐帧检测当前帧亮度是否大于 80，并最终返回第一个亮度大于 80 的帧。
      * - `1`：全局最优，从动图首帧开始逐帧检测并返回亮度最大的一帧。
-     * @example "0"
+     * @example 0
      */
     Strategy?: number;
     /**
      * 动图异步处理超时时间，单位为 ms。默认为 1500，取值负数时表示无超时时间。若在指定时间范围内处理未完成则返回失败。
-     * @example "1500"
+     * @example 1500
      */
     Timeout?: number;
   };
@@ -2671,19 +3026,19 @@ export interface CreateImageTemplateBody {
     /**
      * 动图时长，单位为 ms。
      * 动图时长(ms)
-     * @example "1000"
+     * @example 1000
      */
     Duration: number;
     /**
      * 帧率，1 秒 X 帧。仅当`SelectFrameMode`取值为`fps`时需要配置。
      * 帧率，1秒X帧
-     * @example "10"
+     * @example 10
      */
     FramePerSecond: number;
     /**
      * 秒数，X 秒 1 帧。仅当`SelectFrameMode`取值为`spf`时需要配置。
      * X秒1帧
-     * @example "1"
+     * @example 1
      */
     SecondPerFrame: number;
     /**
@@ -2698,13 +3053,13 @@ export interface CreateImageTemplateBody {
     /**
      * 动图起始时间戳，单位为 ms。
      * 动图起始时间戳(ms)
-     * @example "6"
+     * @example 6
      */
     StartTime: number;
     /**
      * 同步等待时长，单位为 s，超时未完成则根据`DemotionType`降级。
      * 同步等待时长(s)，超时未完成则根据DemotionType降级
-     * @example "5"
+     * @example 5
      */
     WaitTime: number;
   };
@@ -2795,7 +3150,7 @@ export interface CreateImageTemplateBody {
   /**
    * 对图片编码使用的质量参数，取值范围为 [1,100]，默认为 75。
    * 对图片编码使用的质量参数，默认为0
-   * @example "75"
+   * @example 75
    */
   OuputQuality?: number;
   /**
@@ -2968,7 +3323,7 @@ export interface CreateImageTemplateBody {
      * 指定截图时间，取值范围为[0,视频时长]，单位为 ms。默认为 0，表示返回首帧。若指定时间 > 视频长度，则返回视频最后一帧。
      * 截图的时间戳(ms)
      * @format int64
-     * @example "0"
+     * @example 0
      */
     TimeOffsetMs?: number;
     /**
@@ -3198,6 +3553,11 @@ export interface CreateImageTranscodeCallbackBody {
    * @example "649a9332***0e9cc0a0ed"
    */
   EntryId: string;
+  /**
+   * 地域。
+   * @example "cn"
+   */
+  Region?: string;
 }
 
 export interface CreateImageTranscodeCallbackRes {
@@ -3337,17 +3697,26 @@ export interface CreateImageTranscodeTaskBody {
      * @example "HTTP"
      */
     Method: string;
+    /**
+     * 回调的维度类型，缺省情况下按照条目级别进行回调。取值如下所示：
+     * - `task`：将按照任务级别进行回调。可分批回调，一个批次内最多一次性可回调 5000 条图片转码条目执行信息。
+     * - `entry`：将按照条目级别进行回调。当该条目执行完毕，将立即产生回调。
+     * 参数类型。
+     * @example "task"
+     */
+    Type?: string;
   };
   /**
    * `DataList`和`Filelist`二选一必填，同时配置时，`DataList`优先生效。
    *
-   * 待转码的图片 uri 或 url 列表，最多支持 10 万条。
+   * 待转码的图片 uri 或 url 列表，建议最多不超过 10 万条。
    *
    * - 若`DataType`取值`uri`，此处请传入指定 ServiceId 下的存储 URI。
    * - 若`DataType`取值`url`，此处请传入公网可访问的 URL。
+   * 数据列表。
    * @example "["http://demo.com/example.png"]"
    */
-  DataList: string[];
+  DataList?: string[];
   /**
    * 数据类型，取值如下所示：
    *
@@ -3369,24 +3738,22 @@ export interface CreateImageTranscodeTaskBody {
    *
    * 待转码的图片 uri 或 url 文件列表。具体使用方式如下：
    *
-   * 1. 在 txt、csv 文件内填写指定数据类型的待转码图片地址，每行填写一个，最多不超过 10 万条。
+   * 1. 在 txt、csv 文件内填写指定数据类型的待转码图片地址，每行填写一个，建议最多不超过 10 万条。
    * 2. 将该文件上传至指定服务后，获取其存储 URI。
    * 3. 将该存储 URI，传入 `FileList`。
+   * 文件列表。
    * @example "["tos-cn-i-5s***fo/a.txt","tos-cn-i-5s***fo/uridemo.txt"]"
    */
-  FileList: string[];
+  FileList?: string[];
   /**
    * 任务队列名称 ID。缺省情况下提交至账号默认任务队列。您可通过调用[GetImageTranscodeQueues](https://www.volcengine.com/docs/508/1160404)获取该账号下全部任务队列 ID。
    * @example "649a9dbc3***64d44cf5b0"
    */
   QueueId?: string;
   /**
-   * 转码产物的 Storekey 列表，仅当`DataList`不为空时有效，长度需与`DataList`长度一致。不传时默认使用固定规则生成产物的 Storekey。填写规则如下：
+   * 转码产物的存储 Key 列表，仅当 `DataList` 不为空时有效，长度需与`DataList`长度一致。不传时默认使用固定规则生成产物的存储 Key。
    *
-   * - 使用 UTF-8 编码。
-   * - 长度必须在 1～1024 个字符之间。
-   * - 不能以反斜线（\）开头。
-   * - 不支持 `\a`、`\b`、`\t`、`\n`、`\v`、`\f`、`\r` 字符。
+   * 存储 Key 详细命名规范请参看 [veImageX 存储 Key 通用字符规则](https://www.volcengine.com/docs/508/1458331)。
    * @example "["name1","name2"]"
    */
   ResKeyList?: string[];
@@ -4104,22 +4471,34 @@ export interface DeleteImageTranscodeQueueRes {
   Result: Record<string, unknown>;
 }
 
-/** 描述 */
 export interface DeleteImageUploadFilesBody {
   /**
-   * 文件 URI 列表，最多传 1000 个。您可以通过调用[获取服务下的上传文件](https://www.volcengine.com/docs/508/9392)来获取所需的文件 URI。
-   * 文件 Uri 列表，最多传 1000 个。
-   * @example "["uri1","uri2"]"
+   * 待删除文件的存储 URI 列表，最多传 1000 个。您可以通过调用[获取服务下的上传文件](https://www.volcengine.com/docs/508/9392)来获取所需的文件 URI。
+   * @example "["tos-cn-i-36m*6tf/demo.png"]"
    */
   StoreUris: string[];
+  /**
+   * 待删除文件的存储版本 ID。传值时需要和 `StoreUris` 一一对应。您可在 veImageX 控制台资源管理查看文件版本号，或调用 [GetImageStorageVersionFiles](https://www.volcengine.com/docs/508/1359366) 查询服务下所有文件的版本信息。
+   *
+   * :::warning
+   * 当删除文件未指定 StoreVersions，那么删除逻辑将根据版本控制的状态产生以下差异。
+   * - 若此时版本控制为未开启，则 StoreUris 对应文件将被永久删除，不可恢复。
+   * - 若此时版本控制为开启，则 StoreUris 对应文件未被真正删除，该文件可以被恢复，同时将增加一个[删除标记](https://www.volcengine.com/docs/508/1359410)用于标识该文件为删除状态。
+   * - 若此时版本控制为暂停，则根据版本 ID 是否为 null 而有以下差异：
+   * 	- 若文件的版本 ID 为 null，则 StoreUris 对应文件被真正删除，不可恢复，同时将增加一个[删除标记](https://www.volcengine.com/docs/508/1359410)用于标识该文件为删除状态。
+   * 	- 若文件的版本 ID 不为 null，则 StoreUris 对应文件未被真正删除，而是转换为历史版本保留。该文件可以被恢复，同时将增加一个[删除标记](https://www.volcengine.com/docs/508/1359410)。
+   * :::
+   * @example "["56DE530B6D7AAD3DA1F0"]"
+   */
+  StoreVersions?: string[];
 }
 
 export interface DeleteImageUploadFilesQuery {
   /**
-   * 服务 ID。
+   * 待删除文件所在的服务 ID。
    * - 您可以在 veImageX 控制台 [服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。
    * - 您也可以通过 OpenAPI 的方式获取服务 ID，具体请参考[获取所有服务信息](https://www.volcengine.com/docs/508/9360)。
-   * @example "8h**9q"
+   * @example "ui**jh"
    */
   ServiceId: string;
 }
@@ -4150,14 +4529,24 @@ export interface DeleteImageUploadFilesRes {
   Result?: {
     /**
      * 文件成功删除的 URI 列表
-     * @example "["uri1"]"
+     * @example "["tos-cn-i-36m*6tf/demo.png"]"
      */
     DeletedFiles: string[];
     /**
+     * 已删除文件的版本列表。
+     * @example "["56DE530B6D7AAD3DA1F0"]"
+     */
+    DeletedFilesVersion?: string[];
+    /**
      * 文件不存在的无效 URI 列表
-     * @example "[uri2]"
+     * @example "["uri2"]"
      */
     InvaildFiles: string[];
+    /**
+     * 无效文件版本列表。
+     * @example "["56DE530B6D7AAD3DA1F0"]"
+     */
+    InvaildFilesVersion?: string[];
   };
 }
 
@@ -4368,6 +4757,115 @@ export interface DescribeImageVolcCdnAccessLogRes {
   };
 }
 
+export interface DescribeImageXAIRequestCntUsageQuery {
+  /**
+   * 组件名称。支持查询多个组件，传入多个时用英文逗号“,”分割，缺省情况下表示查询所有组件。您可通过调用 [GetImageAddOnConf](https://www.volcengine.com/docs/508/66145) 查看`Key`返回值。
+   * @example "a1,a2"
+   */
+  AdvFeats?: string;
+  /**
+   * 是否叠加计费倍率。默认为false。
+   * @example "true"
+   */
+  EnableBillingRate?: boolean;
+  /**
+   * 获取数据结束时间点。日期格式按照 ISO8601 表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如`2019-06-02T00:00:00+08:00`。
+   * @example "2019-06-02T00:00:00+08:00"
+   */
+  EndTime: string;
+  /**
+   * 维度拆分的维度值。不传表示不拆分维度，只能传入单个参数。支持取值如下：
+   * - `ServiceId`：服务
+   * - `AdvFeat`：组件
+   * @example "AdvFeat"
+   */
+  GroupBy?: string;
+  /**
+   * 查询数据的时间粒度。单位为秒。缺省时查询 `StartTime` 和 `EndTime` 时间段全部数据，此时单次查询最大时间跨度为 93 天。取值如下所示：
+   *
+   * - `300`：单次查询最大时间跨度为 31 天
+   * - `600`：单次查询最大时间跨度为 31 天
+   * - `1200`：单次查询最大时间跨度为 31 天
+   * - `1800`：单次查询最大时间跨度为 31 天
+   * - `3600`：单次查询最大时间跨度为 93 天
+   * - `86400`：单次查询最大时间跨度为 93 天
+   * - `604800`：单次查询最大时间跨度为 93 天
+   * @example "300"
+   */
+  Interval?: string;
+  /**
+   * 服务 ID。支持查询多个服务，传入多个时用英文逗号“,”分割，缺省情况下表示查询所有服务。您可以在 veImageX 控制台的[服务管理](https://console.volcengine.com/imagex/service_manage/)模块或者调用 [GetAllImageServices](https://www.volcengine.com/docs/508/9360) 接口获取服务 ID。
+   * @example "s1,s2"
+   */
+  ServiceIds?: string;
+  /**
+   * 获取数据起始时间点。日期格式按照 ISO8601 表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如`2019-06-02T00:00:00+08:00`。
+   * :::tip
+   * 由于仅支持查询近一年历史数据，则若此刻时间为`2011-11-21T16:14:00+08:00`，那么您可输入最早的开始时间为`2010-11-21T00:00:00+08:00`。
+   * :::
+   * @example "2019-06-02T00:00:00+08:00"
+   */
+  StartTime: string;
+  /**
+   * 图片处理模板。支持查询多个模板，传入多个时用英文逗号“,”分割，缺省情况下表示查询所有模板。您可通过调用 [GetAllImageTemplates](https://www.volcengine.com/docs/508/9386) 获取服务下全部模版信息。
+   * @example "t1,t2"
+   */
+  Templates?: string;
+}
+
+export interface DescribeImageXAIRequestCntUsageRes {
+  ResponseMetadata: {
+    /** 请求的接口名，属于请求的公共参数。 */
+    Action: string;
+    /** 请求的Region，例如：cn-north-1 */
+    Region: string;
+    /** RequestID为每次API请求的唯一标识。 */
+    RequestId: string;
+    /** 请求的服务，属于请求的公共参数。 */
+    Service: string;
+    /** 请求的版本号，属于请求的公共参数。 */
+    Version: string;
+  };
+  Result: {
+    /**
+     * 请求次数据。
+     * @example "-"
+     */
+    RequestCntData: {
+      /**
+       * 附加组件类型，`GroupBy`包含`AdvFeat`时有返回值。如：enhance，smartcut。取值为`total`，表示包含所选`AdvFeat`总请求次数。
+       * 附加组件类型，`GroupBy`包含`AdvFeat`时有返回值。如：enhance，smartcut。取值为`total`，表示包含所选`AdvFeat`总请求次数。
+       * @example "enhance"
+       */
+      AdvFeat?: string;
+      /**
+       * 具体数据
+       * @example "-"
+       */
+      Data: {
+        /**
+         * 统计时间点，时间片开始时刻。按照`ISO8601`表示法，格式为：`YYYY-MM-DDThh:mm:ss±hh:mm`。
+         * 统计时间点，时间片结束时刻。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00。
+         * @example "2023-01-01T00:00:00+08:00"
+         */
+        TimeStamp: string;
+        /**
+         * 请求次
+         * 请求次
+         * @example 123
+         */
+        Value: number;
+      }[];
+      /**
+       * 服务 ID，`GroupBy`包含`ServiceId`时有返回值。
+       * 服务 ID，`GroupBy`包含`ServiceId`时有返回值。
+       * @example "s1"
+       */
+      ServiceId?: string;
+    }[];
+  };
+}
+
 export interface DescribeImageXBaseOpUsageQuery {
   /**
    * 获取数据结束时间点。日期格式按照 ISO8601 表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如`2019-06-02T00:00:00+08:00`。
@@ -4440,7 +4938,7 @@ export interface DescribeImageXBaseOpUsageRes {
         /**
          * 基础处理量，单位为 Byte。
          * 基础处理量，单位Byte
-         * @example "123"
+         * @example 123
          */
         Value: number;
       }[];
@@ -4539,7 +5037,7 @@ export interface DescribeImageXBillingRequestCntUsageRes {
         /**
          * 请求次。
          * 请求次
-         * @example "875"
+         * @example 875
          */
         Value: number;
       }[];
@@ -4619,7 +5117,7 @@ export interface DescribeImageXBucketRetrievalUsageRes {
          * 单位：Byte
          * 单位：Byte
          * @format float
-         * @example "123"
+         * @example 123
          */
         Value: number;
       }[];
@@ -4716,7 +5214,7 @@ export interface DescribeImageXBucketUsageRes {
          * 单位：Byte
          * 单位：Byte
          * @format float
-         * @example "123"
+         * @example 123
          */
         Value: number;
       }[];
@@ -4825,7 +5323,7 @@ export interface DescribeImageXCDNTopRequestDataRes {
     /**
      * 可展示的数据总数量。
      * 可展示的数据总数量。
-     * @example "1000"
+     * @example 1000
      */
     Count: number;
     /**
@@ -4847,7 +5345,7 @@ export interface DescribeImageXCDNTopRequestDataRes {
        * - 当`ValueType`取值为`Traffic`，表示流量，单位为 Byte；
        * - 当`ValueType`取值为`RequestCnt`，表示请求次数，单位为次。
        * Traffic/RequestCnt，指标值。Traffic单位：Byte。RequestCnt单位：次。
-       * @example "123"
+       * @example 123
        */
       Value: number;
     }[];
@@ -4857,7 +5355,7 @@ export interface DescribeImageXCDNTopRequestDataRes {
      * - 当`ValueType`取值为`Traffic`，表示总流量，单位为 Byte；
      * - 当`ValueType`取值为`RequestCnt`，表示总请求次数，单位为次。
      * 全量Traffic/RequestCnt的总量，用于计算占比。Traffic单位：Byte。RequestCnt单位：次。
-     * @example "123"
+     * @example 123
      */
     TotalValue: number;
   };
@@ -4984,6 +5482,14 @@ export interface DescribeImageXCdnDurationAllBody {
    */
   Isp?: string[];
   /**
+   * 取值为不等于的维度（默认为等于）。支持取值：
+   * - 公共维度：`AppVer`、`SdkVer`、`Country`、`Province`、`Isp`、`Domain`、`ImageType`
+   * - 自定义维度：您可以通过调用 [GetImageXQueryDims](https://www.volcengine.com/docs/508/1213048)接口获取自定义维度指标
+   * 取值为不等于的维度（默认为等于）。支持取值：公共维度（AppVer,SdkVer,Country,Province,Isp,Domain,ImageType），自定义维度（通过"获取自定义维度列表"接口获取）
+   * @example "["SdkVer"]"
+   */
+  Not?: string[];
+  /**
    * 需要匹配的系统类型，不传则匹配非 WEB 端的所有系统。取值如下所示：
    * - `iOS`
    * - `Android`
@@ -5057,7 +5563,7 @@ export interface DescribeImageXCdnDurationAllRes {
       /**
        * 上报数据量。
        * 上报数据量。
-       * @example "438"
+       * @example 438
        */
       Count: number;
       /**
@@ -5092,7 +5598,7 @@ export interface DescribeImageXCdnDurationAllRes {
        * 网络耗时，单位为毫秒。
        * 网络耗时，单位毫秒
        * @format float
-       * @example "294"
+       * @example 294
        */
       Value: number;
     }[];
@@ -5230,6 +5736,14 @@ export interface DescribeImageXCdnDurationDetailByTimeBody {
    */
   Isp?: string[];
   /**
+   * 取值为不等于的维度（默认为等于）。支持取值：
+   * - 公共维度：`AppVer`、`SdkVer`、`Country`、`Province`、`Isp`、`Domain`、`ImageType`
+   * - 自定义维度：您可以通过调用 [GetImageXQueryDims](https://www.volcengine.com/docs/508/1213048)接口获取自定义维度指标
+   * 取值为不等于的维度（默认为等于）。支持取值：公共维度（AppVer,SdkVer,Country,Province,Isp,Domain,ImageType），自定义维度（通过"获取自定义维度列表"接口获取）
+   * @example "["SdkVer"]"
+   */
+  Not?: string[];
+  /**
    * 需要匹配的系统类型，不传则匹配非 WEB 端的所有系统。取值如下所示：
    * - `iOS`
    * - `Android`
@@ -5305,7 +5819,7 @@ export interface DescribeImageXCdnDurationDetailByTimeRes {
       /**
        * 数据上报总量。
        * 数据上报量
-       * @example "333"
+       * @example 333
        */
       Count: number;
       /**
@@ -5317,7 +5831,7 @@ export interface DescribeImageXCdnDurationDetailByTimeRes {
         /**
          * 数据上报量。
          * 数据上报量
-         * @example "333"
+         * @example 333
          */
         Count: number;
         /**
@@ -5331,7 +5845,7 @@ export interface DescribeImageXCdnDurationDetailByTimeRes {
          * 平均耗时，单位毫秒。
          * 平均耗时，单位毫秒
          * @format float
-         * @example "333"
+         * @example 333
          */
         Value: number;
       }[];
@@ -5476,6 +5990,14 @@ export interface DescribeImageXCdnErrorCodeAllBody {
    */
   Isp?: string[];
   /**
+   * 取值为不等于的维度（默认为等于）。支持取值：
+   * - 公共维度：`AppVer`、`SdkVer`、`Country`、`Province`、`Isp`、`Domain`、`ImageType`
+   * - 自定义维度：您可以通过调用 [GetImageXQueryDims](https://www.volcengine.com/docs/508/1213048)接口获取自定义维度指标
+   * 取值为不等于的维度（默认为等于）。支持取值：公共维度（AppVer,SdkVer,Country,Province,Isp,Domain,ImageType），自定义维度（通过"获取自定义维度列表"接口获取）
+   * @example "["SdkVer"]"
+   */
+  Not?: string[];
+  /**
    * 需要匹配的系统类型，不传则匹配非 WEB 端的所有系统。取值如下所示：
    * - `iOS`
    * - `Android`
@@ -5563,7 +6085,7 @@ export interface DescribeImageXCdnErrorCodeAllRes {
         /**
          * 错误码数量。
          * 错误码数量
-         * @example "517"
+         * @example 517
          */
         Value: number;
       }[];
@@ -5610,7 +6132,7 @@ export interface DescribeImageXCdnErrorCodeAllRes {
       /**
        * 错误码数量。
        * 错误码数量
-       * @example "517"
+       * @example 517
        */
       Value: number;
     }[];
@@ -5738,6 +6260,14 @@ export interface DescribeImageXCdnErrorCodeByTimeBody {
    */
   Isp?: string[];
   /**
+   * 取值为不等于的维度（默认为等于）。支持取值：
+   * - 公共维度：`AppVer`、`SdkVer`、`Country`、`Province`、`Isp`、`Domain`、`ImageType`
+   * - 自定义维度：您可以通过调用 [GetImageXQueryDims](https://www.volcengine.com/docs/508/1213048)接口获取自定义维度指标
+   * 取值为不等于的维度（默认为等于）。支持取值：公共维度（AppVer,SdkVer,Country,Province,Isp,Domain,ImageType），自定义维度（通过"获取自定义维度列表"接口获取）
+   * @example "["SdkVer"]"
+   */
+  Not?: string[];
+  /**
    * 需要匹配的系统类型，不传则匹配非 WEB 端的所有系统。取值如下所示：
    * - `iOS`
    * - `Android`
@@ -5793,7 +6323,7 @@ export interface DescribeImageXCdnErrorCodeByTimeRes {
       /**
        * 错误码总量。
        * 错误码数量
-       * @example "1"
+       * @example 1
        */
       Count: number;
       /**
@@ -5805,7 +6335,7 @@ export interface DescribeImageXCdnErrorCodeByTimeRes {
         /**
          * 错误码数量。
          * 错误码数量
-         * @example "1"
+         * @example 1
          */
         Count: number;
         /**
@@ -5817,7 +6347,7 @@ export interface DescribeImageXCdnErrorCodeByTimeRes {
         /**
          * 错误码数量。
          * 错误码数量
-         * @example "1"
+         * @example 1
          */
         Value: number;
       }[];
@@ -5952,6 +6482,14 @@ export interface DescribeImageXCdnProtocolRateByTimeBody {
    */
   Isp?: string[];
   /**
+   * 取值为不等于的维度（默认为等于）。支持取值：
+   * - 公共维度：`AppVer`、`SdkVer`、`Country`、`Province`、`Isp`、`Domain`、`ImageType`
+   * - 自定义维度：您可以通过调用 [GetImageXQueryDims](https://www.volcengine.com/docs/508/1213048)接口获取自定义维度指标
+   * 取值为不等于的维度（默认为等于）。支持取值：公共维度（AppVer,SdkVer,Country,Province,Isp,Domain,ImageType），自定义维度（通过"获取自定义维度列表"接口获取）
+   * @example "["SdkVer"]"
+   */
+  Not?: string[];
+  /**
    * 需要匹配的系统类型，不传则匹配非 WEB 端的所有系统。取值如下所示：
    * - `iOS`
    * - `Android`
@@ -6007,7 +6545,7 @@ export interface DescribeImageXCdnProtocolRateByTimeRes {
       /**
        * 上报数据总量。
        * 数据上报量
-       * @example "123"
+       * @example 123
        */
       Count: number;
       /**
@@ -6019,7 +6557,7 @@ export interface DescribeImageXCdnProtocolRateByTimeRes {
         /**
          * 上报数据量。
          * 数据上报量
-         * @example "123"
+         * @example 123
          */
         Count: number;
         /**
@@ -6169,6 +6707,14 @@ export interface DescribeImageXCdnReuseRateAllBody {
    */
   Isp?: string[];
   /**
+   * 取值为不等于的维度（默认为等于）。支持取值：
+   * - 公共维度：`AppVer`、`SdkVer`、`Country`、`Province`、`Isp`、`Domain`、`ImageType`
+   * - 自定义维度：您可以通过调用 [GetImageXQueryDims](https://www.volcengine.com/docs/508/1213048)接口获取自定义维度指标
+   * 取值为不等于的维度（默认为等于）。支持取值：公共维度（AppVer,SdkVer,Country,Province,Isp,Domain,ImageType），自定义维度（通过"获取自定义维度列表"接口获取）
+   * @example "["SdkVer"]"
+   */
+  Not?: string[];
+  /**
    * 需要匹配的系统类型，不传则匹配非 WEB 端的所有系统。取值如下所示：
    * - `iOS`
    * - `Android`
@@ -6242,7 +6788,7 @@ export interface DescribeImageXCdnReuseRateAllRes {
       /**
        * 上报数据量。
        * 上报数据量。
-       * @example "230443"
+       * @example 230443
        */
       Count: number;
       /**
@@ -6413,6 +6959,14 @@ export interface DescribeImageXCdnReuseRateByTimeBody {
    */
   Isp?: string[];
   /**
+   * 取值为不等于的维度（默认为等于）。支持取值：
+   * - 公共维度：`AppVer`、`SdkVer`、`Country`、`Province`、`Isp`、`Domain`、`ImageType`
+   * - 自定义维度：您可以通过调用 [GetImageXQueryDims](https://www.volcengine.com/docs/508/1213048)接口获取自定义维度指标
+   * 取值为不等于的维度（默认为等于）。支持取值：公共维度（AppVer,SdkVer,Country,Province,Isp,Domain,ImageType），自定义维度（通过"获取自定义维度列表"接口获取）
+   * @example "["SdkVer"]"
+   */
+  Not?: string[];
+  /**
    * 需要匹配的系统类型，不传则匹配非 WEB 端的所有系统。取值如下所示：
    * - `iOS`
    * - `Android`
@@ -6468,7 +7022,7 @@ export interface DescribeImageXCdnReuseRateByTimeRes {
       /**
        * 上报数据总量。
        * 数据上报量
-       * @example "3"
+       * @example 3
        */
       Count: number;
       /**
@@ -6480,7 +7034,7 @@ export interface DescribeImageXCdnReuseRateByTimeRes {
         /**
          * 上报数据量。
          * 数据上报量
-         * @example "3"
+         * @example 3
          */
         Count: number;
         /**
@@ -6629,6 +7183,14 @@ export interface DescribeImageXCdnSuccessRateAllBody {
    */
   Isp?: string[];
   /**
+   * 取值为不等于的维度（默认为等于）。支持取值：
+   * - 公共维度：`AppVer`、`SdkVer`、`Country`、`Province`、`Isp`、`Domain`、`ImageType`
+   * - 自定义维度：您可以通过调用 [GetImageXQueryDims](https://www.volcengine.com/docs/508/1213048)接口获取自定义维度指标
+   * 取值为不等于的维度（默认为等于）。支持取值：公共维度（AppVer,SdkVer,Country,Province,Isp,Domain,ImageType），自定义维度（通过"获取自定义维度列表"接口获取）
+   * @example "["SdkVer"]"
+   */
+  Not?: string[];
+  /**
    * 需要匹配的系统类型，不传则匹配所有非 WEB 端的系统。取值如下所示：
    * - `iOS`
    * - `Android`
@@ -6702,7 +7264,7 @@ export interface DescribeImageXCdnSuccessRateAllRes {
       /**
        * 上报数据量。
        * 上报数据量。
-       * @example "259728"
+       * @example 259728
        */
       Count: number;
       /**
@@ -6873,6 +7435,14 @@ export interface DescribeImageXCdnSuccessRateByTimeBody {
    */
   Isp?: string[];
   /**
+   * 取值为不等于的维度（默认为等于）。支持取值：
+   * - 公共维度：`AppVer`、`SdkVer`、`Country`、`Province`、`Isp`、`Domain`、`ImageType`
+   * - 自定义维度：您可以通过调用 [GetImageXQueryDims](https://www.volcengine.com/docs/508/1213048)接口获取自定义维度指标
+   * 取值为不等于的维度（默认为等于）。支持取值：公共维度（AppVer,SdkVer,Country,Province,Isp,Domain,ImageType），自定义维度（通过"获取自定义维度列表"接口获取）
+   * @example "["SdkVer"]"
+   */
+  Not?: string[];
+  /**
    * 需要匹配的系统类型，不传则匹配非 WEB 端的所有系统。取值如下所示：
    * - `iOS`
    * - `Android`
@@ -6928,7 +7498,7 @@ export interface DescribeImageXCdnSuccessRateByTimeRes {
       /**
        * 该数据类型对应的总上报量
        * 该数据类型对应的总上报量
-       * @example "123"
+       * @example 123
        */
       Count: number;
       /**
@@ -6940,7 +7510,7 @@ export interface DescribeImageXCdnSuccessRateByTimeRes {
         /**
          * 数据对应的上报量
          * 数据对应的上报量
-         * @example "123"
+         * @example 123
          */
         Count: number;
         /**
@@ -7096,6 +7666,14 @@ export interface DescribeImageXClientCountByTimeBody {
    */
   Isp?: string[];
   /**
+   * 取值为不等于的维度（默认为等于）。支持取值：
+   * - 公共维度：`AppVer`、`SdkVer`、`Country`、`Province`、`Isp`、`Domain`、`ImageType`
+   * - 自定义维度：您可以通过调用 [GetImageXQueryDims](https://www.volcengine.com/docs/508/1213048)接口获取自定义维度指标
+   * 取值为不等于的维度（默认为等于）。支持取值：公共维度（AppVer,SdkVer,Country,Province,Isp,Domain,ImageType），自定义维度（通过"获取自定义维度列表"接口获取）
+   * @example "["SdkVer"]"
+   */
+  Not?: string[];
+  /**
    * 需要匹配的系统类型，不传则匹配非 WEB 端的所有系统。取值如下所示：
    * - `iOS`
    * - `Android`
@@ -7151,7 +7729,7 @@ export interface DescribeImageXClientCountByTimeRes {
       /**
        * 该数据类型对应的总上报量。
        * 该数据类型对应的上报量
-       * @example "123"
+       * @example 123
        */
       Count: number;
       /**
@@ -7163,7 +7741,7 @@ export interface DescribeImageXClientCountByTimeRes {
         /**
          * 上报量数据
          * 上报量数据
-         * @example "123"
+         * @example 123
          */
         Count: number;
         /**
@@ -7175,7 +7753,7 @@ export interface DescribeImageXClientCountByTimeRes {
         /**
          * 上报量数据
          * 上报量数据
-         * @example "123"
+         * @example 123
          */
         Value: number;
       }[];
@@ -7319,6 +7897,14 @@ export interface DescribeImageXClientDecodeDurationByTimeBody {
    */
   Isp?: string[];
   /**
+   * 取值为不等于的维度（默认为等于）。支持取值：
+   * - 公共维度：`AppVer`、`SdkVer`、`Country`、`Province`、`Isp`、`Domain`、`ImageType`
+   * - 自定义维度：您可以通过调用 [GetImageXQueryDims](https://www.volcengine.com/docs/508/1213048)接口获取自定义维度指标
+   * 取值为不等于的维度（默认为等于）。支持取值：公共维度（AppVer,SdkVer,Country,Province,Isp,Domain,ImageType），自定义维度（通过"获取自定义维度列表"接口获取）
+   * @example "["SdkVer"]"
+   */
+  Not?: string[];
+  /**
    * 需要匹配的系统类型，不传则匹配非 WEB 端的所有系统。取值如下所示：
    * - `iOS`
    * - `Android`
@@ -7374,7 +7960,7 @@ export interface DescribeImageXClientDecodeDurationByTimeRes {
       /**
        * 该数据类型对应的总上报量。
        * 该数据类型对应的总上报量
-       * @example "123"
+       * @example 123
        */
       Count: number;
       /**
@@ -7386,7 +7972,7 @@ export interface DescribeImageXClientDecodeDurationByTimeRes {
         /**
          * 数据对应的上报量。
          * 数据对应的上报量
-         * @example "123"
+         * @example 123
          */
         Count: number;
         /**
@@ -7399,7 +7985,7 @@ export interface DescribeImageXClientDecodeDurationByTimeRes {
          * 平均耗时，单位毫秒。
          * 平均耗时，单位毫秒
          * @format float
-         * @example "18"
+         * @example 18
          */
         Value: number;
       }[];
@@ -7543,6 +8129,14 @@ export interface DescribeImageXClientDecodeSuccessRateByTimeBody {
    */
   Isp?: string[];
   /**
+   * 取值为不等于的维度（默认为等于）。支持取值：
+   * - 公共维度：`AppVer`、`SdkVer`、`Country`、`Province`、`Isp`、`Domain`、`ImageType`
+   * - 自定义维度：您可以通过调用 [GetImageXQueryDims](https://www.volcengine.com/docs/508/1213048)接口获取自定义维度指标
+   * 取值为不等于的维度（默认为等于）。支持取值：公共维度（AppVer,SdkVer,Country,Province,Isp,Domain,ImageType），自定义维度（通过"获取自定义维度列表"接口获取）
+   * @example "["SdkVer"]"
+   */
+  Not?: string[];
+  /**
    * 需要匹配的系统类型，不传则匹配非 WEB 端的所有系统。取值如下所示：
    * - `iOS`
    * - `Android`
@@ -7598,7 +8192,7 @@ export interface DescribeImageXClientDecodeSuccessRateByTimeRes {
       /**
        * 该数据类型对应的总上报量。
        * 该数据类型对应的总上报量
-       * @example "123"
+       * @example 123
        */
       Count: number;
       /**
@@ -7610,7 +8204,7 @@ export interface DescribeImageXClientDecodeSuccessRateByTimeRes {
         /**
          * 数据对应的上报量。
          * 数据对应的上报量
-         * @example "123"
+         * @example 123
          */
         Count: number;
         /**
@@ -7781,6 +8375,14 @@ export interface DescribeImageXClientDemotionRateByTimeBody {
    */
   Isp?: string[];
   /**
+   * 取值为不等于的维度（默认为等于）。支持取值：
+   * - 公共维度：`AppVer`、`SdkVer`、`Country`、`Province`、`Isp`、`Domain`、`ImageType`
+   * - 自定义维度：您可以通过调用 [GetImageXQueryDims](https://www.volcengine.com/docs/508/1213048)接口获取自定义维度指标
+   * 取值为不等于的维度（默认为等于）。支持取值：公共维度（AppVer,SdkVer,Country,Province,Isp,Domain,ImageType），自定义维度（通过"获取自定义维度列表"接口获取）
+   * @example "["SdkVer"]"
+   */
+  Not?: string[];
+  /**
    * 需要匹配的系统类型，不传则匹配非 WEB 端的所有系统。取值如下所示：
    * - `iOS`
    * - `Android`
@@ -7836,7 +8438,7 @@ export interface DescribeImageXClientDemotionRateByTimeRes {
       /**
        * 该数据类型对应的总上报量。
        * 该数据类型对应的总上报量
-       * @example "123"
+       * @example 123
        */
       Count: number;
       /**
@@ -7848,7 +8450,7 @@ export interface DescribeImageXClientDemotionRateByTimeRes {
         /**
          * 数据对应的上报量。
          * 数据对应的上报量
-         * @example "123"
+         * @example 123
          */
         Count: number;
         /**
@@ -7998,6 +8600,14 @@ export interface DescribeImageXClientErrorCodeAllBody {
    */
   Isp?: string[];
   /**
+   * 取值为不等于的维度（默认为等于）。支持取值：
+   * - 公共维度：`AppVer`、`SdkVer`、`Country`、`Province`、`Isp`、`Domain`、`ImageType`
+   * - 自定义维度：您可以通过调用 [GetImageXQueryDims](https://www.volcengine.com/docs/508/1213048)接口获取自定义维度指标
+   * 取值为不等于的维度（默认为等于）。支持取值：公共维度（AppVer,SdkVer,Country,Province,Isp,Domain,ImageType），自定义维度（通过"获取自定义维度列表"接口获取）
+   * @example "["SdkVer"]"
+   */
+  Not?: string[];
+  /**
    * 需要匹配的系统类型，不传则匹配非 WEB 端的所有系统。取值如下所示：
    * - `iOS`
    * - `Android`
@@ -8085,7 +8695,7 @@ export interface DescribeImageXClientErrorCodeAllRes {
         /**
          * 错误码数量。
          * 错误码数量
-         * @example "2"
+         * @example 2
          */
         Value: number;
       }[];
@@ -8132,7 +8742,7 @@ export interface DescribeImageXClientErrorCodeAllRes {
       /**
        * 错误码数量。
        * 错误码数量
-       * @example "2"
+       * @example 2
        */
       Value: number;
     }[];
@@ -8260,6 +8870,14 @@ export interface DescribeImageXClientErrorCodeByTimeBody {
    */
   Isp?: string[];
   /**
+   * 取值为不等于的维度（默认为等于）。支持取值：
+   * - 公共维度：`AppVer`、`SdkVer`、`Country`、`Province`、`Isp`、`Domain`、`ImageType`
+   * - 自定义维度：您可以通过调用 [GetImageXQueryDims](https://www.volcengine.com/docs/508/1213048)接口获取自定义维度指标
+   * 取值为不等于的维度（默认为等于）。支持取值：公共维度（AppVer,SdkVer,Country,Province,Isp,Domain,ImageType），自定义维度（通过"获取自定义维度列表"接口获取）
+   * @example "["SdkVer"]"
+   */
+  Not?: string[];
+  /**
    * 需要匹配的系统类型，不传则匹配非 WEB 端的所有系统。取值如下所示：
    * - `iOS`
    * - `Android`
@@ -8315,7 +8933,7 @@ export interface DescribeImageXClientErrorCodeByTimeRes {
       /**
        * 错误码总量。
        * 错误码数量
-       * @example "3"
+       * @example 3
        */
       Count: number;
       /**
@@ -8327,7 +8945,7 @@ export interface DescribeImageXClientErrorCodeByTimeRes {
         /**
          * 错误码数量。
          * 错误码数量
-         * @example "3"
+         * @example 3
          */
         Count: number;
         /**
@@ -8339,7 +8957,7 @@ export interface DescribeImageXClientErrorCodeByTimeRes {
         /**
          * 错误码数量。
          * 错误码数量
-         * @example "3"
+         * @example 3
          */
         Value: number;
       }[];
@@ -8482,6 +9100,14 @@ export interface DescribeImageXClientFailureRateBody {
    */
   Isp?: string[];
   /**
+   * 取值为不等于的维度（默认为等于）。支持取值：
+   * - 公共维度：`AppVer`、`SdkVer`、`Country`、`Province`、`Isp`、`Domain`、`ImageType`
+   * - 自定义维度：您可以通过调用 [GetImageXQueryDims](https://www.volcengine.com/docs/508/1213048)接口获取自定义维度指标
+   * 取值为不等于的维度（默认为等于）。支持取值：公共维度（AppVer,SdkVer,Country,Province,Isp,Domain,ImageType），自定义维度（通过"获取自定义维度列表"接口获取）
+   * @example "["SdkVer"]"
+   */
+  Not?: string[];
+  /**
    * 需要匹配的系统类型，不传则匹配非 WEB 端的所有系统。取值如下所示：
    * - `iOS`
    * - `Android`
@@ -8537,7 +9163,7 @@ export interface DescribeImageXClientFailureRateRes {
       /**
        * 该数据类型对应的总上报量。
        * 该数据类型对应的总上报量
-       * @example "123"
+       * @example 123
        */
       Count: number;
       /**
@@ -8549,7 +9175,7 @@ export interface DescribeImageXClientFailureRateRes {
         /**
          * 数据对应的上报量。
          * 数据对应的上报量
-         * @example "123"
+         * @example 123
          */
         Count: number;
         /**
@@ -8706,6 +9332,14 @@ export interface DescribeImageXClientFileSizeBody {
    */
   Isp?: string[];
   /**
+   * 取值为不等于的维度（默认为等于）。支持取值：
+   * - 公共维度：`AppVer`、`SdkVer`、`Country`、`Province`、`Isp`、`Domain`、`ImageType`
+   * - 自定义维度：您可以通过调用 [GetImageXQueryDims](https://www.volcengine.com/docs/508/1213048)接口获取自定义维度指标
+   * 取值为不等于的维度（默认为等于）。支持取值：公共维度（AppVer,SdkVer,Country,Province,Isp,Domain,ImageType），自定义维度（通过"获取自定义维度列表"接口获取）
+   * @example "["SdkVer"]"
+   */
+  Not?: string[];
+  /**
    * 需要匹配的系统类型，不传则匹配非 WEB 端的所有系统。取值如下所示：
    * - `iOS`
    * - `Android`
@@ -8761,7 +9395,7 @@ export interface DescribeImageXClientFileSizeRes {
       /**
        * 该数据类型对应的总上报量。
        * 该数据类型对应的总上报量
-       * @example "3"
+       * @example 3
        */
       Count: number;
       /**
@@ -8773,7 +9407,7 @@ export interface DescribeImageXClientFileSizeRes {
         /**
          * 数据对应的上报量。
          * 数据对应的上报量
-         * @example "23"
+         * @example 23
          */
         Count: number;
         /**
@@ -8786,7 +9420,7 @@ export interface DescribeImageXClientFileSizeRes {
          * 文件大小，单位为 byte。
          * 文件大小，单位byte
          * @format float
-         * @example "3672400"
+         * @example 3672400
          */
         Value: number;
       }[];
@@ -8923,6 +9557,14 @@ export interface DescribeImageXClientLoadDurationAllBody {
    */
   Isp?: string[];
   /**
+   * 取值为不等于的维度（默认为等于）。支持取值：
+   * - 公共维度：`AppVer`、`SdkVer`、`Country`、`Province`、`Isp`、`Domain`、`ImageType`
+   * - 自定义维度：您可以通过调用 [GetImageXQueryDims](https://www.volcengine.com/docs/508/1213048)接口获取自定义维度指标
+   * 取值为不等于的维度（默认为等于）。支持取值：公共维度（AppVer,SdkVer,Country,Province,Isp,Domain,ImageType），自定义维度（通过"获取自定义维度列表"接口获取）
+   * @example "["SdkVer"]"
+   */
+  Not?: string[];
+  /**
    * 需要匹配的系统类型，不传则匹配非 WEB 端的所有系统。取值如下所示：
    * - `iOS`
    * - `Android`
@@ -8994,7 +9636,7 @@ export interface DescribeImageXClientLoadDurationAllRes {
       /**
        * 上报数据量。
        * 上报数据量
-       * @example "12335"
+       * @example 12335
        */
       Count: number;
       /**
@@ -9029,7 +9671,7 @@ export interface DescribeImageXClientLoadDurationAllRes {
        * 加载耗时，单位为毫秒。
        * 加载耗时，单位为毫秒
        * @format float
-       * @example "391"
+       * @example 391
        */
       Value: number;
     }[];
@@ -9166,6 +9808,14 @@ export interface DescribeImageXClientLoadDurationBody {
    */
   Isp?: string[];
   /**
+   * 取值为不等于的维度（默认为等于）。支持取值：
+   * - 公共维度：`AppVer`、`SdkVer`、`Country`、`Province`、`Isp`、`Domain`、`ImageType`
+   * - 自定义维度：您可以通过调用 [GetImageXQueryDims](https://www.volcengine.com/docs/508/1213048)接口获取自定义维度指标
+   * 取值为不等于的维度（默认为等于）。支持取值：公共维度（AppVer,SdkVer,Country,Province,Isp,Domain,ImageType），自定义维度（通过"获取自定义维度列表"接口获取）
+   * @example "["SdkVer"]"
+   */
+  Not?: string[];
+  /**
    * 需要匹配的系统类型，不传则匹配非 WEB 端的所有系统。取值如下所示：
    * - `iOS`
    * - `Android`
@@ -9221,7 +9871,7 @@ export interface DescribeImageXClientLoadDurationRes {
       /**
        * 该数据类型对应的总上报量。
        * 该数据类型对应的总上报量
-       * @example "123"
+       * @example 123
        */
       Count: number;
       /**
@@ -9233,7 +9883,7 @@ export interface DescribeImageXClientLoadDurationRes {
         /**
          * 数据对应的上报量。
          * 数据对应的上报量
-         * @example "123"
+         * @example 123
          */
         Count: number;
         /**
@@ -9246,7 +9896,7 @@ export interface DescribeImageXClientLoadDurationRes {
          * 平均耗时，单位为毫秒。
          * 平均耗时，单位毫秒
          * @format float
-         * @example "5142"
+         * @example 5142
          */
         Value: number;
       }[];
@@ -9390,6 +10040,14 @@ export interface DescribeImageXClientQualityRateByTimeBody {
    */
   Isp?: string[];
   /**
+   * 取值为不等于的维度（默认为等于）。支持取值：
+   * - 公共维度：`AppVer`、`SdkVer`、`Country`、`Province`、`Isp`、`Domain`、`ImageType`
+   * - 自定义维度：您可以通过调用 [GetImageXQueryDims](https://www.volcengine.com/docs/508/1213048)接口获取自定义维度指标
+   * 取值为不等于的维度（默认为等于）。支持取值：公共维度（AppVer,SdkVer,Country,Province,Isp,Domain,ImageType），自定义维度（通过"获取自定义维度列表"接口获取）
+   * @example "["SdkVer"]"
+   */
+  Not?: string[];
+  /**
    * 需要匹配的系统类型，不传则匹配非 WEB 端的所有系统。取值如下所示：
    * - `iOS`
    * - `Android`
@@ -9458,7 +10116,7 @@ export interface DescribeImageXClientQualityRateByTimeRes {
       /**
        * 该数据类型对应的总上报量。
        * 该数据类型对应的总上报量
-       * @example "123"
+       * @example 123
        */
       Count: number;
       /**
@@ -9470,7 +10128,7 @@ export interface DescribeImageXClientQualityRateByTimeRes {
         /**
          * 数据对应的上报量。
          * 数据对应的上报量
-         * @example "123"
+         * @example 123
          */
         Count: number;
         /**
@@ -9627,6 +10285,14 @@ export interface DescribeImageXClientQueueDurationByTimeBody {
    */
   Isp?: string[];
   /**
+   * 取值为不等于的维度（默认为等于）。支持取值：
+   * - 公共维度：`AppVer`、`SdkVer`、`Country`、`Province`、`Isp`、`Domain`、`ImageType`
+   * - 自定义维度：您可以通过调用 [GetImageXQueryDims](https://www.volcengine.com/docs/508/1213048)接口获取自定义维度指标
+   * 取值为不等于的维度（默认为等于）。支持取值：公共维度（AppVer,SdkVer,Country,Province,Isp,Domain,ImageType），自定义维度（通过"获取自定义维度列表"接口获取）
+   * @example "["SdkVer"]"
+   */
+  Not?: string[];
+  /**
    * 需要匹配的系统类型，不传则匹配非 WEB 端的所有系统。取值如下所示：
    * - `iOS`
    * - `Android`
@@ -9682,7 +10348,7 @@ export interface DescribeImageXClientQueueDurationByTimeRes {
       /**
        * 该数据类型对应的总上报量。
        * 该数据类型对应的总上报量
-       * @example "123"
+       * @example 123
        */
       Count: number;
       /**
@@ -9694,7 +10360,7 @@ export interface DescribeImageXClientQueueDurationByTimeRes {
         /**
          * 数据对应的上报量。
          * 数据对应的上报量
-         * @example "123"
+         * @example 123
          */
         Count: number;
         /**
@@ -9707,7 +10373,7 @@ export interface DescribeImageXClientQueueDurationByTimeRes {
          * 平均耗时，单位毫秒。
          * 平均耗时，单位毫秒
          * @format float
-         * @example "70"
+         * @example 70
          */
         Value: number;
       }[];
@@ -9852,6 +10518,14 @@ export interface DescribeImageXClientScoreByTimeBody {
    */
   Isp?: string[];
   /**
+   * 取值为不等于的维度（默认为等于）。支持取值：
+   * - 公共维度：`AppVer`、`SdkVer`、`Country`、`Province`、`Isp`、`Domain`、`ImageType`
+   * - 自定义维度：您可以通过调用 [GetImageXQueryDims](https://www.volcengine.com/docs/508/1213048)接口获取自定义维度指标
+   * 取值为不等于的维度（默认为等于）。支持取值：公共维度（AppVer,SdkVer,Country,Province,Isp,Domain,ImageType），自定义维度（通过"获取自定义维度列表"接口获取）
+   * @example "["SdkVer"]"
+   */
+  Not?: string[];
+  /**
    * 需要匹配的系统类型，不传则匹配非 WEB 端的所有系统。取值如下所示：
    * - `iOS`
    * - `Android`
@@ -9924,7 +10598,7 @@ export interface DescribeImageXClientScoreByTimeRes {
     ScoreData: {
       /**
        * 该数据类型对应的总上报量
-       * @example "123"
+       * @example 123
        */
       Count: number;
       /**
@@ -9935,7 +10609,7 @@ export interface DescribeImageXClientScoreByTimeRes {
       Data: {
         /**
          * 数据对应的上报量
-         * @example "123"
+         * @example 123
          */
         Count: number;
         /**
@@ -9947,7 +10621,7 @@ export interface DescribeImageXClientScoreByTimeRes {
         /**
          * 画质评估在该图片维度的分值
          * 画质打分
-         * @example "89"
+         * @example 89
          */
         Value: number;
       }[];
@@ -10081,6 +10755,14 @@ export interface DescribeImageXClientSdkVerByTimeBody {
    */
   Isp?: string[];
   /**
+   * 取值为不等于的维度（默认为等于）。支持取值：
+   * - 公共维度：`AppVer`、`SdkVer`、`Country`、`Province`、`Isp`、`Domain`、`ImageType`
+   * - 自定义维度：您可以通过调用 [GetImageXQueryDims](https://www.volcengine.com/docs/508/1213048)接口获取自定义维度指标
+   * 取值为不等于的维度（默认为等于）。支持取值：公共维度（AppVer,SdkVer,Country,Province,Isp,Domain,ImageType），自定义维度（通过"获取自定义维度列表"接口获取）
+   * @example "["SdkVer"]"
+   */
+  Not?: string[];
+  /**
    * 需要匹配的系统类型，不传则匹配非 WEB 端的所有系统。取值如下所示：
    * - `iOS`
    * - `Android`
@@ -10136,7 +10818,7 @@ export interface DescribeImageXClientSdkVerByTimeRes {
       /**
        * 该 SDK 版本对应的总上报量。
        * 该 SDK 版本对应的总上报量。
-       * @example "123"
+       * @example 123
        */
       Count: number;
       /**
@@ -10148,7 +10830,7 @@ export interface DescribeImageXClientSdkVerByTimeRes {
         /**
          * 版本数量。
          * 版本数量。
-         * @example "123"
+         * @example 123
          */
         Count: number;
         /**
@@ -10160,7 +10842,7 @@ export interface DescribeImageXClientSdkVerByTimeRes {
         /**
          * 版本数量。
          * 版本数量。
-         * @example "123"
+         * @example 123
          */
         Value: number;
       }[];
@@ -10201,6 +10883,14 @@ export interface DescribeImageXClientTopDemotionURLBody {
    */
   EndTime: string;
   /**
+   * 取值为不等于的维度（默认为等于）。支持取值：
+   * - 公共维度：`AppVer`、`SdkVer`、`Country`、`Province`、`Isp`、`Domain`、`ImageType`
+   * - 自定义维度：您可以通过调用 [GetImageXQueryDims](https://www.volcengine.com/docs/508/1213048)接口获取自定义维度指标
+   * 取值为不等于的维度（默认为等于）。支持取值：公共维度（AppVer,SdkVer,Country,Province,Isp,Domain,ImageType），自定义维度（通过"获取自定义维度列表"接口获取）
+   * @example "["SdkVer"]"
+   */
+  Not?: string[];
+  /**
    * 需要匹配的系统类型，不传则匹配非 WEB 端的所有系统。取值如下所示：
    *
    * - `iOS`
@@ -10222,7 +10912,7 @@ export interface DescribeImageXClientTopDemotionURLBody {
   /**
    * 查询 Top URL 条数，取值范围为[0,1000]，默认值为 1000。
    * 查询 Top URL 条数，取值范围为 [0,1000]，默认 1000。
-   * @example "1000"
+   * @example 1000
    */
   Top?: number;
 }
@@ -10250,7 +10940,7 @@ export interface DescribeImageXClientTopDemotionURLRes {
       /**
        * 上报数据量
        * 上报数据量
-       * @example "96"
+       * @example 96
        */
       Count: number;
       /**
@@ -10277,6 +10967,14 @@ export interface DescribeImageXClientTopFileSizeBody {
    */
   EndTime: string;
   /**
+   * 取值为不等于的维度（默认为等于）。支持取值：
+   * - 公共维度：`AppVer`、`SdkVer`、`Country`、`Province`、`Isp`、`Domain`、`ImageType`
+   * - 自定义维度：您可以通过调用 [GetImageXQueryDims](https://www.volcengine.com/docs/508/1213048)接口获取自定义维度指标
+   * 取值为不等于的维度（默认为等于）。支持取值：公共维度（AppVer,SdkVer,Country,Province,Isp,Domain,ImageType），自定义维度（通过"获取自定义维度列表"接口获取）
+   * @example "["SdkVer"]"
+   */
+  Not?: string[];
+  /**
    * 需要匹配的系统类型，不传则匹配非 WEB 端的所有系统。取值如下所示：
    *
    * - `iOS`
@@ -10299,7 +10997,7 @@ export interface DescribeImageXClientTopFileSizeBody {
    * 查询 Top URL 条数，取值范围为[0,1000]，默认值为 1000。
    *
    * 查询 Top URL 条数，取值范围为[0,1000]，默认值为 1000。
-   * @example "1000"
+   * @example 1000
    */
   Top?: number;
 }
@@ -10327,7 +11025,7 @@ export interface DescribeImageXClientTopFileSizeRes {
       /**
        * 上报数据量
        * 上报数据量
-       * @example "1"
+       * @example 1
        */
       Count: number;
       /**
@@ -10339,7 +11037,7 @@ export interface DescribeImageXClientTopFileSizeRes {
       /**
        * 文件大小，单位为 byte
        * 文件大小，单位byte
-       * @example "129984549"
+       * @example 129984549
        */
       Value: number;
     }[];
@@ -10360,6 +11058,14 @@ export interface DescribeImageXClientTopQualityURLBody {
    * @example "2023-01-01T00:00:00+08:00"
    */
   EndTime: string;
+  /**
+   * 取值为不等于的维度（默认为等于）。支持取值：
+   * - 公共维度：`AppVer`、`SdkVer`、`Country`、`Province`、`Isp`、`Domain`、`ImageType`
+   * - 自定义维度：您可以通过调用 [GetImageXQueryDims](https://www.volcengine.com/docs/508/1213048)接口获取自定义维度指标
+   * 取值为不等于的维度（默认为等于）。支持取值：公共维度（AppVer,SdkVer,Country,Province,Isp,Domain,ImageType），自定义维度（通过"获取自定义维度列表"接口获取）
+   * @example "["SdkVer"]"
+   */
+  Not?: string[];
   /**
    * 需要匹配的系统类型，不传则匹配非 WEB 端的所有系统。取值如下所示：
    *
@@ -10396,7 +11102,7 @@ export interface DescribeImageXClientTopQualityURLBody {
   /**
    * 查询 Top URL 条数，取值范围为 [0,1000]，默认值为 1000。
    * 查询 Top URL 条数，取值范围为 [0,1000]，默认 1000。
-   * @example "1000"
+   * @example 1000
    */
   Top?: number;
 }
@@ -10424,7 +11130,7 @@ export interface DescribeImageXClientTopQualityURLRes {
       /**
        * 上报数据量
        * 上报数据量
-       * @example "98"
+       * @example 98
        */
       Count: number;
       /**
@@ -10509,7 +11215,7 @@ export interface DescribeImageXCompressUsageRes {
         /**
          * 压缩前大小或压缩后大小，单位为 byte。
          * 压缩前大小，单位Byte
-         * @example "234"
+         * @example 234
          */
         Value: number;
       }[];
@@ -10527,7 +11233,7 @@ export interface DescribeImageXCompressUsageRes {
         /**
          * 压缩前大小或压缩后大小，单位为 byte。
          * 压缩后大小，单位Byte
-         * @example "123"
+         * @example 123
          */
         Value: number;
       }[];
@@ -10537,6 +11243,81 @@ export interface DescribeImageXCompressUsageRes {
        * @example "s1"
        */
       ServiceId?: string;
+    }[];
+  };
+}
+
+export interface DescribeImageXCubeUsageQuery {
+  /**
+   * 获取数据结束时间点。日期格式按照 ISO8601 表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如`2019-06-02T00:00:00+08:00`。
+   * @example "2019-06-02T00:00:00+08:00"
+   */
+  EndTime: string;
+  /**
+   * 查询数据的时间粒度。单位为秒。缺省时查询 `StartTime` 和 `EndTime` 时间段全部数据，此时单次查询最大时间跨度为 93 天。取值如下所示：
+   *
+   * - `300`：单次查询最大时间跨度为 31 天
+   * - `600`：单次查询最大时间跨度为 31 天
+   * - `1200`：单次查询最大时间跨度为 31 天
+   * - `1800`：单次查询最大时间跨度为 31 天
+   * - `3600`：单次查询最大时间跨度为 93 天
+   * - `86400`：单次查询最大时间跨度为 93 天
+   * - `604800`：单次查询最大时间跨度为 93 天
+   * @example "300"
+   */
+  Interval?: string;
+  /**
+   * 服务 ID。支持查询多个服务，传入多个时用英文逗号“,”分割，缺省情况下表示查询所有服务。您可以在 veImageX 控制台的[服务管理](https://console.volcengine.com/imagex/service_manage/)模块或者调用 [GetAllImageServices](https://www.volcengine.com/docs/508/9360) 接口获取服务 ID。
+   * @example "s1,s2"
+   */
+  ServiceIds?: string;
+  /**
+   * 获取数据起始时间点。日期格式按照 ISO8601 表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如`2019-06-02T00:00:00+08:00`。
+   * :::tip
+   * 由于仅支持查询近一年历史数据，则若此刻时间为`2011-11-21T16:14:00+08:00`，那么您可输入最早的开始时间为`2010-11-21T00:00:00+08:00`。
+   * :::
+   * @example "2019-06-02T00:00:00+08:00"
+   */
+  StartTime: string;
+}
+
+export interface DescribeImageXCubeUsageRes {
+  ResponseMetadata: {
+    /** 请求的接口名，属于请求的公共参数。 */
+    Action: string;
+    /** 请求的Region，例如：cn-north-1 */
+    Region: string;
+    /** RequestID为每次API请求的唯一标识。 */
+    RequestId: string;
+    /** 请求的服务，属于请求的公共参数。 */
+    Service: string;
+    /** 请求的版本号，属于请求的公共参数。 */
+    Version: string;
+  };
+  Result: {
+    /**
+     * 创意魔方用量
+     * 创意魔方数据。
+     * @example "-"
+     */
+    CubeData: {
+      /**
+       * 时序数据
+       * @example "-"
+       */
+      Data: {
+        /**
+         * 统计时间点。日期格式按照 ISO8601 表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。
+         * 统计时间点。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00。
+         * @example "2023-01-01T00:00:00+08:00"
+         */
+        TimeStamp: string;
+        /**
+         * 创意魔方请求次数
+         * @example 123
+         */
+        Value: number;
+      }[];
     }[];
   };
 }
@@ -10585,7 +11366,7 @@ export interface DescribeImageXDomainBandwidthDataQuery {
    * - `3600`：单次查询最大时间跨度为 93 天
    * - `86400`：单次查询最大时间跨度为 93 天
    * - `604800`：单次查询最大时间跨度为 93 天
-   * @example "300"
+   * @example 300
    */
   Interval?: number;
   /**
@@ -11172,7 +11953,7 @@ export interface DescribeImageXEdgeRequestRes {
         TimeStamp: string;
         /**
          * 请求次数，单位为次。
-         * @example "123"
+         * @example 123
          */
         Value: number;
       }[];
@@ -11318,7 +12099,7 @@ export interface DescribeImageXEdgeRequestTrafficRes {
         /**
          * 流量，单位为 byte。
          * @format float
-         * @example "123"
+         * @example 123
          */
         Value: number;
       }[];
@@ -11424,6 +12205,14 @@ export interface DescribeImageXExceedCountByTimeBody {
    */
   ImageType?: string[];
   /**
+   * 取值为不等于的维度（默认为等于）。支持取值：
+   * - 公共维度：`AppVer`、`SdkVer`、`ImageType`
+   * - 自定义维度：您可以通过调用 [GetImageXQueryDims](https://www.volcengine.com/docs/508/1213048)接口获取自定义维度指标
+   * 取值为不等于的维度（默认为等于）。支持取值：公共维度（AppVer,SdkVer,ImageType），自定义维度（通过"获取自定义维度列表"接口获取）
+   * @example "["SdkVer"]"
+   */
+  Not?: string[];
+  /**
    * 需要匹配的系统类型，不传则匹配非 WEB 端的所有系统。取值如下所示：
    * - `iOS`
    * - `Android`
@@ -11472,7 +12261,7 @@ export interface DescribeImageXExceedCountByTimeRes {
       /**
        * 该数据类型对应的总上报量。
        * 该数据类型对应的上报量
-       * @example "123"
+       * @example 123
        */
       Count: number;
       /**
@@ -11484,7 +12273,7 @@ export interface DescribeImageXExceedCountByTimeRes {
         /**
          * 上报量数据
          * 上报量数据
-         * @example "123"
+         * @example 123
          */
         Count: number;
         /**
@@ -11496,7 +12285,7 @@ export interface DescribeImageXExceedCountByTimeRes {
         /**
          * 上报量数据
          * 上报量数据
-         * @example "123"
+         * @example 123
          */
         Value: number;
       }[];
@@ -11602,6 +12391,14 @@ export interface DescribeImageXExceedFileSizeBody {
    */
   ImageType?: string[];
   /**
+   * 取值为不等于的维度（默认为等于）。支持取值：
+   * - 公共维度：`AppVer`、`SdkVer`、`ImageType`
+   * - 自定义维度：您可以通过调用 [GetImageXQueryDims](https://www.volcengine.com/docs/508/1213048)接口获取自定义维度指标
+   * 取值为不等于的维度（默认为等于）。支持取值：公共维度（AppVer,SdkVer,ImageType），自定义维度（通过"获取自定义维度列表"接口获取）
+   * @example "["SdkVer"]"
+   */
+  Not?: string[];
+  /**
    * 需要匹配的系统类型，不传则匹配非 WEB 端的所有系统。取值如下所示：
    * - `iOS`
    * - `Android`
@@ -11650,7 +12447,7 @@ export interface DescribeImageXExceedFileSizeRes {
       /**
        * 该数据类型对应的总上报量。
        * 该数据类型对应的总上报量
-       * @example "3"
+       * @example 3
        */
       Count: number;
       /**
@@ -11662,7 +12459,7 @@ export interface DescribeImageXExceedFileSizeRes {
         /**
          * 数据对应的上报量。
          * 数据对应的上报量
-         * @example "23"
+         * @example 23
          */
         Count: number;
         /**
@@ -11675,7 +12472,7 @@ export interface DescribeImageXExceedFileSizeRes {
          * 文件大小，单位为 byte。
          * 文件大小，单位byte
          * @format float
-         * @example "3672400"
+         * @example 3672400
          */
         Value: number;
       }[];
@@ -11761,6 +12558,14 @@ export interface DescribeImageXExceedResolutionRatioAllBody {
    */
   ImageType?: string[];
   /**
+   * 取值为不等于的维度（默认为等于）。支持取值：
+   * - 公共维度：`AppVer`、`SdkVer`、`ImageType`
+   * - 自定义维度：您可以通过调用 [GetImageXQueryDims](https://www.volcengine.com/docs/508/1213048)接口获取自定义维度指标
+   * 取值为不等于的维度（默认为等于）。支持取值：公共维度（AppVer,SdkVer,ImageType），自定义维度（通过"获取自定义维度列表"接口获取）
+   * @example "["SdkVer"]"
+   */
+  Not?: string[];
+  /**
    * 需要匹配的系统类型，不传则匹配非 WEB 端的所有系统。取值如下所示：
    * - `iOS`
    * - `Android`
@@ -11829,14 +12634,14 @@ export interface DescribeImageXExceedResolutionRatioAllRes {
       /**
        * 大图样本量
        * @format int64
-       * @example "100"
+       * @example 100
        */
       Count: number;
       /**
        * 高比，为图片高/view 高的整数值。
        * 高比，即为图片高/view高取整
        * @format int32
-       * @example "4"
+       * @example 4
        */
       HeightRatio: number;
       /**
@@ -11849,7 +12654,7 @@ export interface DescribeImageXExceedResolutionRatioAllRes {
        * 宽比，为图片宽/view 宽的整数值。
        * 宽比，即为图片宽/view宽取整
        * @format int32
-       * @example "5"
+       * @example 5
        */
       WidthRatio: number;
     }[];
@@ -11937,6 +12742,14 @@ export interface DescribeImageXHeifEncodeDurationByTimeBody {
    */
   ImageType?: string[];
   /**
+   * 取值为不等于的维度（默认为等于）。支持取值：
+   * - 公共维度：`AppVer`、`SdkVer`、`ImageType`、`ImageResolution`
+   * - 自定义维度：您可以通过调用 [GetImageXQueryDims](https://www.volcengine.com/docs/508/1213048)接口获取自定义维度指标
+   * 取值为不等于的维度（默认为等于）。支持取值：公共维度（AppVer,SdkVer,ImageType,ImageResolution），自定义维度（通过"获取自定义维度列表"接口获取）
+   * @example "["SdkVer","data_type"]"
+   */
+  Not?: string[];
+  /**
    * 需要匹配的系统类型，不传则匹配所有系统。取值如下所示：
    * - `iOS`
    * - `Android`
@@ -11983,7 +12796,7 @@ export interface DescribeImageXHeifEncodeDurationByTimeRes {
       /**
        * 数据上报总量。
        * 数据上报量
-       * @example "333"
+       * @example 333
        */
       Count: number;
       /**
@@ -11995,7 +12808,7 @@ export interface DescribeImageXHeifEncodeDurationByTimeRes {
         /**
          * 数据上报量。
          * 数据上报量
-         * @example "333"
+         * @example 333
          */
         Count: number;
         /**
@@ -12008,7 +12821,7 @@ export interface DescribeImageXHeifEncodeDurationByTimeRes {
          * 平均耗时，单位为毫秒。
          * 平均耗时，单位毫秒
          * @format float
-         * @example "333"
+         * @example 333
          */
         Value: number;
       }[];
@@ -12099,6 +12912,14 @@ export interface DescribeImageXHeifEncodeErrorCodeByTimeBody {
    */
   ImageType?: string[];
   /**
+   * 取值为不等于的维度（默认为等于）。支持取值：
+   * - 公共维度：`AppVer`、`SdkVer`、`ImageType`、`ImageResolution`
+   * - 自定义维度：您可以通过调用 [GetImageXQueryDims](https://www.volcengine.com/docs/508/1213048)接口获取自定义维度指标
+   * 取值为不等于的维度（默认为等于）。支持取值：公共维度（AppVer,SdkVer,ImageType,ImageResolution），自定义维度（通过"获取自定义维度列表"接口获取）
+   * @example "["SdkVer"]"
+   */
+  Not?: string[];
+  /**
    * 需要匹配的系统类型，不传则匹配所有系统。取值如下所示：
    * - `iOS`
    * - `Android`
@@ -12145,7 +12966,7 @@ export interface DescribeImageXHeifEncodeErrorCodeByTimeRes {
       /**
        * 错误码总量。
        * 错误码总量。
-       * @example "333"
+       * @example 333
        */
       Count: number;
       /**
@@ -12157,7 +12978,7 @@ export interface DescribeImageXHeifEncodeErrorCodeByTimeRes {
         /**
          * 错误码数量。
          * 错误码数量。
-         * @example "333"
+         * @example 333
          */
         Count: number;
         /**
@@ -12169,7 +12990,7 @@ export interface DescribeImageXHeifEncodeErrorCodeByTimeRes {
         /**
          * 错误码数量。
          * 错误码数量。
-         * @example "333"
+         * @example 333
          */
         Value: number;
       }[];
@@ -12263,6 +13084,14 @@ export interface DescribeImageXHeifEncodeFileInSizeByTimeBody {
    */
   ImageType?: string[];
   /**
+   * 取值为不等于的维度（默认为等于）。支持取值：
+   * - 公共维度：`AppVer`、`SdkVer`、`ImageType`、`ImageResolution`
+   * - 自定义维度：您可以通过调用 [GetImageXQueryDims](https://www.volcengine.com/docs/508/1213048)接口获取自定义维度指标
+   * 取值为不等于的维度（默认为等于）。支持取值：公共维度（AppVer,SdkVer,ImageType,ImageResolution），自定义维度（通过"获取自定义维度列表"接口获取）
+   * @example "["SdkVer","data_type"]"
+   */
+  Not?: string[];
+  /**
    * 需要匹配的系统类型，不传则匹配所有系统。取值如下所示：
    * - `iOS`
    * - `Android`
@@ -12309,7 +13138,7 @@ export interface DescribeImageXHeifEncodeFileInSizeByTimeRes {
       /**
        * 数据上报总量。
        * 数据上报量
-       * @example "333"
+       * @example 333
        */
       Count: number;
       /**
@@ -12321,7 +13150,7 @@ export interface DescribeImageXHeifEncodeFileInSizeByTimeRes {
         /**
          * 数据上报量。
          * 数据上报量
-         * @example "333"
+         * @example 333
          */
         Count: number;
         /**
@@ -12334,7 +13163,7 @@ export interface DescribeImageXHeifEncodeFileInSizeByTimeRes {
          * 文件大小，单位为 byte。
          * 文件大小，单位byte
          * @format float
-         * @example "333"
+         * @example 333
          */
         Value: number;
       }[];
@@ -12434,6 +13263,14 @@ export interface DescribeImageXHeifEncodeFileOutSizeByTimeBody {
    */
   ImageType?: string[];
   /**
+   * 取值为不等于的维度（默认为等于）。支持取值：
+   * - 公共维度：`AppVer`、`SdkVer`、`ImageType`、`ImageResolution`
+   * - 自定义维度：您可以通过调用 [GetImageXQueryDims](https://www.volcengine.com/docs/508/1213048)接口获取自定义维度指标
+   * 取值为不等于的维度（默认为等于）。支持取值：公共维度（AppVer,SdkVer,ImageType,ImageResolution），自定义维度（通过"获取自定义维度列表"接口获取）
+   * @example "["SdkVer","data_type"]"
+   */
+  Not?: string[];
+  /**
    * 需要匹配的系统类型，不传则匹配所有系统。取值如下所示：
    * - `iOS`
    * - `Android`
@@ -12480,7 +13317,7 @@ export interface DescribeImageXHeifEncodeFileOutSizeByTimeRes {
       /**
        * 数据上报总量。
        * 数据上报量
-       * @example "333"
+       * @example 333
        */
       Count: number;
       /**
@@ -12492,7 +13329,7 @@ export interface DescribeImageXHeifEncodeFileOutSizeByTimeRes {
         /**
          * 数据上报量。
          * 数据上报量
-         * @example "333"
+         * @example 333
          */
         Count: number;
         /**
@@ -12505,7 +13342,7 @@ export interface DescribeImageXHeifEncodeFileOutSizeByTimeRes {
          * 文件大小，单位为 byte。
          * 文件大小，单位byte
          * @format float
-         * @example "333"
+         * @example 333
          */
         Value: number;
       }[];
@@ -12604,6 +13441,14 @@ export interface DescribeImageXHeifEncodeSuccessCountByTimeBody {
    */
   ImageType?: string[];
   /**
+   * 取值为不等于的维度（默认为等于）。支持取值：
+   * - 公共维度：`AppVer`、`SdkVer`、`ImageType`、`ImageResolution`
+   * - 自定义维度：您可以通过调用 [GetImageXQueryDims](https://www.volcengine.com/docs/508/1213048)接口获取自定义维度指标
+   * 取值为不等于的维度（默认为等于）。支持取值：公共维度（AppVer,SdkVer,ImageType,ImageResolution），自定义维度（通过"获取自定义维度列表"接口获取）
+   * @example "["SdkVer","data_type"]"
+   */
+  Not?: string[];
+  /**
    * 需要匹配的系统类型，不传则匹配所有系统。取值如下所示：
    * - `iOS`
    * - `Android`
@@ -12650,7 +13495,7 @@ export interface DescribeImageXHeifEncodeSuccessCountByTimeRes {
       /**
        * 编码成功次数。
        * 编码成功次数
-       * @example "333"
+       * @example 333
        */
       Count: number;
       /**
@@ -12662,7 +13507,7 @@ export interface DescribeImageXHeifEncodeSuccessCountByTimeRes {
         /**
          * 编码成功次数。
          * 编码成功次数
-         * @example "333"
+         * @example 333
          */
         Count: number;
         /**
@@ -12816,7 +13661,7 @@ export interface DescribeImageXHeifEncodeSuccessRateByTimeRes {
       /**
        * 数据上报总量。
        * 数据上报次数。
-       * @example "333"
+       * @example 333
        */
       Count: number;
       /**
@@ -12828,7 +13673,7 @@ export interface DescribeImageXHeifEncodeSuccessRateByTimeRes {
         /**
          * 数据上报量。
          * 数据上报次数。
-         * @example "333"
+         * @example 333
          */
         Count: number;
         /**
@@ -13230,7 +14075,7 @@ export interface DescribeImageXMirrorRequestHttpCodeByTimeRes {
         /**
          * 请求次数，单位为次。
          * 请求次数
-         * @example "123"
+         * @example 123
          */
         Value: number;
       }[];
@@ -13305,7 +14150,7 @@ export interface DescribeImageXMirrorRequestHttpCodeOverviewRes {
       /**
        * 总请求次数，单位为次。
        * 总请求次数
-       * @example "123"
+       * @example 123
        */
       Count: number;
       /**
@@ -13321,7 +14166,7 @@ export interface DescribeImageXMirrorRequestHttpCodeOverviewRes {
         /**
          * Http 状态码对应的请求次数，单位为次。
          * http状态码对应的请求次数
-         * @example "123"
+         * @example 123
          */
         Value: number;
       }[];
@@ -13419,7 +14264,7 @@ export interface DescribeImageXMirrorRequestTrafficRes {
       /**
        * 流量，单位为 byte。
        * 流量，单位byte
-       * @example "123"
+       * @example 123
        */
       Value: number;
     }[];
@@ -13492,7 +14337,7 @@ export interface DescribeImageXMultiCompressUsageRes {
         /**
          * 压缩量，单位为 Byte。
          * 压缩量，单位Byte。
-         * @example "1234"
+         * @example 1234
          */
         Value: number;
       }[];
@@ -13590,7 +14435,7 @@ export interface DescribeImageXRequestCntUsageRes {
         /**
          * 请求次
          * 请求次
-         * @example "123"
+         * @example 123
          */
         Value: number;
       }[];
@@ -13670,7 +14515,7 @@ export interface DescribeImageXScreenshotUsageRes {
         TimeStamp: string;
         /**
          * 截帧使用次数
-         * @example "123"
+         * @example 123
          */
         Value: number;
       }[];
@@ -13771,6 +14616,14 @@ export interface DescribeImageXSensibleCacheHitRateByTimeBody {
    */
   ImageType?: string[];
   /**
+   * 取值为不等于的维度（默认为等于）。支持取值：
+   * - 公共维度：`AppVer`、`SdkVer`、`ImageType`
+   * - 自定义维度：您可以通过调用 [GetImageXQueryDims](https://www.volcengine.com/docs/508/1213048)接口获取自定义维度指标
+   * 取值为不等于的维度（默认为等于）。支持取值：公共维度（AppVer,SdkVer,ImageType），自定义维度（通过"获取自定义维度列表"接口获取）
+   * @example "["SdkVer"]"
+   */
+  Not?: string[];
+  /**
    * 需要匹配的系统类型，缺省情况下匹配非 WEB 端的所有系统。取值如下所示：
    * - `iOS`
    * - `Android`
@@ -13830,7 +14683,7 @@ export interface DescribeImageXSensibleCacheHitRateByTimeRes {
       /**
        * 该数据类型对应的总上报量。
        * 该数据类型对应的总上报量
-       * @example "3"
+       * @example 3
        */
       Count: number;
       /**
@@ -13842,7 +14695,7 @@ export interface DescribeImageXSensibleCacheHitRateByTimeRes {
         /**
          * 数据对应的上报量。
          * 数据对应的上报量
-         * @example "3"
+         * @example 3
          */
         Count: number;
         /**
@@ -13962,6 +14815,14 @@ export interface DescribeImageXSensibleCountByTimeBody {
    */
   ImageType?: string[];
   /**
+   * 取值为不等于的维度（默认为等于）。支持取值：
+   * - 公共维度：`AppVer`、`SdkVer`、`ImageType`
+   * - 自定义维度：您可以通过调用 [GetImageXQueryDims](https://www.volcengine.com/docs/508/1213048)接口获取自定义维度指标
+   * 取值为不等于的维度（默认为等于）。支持取值：公共维度（AppVer,SdkVer,ImageType），自定义维度（通过"获取自定义维度列表"接口获取）
+   * @example "["SdkVer"]"
+   */
+  Not?: string[];
+  /**
    * 需要匹配的系统类型，缺省情况下匹配非 WEB 端的所有系统。取值如下所示：
    * - `iOS`
    * - `Android`
@@ -14011,7 +14872,7 @@ export interface DescribeImageXSensibleCountByTimeRes {
       /**
        * 该数据类型对应的总上报量。
        * 该数据类型对应的总上报量
-       * @example "2"
+       * @example 2
        */
       Count: number;
       /**
@@ -14023,7 +14884,7 @@ export interface DescribeImageXSensibleCountByTimeRes {
         /**
          * 上报量数据。
          * 上报量数据
-         * @example "2"
+         * @example 2
          */
         Count: number;
         /**
@@ -14035,7 +14896,7 @@ export interface DescribeImageXSensibleCountByTimeRes {
         /**
          * 上报量数据，与`Count`数值相同。
          * 上报量数据，与Count数值相同。
-         * @example "2"
+         * @example 2
          */
         Value: number;
       }[];
@@ -14121,6 +14982,14 @@ export interface DescribeImageXSensibleTopRamURLBody {
    */
   ImageType?: string[];
   /**
+   * 取值为不等于的维度（默认为等于）。支持取值：
+   * - 公共维度：`AppVer`、`SdkVer`、`ImageType`
+   * - 自定义维度：您可以通过调用 [GetImageXQueryDims](https://www.volcengine.com/docs/508/1213048)接口获取自定义维度指标
+   * 取值为不等于的维度（默认为等于）。支持取值：公共维度（AppVer,SdkVer,ImageType），自定义维度（通过"获取自定义维度列表"接口获取）
+   * @example "["SdkVer"]"
+   */
+  Not?: string[];
+  /**
    * 需要匹配的系统类型，缺省情况下匹配非 WEB 端的所有系统。取值如下所示：
    *
    * - `iOS`
@@ -14140,7 +15009,7 @@ export interface DescribeImageXSensibleTopRamURLBody {
    * 支持以下取值：
    * 1：按上报次数排序；
    * 2：按内存大小排序。
-   * @example "1"
+   * @example 1
    */
   OrderByIdx: number;
   /**
@@ -14158,7 +15027,7 @@ export interface DescribeImageXSensibleTopRamURLBody {
   /**
    * 查询 Top URL 条数，取值范围为(0,1000]。缺省情况下默认为 1000。
    * 查询 Top URL 条数，取值范围为(0,1000]。缺省情况下默认为 1000。
-   * @example "1000"
+   * @example 1000
    */
   Top?: number;
 }
@@ -14198,13 +15067,13 @@ export interface DescribeImageXSensibleTopRamURLRes {
       /**
        * 上报次数
        * 上报次数
-       * @example "128"
+       * @example 128
        */
       Count: number;
       /**
        * 图片内存大小
        * 图片内存大小
-       * @example "9860"
+       * @example 9860
        */
       RamSize: number;
       /**
@@ -14289,6 +15158,14 @@ export interface DescribeImageXSensibleTopResolutionURLBody {
    */
   ImageType?: string[];
   /**
+   * 取值为不等于的维度（默认为等于）。支持取值：
+   * - 公共维度：`AppVer`、`SdkVer`、`ImageType`
+   * - 自定义维度：您可以通过调用 [GetImageXQueryDims](https://www.volcengine.com/docs/508/1213048)接口获取自定义维度指标
+   * 取值为不等于的维度（默认为等于）。支持取值：公共维度（AppVer,SdkVer,ImageType），自定义维度（通过"获取自定义维度列表"接口获取）
+   * @example "["SdkVer"]"
+   */
+  Not?: string[];
+  /**
    * 需要匹配的系统类型，缺省情况下匹配非 WEB 端的所有系统。取值如下所示：
    *
    * - `iOS`
@@ -14310,7 +15187,7 @@ export interface DescribeImageXSensibleTopResolutionURLBody {
    * 1：按上报次数排序；
    * 2：按图片分辨率排序；
    * 3：按 view 分辨率排序。
-   * @example "1"
+   * @example 1
    */
   OrderByIdx: number;
   /**
@@ -14328,7 +15205,7 @@ export interface DescribeImageXSensibleTopResolutionURLBody {
   /**
    * 查询 Top URL 条数，取值范围为(0,1000]。缺省情况下默认为 1000。
    * 查询 Top URL 条数，取值范围为(0,1000]。缺省情况下默认为 1000。
-   * @example "1000"
+   * @example 1000
    */
   Top?: number;
 }
@@ -14368,19 +15245,19 @@ export interface DescribeImageXSensibleTopResolutionURLRes {
       /**
        * 上报次数
        * 上报次数
-       * @example "124"
+       * @example 124
        */
       Count: number;
       /**
        * 图片高
        * 图片高
-       * @example "833"
+       * @example 833
        */
       ImageHeight: number;
       /**
        * 图片宽
        * 图片宽
-       * @example "481"
+       * @example 481
        */
       ImageWidth: number;
       /**
@@ -14392,13 +15269,13 @@ export interface DescribeImageXSensibleTopResolutionURLRes {
       /**
        * 图片展示背景 view 高
        * 图片展示背景 view 高。
-       * @example "800"
+       * @example 800
        */
       ViewHeight: number;
       /**
        * 图片展示背景 view 宽
        * 图片展示背景 view 宽。
-       * @example "500"
+       * @example 500
        */
       ViewWidth: number;
     }[];
@@ -14477,6 +15354,14 @@ export interface DescribeImageXSensibleTopSizeURLBody {
    */
   ImageType?: string[];
   /**
+   * 取值为不等于的维度（默认为等于）。支持取值：
+   * - 公共维度：`AppVer`、`SdkVer`、`ImageType`
+   * - 自定义维度：您可以通过调用 [GetImageXQueryDims](https://www.volcengine.com/docs/508/1213048)接口获取自定义维度指标
+   * 取值为不等于的维度（默认为等于）。支持取值：公共维度（AppVer,SdkVer,ImageType），自定义维度（通过"获取自定义维度列表"接口获取）
+   * @example "["SdkVer"]"
+   */
+  Not?: string[];
+  /**
    * 需要匹配的系统类型，缺省情况下则匹配非 WEB 端的所有系统。取值如下所示：
    *
    * - `iOS`
@@ -14496,7 +15381,7 @@ export interface DescribeImageXSensibleTopSizeURLBody {
    * 支持以下取值：
    * 1：按上报次数排序；
    * 2：按文件体积排序。
-   * @example "1"
+   * @example 1
    */
   OrderByIdx: number;
   /**
@@ -14514,7 +15399,7 @@ export interface DescribeImageXSensibleTopSizeURLBody {
   /**
    * 查询 Top URL 条数，取值范围为(0,1000]。缺省情况下默认为 1000。
    * 查询 Top URL 条数，取值范围为(0,1000]。缺省情况下默认为 1000。
-   * @example "1000"
+   * @example 1000
    */
   Top?: number;
 }
@@ -14554,7 +15439,7 @@ export interface DescribeImageXSensibleTopSizeURLRes {
       /**
        * 上报次数
        * 上报次数
-       * @example "123"
+       * @example 123
        */
       Count: number;
       /**
@@ -14566,7 +15451,7 @@ export interface DescribeImageXSensibleTopSizeURLRes {
       /**
        * 文件体积
        * 文件体积
-       * @example "6590"
+       * @example 6590
        */
       Value: number;
     }[];
@@ -14645,6 +15530,14 @@ export interface DescribeImageXSensibleTopUnknownURLBody {
    */
   ImageType?: string[];
   /**
+   * 取值为不等于的维度（默认为等于）。支持取值：
+   * - 公共维度：`AppVer`、`SdkVer`、`ImageType`
+   * - 自定义维度：您可以通过调用 [GetImageXQueryDims](https://www.volcengine.com/docs/508/1213048)接口获取自定义维度指标
+   * 取值为不等于的维度（默认为等于）。支持取值：公共维度（AppVer,SdkVer,ImageType），自定义维度（通过"获取自定义维度列表"接口获取）
+   * @example "["SdkVer"]"
+   */
+  Not?: string[];
+  /**
    * 需要匹配的系统类型，缺省情况下匹配非 WEB 端的所有系统。取值如下所示：
    *
    * - `iOS`
@@ -14670,7 +15563,7 @@ export interface DescribeImageXSensibleTopUnknownURLBody {
    * 3：按文件大小排序
    * 4：按图片分辨率排序
    * 5：按 view 分辨率排序
-   * @example "2"
+   * @example 2
    */
   OrderByIdx: number;
   /**
@@ -14688,7 +15581,7 @@ export interface DescribeImageXSensibleTopUnknownURLBody {
   /**
    * 查询 Top URL 条数，取值范围为(0,1000]。默认值为 1000。
    * 查询 Top URL 条数，取值范围为(0,1000]。缺省情况下默认为 1000。
-   * @example "1000"
+   * @example 1000
    */
   Top?: number;
 }
@@ -14724,27 +15617,27 @@ export interface DescribeImageXSensibleTopUnknownURLRes {
       BizTag?: string;
       /**
        * 上报次数
-       * @example "73"
+       * @example 73
        */
       Count?: number;
       /**
        * 文件大小
-       * @example "60"
+       * @example 60
        */
       FileSize?: number;
       /**
        * 图片高
-       * @example "591"
+       * @example 591
        */
       ImageHeight?: number;
       /**
        * 图片宽
-       * @example "400"
+       * @example 400
        */
       ImageWidth?: number;
       /**
        * 图片内存大小
-       * @example "90"
+       * @example 90
        */
       RamSize?: number;
       /**
@@ -14754,12 +15647,12 @@ export interface DescribeImageXSensibleTopUnknownURLRes {
       URL?: string;
       /**
        * 展示 view 高
-       * @example "700"
+       * @example 700
        */
       ViewHeight?: number;
       /**
        * 展示 view 宽
-       * @example "500"
+       * @example 500
        */
       ViewWidth?: number;
     }[];
@@ -14835,7 +15728,7 @@ export interface DescribeImageXServerQPSUsageRes {
         TimeStamp: string;
         /**
          * QPS 用量的值。单位为 "次/秒"，表示每秒处理的请求数量。
-         * @example "12"
+         * @example 12
          */
         Value: number;
       }[];
@@ -14894,7 +15787,7 @@ export interface DescribeImageXServiceQualityRes {
        * 网络平均耗时，单位为 ms。
        * 网络平均耗时，单位为 ms。
        * @format float
-       * @example "356"
+       * @example 356
        */
       AvgDuration: number;
       /**
@@ -14910,7 +15803,7 @@ export interface DescribeImageXServiceQualityRes {
       /**
        * 下行总上报数据量。
        * 下行总上报数据量。
-       * @example "90281"
+       * @example 90281
        */
       TotalCount: number;
     };
@@ -14924,21 +15817,21 @@ export interface DescribeImageXServiceQualityRes {
        * 平均解码耗时，单位为 ms。
        * 平均解码耗时，单位为 ms。
        * @format float
-       * @example "11"
+       * @example 11
        */
       AvgDecodeDuration: number;
       /**
        * 平均加载耗时，单位为 ms。
        * 平均加载耗时，单位为 ms。
        * @format float
-       * @example "752"
+       * @example 752
        */
       AvgLoadDuration: number;
       /**
        * 平均排队耗时，单位为 ms。
        * 平均排队耗时，单位为 ms。
        * @format float
-       * @example "370"
+       * @example 370
        */
       AvgQueueDuration: number;
       /**
@@ -14954,7 +15847,7 @@ export interface DescribeImageXServiceQualityRes {
       /**
        * 客户端总上报数据量。
        * 客户端总上报数据量。
-       * @example "92781"
+       * @example 92781
        */
       TotalCount: number;
     };
@@ -14975,14 +15868,14 @@ export interface DescribeImageXServiceQualityRes {
        * 上传平均耗时，单位为 ms。
        * 上传平均耗时，单位为 ms。
        * @format float
-       * @example "2428"
+       * @example 2428
        */
       AvgDuration: number;
       /**
        * 上传文件平均大小，单位为字节。
        * 上传文件平均大小，单位字节。
        * @format float
-       * @example "377649"
+       * @example 377649
        */
       AvgSize: number;
       /**
@@ -14998,13 +15891,13 @@ export interface DescribeImageXServiceQualityRes {
       /**
        * 上传总上报数据量。
        * 上传总上报数据量。
-       * @example "3919"
+       * @example 3919
        */
       TotalCount: number;
       /**
        * 上传有效次数。
        * 上传有效次数
-       * @example "7189143"
+       * @example 7189143
        */
       UploadCount: number;
     };
@@ -15310,7 +16203,7 @@ export interface DescribeImageXSourceRequestRes {
         TimeStamp: string;
         /**
          * 请求次数，单位为次。
-         * @example "123"
+         * @example 123
          */
         Value: number;
       }[];
@@ -15460,7 +16353,7 @@ export interface DescribeImageXSourceRequestTrafficRes {
         /**
          * 流量，单位为 byte。
          * @format float
-         * @example "123"
+         * @example 123
          */
         Value: number;
       }[];
@@ -15511,7 +16404,7 @@ export interface DescribeImageXSummaryRes {
        * 当月图像处理量，单位为：Byte。
        * 当月图像处理量，单位为：Byte
        * @format int64
-       * @example "0"
+       * @example 0
        */
       Value: number;
     };
@@ -15524,7 +16417,7 @@ export interface DescribeImageXSummaryRes {
        * 当月带宽用量，单位为：bps。
        * 当月带宽用量，单位为：bps
        * @format float
-       * @example "0"
+       * @example 0
        */
       Value: number;
     };
@@ -15537,7 +16430,7 @@ export interface DescribeImageXSummaryRes {
        * 当月流量用量，单位为：Byte。
        * 当月流量用量，单位为：Byte
        * @format int64
-       * @example "0"
+       * @example 0
        */
       Value: number;
     };
@@ -15549,7 +16442,7 @@ export interface DescribeImageXSummaryRes {
       /**
        * 当月源站请求次数，单位为：次。
        * 当月源站请求次数，单位为：次
-       * @example "0"
+       * @example 0
        */
       Value: number;
     };
@@ -15562,7 +16455,7 @@ export interface DescribeImageXSummaryRes {
        * 当月最新一日资源占用量，单位为：Byte。
        * 当月最新一日资源占用量，单位为：Byte
        * @format float
-       * @example "0"
+       * @example 0
        */
       Value: number;
     };
@@ -15668,6 +16561,14 @@ export interface DescribeImageXUploadCountByTimeBody {
    */
   Isp?: string[];
   /**
+   * 取值为不等于的维度（默认为等于）。支持取值：
+   * - 公共维度：`AppVer`、`SdkVer`、`Country`、`Province`、`Isp`
+   * - 自定义维度：您可以通过调用 [GetImageXQueryDims](https://www.volcengine.com/docs/508/1213048)接口获取自定义维度指标
+   * 取值为不等于的维度（默认为等于）。支持取值：公共维度（AppVer,SdkVer,Country,Province,Isp），自定义维度（通过"获取自定义维度列表"接口获取）
+   * @example "["SdkVer","access"]"
+   */
+  Not?: string[];
+  /**
    * 需要匹配的系统类型。取值如下所示：
    * - 不传或传空字符串：Android+iOS。
    * - `iOS`：iOS。
@@ -15711,7 +16612,7 @@ export interface DescribeImageXUploadCountByTimeBody {
    * 上传类型，默认为空，返回上传 1.0 数据。
    * 1：上传 1.0。
    * 2：上传 2.0。
-   * @example "2"
+   * @example 2
    */
   UploadType?: number;
 }
@@ -15739,7 +16640,7 @@ export interface DescribeImageXUploadCountByTimeRes {
       /**
        * 对应的总上传有效次数。
        * 对应的总上传有效次数。
-       * @example "123"
+       * @example 123
        */
       Count: number;
       /**
@@ -15751,7 +16652,7 @@ export interface DescribeImageXUploadCountByTimeRes {
         /**
          * 上传有效次数。
          * 上传有效次数
-         * @example "123"
+         * @example 123
          */
         Count: number;
         /**
@@ -15763,7 +16664,7 @@ export interface DescribeImageXUploadCountByTimeRes {
         /**
          * 上传有效次数。
          * 上传有效次数
-         * @example "123"
+         * @example 123
          */
         Value: number;
       }[];
@@ -15878,6 +16779,14 @@ export interface DescribeImageXUploadDurationBody {
    */
   Isp?: string[];
   /**
+   * 取值为不等于的维度（默认为等于）。支持取值：
+   * - 公共维度：`AppVer`、`SdkVer`、`Country`、`Province`、`Isp`
+   * - 自定义维度：您可以通过调用 [GetImageXQueryDims](https://www.volcengine.com/docs/508/1213048)接口获取自定义维度指标
+   * 取值为不等于的维度（默认为等于）。支持取值：公共维度（AppVer,SdkVer,Country,Province,Isp），自定义维度（通过"获取自定义维度列表"接口获取）
+   * @example "["SdkVer"]"
+   */
+  Not?: string[];
+  /**
    * 需要匹配的系统类型。取值如下所示：
    * - 不传或传空字符串：Android+iOS。
    * - `iOS`：iOS。
@@ -15921,7 +16830,7 @@ export interface DescribeImageXUploadDurationBody {
    * 上传类型，默认为空，返回上传 1.0 数据。
    * 1：上传 1.0。
    * 2：上传 2.0。
-   * @example "2"
+   * @example 2
    */
   UploadType?: number;
 }
@@ -15949,7 +16858,7 @@ export interface DescribeImageXUploadDurationRes {
       /**
        * 对应的总次数。
        * 对应的总次数。
-       * @example "123"
+       * @example 123
        */
       Count: number;
       /**
@@ -15961,7 +16870,7 @@ export interface DescribeImageXUploadDurationRes {
         /**
          * 数据对应上传次数。
          * 数据对应上传次数。
-         * @example "123"
+         * @example 123
          */
         Count: number;
         /**
@@ -15974,7 +16883,7 @@ export interface DescribeImageXUploadDurationRes {
          * 上传耗时，单位为 ms。
          * 上传耗时，单位为 ms。
          * @format float
-         * @example "656"
+         * @example 656
          */
         Value: number;
       }[];
@@ -16085,6 +16994,14 @@ export interface DescribeImageXUploadErrorCodeAllBody {
    */
   Isp?: string[];
   /**
+   * 取值为不等于的维度（默认为等于）。支持取值：
+   * - 公共维度：`AppVer`、`SdkVer`、`Country`、`Province`、`Isp`
+   * - 自定义维度：您可以通过调用 [GetImageXQueryDims](https://www.volcengine.com/docs/508/1213048)接口获取自定义维度指标
+   * 取值为不等于的维度（默认为等于）。支持取值：公共维度（AppVer,SdkVer,Country,Province,Isp），自定义维度（通过"获取自定义维度列表"接口获取）
+   * @example "["SdkVer"]"
+   */
+  Not?: string[];
+  /**
    * 需要匹配的系统类型。取值如下所示：
    * - 不传或传空字符串：Android+iOS。
    * - `iOS`：iOS。
@@ -16142,7 +17059,7 @@ export interface DescribeImageXUploadErrorCodeAllBody {
    * 上传类型，默认为空，返回上传 1.0 数据。
    * 1：上传 1.0。
    * 2：上传 2.0。
-   * @example "2"
+   * @example 2
    */
   UploadType?: number;
 }
@@ -16188,7 +17105,7 @@ export interface DescribeImageXUploadErrorCodeAllRes {
         /**
          * 错误码数量。
          * 错误码数量
-         * @example "1"
+         * @example 1
          */
         Value: number;
       }[];
@@ -16229,7 +17146,7 @@ export interface DescribeImageXUploadErrorCodeAllRes {
       /**
        * 错误码数量。
        * 错误码数量。
-       * @example "2"
+       * @example 2
        */
       Value: number;
     }[];
@@ -16327,6 +17244,14 @@ export interface DescribeImageXUploadErrorCodeByTimeBody {
    */
   Isp?: string[];
   /**
+   * 取值为不等于的维度（默认为等于）。支持取值：
+   * - 公共维度：`AppVer`、`SdkVer`、`Country`、`Province`、`Isp`
+   * - 自定义维度：您可以通过调用 [GetImageXQueryDims](https://www.volcengine.com/docs/508/1213048)接口获取自定义维度指标
+   * 取值为不等于的维度（默认为等于）。支持取值：公共维度（AppVer,SdkVer,Country,Province,Isp），自定义维度（通过"获取自定义维度列表"接口获取）
+   * @example "["SdkVer","access"]"
+   */
+  Not?: string[];
+  /**
    * 需要匹配的系统类型。取值如下所示：
    * - 不传或传空字符串：Android+iOS。
    * - `iOS`：iOS。
@@ -16370,7 +17295,7 @@ export interface DescribeImageXUploadErrorCodeByTimeBody {
    * 上传类型，默认为空，返回上传 1.0 数据。
    * 1：上传 1.0。
    * 2：上传 2.0。
-   * @example "2"
+   * @example 2
    */
   UploadType?: number;
 }
@@ -16396,7 +17321,7 @@ export interface DescribeImageXUploadErrorCodeByTimeRes {
     ErrorCodeData: {
       /**
        * 错误码数量。
-       * @example "3"
+       * @example 3
        */
       Count: number;
       /**
@@ -16406,7 +17331,7 @@ export interface DescribeImageXUploadErrorCodeByTimeRes {
       Data: {
         /**
          * 错误码数量。
-         * @example "3"
+         * @example 3
          */
         Count: number;
         /**
@@ -16416,7 +17341,7 @@ export interface DescribeImageXUploadErrorCodeByTimeRes {
         Timestamp: string;
         /**
          * 错误码数量。
-         * @example "3"
+         * @example 3
          */
         Value: number;
       }[];
@@ -16529,6 +17454,14 @@ export interface DescribeImageXUploadFileSizeBody {
    */
   Isp?: string[];
   /**
+   * 取值为不等于的维度（默认为等于）。支持取值：
+   * - 公共维度：`AppVer`、`SdkVer`、`Country`、`Province`、`Isp`
+   * - 自定义维度：您可以通过调用 [GetImageXQueryDims](https://www.volcengine.com/docs/508/1213048)接口获取自定义维度指标
+   * 取值为不等于的维度（默认为等于）。支持取值：公共维度（AppVer,SdkVer,Country,Province,Isp），自定义维度（通过"获取自定义维度列表"接口获取）
+   * @example "["SdkVer","access"]"
+   */
+  Not?: string[];
+  /**
    * 需要匹配的系统类型。取值如下所示：
    * - 不传或传空字符串：Android+iOS。
    * - `iOS`：iOS。
@@ -16572,7 +17505,7 @@ export interface DescribeImageXUploadFileSizeBody {
    * 上传类型，默认为空，返回上传 1.0 数据。
    * 1：上传 1.0。
    * 2：上传 2.0。
-   * @example "2"
+   * @example 2
    */
   UploadType?: number;
 }
@@ -16600,7 +17533,7 @@ export interface DescribeImageXUploadFileSizeRes {
       /**
        * 对应的总次数。
        * 对应的总次数。
-       * @example "123"
+       * @example 123
        */
       Count: number;
       /**
@@ -16612,7 +17545,7 @@ export interface DescribeImageXUploadFileSizeRes {
         /**
          * 数据对应次数。
          * 数据对应次数。
-         * @example "123"
+         * @example 123
          */
         Count: number;
         /**
@@ -16625,7 +17558,7 @@ export interface DescribeImageXUploadFileSizeRes {
          * 对应文件大小。
          * 对应文件大小。
          * @format float
-         * @example "456"
+         * @example 456
          */
         Value: number;
       }[];
@@ -16746,6 +17679,14 @@ export interface DescribeImageXUploadSegmentSpeedByTimeBody {
    */
   Isp?: string[];
   /**
+   * 取值为不等于的维度（默认为等于）。支持取值：
+   * - 公共维度：`AppVer`、`SdkVer`、`Country`、`Province`、`Isp`
+   * - 自定义维度：您可以通过调用 [GetImageXQueryDims](https://www.volcengine.com/docs/508/1213048)接口获取自定义维度指标
+   * 取值为不等于的维度（默认为等于）。支持取值：公共维度（AppVer,SdkVer,Country,Province,Isp），自定义维度（通过"获取自定义维度列表"接口获取）
+   * @example "["SdkVer"]"
+   */
+  Not?: string[];
+  /**
    * 需要匹配的系统类型。取值如下所示：
    * - 不传或传空字符串：Android+iOS。
    * - `iOS`：iOS。
@@ -16785,7 +17726,7 @@ export interface DescribeImageXUploadSegmentSpeedByTimeBody {
   /**
    * 上传类型，固定值传入`2`，表示上传 2.0 数据。
    * 上传类型，固定值传入2，表示上传 2.0 数据。
-   * @example "2"
+   * @example 2
    */
   UploadType: number;
 }
@@ -16813,7 +17754,7 @@ export interface DescribeImageXUploadSegmentSpeedByTimeRes {
       /**
        * 总上传次数
        * 总上传次数
-       * @example "123"
+       * @example 123
        */
       Count: number;
       /**
@@ -16825,7 +17766,7 @@ export interface DescribeImageXUploadSegmentSpeedByTimeRes {
         /**
          * 上传次数
          * 上传次数
-         * @example "123"
+         * @example 123
          */
         Count: number;
         /**
@@ -16956,6 +17897,14 @@ export interface DescribeImageXUploadSpeedBody {
    */
   Isp?: string[];
   /**
+   * 取值为不等于的维度（默认为等于）。支持取值：
+   * - 公共维度：`AppVer`、`SdkVer`、`Country`、`Province`、`Isp`
+   * - 自定义维度：您可以通过调用 [GetImageXQueryDims](https://www.volcengine.com/docs/508/1213048)接口获取自定义维度指标
+   * 取值为不等于的维度（默认为等于）。支持取值：公共维度（AppVer,SdkVer,Country,Province,Isp），自定义维度（通过"获取自定义维度列表"接口获取）
+   * @example "["SdkVer"]"
+   */
+  Not?: string[];
+  /**
    * 需要匹配的系统类型。取值如下所示：
    * - 不传或传空字符串：Android+iOS。
    * - `iOS`：iOS。
@@ -16999,7 +17948,7 @@ export interface DescribeImageXUploadSpeedBody {
    * 上传类型，默认为空，返回上传 1.0 数据。
    * 1：上传 1.0。
    * 2：上传 2.0。
-   * @example "2"
+   * @example 2
    */
   UploadType?: number;
 }
@@ -17027,7 +17976,7 @@ export interface DescribeImageXUploadSpeedRes {
       /**
        * 对应的总次数。
        * 对应的总次数。
-       * @example "123"
+       * @example 123
        */
       Count: number;
       /**
@@ -17039,7 +17988,7 @@ export interface DescribeImageXUploadSpeedRes {
         /**
          * 数据对应上传次数。
          * 数据对应上传次数。
-         * @example "123"
+         * @example 123
          */
         Count: number;
         /**
@@ -17169,6 +18118,14 @@ export interface DescribeImageXUploadSuccessRateByTimeBody {
    */
   Isp?: string[];
   /**
+   * 取值为不等于的维度（默认为等于）。支持取值：
+   * - 公共维度：`AppVer`、`SdkVer`、`Country`、`Province`、`Isp`
+   * - 自定义维度：您可以通过调用 [GetImageXQueryDims](https://www.volcengine.com/docs/508/1213048)接口获取自定义维度指标
+   * 取值为不等于的维度（默认为等于）。支持取值：公共维度（AppVer,SdkVer,Country,Province,Isp），自定义维度（通过"获取自定义维度列表"接口获取）
+   * @example "["SdkVer","access"]"
+   */
+  Not?: string[];
+  /**
    * 需要匹配的系统类型。取值如下所示：
    * - 不传或传空字符串：Android+iOS。
    * - `iOS`：iOS。
@@ -17212,7 +18169,7 @@ export interface DescribeImageXUploadSuccessRateByTimeBody {
    * 上传类型，默认为空，返回上传 1.0 数据。
    * 1：上传 1.0。
    * 2：上传 2.0。
-   * @example "2"
+   * @example 2
    */
   UploadType?: number;
 }
@@ -17240,7 +18197,7 @@ export interface DescribeImageXUploadSuccessRateByTimeRes {
       /**
        * 对应的总上传有效次数。
        * 对应的总上传有效次数。
-       * @example "123"
+       * @example 123
        */
       Count: number;
       /**
@@ -17252,7 +18209,7 @@ export interface DescribeImageXUploadSuccessRateByTimeRes {
         /**
          * 数据对应上传有效次数。
          * 数据对应上传有效次数。
-         * @example "123"
+         * @example 123
          */
         Count: number;
         /**
@@ -17453,7 +18410,7 @@ export interface ExportFailedMigrateTaskRes {
     Entries: {
       /**
        * 失败错误码
-       * @example "613102"
+       * @example 613102
        */
       ErrCode: number;
       /**
@@ -17565,7 +18522,7 @@ export interface FetchImageUrlBody {
    *
    * - 同步处理下最大超时为 20 秒；
    * - 异步处理下最大超时为 90 秒。
-   * @example "10"
+   * @example 10
    */
   TimeOut?: number;
   /**
@@ -17602,24 +18559,24 @@ export interface FetchImageUrlRes {
     /**
      * 动图持续时间，在同步处理情况下、迁移至图像处理服务且为图片资源时有返回值。
      * @format int64
-     * @example "5"
+     * @example 5
      */
     Duration?: number;
     /**
      * 任务结束执行时间戳，UTC 时间，单位为 ns。
      * @format int64
-     * @example "1689304215000000000"
+     * @example 1689304215000000000
      */
     EndTime?: number;
     /**
      * 文件大小，单位为 byte。同步处理情况下有返回值。
      * @format int64
-     * @example "9084"
+     * @example 9084
      */
     FSize?: number;
     /**
      * 图片帧数，在同步处理情况下、迁移至图像处理服务且为图片资源时有返回值。
-     * @example "100"
+     * @example 100
      */
     FrameCnt?: number;
     /**
@@ -17629,18 +18586,18 @@ export interface FetchImageUrlRes {
     ImageFormat?: string;
     /**
      * 图片高，在同步处理情况下、迁移至图像处理服务且为图片资源时有返回值。
-     * @example "1100"
+     * @example 1100
      */
     ImageHeight?: number;
     /**
      * 图片宽，在同步处理情况下、迁移至图像处理服务且为图片资源时有返回值。
-     * @example "2300"
+     * @example 2300
      */
     ImageWidth?: number;
     /**
      * 任务开始执行时间戳，UTC 时间，单位为 ns。
      * @format int64
-     * @example "1692019200000000000"
+     * @example 1692019200000000000
      */
     StartTime?: number;
     /**
@@ -17656,7 +18613,7 @@ export interface FetchImageUrlRes {
     /**
      * 完成任务总耗时，单位为毫秒。
      * @format int64
-     * @example "2714985000"
+     * @example 2714985000
      */
     TimeCost?: number;
     /**
@@ -17790,6 +18747,7 @@ export interface GetAllImageServicesRes {
        * 是否开启精简 URL，取值如下所示：
        * - `true`：是
        * - `false`：否
+       * @example "false"
        */
       CompactURL: boolean;
       /**
@@ -17824,7 +18782,14 @@ export interface GetAllImageServicesRes {
          * @example "正常"
          */
         Status: string;
-        /** 是否开启鉴权 */
+        /**
+         * 是否开启鉴权，取值如下所示：
+         *
+         * - `true`：开启
+         * - `false`：关闭
+         * 是否开启鉴权
+         * @example "false"
+         */
         UrlAuth: boolean;
       }[];
       /**
@@ -17875,6 +18840,8 @@ export interface GetAllImageServicesRes {
        * @example "false"
        */
       HasSigkey: boolean;
+      /** @example "true" */
+      ImageY: boolean;
       /**
        * 自定义处理样式具体配置
        * @example "-"
@@ -17887,12 +18854,15 @@ export interface GetAllImageServicesRes {
          * - `false`：关闭
          * @example "true"
          */
-        ResourceProtect: boolean;
+        ImageProtect: boolean;
         /**
          * 样式分割符
+         * 图像样式分隔符。
          * @example "["@"]"
          */
-        StyleSeparators: string[];
+        ImageStyleSeparators: string[];
+        QnCosPreference: string;
+        QueryStyleCombine: boolean;
       };
       /**
        * 镜像回源配置。
@@ -17903,7 +18873,7 @@ export interface GetAllImageServicesRes {
          * 镜像回源下载原图时，携带的 HTTP 头部，键值都为 String 类型。
          * @example "{ "name": "app1" }"
          */
-        Headers: Record<string, Record<string, unknown>>;
+        Headers: Record<string, string>;
         /**
          * 镜像回源域名。
          * @example "img.example.com"
@@ -17945,8 +18915,23 @@ export interface GetAllImageServicesRes {
        * @example "default"
        */
       ProjectName: string;
+      /**
+       * 资源封禁配置
+       * @example "-"
+       */
       ResourceLimitedVisit: {
+        /**
+         * 域名白名单列表，封禁资源仅可被白名单的域名访问。
+         * @example "["test.example.com"]"
+         */
         AllowDomains: string[];
+        /**
+         * 资源封禁开关，取值如下所示：
+         *
+         * - `true`：开启
+         * - `false`：关闭
+         * @example "true"
+         */
         Enable: boolean;
       };
       /**
@@ -17984,7 +18969,6 @@ export interface GetAllImageServicesRes {
       /**
        * 服务地域，取值如下所示：
        * * `cn`：中国
-       * * `va`：美东
        * * `sg`：新加坡
        * @example "cn"
        */
@@ -18026,7 +19010,7 @@ export interface GetAllImageServicesRes {
         /**
          * 保存时间，单位为秒。
          * @format int64
-         * @example "0"
+         * @example 0
          */
         TTL: number;
       };
@@ -18044,12 +19028,12 @@ export interface GetAllImageServicesRes {
          *
          * @example "IA"
          */
-        Action: string;
+        Action?: string;
         /**
          * 策略天数，单位为天。按照 Event 事件 Day 天后执行 Action 事件，即当匹配文件的上传时间符合指定天数后，自动按照处理策略对资源进行处理。
-         * @example "30"
+         * @example 30
          */
-        Day: number;
+        Day?: number;
         /**
          * 是否启用策略，取值如下所示：
          * - `true`：是
@@ -18063,11 +19047,29 @@ export interface GetAllImageServicesRes {
          */
         Event: string;
         /**
+         * 历史版本文件在策略命中后需要执行的操作
+         * @example "IA"
+         */
+        NonCurrentAction?: string;
+        /**
+         * 历史版本文件的策略天数
+         * @example 30
+         */
+        NonCurrentDay?: number;
+        /**
          * 文件前缀。例如设置为 `prefix` 后，规则将只对名称以 `prefix` 开头的存储资源生效。
          * @example "prefix"
          */
         Prefix: string;
       }[];
+      /**
+       * 版本控制启用状态，取值如下所示：
+       * - `0`：未开启
+       * - `1`：已开启
+       * - `2`：暂停
+       * @example 0
+       */
+      StorageVersioning?: number;
       /**
        * 该服务的图片模板固定前缀。
        * @example "tplv-zh**1q-"
@@ -18116,12 +19118,12 @@ export interface GetAllImageTemplatesQuery {
   Asc?: string;
   /**
    * 分页获取条数，默认 10。
-   * @example "10"
+   * @example 10
    */
   Limit?: number;
   /**
    * 分页偏移量，默认 0。取值为 1 时，表示跳过第一条数据，从第二条数据取值。
-   * @example "0"
+   * @example 0
    */
   Offset?: number;
   /**
@@ -18245,73 +19247,73 @@ export interface GetAuditEntrysCountRes {
     /**
      * 异常审核的总次数，即审核失败、建议不通过和建议复审的审核次数之和。
      * @format int64
-     * @example "427"
+     * @example 427
      */
     AuditExceptionCount: number;
     /**
      * 审核失败的审核次数
      * @format int64
-     * @example "0"
+     * @example 0
      */
     AuditFailCount: number;
     /**
      * 建议不通过的审核次数
      * @format int64
-     * @example "427"
+     * @example 427
      */
     AuditNopassCount: number;
     /**
      * 建议复审的审核次数
      * @format int64
-     * @example "0"
+     * @example 0
      */
     AuditRecheckCount: number;
     /**
      * 审核成功的审核次数。
      * @format int64
-     * @example "1442"
+     * @example 1442
      */
     AuditSuccessCount: number;
     /**
      * 该任务的审核总次数，为审核成功和审核失败的图片数量之和。
      * @format int64
-     * @example "1442"
+     * @example 1442
      */
     AuditTotal: number;
     /**
      * 审核异常的图片数量，即审核失败、建议不通过和建议复审的图片数量之和。
      * @format int64
-     * @example "61"
+     * @example 61
      */
     ExceptionCount: number;
     /**
      * 审核失败的图片数量
      * @format int64
-     * @example "0"
+     * @example 0
      */
     FailedCount: number;
     /**
      * 建议不通过的图片数量
      * @format int64
-     * @example "61"
+     * @example 61
      */
     NopassCount: number;
     /**
      * 建议复审的图片数量
      * @format int64
-     * @example "0"
+     * @example 0
      */
     RecheckCount: number;
     /**
      * 审核成功的图片数量
      * @format int64
-     * @example "206"
+     * @example 206
      */
     SuccessCount: number;
     /**
      * 累计审核图片数量，为审核成功和审核失败的图片数量之和。
      * @format int64
-     * @example "206"
+     * @example 206
      */
     Total: number;
   };
@@ -18391,12 +19393,12 @@ export interface GetBatchProcessResultRes {
       Err?: string;
       /**
        * 该资源的文件大小，单位为 byte。
-       * @example "230000"
+       * @example 230000
        */
       Size?: number;
       /**
        * 访问该资源时返回的 [HTTP 状态码](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status)
-       * @example "403"
+       * @example 403
        */
       StatusCode?: number;
       /**
@@ -18467,7 +19469,7 @@ export interface GetBatchTaskInfoRes {
     CallbackBodyType?: string;
     /**
      * 错误码。仅当`Status`取值`Failed`时，有返回值。
-     * @example "644001"
+     * @example 644001
      */
     Code?: number;
     /**
@@ -18490,12 +19492,12 @@ export interface GetBatchTaskInfoRes {
       Err?: string;
       /**
        * 该资源对应的文件大小，单位为 byte。
-       * @example "230000"
+       * @example 230000
        */
       Size?: number;
       /**
        * 访问该资源时返回的 [HTTP 状态码](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status)
-       * @example "0"
+       * @example 0
        */
       StatusCode?: number;
       /**
@@ -19227,7 +20229,7 @@ export interface GetComprehensiveEnhanceImageBody {
    * `EnableConfig` 取值为 `true` 时，为必填。
    *
    * 亮度，取值范围为[90,100]。取值越小，亮度提升越明显。
-   * @example "95"
+   * @example 95
    */
   Brightness?: number;
   /**
@@ -19245,17 +20247,17 @@ export interface GetComprehensiveEnhanceImageBody {
    * - `0`: 仅缩小，图片大于设置的“宽/高”时，将缩小图片
    * - `1`: 仅放大，图片小于设置的“宽/高”时，将放大图片
    * - `2`: 既缩小又放大，即按照自定义“宽/高”输出结果图，该操作可能导致图片变形
-   * @example "1"
+   * @example 1
    */
   DownsampleMode?: number;
   /**
    * 下采样输出图片高度，图片将适配对应大小。单位为 px。
-   * @example "10"
+   * @example 10
    */
   DownsampleOutHeight?: number;
   /**
    * 下采样输出图片宽度，图片将适配对应大小。单位为 px。
-   * @example "10"
+   * @example 10
    */
   DownsampleOutWidth?: number;
   /**
@@ -19303,12 +20305,12 @@ export interface GetComprehensiveEnhanceImageBody {
   ImageUri: string;
   /**
    * 执行超分处理的长边范围最大值，仅当满足图像边界输入的图像执行超分处理。单位为 px。
-   * @example "800"
+   * @example 800
    */
   LongMax?: number;
   /**
    * 执行超分处理的长边范围最小值，仅当满足图像边界输入的图像执行超分处理。单位为 px。
-   * @example "300"
+   * @example 300
    */
   LongMin?: number;
   /**
@@ -19318,7 +20320,7 @@ export interface GetComprehensiveEnhanceImageBody {
    * :::tip
    * 推荐优先使用通用方案，显著画质提升方案画质分提高 10% 左右，但体积会有一定浮动提升。以上幅度变化基于测试集总结，具体以使用场景为准。
    * :::
-   * @example "0"
+   * @example 0
    */
   Mode: number;
   /**
@@ -19326,7 +20328,7 @@ export interface GetComprehensiveEnhanceImageBody {
    * :::tip
    * 4 倍超分辨率只适用于 4000 x 4000 以内分辨率图像的画质增强。
    * :::
-   * @example "2"
+   * @example 2
    */
   Multiple?: number;
   /**
@@ -19345,14 +20347,14 @@ export interface GetComprehensiveEnhanceImageBody {
    * `EnableSuperResolution` 取值为 `true` 时，为必填。
    *
    * 执行超分处理的短边范围最大值，仅当满足图像边界输入的图像执行超分处理。单位为 px。
-   * @example "700"
+   * @example 700
    */
   ShortMax?: number;
   /**
    * `EnableSuperResolution` 取值为 `true` 时，为必填。
    *
    * 执行超分处理的短边范围最小值，仅当满足图像边界输入的图像执行超分处理。单位为 px。
-   * @example "200"
+   * @example 200
    */
   ShortMin?: number;
   /**
@@ -19437,7 +20439,7 @@ export interface GetCompressTaskInfoRes {
   Result?: {
     /**
      * 错误码。仅当`Status`为`Failed`时，该值不为 0。
-     * @example "604026"
+     * @example 604026
      */
     ErrCode?: number;
     /**
@@ -19453,7 +20455,7 @@ export interface GetCompressTaskInfoRes {
     /**
      * 任务处理进度，即已处理的文件数量。
      * @format int64
-     * @example "4"
+     * @example 4
      */
     ProcessCount?: number;
     ResUri?: string;
@@ -19519,7 +20521,7 @@ export interface GetDedupTaskStatusRes {
      * * 0：任务进行中
      * * 1：任务执行成功
      * * 2：任务执行失败
-     * @example "1"
+     * @example 1
      */
     Status: number;
     /**
@@ -19858,7 +20860,7 @@ export interface GetDomainConfigRes {
             cache_key: string[];
             /**
              * 鉴权状态码的缓存时间，单位是秒
-             * @example "5"
+             * @example 5
              */
             ttl: number;
           };
@@ -19898,7 +20900,7 @@ export interface GetDomainConfigRes {
             action: string;
             /**
              * 鉴权超时的时间，单位是毫秒。
-             * @example "200"
+             * @example 200
              */
             time: number;
           };
@@ -20037,7 +21039,7 @@ export interface GetDomainConfigRes {
           backup_sk: string;
           /**
            * 有效时间，单位为秒。取值范围为[1, 630720000]内的正整数，默认为 1800 秒。
-           * @example "1800"
+           * @example 1800
            */
           expire_time: number;
           /**
@@ -20063,7 +21065,7 @@ export interface GetDomainConfigRes {
           backup_sk: string;
           /**
            * 有效时间，单位为秒。取值范围为[1, 630720000]内的正整数，默认为 1800 秒。
-           * @example "1800"
+           * @example 1800
            */
           expire_time: number;
           /**
@@ -20084,7 +21086,7 @@ export interface GetDomainConfigRes {
           backup_sk: string;
           /**
            * 有效时间，单位为秒。取值范围为[1, 630720000]内的正整数，默认为 1800 秒。
-           * @example "1800"
+           * @example 1800
            */
           expire_time: number;
           /**
@@ -20105,7 +21107,7 @@ export interface GetDomainConfigRes {
           backup_sk: string;
           /**
            * 有效时间，单位为秒。取值范围为[1, 630720000]内的正整数，默认为 1800 秒。
-           * @example "1800"
+           * @example 1800
            */
           expire_time: number;
           /**
@@ -20251,7 +21253,7 @@ export interface GetDomainConfigRes {
         subdomain?: string;
         /**
          * Strict-Transport-Security 响应头在浏览器中的缓存过期时间，单位是秒。取值范围是 0 - 31,536,000。31,536,000 秒表示 365 天。如果该参数值为 0，其效果等同于禁用 HSTS 设置。
-         * @example "0"
+         * @example 0
          */
         ttl?: number;
       };
@@ -20418,6 +21420,309 @@ export enum GetGetImageTranscodeQueuesTypeEnum {
   User = "user",
 }
 
+export interface GetImageAIDetailsQuery {
+  /**
+   * 查询的结束 Unix 时间戳，`StartTime` 与 `EndTime` 时间间隔最大不超过 7 天。
+   * @example 1685913599
+   */
+  EndTime: number;
+  /**
+   * 分页条数，取值范围为 (0, 100]。
+   * @format int64
+   * @example 10
+   */
+  Limit: number;
+  /**
+   * 分页偏移量，默认为 0。取值为 1 时，表示跳过第一条数据，从第二条数据取值。
+   * @format int64
+   * @example 0
+   */
+  Offset?: number;
+  /**
+   * 队列 ID，通过 CreateImageAITask 接口返回。
+   * @example "649a9dbc32**064d44cf5b0"
+   */
+  QueueId: string;
+  /**
+   * 返回图片 URL 或 URI 中包含该值的任务。默认为空，不传则返回所有任务。
+   * @example "test"
+   */
+  SearchPtn?: string;
+  /**
+   * 查询的起始 Unix 时间戳，`StartTime` 与 `EndTime` 时间间隔最大不超过 7 天。
+   * @format int64
+   * @example 1684713599
+   */
+  StartTime: number;
+  /**
+   * 执行状态，填入多个时使用英文逗号分隔。取值如下所示：
+   *
+   * - `Pending`：排队中
+   * - `Running`：执行中
+   * - `Success`：执行成功
+   * - `Fail`：执行失败
+   * @example "Pending"
+   */
+  Status?: string;
+  /**
+   * 任务 ID，通过 CreateImageAITask 接口返回，缺省时查询指定队列下全部的任务。
+   * @example "67174744adc54449623155b9"
+   */
+  TaskId: string;
+}
+
+export interface GetImageAIDetailsRes {
+  ResponseMetadata: {
+    /** @example "{Action}" */
+    Action: string;
+    /** @example "cn-north-1" */
+    Region: string;
+    /** @example "201806041104200100100232280022D30" */
+    RequestId: string;
+    /** @example "imagex" */
+    Service: string;
+    /** @example "2023-05-01" */
+    Version: string;
+  };
+  Result: {
+    /**
+     * 任务中每个条目的执行详情。
+     * @example "-"
+     */
+    ExecInfo: {
+      /**
+       * 结束时间。
+       * @example "2023-06-27 15:44:11"
+       */
+      EndAt?: string;
+      /**
+       * 条目 ID。
+       * @example "649a9332***80e9cc0a0ec"
+       */
+      EntryId?: string;
+      /**
+       * 执行输入。
+       * @example "-"
+       */
+      ExecInput?: {
+        /**
+         * 图片 URL 或 URI。
+         * @example "2e39b35b98524100ae12b2ae07283cb2"
+         */
+        ObjectKey: string;
+      };
+      /**
+       * 执行输出。
+       * @example "-"
+       */
+      ExecOutput?: {
+        /**
+         * AI 图像处理失败[错误码](https://www.volcengine.com/docs/508/1104726#%E9%94%99%E8%AF%AF%E7%A0%81)。仅当 `Status` 值为 `Fail` 时，`ErrCode` 有值。
+         * @example "615011"
+         */
+        ErrCode: string;
+        /**
+         * AI 图像处理失败错误信息。
+         * @example "解码图片要素失败"
+         */
+        ErrMsg: string;
+        /**
+         * AI 图像处理结果，是 JSON 压缩并转义后的字符串，仅当 `Status` 值为 `Success` 时，`Output` 有值。参看 [AI 图像处理模板](https://www.volcengine.com/docs/508/1515840)页面获取模板 ID 和参数信息，根据具体的工作流的说明进行解析。
+         * @example "{\"ObjectKey\":\"veImageX-store/ai_super_resolution/67***\/example.webp\",\"Size\":54509,\"Format\":\"webp\"}"
+         */
+        Output: string;
+      };
+      /**
+       * 开始时间。
+       * @example "2023-06-27 15:44:11"
+       */
+      StartAt?: string;
+      /**
+       * 执行状态。取值如下所示：
+       *
+       * - `Pending`：排队中
+       * - `Running`：执行中
+       * - `Success`：执行成功
+       * - `Fail`：执行失败
+       * @example "Fail"
+       */
+      Status?: string;
+      /**
+       * 提交时间。
+       * @example "2023-06-27 15:43:46"
+       */
+      SubmitAt?: string;
+    }[];
+    /**
+     * 任务中包含的条目数。
+     * @format int64
+     * @example 2
+     */
+    Total: number;
+  };
+}
+
+export interface GetImageAITasksQuery {
+  /**
+   * 查询的结束 Unix 时间戳，`StartTime` 与 `EndTime` 时间间隔最大不超过 7 天。
+   * @example 1729612799
+   */
+  EndTime: number;
+  /**
+   * 单次查询列出的任务的个数，取值范围为 (0,1000]，默认值为 1000。
+   * @example 10
+   */
+  Limit?: number;
+  /**
+   * 上一次查询返回的位置标记，作为本次查询的起点信息，默认值为空。
+   * @example "0"
+   */
+  Marker?: string;
+  /**
+   * 队列 ID，通过 CreateImageAITask 接口返回。
+   * @example "63db57e36**cce1ffee11bb1"
+   */
+  QueueId: string;
+  /**
+   * 服务 ID。
+   *
+   * - 您可以在 veImageX 控制台 [服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。
+   * - 您也可以通过 OpenAPI 的方式获取服务 ID，具体请参考[获取所有服务信息](https://www.volcengine.com/docs/508/9360)。
+   * @example "5s****fo"
+   */
+  ServiceId: string;
+  /**
+   * 查询的起始 Unix 时间戳，`StartTime` 与 `EndTime` 时间间隔最大不超过 7 天。
+   * @example 1728921600
+   */
+  StartTime: number;
+  /**
+   * 指定查询的任务状态，缺省时将查询全部状态的任务。取值如下所示：
+   * - `Running`：任务运行中
+   * - `Suspend`：任务中断
+   * - `Done`：任务已完成
+   * - `Cancel`：任务取消
+   * - `Failed`：任务失败
+   * @example "Failed"
+   */
+  Status?: string;
+  /**
+   * 任务 ID，通过 CreateImageAITask 接口返回，缺省时查询指定队列下全部的任务。
+   * @example "649b9d3****5537684010a7"
+   */
+  TaskId?: string;
+}
+
+export interface GetImageAITasksRes {
+  ResponseMetadata: {
+    /**
+     * 请求的接口名，属于请求的公共参数。
+     * @example "{Action}"
+     */
+    Action: string;
+    /**
+     * 请求的Region，例如：cn-north-1
+     * @example "cn-north-1"
+     */
+    Region: string;
+    /** RequestId为每次API请求的唯一标识。 */
+    RequestId: string;
+    /** 请求的服务，属于请求的公共参数。 */
+    Service: string;
+    /**
+     * 请求的版本号，属于请求的公共参数。
+     * @example "{Version}"
+     */
+    Version: string;
+  };
+  /** 视请求的接口而定 */
+  Result: {
+    /**
+     * 是否还有更多任务，取值如下所示：
+     *
+     * - `true`：是，还有任务未列出。
+     * - `false`：否，已列出所有任务。
+     * @example "false"
+     */
+    HasMore: boolean;
+    /**
+     * `HasMore` 取值为 `true` 时（即本次查询还有未列举到的任务时），`Marker` 应作为查询起始位置标记，您需要在下一次查询时传入该值。
+     * @example "hkaiohwn**1WIO092WO"
+     */
+    Marker?: string;
+    /**
+     * 指定的队列 ID。
+     * @example "63db57e36**cce1ffee11bb1"
+     */
+    QueueId: string;
+    /**
+     * AI 图像处理任务的各类信息。
+     * @example "-"
+     */
+    TaskInfo: {
+      /**
+       * 任务的结束执行时间。
+       * @example "2024-10-22 14:28:16"
+       */
+      EndAt: string;
+      /**
+       * 任务中执行失败的条目数。
+       * @format int64
+       * @example 1
+       */
+      Fail: number;
+      /**
+       * 任务中重试的条目数。
+       *
+       * :::tip
+       * 当因系统内部原因导致的条目转码失败，系统将自动重试该条目，最大重试次数为 5。
+       * :::
+       * @format int64
+       * @example 0
+       */
+      Retry: number;
+      /**
+       * 任务的开始执行时间。
+       * @example "2024-10-22 13:28:16"
+       */
+      StartAt: string;
+      /**
+       * 任务的执行状态，取值如下所示：
+       *
+       * - `Running`：任务运行中
+       * - `Suspend`：任务中断
+       * - `Done`：任务已完成
+       * - `Cancel`：任务取消
+       * - `Failed`：任务失败
+       * @example "Failed"
+       */
+      Status: string;
+      /**
+       * 任务的提交时间。
+       * @example "2024-10-22 13:26:46"
+       */
+      SubmitAt: string;
+      /**
+       * 任务中执行成功的条目数。
+       * @format int64
+       * @example 0
+       */
+      Success: number;
+      /**
+       * 任务 ID。
+       * @example "649b9d3****5537684010a7"
+       */
+      TaskId: string;
+      /**
+       * 任务中包含的条目数。
+       * @format int64
+       * @example 1
+       */
+      Total: number;
+    }[];
+  };
+}
+
 export interface GetImageAddOnTagQuery {
   /**
    * 组件标签 key。取值固定为`功能属性`，返回相关标签值。
@@ -20553,7 +21858,7 @@ export interface GetImageAlertRecordsBody {
   EndTime: string;
   /**
    * 获取个数限制。默认值为 10，取值范围为 (0,100\]。
-   * @example "10"
+   * @example 10
    */
   Limit?: number;
   /**
@@ -20627,7 +21932,7 @@ export interface GetImageAlertRecordsRes {
         AlertContent: {
           /**
            * 聚合周期，单位为分钟。被监控指标在该指定周期内满足指标比较阈值触发告警。
-           * @example "5"
+           * @example 5
            */
           AggrInterval: number;
           /**
@@ -20670,12 +21975,12 @@ export interface GetImageAlertRecordsRes {
           Op: string;
           /**
            * 持续周期，表示聚合周期内的异常指标持续出现指定次数触发告警。
-           * @example "1"
+           * @example 1
            */
           RepeatCnt: number;
           /**
            * 指标比较阈值
-           * @example "50"
+           * @example 50
            */
           Threshold: number;
           /**
@@ -20708,7 +22013,7 @@ export interface GetImageAlertRecordsRes {
             Val: number;
             /**
              * 指标上一周期值，仅在 `Op` 为同比/环比相关方法时有值。
-             * @example "20"
+             * @example 20
              */
             ValBase: number;
             /**
@@ -20778,7 +22083,7 @@ export interface GetImageAlertRecordsRes {
     HasMore: boolean;
     /**
      * 记录总数
-     * @example "1"
+     * @example 1
      */
     Total: number;
   };
@@ -20828,19 +22133,19 @@ export interface GetImageAnalyzeResultQuery {
   /**
    * 任务运行结束时间，Unix 时间戳。
    * @format int64
-   * @example "1698306058"
+   * @example 1698306058
    */
   EndTime: number;
   /** 文件名 */
   File?: string;
   /**
    * 分页条数。默认值为 10。
-   * @example "10"
+   * @example 10
    */
   Limit?: number;
   /**
    * 分页偏移量，默认为 0。取值为 1 时，表示跳过第一条数据，从第二条数据取值。
-   * @example "0"
+   * @example 0
    */
   Offset?: number;
   /**
@@ -20851,7 +22156,7 @@ export interface GetImageAnalyzeResultQuery {
   /**
    * 任务运行开始时间，Unix 时间戳。
    * @format int64
-   * @example "1697701258"
+   * @example 1697701258
    */
   StartTime: number;
   /**
@@ -20903,7 +22208,7 @@ export interface GetImageAnalyzeResultRes {
     }[];
     /**
      * 查询到的总量
-     * @example "1"
+     * @example 1
      */
     Total: number;
   };
@@ -20912,12 +22217,12 @@ export interface GetImageAnalyzeResultRes {
 export interface GetImageAnalyzeTasksQuery {
   /**
    * 分页条数。取值范围为 (0,100]，默认值为 100。
-   * @example "100"
+   * @example 100
    */
   Limit?: number;
   /**
    * 分页偏移量，默认为 0。取值为 1 时，表示跳过第一条数据，从第二条数据取值。
-   * @example "0"
+   * @example 0
    */
   Offset?: number;
   /**
@@ -20968,6 +22273,7 @@ export interface GetImageAnalyzeTasksRes {
        * @example "false"
        */
       EvalPerStage?: boolean;
+      EvalStages: string[];
       Id: string;
       /**
        * 离线评估任务名称
@@ -21012,11 +22318,12 @@ export interface GetImageAnalyzeTasksRes {
        * @example "2023-09-15T06:28:07.267Z"
        */
       UpdateAt: string;
+      VqTypes: string[];
     }[];
     /**
      * 查询到任务数量
      * @format int64
-     * @example "2"
+     * @example 2
      */
     Total: number;
   };
@@ -21042,12 +22349,12 @@ export interface GetImageAuditResultQuery {
   ImageType?: string;
   /**
    * 分页条数。取值范围为 (0,100\]，默认值为 10。
-   * @example "10"
+   * @example 10
    */
   Limit?: number;
   /**
    * 上一次查询返回的位置标记，作为本次列举的起点信息。默认值为 0。
-   * @example "0"
+   * @example 0
    */
   Marker?: number;
   /**
@@ -21126,7 +22433,7 @@ export interface GetImageAuditResultRes {
        *
        * - `0`：基础审核能力
        * - `1`：智能审核能力
-       * @example "1"
+       * @example 1
        */
       Ability?: number;
       /**
@@ -21200,17 +22507,17 @@ export interface GetImageAuditTasksQuery {
    *
    * - `0`：基础审核能力
    * - `1`：智能审核能力
-   * @example "0"
+   * @example 0
    */
   AuditAbility?: number;
   /**
    * 分页条数。取值范围为 (0,100]，默认值为 100。
-   * @example "100"
+   * @example 100
    */
   Limit?: number;
   /**
    * 分页偏移量，默认为 0。取值为 1 时，表示跳过第一条数据，从第二条数据取值。
-   * @example "0"
+   * @example 0
    */
   Offset?: number;
   /**
@@ -21274,7 +22581,7 @@ export interface GetImageAuditTasksRes {
          *
          * - `0`：基础审核能力
          * - `1`：智能审核能力
-         * @example "1"
+         * @example 1
          */
         AuditAbility: number;
         /**
@@ -21318,7 +22625,7 @@ export interface GetImageAuditTasksRes {
          *
          * - `0`：不限范围
          * - `1`：指定范围
-         * @example "0"
+         * @example 0
          */
         EnableAuditRange: number;
         /**
@@ -21347,7 +22654,7 @@ export interface GetImageAuditTasksRes {
         /**
          * 审核失败的图片数量
          * @format int64
-         * @example "0"
+         * @example 0
          */
         FailedCount: number;
         /**
@@ -21357,7 +22664,7 @@ export interface GetImageAuditTasksRes {
         FreezeDimensions: string[];
         /**
          * 冻结策略，当前仅支持取 `0`，表示禁用图片。
-         * @example "0"
+         * @example 0
          */
         FreezeStrategy: number;
         /**
@@ -21392,13 +22699,13 @@ export interface GetImageAuditTasksRes {
         /**
          * 审核中的图片数量
          * @format int64
-         * @example "0"
+         * @example 0
          */
         ProcessedNumber: number;
         /**
          * 审核成功的图片数量
          * @format int64
-         * @example "0"
+         * @example 0
          */
         SuccessCount: number;
       };
@@ -21455,7 +22762,7 @@ export interface GetImageAuditTasksRes {
     }[];
     /**
      * 符合请求的审核任务数量
-     * @example "1"
+     * @example 1
      */
     Total: number;
   };
@@ -21570,7 +22877,7 @@ export interface GetImageBgFillResultBody {
    * 填充模型，取值如下所示：
    * * 0：国漫风格模型；
    * * 1：通用模型。
-   * @example "0"
+   * @example 0
    */
   Model: number;
   /**
@@ -21695,7 +23002,7 @@ export interface GetImageContentBlockListBody {
   /**
    * 结束查询时间，unix 时间戳，单位为秒。
    * @format int64
-   * @example "1678252535"
+   * @example 1678252535
    */
   EndTime: number;
   /**
@@ -21707,18 +23014,18 @@ export interface GetImageContentBlockListBody {
   Order?: string;
   /**
    * 页码，仅返回该页码上的任务。默认值为 1。
-   * @example "1"
+   * @example 1
    */
   PageNum?: number;
   /**
    * 每页条数，取值范围是[10,1000]。默认值为 100。
-   * @example "10"
+   * @example 10
    */
   PageSize?: number;
   /**
    * 开始查询时间，unix 时间戳，单位为秒。
    * @format int64
-   * @example "1678204800"
+   * @example 1678204800
    */
   StartTime: number;
   /**
@@ -21775,7 +23082,7 @@ export interface GetImageContentBlockListRes {
       /**
        * 任务的创建时间
        * @format int64
-       * @example "1678252511"
+       * @example 1678252511
        */
       CreateTime: number;
       /**
@@ -21814,17 +23121,17 @@ export interface GetImageContentBlockListRes {
     }[];
     /**
      * 当前页码
-     * @example "1"
+     * @example 1
      */
     PageNum: number;
     /**
      * 每页最大记录数
-     * @example "10"
+     * @example 10
      */
     PageSize: number;
     /**
      * 符合查询条件的总记录数
-     * @example "1"
+     * @example 1
      */
     Total: number;
   };
@@ -21840,7 +23147,7 @@ export interface GetImageContentTaskDetailBody {
   /**
    * 查询结束时间，unix 时间戳，单位为秒。
    * @format int64
-   * @example "1721703964"
+   * @example 1721703964
    */
   EndTime: number;
   /**
@@ -21852,18 +23159,18 @@ export interface GetImageContentTaskDetailBody {
   Order?: string;
   /**
    * 页码，系统将仅返回该页面上的任务。默认值为 1。
-   * @example "1"
+   * @example 1
    */
   PageNum?: number;
   /**
    * 每页条数，取值范围为 [10,1000]。默认值为 100。
-   * @example "10"
+   * @example 10
    */
   PageSize?: number;
   /**
    * 查询开始时间，unix 时间戳，单位为秒。
    * @format int64
-   * @example "1721703949"
+   * @example 1721703949
    */
   StartTime: number;
   /**
@@ -21930,7 +23237,7 @@ export interface GetImageContentTaskDetailRes {
       /**
        * 任务的创建时间
        * @format int64
-       * @example "1721703949"
+       * @example 1721703949
        */
       CreateTime: number;
       /**
@@ -21971,7 +23278,7 @@ export interface GetImageContentTaskDetailRes {
       /**
        * 任务的更新时间
        * @format int64
-       * @example "1721703964"
+       * @example 1721703964
        */
       UpdateTime: number;
       /**
@@ -21982,17 +23289,17 @@ export interface GetImageContentTaskDetailRes {
     }[];
     /**
      * 当前页码
-     * @example "1"
+     * @example 1
      */
     PageNum: number;
     /**
      * 每页最大记录数
-     * @example "10"
+     * @example 10
      */
     PageSize: number;
     /**
      * 总记录数
-     * @example "1"
+     * @example 1
      */
     Total: number;
   };
@@ -22007,7 +23314,7 @@ export interface GetImageDetectResultBody {
   /**
    * 当 DetectType 取值 `face` 时，为必填。
    *
-   * 人脸检测阈值，默认值为 0.52，取值范围为 (0,1)。值越高，对检测结果过滤越严格，召回率越低，精确率越高。
+   * 人脸检测阈值，推荐值为 0.52（默认值），取值范围为 (0,1)。值越高，对检测结果过滤越严格，召回率越低，精确率越高。
    *
    * :::tip
    * - 阈值过低，表示图片中的检测样本较多，可能会导致非人脸样本被纳入检测范围，从而降低精确率。
@@ -22028,6 +23335,7 @@ export interface GetImageDetectResultBody {
 export interface GetImageDetectResultQuery {
   /**
    * 待检测图片对应的服务 ID。
+   *
    * - 您可以在 veImageX 控制台[服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。
    * - 您也可以通过 OpenAPI 的方式获取服务 ID，具体请参考[获取所有服务信息](https://www.volcengine.com/docs/508/9360)。
    * @example "serviceid1"
@@ -22077,7 +23385,8 @@ export interface GetImageDetectResultRes {
        */
       Box: number[];
       /**
-       * 坐标置信度，表示识别内容可信程度。值越大内容越准确。
+       * 坐标置信度，表示识别内容可信程度。
+       * 值越大，代表可信程度越高。置信度高于 90% 表示高可信，60%～90% 建议人工二次确认，低于 60% 表示不可信。
        * @format float
        * @example "置信度"
        */
@@ -22178,12 +23487,12 @@ export interface GetImageDuplicateDetectionRes {
 export interface GetImageElementsQuery {
   /**
    * 分页返回条数。默认 10，最大限制为 100。
-   * @example "10"
+   * @example 10
    */
   Limit?: number;
   /**
    * 分页偏移，默认 0，取值为 1 时，表示跳过一条数据，从第二条数据取值。
-   * @example "0"
+   * @example 0
    */
   Offset?: number;
   /**
@@ -22249,7 +23558,7 @@ export interface GetImageElementsRes {
     }[];
     /**
      * 要素总个数。
-     * @example "2"
+     * @example 2
      */
     Total: number;
   };
@@ -22275,7 +23584,7 @@ export interface GetImageEnhanceResultBody {
    * 增强模型，取值如下所示：
    * * `0`：通用模型
    * * `1`：低质专清模型
-   * @example "0"
+   * @example 0
    */
   Model: number;
   /**
@@ -22340,7 +23649,7 @@ export interface GetImageEraseModelsQuery {
    * 模型。默认取值为`0`。
    * * 0：自动检测并擦除模型列表。
    * * 1：指定区域擦除模型列表。
-   * @example "0"
+   * @example 0
    */
   Type?: number;
 }
@@ -22520,7 +23829,7 @@ export interface GetImageFontsRes {
 export interface GetImageMigrateTasksQuery {
   /**
    * 分页查询时，显示的每页数据的最大条数。默认值为 10，最大值为 1000。
-   * @example "10"
+   * @example 10
    */
   Limit?: number;
   /**
@@ -22529,7 +23838,7 @@ export interface GetImageMigrateTasksQuery {
    * 例如，指定分页条数 Limit = 10，分页偏移量 Offset = 10，表示从查询结果的第 11 条记录开始返回数据，共展示 10 条数据。
    * :::
    * @format int64
-   * @example "0"
+   * @example 0
    */
   Offset?: number;
   /**
@@ -22628,7 +23937,7 @@ export interface GetImageMigrateTasksRes {
          * - `0`：直接覆盖同名文件
          * - `1`：增加文件名后缀，后缀为 任务 ID
          * - `2`：跳过同名文件，即不做迁移
-         * @example "1"
+         * @example 1
          */
         UploadConf: number;
       };
@@ -22650,7 +23959,7 @@ export interface GetImageMigrateTasksRes {
         /**
          * 失败错误码。仅当 `Status`=`Failed` 时有值。
          *
-         * @example "613100"
+         * @example 613100
          */
         ErrCode: number;
         /**
@@ -22663,35 +23972,35 @@ export interface GetImageMigrateTasksRes {
          * 迁移失败文件数
          *
          * @format int64
-         * @example "1"
+         * @example 1
          */
         FailCnt: number;
         /**
          * 迁移成功文件量，单位为 byte
          *
          * @format int64
-         * @example "346641"
+         * @example 346641
          */
         SuccessAmount: number;
         /**
          * 迁移成功文件数
          *
          * @format int64
-         * @example "4"
+         * @example 4
          */
         SuccessCnt: number;
         /**
          * 迁移文件总量，单位为 byte
          *
          * @format int64
-         * @example "5523453"
+         * @example 5523453
          */
         TotalAmount: number;
         /**
          * 总文件数
          *
          * @format int64
-         * @example "5"
+         * @example 5
          */
         TotalCnt: number;
       };
@@ -22845,7 +24154,7 @@ export interface GetImageMigrateTasksRes {
         Format: string;
         /**
          * 转码质量参数。对于 PNG 为无损压缩，其他格式下其值越小，压缩率越高，画质越差。
-         * @example "75"
+         * @example 75
          */
         Quality: number;
       };
@@ -22853,7 +24162,7 @@ export interface GetImageMigrateTasksRes {
     /**
      * 总任务数
      * @format int64
-     * @example "1"
+     * @example 1
      */
     Total: number;
   };
@@ -22864,7 +24173,7 @@ export interface GetImageMonitorRulesQuery {
   AppId?: string;
   /**
    * 分页条数。默认值为 10，取值范围为（0，100]。
-   * @example "10"
+   * @example 10
    */
   Limit?: number;
   /**
@@ -22874,7 +24183,7 @@ export interface GetImageMonitorRulesQuery {
   NamePtn?: string;
   /**
    * 分页偏移量。默认值为 0，表示从最新一个开始获取。
-   * @example "0"
+   * @example 0
    */
   Offset?: number;
   /**
@@ -22925,12 +24234,12 @@ export interface GetImageMonitorRulesRes {
            *
            * - `5`
            * - `10`
-           * @example "5"
+           * @example 5
            */
           AggrInterval: number;
           /**
            * 样本量阈值。被监控指标超过该值时触发告警。
-           * @example "200"
+           * @example 200
            */
           CntThreshold?: number;
           /**
@@ -22972,12 +24281,12 @@ export interface GetImageMonitorRulesRes {
            * - `1`
            * - `3`
            * - `5`
-           * @example "3"
+           * @example 3
            */
           RepeatCnt: number;
           /**
            * 指标比较阈值，需要与 `CntThreshold` 同时被满足才会触发告警。
-           * @example "50"
+           * @example 50
            */
           Threshold: number;
         }[];
@@ -23050,7 +24359,7 @@ export interface GetImageMonitorRulesRes {
        * - `30`
        * - `40`
        * - `50`
-       * @example "5"
+       * @example 5
        */
       Frequency: number;
       /**
@@ -23113,7 +24422,7 @@ export interface GetImageMonitorRulesRes {
          * - `30`
          * - `60`
          * - `360`
-         * @example "30"
+         * @example 30
          */
         SilentDur: number;
         /**
@@ -23155,7 +24464,7 @@ export interface GetImageMonitorRulesRes {
     }[];
     /**
      * 规则总数
-     * @example "1"
+     * @example 1
      */
     Total: number;
   };
@@ -23264,7 +24573,7 @@ export interface GetImageOCRV2Res {
        * :::tip
        * 其他缺陷类别编号识别还在训练增加中。
        * :::
-       * @example "0"
+       * @example 0
        */
       ClassLabel?: number;
       /**
@@ -23287,7 +24596,7 @@ export interface GetImageOCRV2Res {
       Message?: string;
       /**
        * 算子服务处理状态，0: 成功 -1: 图片载入失败 -2: 图片检测失败
-       * @example "0"
+       * @example 0
        */
       Status?: number;
     };
@@ -23302,7 +24611,7 @@ export interface GetImageOCRV2Res {
       Message?: string;
       /**
        * 算子服务处理状态，0: 成功 -1: 图片载入失败 -2: 图片检测失败
-       * @example "0"
+       * @example 0
        */
       Status?: number;
     };
@@ -23439,7 +24748,7 @@ export interface GetImagePSDetectionRes {
      * 置信度标签，取值如下所示：
      * - 1：正常
      * - 0：高风险
-     * @example "1"
+     * @example 1
      */
     Label: number;
     /**
@@ -23663,6 +24972,65 @@ export interface GetImageServiceRes {
     Version: string;
   };
   Result?: {
+    /** 存储规则。 */
+    StorageRulesV2?: {
+      /** 中止未完成的分段上传配置。 */
+      AbortIncompleteMultipartUpload?: {
+        /** 距启动后的天数。 */
+        DaysAfterInitiation?: number;
+      };
+      /** 是否启用。 */
+      Enable: boolean;
+      /** 事件类型。 */
+      Event: string;
+      /** 过期时间。 */
+      Expiration?: {
+        /** 日期。 */
+        Date?: string;
+        /** 天数。 */
+        Days?: number;
+      };
+      /** 过滤条件。 */
+      Filter?: {
+        /** 是否包含大于等于。 */
+        GreaterThanIncludeEqual?: string;
+        /** 小于等于条件。 */
+        LessThanIncludeEqual?: string;
+        /** 对象大小大于。取值范围为 `[ ]`，单位为，默认值为``。 */
+        ObjectSizeGreaterThan?: number;
+        /** 对象大小上限。 */
+        ObjectSizeLessThan?: number;
+      };
+      /** 请提供参数的名字（Id）和类型（string），我会根据输入生成参数的一句话描述。 */
+      Id: string;
+      /** 非当前版本的过期时间。 */
+      NonCurrentVersionExpiration?: {
+        /** 非当前日期。 */
+        NonCurrentDate?: string;
+        /** 非当前天数。 */
+        NonCurrentDays?: number;
+      };
+      /** 非当前版本转换规则。 */
+      NonCurrentVersionTransitions?: {
+        /** 非当前日期。 */
+        NonCurrentDate?: string;
+        /** 非当前天数。 */
+        NonCurrentDays?: number;
+        /** 存储类型。 */
+        StorageClass: string;
+      }[];
+      /** 参数的前缀和类型。 */
+      Prefix: string;
+      /** 状态转换。 */
+      Transitions?: {
+        /** 日期字符串。 */
+        Date?: string;
+        /** 天数。 */
+        Days?: number;
+        /** 存储类型。 */
+        StorageClass: string;
+      }[];
+    }[];
     /**
      * 服务的授权 Bucket 列表。
      * @example "["tos-cn-i-fc*****cf"]"
@@ -23786,12 +25154,14 @@ export interface GetImageServiceRes {
        * - `false`：关闭
        * @example "true"
        */
-      ResourceProtect: boolean;
+      ImageProtect: boolean;
       /**
        * 样式分割符
        * @example "["@"]"
        */
-      StyleSeparators: string[];
+      ImageStyleSeparators: string[];
+      QnCosPreference: string;
+      QueryStyleCombine: boolean;
     };
     /**
      * 镜像回源配置，默认关闭。
@@ -23930,7 +25300,7 @@ export interface GetImageServiceRes {
       /**
        * 保存时间，单位为秒。
        * @format int64
-       * @example "0"
+       * @example 0
        */
       TTL: number;
     };
@@ -23947,14 +25317,20 @@ export interface GetImageServiceRes {
        * - `ARCHIVE`：文件转归档存储
        * - `COLD_ARCHIVE`：文件转冷归档存储
        *
+       * - DELETE，删除
+       * - IA，转为低频存储
+       * - ARCHIVE_FR，转为归档闪回存储
+       * - COLD_ARCHIVE，转为冷归档存储
+       * - ARCHIVE，转为归档存储
        * @example "IA"
        */
-      Action: string;
+      Action?: string;
       /**
        * 策略天数，按照 Event 事件 Day 天后执行 Action 事件，即当匹配文件的上传时间符合指定天数后，自动按照处理策略对资源进行处理。
-       * @example "24"
+       * 天数，与Date冲突
+       * @example 24
        */
-      Day: number;
+      Day?: number;
       /**
        * 是否启用策略，取值如下所示：
        *
@@ -23968,12 +25344,21 @@ export interface GetImageServiceRes {
        * @example "upload"
        */
       Event: string;
+      /** @example "IA" */
+      NonCurrentAction?: string;
+      /**
+       * 非当前天数。取值范围为 `[ ]`，单位为，默认值为``。
+       * @example 30
+       */
+      NonCurrentDay?: number;
       /**
        * 文件前缀，例如设置为 `prefix` 后，规则将只对名称以 `prefix` 开头的存储资源生效。
+       * 前缀。
        * @example "prefix"
        */
-      Prefix: string;
+      Prefix?: string;
     }[];
+    StorageVersioning?: number;
     /**
      * 该服务的图片模板固定前缀。
      * @example "tplv-fc*****cf-"
@@ -24148,7 +25533,7 @@ export interface GetImageSettingRuleHistoryQuery {
   AppId: string;
   /**
    * 分页查询时，显示的每页数据的最大条数。取值范围为 [1,100]，默认值为 10。
-   * @example "10"
+   * @example 10
    */
   Limit?: number;
   /**
@@ -24156,7 +25541,7 @@ export interface GetImageSettingRuleHistoryQuery {
    * :::tip
    * 例如，指定分页条数 Limit = 10，分页偏移量 Offset = 10，表示从查询结果的第 11 条记录开始返回数据，共展示 10 条数据。
    * :::
-   * @example "0"
+   * @example 0
    */
   Offset?: number;
   /**
@@ -24247,7 +25632,7 @@ export interface GetImageSettingRuleHistoryRes {
     }[];
     /**
      * 总记录条数
-     * @example "1"
+     * @example 1
      */
     Total: number;
   };
@@ -24385,7 +25770,7 @@ export interface GetImageSettingRulesRes {
       Name: string;
       /**
        * 规则优先级，值越小优先级越高。
-       * @example "1"
+       * @example 1
        */
       Priority: number;
       /**
@@ -24407,7 +25792,7 @@ export interface GetImageSettingRulesRes {
     SettingId: string;
     /**
      * 配置项状态。当前仅支持取值为 `0`，表示状态正常。
-     * @example "0"
+     * @example 0
      */
     Status: number;
     /**
@@ -24538,7 +25923,7 @@ export interface GetImageSettingsRes {
       SettingId: string;
       /**
        * 配置项状态。当前仅支持取值为 `0`，表示状态正常。
-       * @example "0"
+       * @example 0
        */
       Status: number;
       /**
@@ -24591,7 +25976,7 @@ export interface GetImageSettingsRes {
 export interface GetImageSmartCropResultBody {
   /**
    * 图片裁剪后的高度设置，单位为 px。当图片小于设置的宽高时，将不被裁剪。
-   * @example "100"
+   * @example 100
    */
   Height?: number;
   /**
@@ -24622,7 +26007,7 @@ export interface GetImageSmartCropResultBody {
   /**
    * 当`Policy`取值为`fglass`时的高斯模糊参数，取值为大于 0 的整数，值越大越模糊。
    * @format float
-   * @example "1"
+   * @example 1
    */
   Sigma?: number;
   /**
@@ -24632,7 +26017,7 @@ export interface GetImageSmartCropResultBody {
   StoreUri: string;
   /**
    * 图片裁剪后的宽度设置，单位为 px。当图片小于设置的宽高时，将不被裁剪。
-   * @example "100"
+   * @example 100
    */
   Width?: number;
 }
@@ -24678,14 +26063,14 @@ export interface GetImageSmartCropResultRes {
 
 export interface GetImageStorageFilesQuery {
   /**
-   * 指定目录分隔符，默认值为 `/`。所有文件名字包含指定的前缀，第一次出现 `Delimiter` 字符之间的文件作为一组元素（即 `CommonPrefixe`）。
+   * 指定目录分隔符，默认值为空。所有文件名字包含指定的前缀，第一次出现 `Delimiter` 字符之间的文件作为一组元素（即 `CommonPrefixe`）。
    * @example "/"
    */
   Delimiter?: string;
   /**
    * 一次查询列出的文件信息条目数，取值范围为[1,1000]。默认值为 10。
    * @format int64
-   * @example "1000"
+   * @example 1000
    */
   Limit?: number;
   /**
@@ -24712,80 +26097,72 @@ export interface GetImageStorageFilesQuery {
 
 export interface GetImageStorageFilesRes {
   ResponseMetadata: {
-    /**
-     * 请求的接口名，属于请求的公共参数。
-     * @example "{Action}"
-     */
+    /** @example "GetImageStorageFiles" */
     Action: string;
-    /**
-     * 请求的Region，例如：cn-north-1
-     * @example "cn-north-1"
-     */
+    /** @example "cn-north-1" */
     Region: string;
-    /** RequestID为每次API请求的唯一标识。 */
+    /** @example "202306041104200100100232280022D31" */
     RequestId: string;
-    /** 请求的服务，属于请求的公共参数。 */
+    /** @example "ImageX" */
     Service: string;
-    /**
-     * 请求的版本号，属于请求的公共参数。
-     * @example "{Version}"
-     */
+    /** @example "2018-08-01" */
     Version: string;
   };
-  Result?: {
+  Result: {
     /**
      * 返回目录名称的数组集合。
-     * 当前遍历目录包含的目录名称，对于子目录，需要递归列举
      * @example "["Example/mov/"]"
      */
-    CommonPrefix?: string[];
+    CommonPrefix: string[];
     /**
      * 是否还有更多文件，取值如下所示：
+     *
      * - `true`：是，还有文件信息未列出
      * - `false`：否，已列出所有文件信息
-     * 是否还有更多文件
      * @example "true"
      */
     HasMore: boolean;
     /**
      * 文件列表
-     * 文件列表
-     * @format list
+     *
      * @example "-"
      */
     Items: {
       /**
        * 文件大小，单位为 byte。
-       * 文件大小，单位字节
-       * @format int64
-       * @example "837"
+       * @example 837
        */
-      FileSize: number;
+      FileSize?: number;
       /**
        * 文件存储 Key
-       * 文件存储key
        * @example "Example/imagex.png"
        */
-      Key: string;
+      Key?: string;
       /**
        * 文件最后修改时间，RFC 时间格式。
-       * 文件最后修改时间
        * @example "Fri, 01 Sep 2023 06:52:37 GMT"
        */
-      LastModified: string;
+      LastModified?: string;
+      /**
+       * 文件的存储类型，取值如下所示：
+       * - `STANDARD`：标准存储
+       * - `IA`：低频存储
+       * - `ARCHIVE`：归档存储
+       * - `COLD_ARCHIVE`：冷归档存储
+       * @example "STANDARD"
+       */
+      StorageClass?: string;
       /**
        * 文件存储 URI
-       * 文件URI
        * @example "tos-cn-i-5s**fo/Example/imagex.png"
        */
-      StoreUri: string;
+      StoreUri?: string;
     }[];
     /**
      * `HasMore` 取值 `true` 时，即本次查询还有未列举到的文件信息时。`Marker` 作为起始条目位置标记，您需要在下一次列举时传入该值。
-     * HasMore = true时，下次列举从该Marker开始
      * @example "eyJjIjowLCJrIjoiMDAwMDAyLmljbyJ9"
      */
-    Marker?: string;
+    Marker: string;
   };
 }
 
@@ -24971,7 +26348,7 @@ export interface GetImageStyleResultBody {
   OutputFormat?: string;
   /**
    * 渲染结果图的编码质量。默认为 75，取值范围为 [1,100]，值越大，结果图的质量越高。
-   * @example "75"
+   * @example 75
    */
   OutputQuality?: number;
   /**
@@ -25067,12 +26444,12 @@ export interface GetImageStyleResultRes {
 export interface GetImageStylesQuery {
   /**
    * 分页返回条数，取值范围为[0,100]，默认 10 条。
-   * @example "10"
+   * @example 10
    */
   Limit?: number;
   /**
    * 分页偏移，默认 0，取值为 1 时，表示跳过一条数据，从第二条数据取值。
-   * @example "0"
+   * @example 0
    */
   Offset?: number;
   /**
@@ -25165,7 +26542,7 @@ export interface GetImageStylesRes {
     }[];
     /**
      * 总样式个数。
-     * @example "1"
+     * @example 1
      */
     Total: number;
   };
@@ -25176,7 +26553,7 @@ export interface GetImageSuperResolutionResultBody {
   /**
    * 超分倍率，默认值为`2`，支持取值为：`2`、`3`、`4`、`5`、`6`、`7`、`8`。
    * @format float
-   * @example "2"
+   * @example 2
    */
   Multiple?: number;
   /**
@@ -25404,19 +26781,19 @@ export interface GetImageTranscodeDetailsQuery {
    * 任务提交的截止 Unix 时间戳
    * `StartTime`与`EndTime`时间间隔最大不超过 7 天。
    * @format int64
-   * @example "1685913599"
+   * @example 1685913599
    */
   EndTime: number;
   /**
    * 分页条数，取值范围为(0, 100]。
    * @format int64
-   * @example "10"
+   * @example 10
    */
   Limit: number;
   /**
    * 分页偏移量，默认为 0。取值为 1 时，表示跳过第一条数据，从第二条数据取值。
    * @format int64
-   * @example "0"
+   * @example 0
    */
   Offset?: number;
   /**
@@ -25424,7 +26801,10 @@ export interface GetImageTranscodeDetailsQuery {
    * @example "649a9dbc32**064d44cf5b0"
    */
   QueueId: string;
-  /** 队列所在地区。默认当前地区。ToB取值枚举：cn、va、sg。 */
+  /**
+   * 队列所在地区。默认当前地区为 **cn**。
+   * @example "cn"
+   */
   Region?: string;
   /**
    * 返回图片 url 或 uri 中包含该值的任务。默认为空，不传则返回所有任务。
@@ -25435,7 +26815,7 @@ export interface GetImageTranscodeDetailsQuery {
    * 任务提交的起始 Unix 时间戳
    * `StartTime`与`EndTime`时间间隔最大不超过 7 天。
    * @format int64
-   * @example "1684713599"
+   * @example 1684713599
    */
   StartTime: number;
   /**
@@ -25448,6 +26828,11 @@ export interface GetImageTranscodeDetailsQuery {
    * @example "Pending"
    */
   Status?: string;
+  /**
+   * 任务 ID，缺省情况下查询指定队列下所有任务详情。您可通过调用 [GetImageTranscodeTasks](https://www.volcengine.com/docs/508/1356555)获取指定队列的全部任务 ID。
+   * @example "67174744adc54449623155b9"
+   */
+  TaskId?: string;
 }
 
 export interface GetImageTranscodeDetailsRes {
@@ -25475,7 +26860,7 @@ export interface GetImageTranscodeDetailsRes {
        */
       EndAt?: string;
       /**
-       * 执行条目 ID
+       * 条目 ID
        * @example "649a9332***80e9cc0a0ec"
        */
       EntryId?: string;
@@ -25485,7 +26870,7 @@ export interface GetImageTranscodeDetailsRes {
        */
       ExecInput?: {
         /**
-         * 图片 url 或 uri
+         * 原图图片的 URL 或存储 URI。
          * @example "tos-cn-i-5sq****fo/2e39b35b98524100ae12b2ae07283cb2"
          */
         Image: string;
@@ -25510,6 +26895,34 @@ export interface GetImageTranscodeDetailsRes {
          * @example "解码图片要素失败"
          */
         ErrMsg: string;
+        /** 请提供具体的参数名字和类型。 */
+        Evals: {
+          /** 参数格式。 */
+          Format: string;
+          /** 请提供具体的参数名字（Index）和类型（string），以便我为您生成参数描述。 */
+          Index: number;
+          /** 参数名称。 */
+          Name: string;
+          /** 当前阶段。 */
+          Phase: string;
+          /** 实例规格。 */
+          Size: number;
+          /** 参数值。 */
+          Value: {
+            /** 美学配置。 */
+            Aesthetic: number;
+            /** 噪声类型。 */
+            Noise: number;
+            /** 峰值信噪比。 */
+            PSNR: number;
+            /** 结构相似性指数。 */
+            SSIM: number;
+            /** 视频多重评估函数。 */
+            VMAF: number;
+            /** 视频质量评分。 */
+            VQScore: number;
+          };
+        }[];
         /**
          * 转码结果图格式
          * @example "png"
@@ -25521,9 +26934,10 @@ export interface GetImageTranscodeDetailsRes {
          */
         Output: string;
         /**
-         * 转码结果图大小，单位为 byte
+         * 转码结果图大小，单位为 byte。
+         * 尺寸。取值范围为 `[ ]`，单位为，默认值为``。
          * @format int64
-         * @example "9800"
+         * @example 9800
          */
         Size: number;
       };
@@ -25551,7 +26965,7 @@ export interface GetImageTranscodeDetailsRes {
     /**
      * 总数
      * @format int64
-     * @example "2"
+     * @example 2
      */
     Total: number;
   };
@@ -25560,12 +26974,12 @@ export interface GetImageTranscodeDetailsRes {
 export interface GetImageTranscodeQueuesQuery {
   /**
    * 分页条数，取值范围为(0,100]。
-   * @example "10"
+   * @example 10
    */
   Limit: number;
   /**
    * 分页偏移量，默认为 0。取值为 1 时，表示跳过第一条数据，从第二条数据取值。
-   * @example "0"
+   * @example 0
    */
   Offset?: number;
   /**
@@ -25708,7 +27122,7 @@ export interface GetImageTranscodeQueuesRes {
     /**
      * 符合条件的队列总数
      * @format int64
-     * @example "2"
+     * @example 2
      */
     Total: number;
   };
@@ -25717,7 +27131,7 @@ export interface GetImageTranscodeQueuesRes {
 export interface GetImageUpdateFilesQuery {
   /**
    * 分页查询时，显示的每页数据的最大条数。最大值为 100。
-   * @example "50"
+   * @example 50
    */
   Limit?: number;
   /**
@@ -25725,7 +27139,7 @@ export interface GetImageUpdateFilesQuery {
    * :::tip
    * 例如，指定分页条数 Limit = 10，分页偏移量 Offset = 10，表示从查询结果的第 11 条记录开始返回数据，共展示 10 条数据。
    * :::
-   * @example "0"
+   * @example 0
    */
   Offset?: number;
   /**
@@ -25739,7 +27153,7 @@ export interface GetImageUpdateFilesQuery {
    * 获取类型，取值如下所示：
    * - `0`：获取刷新 URL 列表
    * - `1`：获取禁用 URL 列表
-   * @example "1"
+   * @example 1
    */
   Type?: number;
   /**
@@ -25785,7 +27199,7 @@ export interface GetImageUpdateFilesRes {
     Status: string;
     /**
      * 符合条件的 URL 总数
-     * @example "1"
+     * @example 1
      */
     Total: number;
     /**
@@ -25852,7 +27266,7 @@ export interface GetImageUploadFileRes {
     Disabled?: boolean;
     /**
      * 文件字节数。
-     * @example "7749"
+     * @example 7749
      */
     FileSize?: number;
     /**
@@ -25866,6 +27280,10 @@ export interface GetImageUploadFileRes {
      * @example "Wed, 24 Jan 2024 00:00:00 GMT"
      */
     RestoreExpiryDate?: string;
+    /** 恢复请求日期。 */
+    RestoreRequestDate?: string;
+    /** 恢复取回方式 */
+    RestoreTier?: string;
     /**
      * 文件是否处于恢复中状态，取值如下所示：
      * - `true`：是
@@ -25905,13 +27323,13 @@ export interface GetImageUploadFileRes {
 export interface GetImageUploadFilesQuery {
   /**
    * 获取文件个数，最大值为 100。
-   * @example "100"
+   * @example 100
    */
   Limit?: number;
   /**
    * 分页标志。
    * @format int64
-   * @example "0"
+   * @example 0
    */
   Marker?: number;
   /**
@@ -26272,22 +27690,22 @@ export interface GetLicensePlateDetectionRes {
     Locations: {
       /**
        * 车牌区域左上角 X 轴坐标。
-       * @example "360"
+       * @example 360
        */
       X1: number;
       /**
        * 车牌区域右下角 X 轴坐标。
-       * @example "513"
+       * @example 513
        */
       X2: number;
       /**
        * 车牌区域左上角 Y 轴坐标。
-       * @example "202"
+       * @example 202
        */
       Y1: number;
       /**
        * 车牌区域右下角 Y 轴坐标。
-       * @example "286"
+       * @example 286
        */
       Y2: number;
     }[];
@@ -26367,14 +27785,14 @@ export interface GetPrivateImageTypeRes {
      * 请求参数`Method`中包含`cloth`则返回该参数，取值如下所示：
      * - 1： 包含衣物
      * - 0： 不包含衣物
-     * @example "1"
+     * @example 1
      */
     Cloth: number;
     /**
      * 请求参数`Method`中包含`face`则返回该参数，取值如下所示：
      * - 1： 包含人脸
      * - 0： 不包含人脸
-     * @example "1"
+     * @example 1
      */
     Face: number;
   };
@@ -26402,19 +27820,19 @@ export interface GetProductAIGCResultBody {
   /**
    * 每次生成的图片数量，取值范围为 [1,4]，默认值为 4。
    * 每次生成的图片数量，[0,4], 默认4
-   * @example "4"
+   * @example 4
    */
   BatchSize?: number;
   /**
    * 设置商品放置的安全区中心坐标和宽高。取值需大于等于 `-1`，设为默认值 `-1` 时，商品自动居中，安全区为全图；否则需同时指定区安全区四个参数的值。
    * 设置商品放置的安全区中心坐标和宽高：设为默认值-1时，商品自动居中，安全区为全图；否则用户需同时指定四个参数的值，取值范围大于等于-1
-   * @example "0"
+   * @example 0
    */
   CX?: number;
   /**
    * 设置商品放置的安全区中心坐标和宽高。取值需大于等于 `-1`，设为默认值 `-1` 时，商品自动居中，安全区为全图；否则需同时指定区安全区四个参数的值。
    * 设置商品放置的安全区中心坐标和宽高：设为默认值-1时，商品自动居中，安全区为全图；否则用户需同时指定四个参数的值，取值范围大于等于-1
-   * @example "0"
+   * @example 0
    */
   CY?: number;
   /**
@@ -26423,6 +27841,8 @@ export interface GetProductAIGCResultBody {
    * @example "-"
    */
   Extra?: string;
+  /** Lora 配置。 */
+  LoraConfig?: string;
   /**
    * 是否使用分割处理图片，取值如下所示：
    * - `true`：分隔处理。
@@ -26469,7 +27889,7 @@ export interface GetProductAIGCResultBody {
    * 结果图是指定`BatchSize`张长宽比为 1:1 的方图。
    * :::
    * 输出图片的长度，512~1024
-   * @example "1"
+   * @example 1
    */
   OutputSize: number;
   /**
@@ -26507,6 +27927,8 @@ export interface GetProductAIGCResultBody {
    * @example "0.6"
    */
   ProductRatio?: number;
+  /** 商品比例 */
+  ProductRatios?: number[][];
   /**
    * 是否返回场景图，取值如下所示：
    * - `true`：（默认）是
@@ -26518,13 +27940,13 @@ export interface GetProductAIGCResultBody {
   /**
    * 设置商品放置的安全区中心坐标和宽高。取值需大于等于 `-1`，设为默认值 `-1` 时，商品自动居中，安全区为全图；否则需同时指定区安全区四个参数的值。
    * 设置商品放置的安全区中心坐标和宽高：设为默认值-1时，商品自动居中，安全区为全图；否则用户需同时指定四个参数的值，取值范围大于等于-1
-   * @example "0"
+   * @example 0
    */
   SafeH?: number;
   /**
    * 设置商品放置的安全区中心坐标和宽高。取值需大于等于 `-1`，设为默认值 `-1` 时，商品自动居中，安全区为全图；否则需同时指定区安全区四个参数的值。
    * 设置商品放置的安全区中心坐标和宽高：设为默认值-1时，商品自动居中，安全区为全图；否则用户需同时指定四个参数的值，取值范围大于等于-1
-   * @example "0"
+   * @example 0
    */
   SafeW?: number;
   /**
@@ -26612,6 +28034,8 @@ export interface GetProductAIGCResultBody {
      */
     SellingPointText?: string;
   };
+  /** 打分策略规则。 */
+  StrategyRules?: Record<string, Record<string, unknown>>;
   /**
    * 商品主体图的访问 URL（公网可访问）。建议为包含完整商品主体的白底图或透底图，尽量避免复杂背景的影响，以确保最终生成效果的质量。
    * @example "http://test.com/demo.jpeg"
@@ -26672,6 +28096,8 @@ export interface GetProductAIGCResultRes {
      * @example "[0.91, 0.83, 0.52, 0.61]"
      */
     AestheticScores?: number[];
+    /** AIGC图像评分。 */
+    AigcImageScores?: Record<string, number[]>;
     /**
      * 商品场景图 URI 列表，未采用文字卖点。
      * @example "["tos-cn-i-8h**7j/8912623**1276102"]"
@@ -26737,7 +28163,7 @@ export interface GetResourceURLQuery {
    * :::tip
    * 仅当开启 [URL 鉴权](https://www.volcengine.com/docs/508/128828)配置后，`Timestamp` 配置生效。
    * :::
-   * @example "1800"
+   * @example 1800
    */
   Timestamp?: number;
   /**
@@ -26867,7 +28293,7 @@ export interface GetSegmentImageBody {
     Color: string;
     /**
      * 描边宽度，单位为 px。取值范围为 0 到正整数，默认 10px。
-     * @example "10"
+     * @example 10
      */
     Size: number;
   };
@@ -26977,7 +28403,7 @@ export interface GetServiceDomainsRes {
     cname?: string;
     /**
      * 创建时间
-     * @example "1664278771"
+     * @example 1664278771
      */
     create_time?: number;
     /**
@@ -27090,7 +28516,7 @@ export interface GetServiceDomainsRes {
 }
 
 export interface GetSyncAuditResultBody {
-  /** @example "1" */
+  /** @example 1 */
   AuditAbility: number;
   /** @example "" */
   AuditDimensions: string[];
@@ -27151,12 +28577,12 @@ export interface GetTemplatesFromBinQuery {
   Asc?: string;
   /**
    * 分页获取条数，默认 10。
-   * @example "10"
+   * @example 10
    */
   Limit?: number;
   /**
    * 分页偏移。默认 0。取值为1，表示跳过第一条数据，从第二条数据开始取值。
-   * @example "0"
+   * @example 0
    */
   Offset?: number;
   /**
@@ -27342,7 +28768,7 @@ export interface GetUrlFetchTaskRes {
     CallbackBodyType?: string;
     /**
      * 错误码，仅当`Status`取值`Failed`时有返回值。
-     * @example "604624"
+     * @example 604624
      */
     Code?: number;
     /**
@@ -27527,7 +28953,7 @@ export interface PreviewImageUploadFileRes {
   Result?: {
     /**
      * 图片播放时间，单位为毫秒，仅当图片为动态图时返回。
-     * @example "6"
+     * @example 6
      */
     ImageDuration?: number;
     /**
@@ -27537,22 +28963,22 @@ export interface PreviewImageUploadFileRes {
     ImageFormat: string;
     /**
      * 图片帧数。
-     * @example "20"
+     * @example 20
      */
     ImageFrames: number;
     /**
      * 图片高度。
-     * @example "683"
+     * @example 683
      */
     ImageHeight: number;
     /**
      * 图片大小，单位为字节。
-     * @example "64859"
+     * @example 64859
      */
     ImageSize: number;
     /**
      * 图片宽度。
-     * @example "1023"
+     * @example 1023
      */
     ImageWidth: number;
     /**
@@ -27873,8 +29299,14 @@ export interface UpdateFileStorageClassBody {
    * 修改后的存储类型，取值如下所示：
    * - `STANDARD`：标准存储
    * - `IA`：低频存储
+   * - `ARCHIVE_FR`：归档闪回存储
    * - `ARCHIVE`：归档存储
    * - `COLD_ARCHIVE`：冷归档存储
+   * - STANDARD 标准存储
+   * - IA 低频存储
+   * - ARCHIVE_FR 归档闪回存储
+   * - COLD_ARCHIVE 冷归档存储
+   * - ARCHIVE 归档存储
    * @example "IA"
    */
   StorageClass: string;
@@ -28512,7 +29944,7 @@ export interface UpdateImageDomainBandwidthLimitBody {
      * :::tip
      * 当 `limit_type` 为 `randomreject` 时，不支持自定义该配置。
      * :::
-     * @example "1"
+     * @example 1
      */
     speed_limit_rate: number;
     /**
@@ -28532,7 +29964,7 @@ export interface UpdateImageDomainBandwidthLimitBody {
      * :::tip
      * 当 `limit_type` 为 `randomreject` 时，不支持自定义该配置。
      * :::
-     * @example "1"
+     * @example 1
      */
     speed_limit_rate_max: number;
     /**
@@ -28540,7 +29972,7 @@ export interface UpdateImageDomainBandwidthLimitBody {
      * 单位换算：1 Gbps = 1000 Mbps。
      * 全局带宽阈值，指定加速域名的带宽阈值。单位为 bps，取值范围为 [1, 1000000000000000]  的整数。
      * 单位换算：1 Gbps = 1000 Mbps。
-     * @example "1000000000"
+     * @example 1000000000
      */
     threshold: number;
   };
@@ -28804,7 +30236,7 @@ export interface UpdateImageDomainConfigBody {
       /**
        * 如果 enable_https 是 true，该参数为必填。
        * Strict-Transport-Security 响应头在浏览器中的缓存过期时间，单位是秒。取值范围是 [0,31,536,000]。31,536,000 秒表示 365 天。如果该参数值指定为 0，其效果等同于禁用 HSTS 设置。
-       * @example "23400"
+       * @example 23400
        */
       ttl?: number;
     };
@@ -28842,7 +30274,7 @@ export interface UpdateImageDomainConfigBody {
      */
     is_white_mode: boolean;
     /**
-     * 黑白名单 IP 地址，最大限制为 100。
+     * 黑白名单 IP 地址，最大限制为 1000。
      * @example "["192.0.2.0"]"
      */
     values: string[];
@@ -28877,13 +30309,13 @@ export interface UpdateImageDomainConfigBody {
    */
   referer_link?: {
     /**
-     * 是否允许空 Refer，取值如下所示：
+     * 是否允许空 Referer，取值如下所示：
      *
-     * - `true`：允许空 Refer
-     * - `false`：不允许空 Refer
+     * - `true`：允许空 Referer
+     * - `false`：不允许空 Referer
      * @example "false"
      */
-    allow_empty_refer: boolean;
+    allow_empty_refer?: boolean;
     /**
      * 是否开启 Referer 防盗链，取值如下所示：
      *
@@ -28909,18 +30341,23 @@ export interface UpdateImageDomainConfigBody {
     /**
      * 是否选择白名单，取值如下所示：
      *
-     * - `true`：选择白名单
-     * - `false`：不选择白名单
+     * - `true`：配置白名单
+     * - `false`：配置黑名单
      * @example "true"
      */
     is_white_mode: boolean;
-    /** 正则表达式规则列表 */
-    regex_values: string[];
     /**
-     * 根据是否为白名单，为对应的白/黑名单的值。
+     * 正则表达式规则列表，最大限制为 100 条。
+     * 请提供具体的参数名字和类型。
+     * @example "\192\.23\.1\.8\b"
+     */
+    regex_values?: string[];
+    /**
+     * 黑白名单 Referer 规则，可输入域名或 IP 地址，最大限制为 1000 条。
+     * 请提供具体的参数名字（values）和参数类型（array），以便我为您生成参数描述。
      * @example "["s.com", "y.com", "q.com"]"
      */
-    values: string[];
+    values?: string[];
   };
   /**
    * 远程鉴权设置
@@ -29048,7 +30485,7 @@ export interface UpdateImageDomainConfigBody {
         cache_key: string[];
         /**
          * 鉴权状态码的缓存时间。单位是秒。取值范围是 [1,86400]。86400 秒表示 24 小时。
-         * @example "5"
+         * @example 5
          */
         ttl: number;
       };
@@ -29093,7 +30530,7 @@ export interface UpdateImageDomainConfigBody {
         action: string;
         /**
          * 鉴权超时的时间，单位是毫秒。默认值为 200，取值范围是 [200,3600]。
-         * @example "200"
+         * @example 200
          */
         time: number;
       };
@@ -29201,20 +30638,6 @@ export interface UpdateImageDomainConfigBody {
    */
   resp_hdrs?: {
     /**
-     * 开启跨域校验，取值如下所示：
-     * - `true`：开启
-     * - `false`：关闭
-     * @example ""
-     */
-    access_origin_control?: boolean;
-    /**
-     * 表示对响应头的操作。该参数有以下取值：
-     * - `set`：表示设置一个头部。设置操作包括添加与修改。如果源站响应中已包含该头部，该头部的值会被覆盖。如果源站响应中没有包含该头部，该头部会被添加。
-     * - `delete`：表示删除一个头部。
-     * @example ""
-     */
-    action: string;
-    /**
      * Header Key，请见[支持配置的响应头](https://www.volcengine.com/docs/508/196704#%E6%94%AF%E6%8C%81%E9%85%8D%E7%BD%AE%E7%9A%84%E5%93%8D%E5%BA%94%E5%A4%B4)。
      * @example "Access-Control-Allow-Origin"
      */
@@ -29225,7 +30648,19 @@ export interface UpdateImageDomainConfigBody {
      */
     value: string;
   }[];
+  /**
+   * 共享缓存配置。共享缓存允许同账号下多个加速域名共享同一份节点上的缓存。在 veImageX 中，您可以通过设置共享缓存配置，使各个子站点之间可共享相同的公共资源，以减少带宽的使用，提高资源命中率。详细功能说明参看[共享缓存](https://www.volcengine.com/docs/508/196769)。
+   *
+   * :::tip
+   * 共享缓存为白名单功能，请[提交工单](https://console.volcengine.com/workorder/create?step=2&SubProductID=P00000080)联系技术支持为您的账号开启配置能力。
+   * :::
+   * @example "-"
+   */
   share_cache?: {
+    /**
+     * 共享域名。
+     * @example "["test1.imagex.cn","test2.imagex.cn"]"
+     */
     domains: string[];
   };
   /**
@@ -29252,7 +30687,7 @@ export interface UpdateImageDomainConfigBody {
       backup_sk: string;
       /**
        * 有效时间，单位为秒。取值范围为[1, 630720000]内的正整数，默认为 1800 秒。
-       * @example "1800"
+       * @example 1800
        */
       expire_time: number;
       /**
@@ -29278,7 +30713,7 @@ export interface UpdateImageDomainConfigBody {
       backup_sk: string;
       /**
        * 有效时间，单位为秒。取值范围为[1, 630720000]内的正整数，默认为 1800 秒。
-       * @example "1800"
+       * @example 1800
        */
       expire_time: number;
       /**
@@ -29299,7 +30734,7 @@ export interface UpdateImageDomainConfigBody {
       backup_sk: string;
       /**
        * 有效时间，单位为秒。取值范围为[1, 630720000]内的正整数，默认为 1800 秒。
-       * @example "1800"
+       * @example 1800
        */
       expire_time: number;
       /**
@@ -29320,7 +30755,7 @@ export interface UpdateImageDomainConfigBody {
       backup_sk: string;
       /**
        * 有效时间，单位为秒。取值范围为[1, 630720000]内的正整数，默认为 1800 秒。
-       * @example "1800"
+       * @example 1800
        */
       expire_time: number;
       /**
@@ -29379,7 +30814,7 @@ export interface UpdateImageDomainConfigBody {
      */
     rule_type: string;
     /**
-     * Agent 列表，最多可支持输入100个，支持通配符`*`匹配任意字符串。
+     * Agent 列表，最多可支持输入 1000 个，支持通配符 `*` 匹配任意字符串。
      * @example "["*IE*|*safari*"]"
      */
     user_agents: string[];
@@ -29535,10 +30970,10 @@ export interface UpdateImageDomainIPAuthBody {
      */
     is_white_mode: boolean;
     /**
-     * 黑白名单 IP 地址，您可以指定一个或者多个 IP 地址（如 192.0.2.0）和 IP 地址网段（192.0.2.0/24）。IP 地址和网段可以是 IPv4 或 IPv6 格式，可混合填写，最多可输入 100 个地址。
+     * 黑白名单 IP 地址，您可以指定一个或者多个 IP 地址（如 192.0.2.0）和 IP 地址网段（192.0.2.0/24）。IP 地址和网段可以是 IPv4 或 IPv6 格式，可混合填写，最多可输入 1000 个地址。
      *
      * :::warning
-     * 若您需要对名单内已配置的 `values` 地址进行增删处理，那么您需提供已配置的全量地址，并在此基础上添加或删除您期望变更的地址后，再重新传入 `values`。
+     * 若您需要对同类型名单内已设定的 `values` 地址进行增删处理，那么您可调用 [获取域名配置](https://www.volcengine.com/docs/508/9366#ip-auth) 接口获取已配置的全部地址列表后，在此基础上添加或删除您期望变更的地址，最后重新传入 `values`。
      * :::
      * @example "["192.0.2.0","192.0.2.0/24"]"
      */
@@ -29575,20 +31010,49 @@ export interface UpdateImageDomainIPAuthRes {
 
 /** title */
 export interface UpdateImageDomainUaAccessBody {
-  /** 域名 */
+  /**
+   * 域名，您可以通过[获取服务下全部域名](https://www.volcengine.com/docs/508/9379)获取服务下域名信息。
+   * @example "123***.volcimagextest.com"
+   */
   domain: string;
-  /** ua访问限制配置 */
+  /**
+   * UA 访问限制配置。
+   * @example "-"
+   */
   ua_auth: {
-    /** 表示是否允许 UA 为空或者不包含 UA 字段的请求访问加速域名 */
+    /**
+     * 是否允许 UA 为空或者不包含 UA 字段的请求访问加速域名。取值如下所示：
+     *
+     * - `true`：允许
+     * - `false`：不允许
+     * @example "true"
+     */
     allow_empty: boolean;
-    /** 是否开启ua访问限制 */
+    /**
+     * 是否开启 UA 访问限制，取值如下所示：
+     *
+     * - `true`：开启
+     * - `false`：未开启（默认）
+     * @example "true"
+     */
     enable: boolean;
     /**
-     * ua访问限制模式
+     * 黑白名单设置类型，取值如下所示：
+     *
+     * - `deny`：黑名单
+     * - `allow`：白名单（默认）
      * deny黑名单，allow白名单
+     * @example "deny"
      */
     rule_type: string;
-    /** agent列表 */
+    /**
+     * Agent 列表，最多可支持输入 1000 个，支持通配符 `*` 匹配任意字符串。输入多个时以 `|` 分割，或者一行仅输入一个。
+     *
+     * :::warning
+     * 若您需要对同类型名单内已设定的 Agent 列表进行增删处理，那么您可调用 [获取域名配置](https://www.volcengine.com/docs/508/9366#ua-list) 接口获取已配置的全部列表后，在此基础上添加或删除您期望变更的值，最后重新传入 `user_agents`。
+     * :::
+     * @example "["road"]"
+     */
     user_agents: string[];
   };
 }
@@ -29596,8 +31060,9 @@ export interface UpdateImageDomainUaAccessBody {
 export interface UpdateImageDomainUaAccessQuery {
   /**
    * 服务 ID。
-   * - 您可以在veImageX 控制台 [服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。
+   * - 您可以在veImageX 控制台[服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。
    * - 您也可以通过 OpenAPI 的方式获取服务 ID，具体请参考[获取所有服务信息](https://www.volcengine.com/docs/508/9360)。
+   * @example "qhc***uslz"
    */
   ServiceId: string;
 }
@@ -29615,8 +31080,11 @@ export interface UpdateImageDomainUaAccessRes {
 
 /** title */
 export interface UpdateImageDomainVolcOriginBody {
-  /** 域名 */
-  doamin: string;
+  /**
+   * 域名
+   * 域名
+   */
+  domain: string;
   origin_config: {
     origins: {
       /**
@@ -29835,7 +31303,7 @@ export interface UpdateImageFileCTRes {
 /** 描述 */
 export interface UpdateImageFileKeyBody {
   /**
-   * 重命名后的文件名
+   * 重命名后的文件名，存储 Key 详细命名规范请参看 [veImageX 存储 Key 通用字符规则](https://www.volcengine.com/docs/508/1458331)。
    * 重命名后的文件名。输入限制如下所示：
    *
    * - 不支持空格，如果中间有空格将会导致重命名失败。
@@ -29844,7 +31312,7 @@ export interface UpdateImageFileKeyBody {
    */
   DstKey: string;
   /**
-   * 源文件名
+   * 源文件名，即上传文件的存储 Key。
    * 源文件名，即上传文件的 storekey。
    * @example "bb6d0430d***7feac525023d52"
    */
@@ -29974,12 +31442,12 @@ export interface UpdateImageMonitorRuleBody {
          *
          * - `5`
          * - `10`
-         * @example "5"
+         * @example 5
          */
         AggrInterval: number;
         /**
          * 样本量阈值。被监控指标超过该值时触发告警。
-         * @example "200"
+         * @example 200
          */
         CntThreshold?: number;
         /**
@@ -30025,12 +31493,12 @@ export interface UpdateImageMonitorRuleBody {
          * - `1`
          * - `3`
          * - `5`
-         * @example "3"
+         * @example 3
          */
         RepeatCnt: number;
         /**
          * 指标比较阈值，需要与 `CntThreshold` 同时被满足才会触发告警。
-         * @example "50"
+         * @example 50
          */
         Threshold: number;
       }[];
@@ -30098,7 +31566,7 @@ export interface UpdateImageMonitorRuleBody {
      * - `30`
      * - `40`
      * - `50`
-     * @example "5"
+     * @example 5
      */
     Frequency: number;
     /**
@@ -30161,7 +31629,7 @@ export interface UpdateImageMonitorRuleBody {
        * - `30`
        * - `60`
        * - `360`
-       * @example "30"
+       * @example 30
        */
       SilentDur: number;
       /**
@@ -30455,7 +31923,7 @@ export interface UpdateImageSettingRulePriorityBody {
      * :::tip
      * 如果配置项下创建了多个规则，需要填写全部规则更新后的优先级。
      * :::
-     * @example "1"
+     * @example 1
      */
     Priority: number;
     /**
@@ -30989,8 +32457,8 @@ export interface UpdateReferBody {
      */
     is_white_mode?: boolean;
     /**
-     * Referer 的正则表达式的列表，仅支持填写 IPv4 和 IPv6 格式的 IP 地址，参数长度范围为（1，1024）。不支持域名、泛域名、CIDR 网段。
-     * @example "192.1.1.1"
+     * Referer 的正则表达式的列表，仅支持填写 IPv4 和 IPv6 格式的 IP 地址，参数长度范围为（1，1024）。不支持域名、泛域名、CIDR 网段。最多支持设置 100 条规则。
+     * @example "["192\.23\.1\.8\b"]"
      */
     regex_values?: string[];
     /**
@@ -31002,11 +32470,12 @@ export interface UpdateReferBody {
     regex_values_enabled?: boolean;
     /**
      * Referer 通用规则列表，根据是否为白名单，为对应的白/黑名单的值。您可以指定一个或者多个 IP 地址，域名和泛域名。支持填写二级域名，支持混合输入。
-     * - IP 地址格式支持 IPv4 和 IPv6，最多可输入 100 个 IP 地址。
+     * - IP 地址格式支持 IPv4 和 IPv6，最多可输入 1000 个 IP 地址。
      * - 域名无需包含`http://` 或 `https://`。
      *
      * :::tip
-     * `values` 和 `regex_valses` 均存在时，两者同时生效。
+     * - `values` 和 `regex_valses` 均存在时，两者同时生效。
+     * - 若您需要对同类型名单内已设定的 `values` 地址进行增删处理，那么您可调用 [获取域名配置](https://www.volcengine.com/docs/508/9366#refer-link) 接口获取已配置的全部地址列表后，在此基础上添加或删除您期望变更的值，最后重新传入 `values`。
      * :::
      * @example "["test.example.com", "*.example.com", "10.0.0.1"]"
      */
@@ -31262,7 +32731,7 @@ export interface UpdateStorageRulesBody {
    */
   StorageRules?: {
     /**
-     * 策略命中后需要执行的操作，取值如下所示：
+     * 最新版本文件在策略命中后需要执行的操作，取值如下所示：
      * - `DELETE`：删除文件
      * - `IA`：文件转低频存储
      * - `ARCHIVE`：文件转归档存储
@@ -31272,14 +32741,15 @@ export interface UpdateStorageRulesBody {
      */
     Action: string;
     /**
-     * 策略天数，取值范围为 [1,365]，单位为天。按照 Event 事件 Day 天后执行 Action 事件，即当匹配文件的上传时间符合指定天数后，自动按照处理策略对资源进行处理。
-     * @example "30"
+     * 最新版本文件的策略天数，取值范围为 [1,365]，单位为天。按照 Event 事件 Day 天后执行 Action 事件，即当匹配文件的上传时间符合指定天数后，自动按照处理策略对资源进行处理。
+     * @example 30
      */
     Day: number;
     /**
      * 是否启用策略，取值如下所示：
      * - `true`：是
      * - `false`：否
+     * 是否启用。<ul><li>`false`： ；</li><li>`true`： 。</li>默认值为`false`。
      * @example "true"
      */
     Enable: boolean;
@@ -31288,6 +32758,23 @@ export interface UpdateStorageRulesBody {
      * @example "upload"
      */
     Event: string;
+    /**
+     * 历史版本文件在策略命中后需要执行的操作，取值如下所示：
+     *
+     * - `DELETE`：删除文件
+     * - `IA`：文件转低频存储
+     * - `ARCHIVE`：文件转归档存储
+     * - `COLD_ARCHIVE`：文件转冷归档存储
+     * 非当前操作类型。
+     * @example "IA"
+     */
+    NonCurrentAction: string;
+    /**
+     * 历史版本文件的策略天数，取值范围为 [1,365]，单位为天。按照 Event 事件 NonCurrentDay 天后执行 NonCurrentAction 事件，即当匹配历史版本文件的上传时间符合指定天数后，自动按照处理策略对历史版本资源进行处理。
+     * 非当前日期。
+     * @example 30
+     */
+    NonCurrentDay: number;
     /**
      * 文件前缀。例如设置为 `prefix` 后，规则将只对名称以 `prefix` 开头的存储资源生效。输入规则如下：
      * - 不能以正斜线（/）或者反斜线（\）开头；
@@ -31322,6 +32809,109 @@ export interface UpdateStorageRulesRes {
      */
     Region: string;
     /** RequestID为每次API请求的唯一标识。 */
+    RequestId: string;
+    /** 请求的服务，属于请求的公共参数。 */
+    Service: string;
+    /**
+     * 请求的版本号，属于请求的公共参数。
+     * @example "{Version}"
+     */
+    Version: string;
+  };
+  /** 视请求的接口而定 */
+  Result?: Record<string, unknown>;
+}
+
+export interface UpdateStorageRulesV2Body {
+  /** 存储规则。 */
+  StorageRules?: {
+    /** 中止未完成的分段上传配置。 */
+    AbortIncompleteMultipartUpload?: {
+      /** 分片过期时间 */
+      DaysAfterInitiation?: number;
+    };
+    /** 是否启用。 */
+    Enable: boolean;
+    /** 事件名称，目前仅支持upload */
+    Event: string;
+    /** 过期时间。过期后会删除文件。过期时间要小于Transitions中天数，另外不能与Transitions里混用Day与Date */
+    Expiration?: {
+      /** 过期日期。与day冲突 */
+      Date?: string;
+      /** 过期天数。与date冲突 */
+      Days?: number;
+    };
+    /** 过滤条件。 */
+    Filter?: {
+      /** 是否包含大于等于。 */
+      GreaterThanIncludeEqual?: string;
+      /** 小于等于条件。 */
+      LessThanIncludeEqual?: string;
+      /** 对象大小大于。 */
+      ObjectSizeGreaterThan?: number;
+      /** 对象大小上限。 */
+      ObjectSizeLessThan?: number;
+    };
+    /** 规则名称，长度256以内 */
+    Id: string;
+    /** 多版本过期配置。过期后会删除旧版本文件。 */
+    NonCurrentVersionExpiration?: {
+      /** 日期，只填写年月日，无法指定时分秒 */
+      NonCurrentDate?: string;
+      /** 多版本过期天数。 */
+      NonCurrentDays?: number;
+    };
+    /** 非当前版本转换规则。要么全部days要么全部date，不能混合配置 */
+    NonCurrentVersionTransitions?: {
+      /** 日期，只填写年月日，无法指定时分秒 */
+      NonCurrentDate?: string;
+      /** 非当前天数。 */
+      NonCurrentDays?: number;
+      /** 沉降存储类别。- IA，转为低频存储- ARCHIVE_FR，转为归档闪回存储- COLD_ARCHIVE，转为冷归档存储- ARCHIVE，转为归档存储 */
+      StorageClass: string;
+    }[];
+    /** 文件前缀 */
+    Prefix: string;
+    /** 存储沉降配置，要么全部days要么全部date，不能混合配置 */
+    Transitions?: {
+      /** 日期。 */
+      Date?: string;
+      /** 天数。 */
+      Days?: number;
+      /**
+       * 沉降存储类别。
+       * - IA，转为低频存储
+       * - ARCHIVE_FR，转为归档闪回存储
+       * - COLD_ARCHIVE，转为冷归档存储
+       * - ARCHIVE，转为归档存储
+       */
+      StorageClass: string;
+    }[];
+  }[];
+}
+
+export interface UpdateStorageRulesV2Query {
+  /**
+   * 服务 ID。
+   * - 您可以在 veImageX 控制台 [服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。
+   * - 您也可以通过 OpenAPI 的方式获取服务 ID，具体请参考[获取所有服务信息](https://www.volcengine.com/docs/508/9360)。
+   */
+  ServiceId: string;
+}
+
+export interface UpdateStorageRulesV2Res {
+  ResponseMetadata: {
+    /**
+     * 请求的接口名，属于请求的公共参数。
+     * @example "{Action}"
+     */
+    Action: string;
+    /**
+     * 请求的Region，例如：cn-north-1
+     * @example "cn-north-1"
+     */
+    Region: string;
+    /** RequestId为每次API请求的唯一标识。 */
     RequestId: string;
     /** 请求的服务，属于请求的公共参数。 */
     Service: string;
