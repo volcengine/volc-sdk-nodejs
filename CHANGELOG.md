@@ -1,3 +1,7 @@
+2025-03-31 Bumped to version v1.29.0
+- imagex:
+  - 新增一批API
+
 2025-03-20 Bumped to version v1.28.1
 - vikingdb:
   - 向量库创建数据集传参修复
