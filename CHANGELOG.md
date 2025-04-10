@@ -1,3 +1,11 @@
+2025-04-10 Bumped to version v1.30.0
+- vod:
+  - 支持流上传
+- imagex:
+  - 支持分片上传，通过`UploadImages`方法的`chunkUpload`参数进行指定。
+  - 支持指定上传文件的存储类型。
+  - 修正`UploadImages`指定`SkipCommit`为`true`时返回值的格式。
+
 2025-03-31 Bumped to version v1.29.0
 - imagex:
   - 新增一批API
