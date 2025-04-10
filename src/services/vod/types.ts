@@ -23,6 +23,7 @@ export interface UploadParams {
   FileName?: string;
   FileExtension?: string;
   maxConcurrency?: number;
+  Content?: NodeJS.ReadableStream; // 流内容
 }
 
 // 媒资上传
@@ -34,6 +35,8 @@ export interface VodUploadMediaRequest {
   FileName?: string; // 设置文件存储路径
   FileExtension?: string; // 设置文件后缀
   maxConcurrency?: number; // 单次上传最大并发数
+  FileSize?: number; // 流大小
+  Content?: NodeJS.ReadableStream; // 流内容
 }
 
 // 素材上传

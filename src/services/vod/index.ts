@@ -10,6 +10,7 @@ import get from "lodash.get";
 import axios from "axios";
 import { MinChunkSize, VALID_TYPE_LIST } from "./constants";
 import pLimit from "p-limit";
+import { Readable } from "stream";
 
 // 进程级chunk上传并发数限制
 const maxLimit = pLimit(20);
@@ -18,6 +19,22 @@ const fsStat = fsPromises ? fsPromises.stat : promisify(fs.stat);
 const fsOpen = promisify(fs.open);
 const fsRead = promisify(fs.read);
 const fsClose = promisify(fs.close);
+
+// 获取文件流的大小
+const _getStreamSize = async (stream: fs.ReadStream) => {
+  if (!(stream instanceof Readable)) {
+    return null;
+  }
+  // 仅当是可统计的文件流时获取大小
+  if (typeof stream.path === "string" && stream instanceof Readable) {
+    try {
+      // 仅当是可统计的文件流时获取大小
+      return (await fsStat(stream.path)).size;
+    } catch {}
+  }
+  // 对不可统计的流返回null
+  return null;
+};
 
 // 考虑到filename可能包含中文 因此url encode下 否则分片上传会失败
 function getEncodedUri(originUri: string): string {
@@ -36,9 +53,164 @@ export class VodService extends Service {
     });
   }
 
+  private uploadToBStream = async (params: types.UploadParams): Promise<{ sessionKey: string }> => {
+    /* 校验文件是否合法 */
+    const {
+      SpaceName,
+      FileType,
+      FileName,
+      FileExtension,
+      maxConcurrency,
+      FileSize, // 流大小
+      Content, // 流内容
+    } = params;
+    if (!FileType || !VALID_TYPE_LIST.includes(FileType)) {
+      throw new Error("invalid file type");
+    }
+    if (!(Content instanceof Readable)) {
+      throw new Error(
+        "invalid stream content, please use stream content or plasease use file path to upload"
+      );
+    }
+
+    /* 获取文件上传凭证及地址 */
+    const applyReq: types.VodApplyUploadInfoRequest = {
+      SpaceName,
+      FileType: FileType || "media",
+      FileName,
+      FileExtension,
+    };
+    const applyRes = await this.ApplyUploadInfo(applyReq);
+    if (applyRes.ResponseMetadata.Error) {
+      throw new Error(JSON.stringify(applyRes));
+    }
+    const uploadAddress = get(applyRes, "Result.Data.UploadAddress");
+    const oid = get(uploadAddress, "StoreInfos[0].StoreUri", "");
+    const auth = get(uploadAddress, "StoreInfos[0].Auth", "");
+    const sessionKey = get(uploadAddress, "SessionKey", "");
+    const host = get(uploadAddress, "UploadHosts[0]", "");
+
+    const streamSize = await _getStreamSize(Content as any);
+    const size = FileSize ?? streamSize;
+    if (!size) {
+      throw new Error("invalid FileSize");
+    }
+    /* 获取文件上传凭证及地址 */
+    /* 判断文件大小,选择上传方式 */
+    if (size <= MinChunkSize) {
+      await this._dynamicUploadWithUnknownSize(Content, host, oid, auth);
+    } else {
+      await this.chunkedStreamUpload(Content, host, oid, auth, true, maxConcurrency);
+    }
+    // const cost = dayjs().diff(startTime, "second");
+    // const avgSpeed = fileSize / cost;
+    return { /*oid,*/ sessionKey /* avgSpeed*/ };
+  };
+
+  private _dynamicUploadWithUnknownSize = async (
+    stream: Readable,
+    host: string,
+    oid: string,
+    auth: string
+  ) => {
+    let buffer = Buffer.alloc(0);
+    try {
+      for await (const chunk of stream) {
+        buffer = Buffer.concat([buffer, chunk]);
+      }
+      // 未超过阈值执行直传
+      return this.directUploadStream(buffer, host, oid, auth);
+    } finally {
+      stream.destroy();
+    }
+  };
+
+  private chunkedStreamUpload = async (
+    stream: Readable,
+    host: string,
+    oid: string,
+    auth: string,
+    isLargeFile: boolean,
+    maxConcurrency = 4
+  ) => {
+    const limit = pLimit(maxConcurrency);
+    let buffer = Buffer.alloc(0);
+    let partNumber = 0;
+    const parts: string[] = [];
+
+    try {
+      const uploadId = await this.initUploadPart(host, oid, auth, isLargeFile);
+
+      // 流数据处理循环
+      for await (const chunk of stream) {
+        buffer = Buffer.concat([buffer, chunk]);
+
+        // 动态切割分片
+        while (buffer.length >= MinChunkSize) {
+          const chunkBuffer = buffer.subarray(0, MinChunkSize);
+          buffer = buffer.subarray(MinChunkSize);
+          partNumber++;
+
+          // 提交分片上传任务
+          parts.push(
+            await limit(async () => {
+              return maxLimit(async () => {
+                const check_sum = await this.uploadPart(
+                  host,
+                  oid,
+                  auth,
+                  uploadId,
+                  partNumber,
+                  chunkBuffer,
+                  isLargeFile
+                );
+                return check_sum;
+              });
+            })
+          );
+        }
+      }
+
+      // 上传最后的分片
+      if (buffer.length > 0) {
+        partNumber++;
+        parts.push(
+          await this.uploadPart(host, oid, auth, uploadId, partNumber, buffer, isLargeFile)
+        );
+      }
+
+      await this.uploadMergePart(host, oid, auth, uploadId, parts, isLargeFile);
+    } finally {
+      stream.destroy();
+    }
+  };
+  // 直接上传
+  private directUploadStream = async (buffer: Buffer, host: string, oid: string, auth: string) => {
+    await axios(`https://${host}/${getEncodedUri(oid)}`, {
+      method: "put",
+      headers: {
+        "Content-CRC32": crc32(buffer).toString(16).padStart(8, "0"),
+        Authorization: auth,
+      },
+      data: buffer,
+      maxBodyLength: MinChunkSize * 2,
+    });
+  };
   private uploadToB = async (params: types.UploadParams): Promise<{ sessionKey: string }> => {
     /* 校验文件是否合法 */
-    const { SpaceName, FilePath, FileType, FileName, FileExtension, maxConcurrency } = params;
+    const {
+      SpaceName,
+      FilePath,
+      FileType,
+      FileName,
+      FileExtension,
+      maxConcurrency,
+      Content, // 流内容
+    } = params;
+
+    if (Content instanceof Readable) {
+      return this.uploadToBStream(params);
+    }
     const fileStat = await fsStat(FilePath);
     const fileSize = fileStat.size;
     if (!fileStat.isFile()) {
@@ -299,6 +471,8 @@ export class VodService extends Service {
         FileName = "",
         FileExtension = "",
         maxConcurrency = 4,
+        FileSize, // 流大小
+        Content, // 流内容
       } = req;
       const { sessionKey } = await this.uploadToB({
         SpaceName,
@@ -307,6 +481,8 @@ export class VodService extends Service {
         FileName,
         FileExtension,
         maxConcurrency,
+        FileSize, // 流大小
+        Content, // 流内容
       });
       const commitQuery = {
         SpaceName,
@@ -336,6 +512,8 @@ export class VodService extends Service {
         FileName = "",
         FileExtension = "",
         maxConcurrency = 4,
+        FileSize, // 流大小
+        Content, // 流内容
       } = req;
       const { sessionKey } = await this.uploadToB({
         SpaceName,
@@ -344,6 +522,8 @@ export class VodService extends Service {
         FileName,
         FileExtension,
         maxConcurrency,
+        FileSize, // 流大小
+        Content, // 流内容
       });
       const commitQuery = {
         SpaceName,
@@ -495,7 +675,11 @@ export class VodService extends Service {
     }
     return this._signUrl<types.VodGetPrivateDrmPlayAuthRequest>({
       method: "GET",
-      params: { Action: "GetPrivateDrmPlayAuth", Version: "2020-08-01", ...query },
+      params: {
+        Action: "GetPrivateDrmPlayAuth",
+        Version: "2020-08-01",
+        ...query,
+      },
     });
   };
 
