@@ -135,8 +135,14 @@ export default class Service {
 
       const { accessKeyId, secretKey, sessionToken, host, version, protocol, serviceName, region } =
         this.options;
-      if (!accessKeyId || !secretKey || !host)
-        throw new Error(`[tls-node-sdk] host and accessKeyId and secretKey is necessary`);
+      if (!accessKeyId || !secretKey || !host || !region) {
+        const missingParams: string[] = [];
+        if (!accessKeyId) missingParams.push("accessKeyId");
+        if (!secretKey) missingParams.push("secretKey");
+        if (!host) missingParams.push("host");
+        if (!region) missingParams.push("region");
+        throw new Error(`[tls-node-sdk] ${missingParams.join(" and ")} is necessary`);
+      }
 
       const requestObj: any = {
         region,
