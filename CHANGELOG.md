@@ -1,3 +1,7 @@
+2025-04-24 Bumped to version v1.30.1
+- tls:
+  - 增加接口入参 region 校验，优化报错输出文案
+
 2025-04-10 Bumped to version v1.30.0
 - vod:
   - 支持流上传
