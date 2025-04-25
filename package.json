@@ -16,6 +16,7 @@
     "test": "yarn build && jest --env=node",
     "test-mq": "jest ./test/rocketmq.test.js --env=node",
     "test-maas": "jest ./test/maas.test.js --env=node",
+    "test-sign": "jest ./test/sign.test.ts --env=node",
     "test-tls": "jest ./test/tls.test.js --env=node",
     "test-vod": "jest ./test/vod.test.js --env=node"
   },

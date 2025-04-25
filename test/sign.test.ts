@@ -43,3 +43,23 @@ if (TEST_SIGNER) {
     }
   });
 }
+
+test("x-content-sha256", () => {
+  const buffer = Buffer.from("hello world");
+  const hash = "b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9";
+  const request = {
+    body: buffer,
+    method: "POST",
+    region: "cn-north-1",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  };
+  const signer = new Signer(request, "sts");
+  signer.addAuthorization({
+    accessKeyId: VOLC_ACCESSKEY,
+    secretKey: VOLC_SECRETKEY,
+  });
+  const computedHash = request.headers["X-Content-Sha256"];
+  expect(computedHash).toEqual(hash);
+});
