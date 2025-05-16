@@ -3,7 +3,7 @@ const { tlsOpenapi } = require("@volcengine/openapi");
 // host group
 async function main() {
   const tlsOpenapiService = tlsOpenapi.defaultService;
-  tlsOpenapi.setHost("your host");
+  tlsOpenapiService.setHost("your host");
   tlsOpenapiService.setSecretKey("your secret key");
   tlsOpenapiService.setAccessKeyId("your access key id");
 
