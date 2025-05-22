@@ -1,3 +1,7 @@
+2025-05-22 Bumped to version v1.30.2
+- tls:
+  - demo js订正，不涉及逻辑代码变更
+
 2025-04-24 Bumped to version v1.30.1
 - tls:
   - 增加接口入参 region 校验，优化报错输出文案
