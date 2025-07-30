@@ -239,6 +239,18 @@ export default class ImagexService extends Service {
   });
 
   /**
+   * @function VerifyDomainOwner
+   */
+  public VerifyDomainOwner = this.createAPI<
+    types.VerifyDomainOwnerBody,
+    types.VerifyDomainOwnerRes["Result"]
+  >("VerifyDomainOwner", {
+    method: "POST",
+    contentType: "json",
+    Version: "2023-05-01",
+  });
+
+  /**
    * @function GetResponseHeaderValidateKeys
    */
   public GetResponseHeaderValidateKeys = this.createAPI<
@@ -261,6 +273,19 @@ export default class ImagexService extends Service {
     contentType: "json",
     Version: "2018-08-01",
     queryKeys: ["DomainName", "ServiceId"],
+  });
+
+  /**
+   * @function GetDomainOwnerVerifyContent
+   */
+  public GetDomainOwnerVerifyContent = this.createAPI<
+    types.GetDomainOwnerVerifyContentQuery,
+    types.GetDomainOwnerVerifyContentRes["Result"]
+  >("GetDomainOwnerVerifyContent", {
+    method: "GET",
+    contentType: "json",
+    Version: "2023-05-01",
+    queryKeys: ["Domain"],
   });
 
   /**
@@ -653,6 +678,27 @@ export default class ImagexService extends Service {
   });
 
   /**
+   * @function DescribeImageXStorageUsage
+   */
+  public DescribeImageXStorageUsage = this.createAPI<
+    types.DescribeImageXStorageUsageQuery,
+    types.DescribeImageXStorageUsageRes["Result"]
+  >("DescribeImageXStorageUsage", {
+    method: "GET",
+    contentType: "json",
+    Version: "2023-05-01",
+    queryKeys: [
+      "ServiceIds",
+      "BucketNames",
+      "GroupBy",
+      "StartTime",
+      "EndTime",
+      "Interval",
+      "IsRetrieval",
+    ],
+  });
+
+  /**
    * @function DescribeImageXBucketRetrievalUsage
    */
   public DescribeImageXBucketRetrievalUsage = this.createAPI<
@@ -662,7 +708,20 @@ export default class ImagexService extends Service {
     method: "GET",
     contentType: "json",
     Version: "2023-05-01",
-    queryKeys: ["ServiceIds", "BucketNames", "GroupBy", "StartTime", "EndTime"],
+    queryKeys: ["ServiceIds", "BucketNames", "GroupBy", "StartTime", "EndTime", "IsRetrieval"],
+  });
+
+  /**
+   * @function DescribeImageXAddOnQPSUsage
+   */
+  public DescribeImageXAddOnQPSUsage = this.createAPI<
+    types.DescribeImageXAddOnQPSUsageQuery,
+    types.DescribeImageXAddOnQPSUsageRes["Result"]
+  >("DescribeImageXAddOnQPSUsage", {
+    method: "GET",
+    contentType: "json",
+    Version: "2023-05-01",
+    queryKeys: ["AdvFeat", "ServiceIds", "StartTime", "EndTime", "Interval"],
   });
 
   /**
@@ -954,7 +1013,7 @@ export default class ImagexService extends Service {
     method: "GET",
     contentType: "json",
     Version: "2023-05-01",
-    queryKeys: ["StartTime", "EndTime"],
+    queryKeys: ["ServiceIds", "StartTime", "EndTime"],
   });
 
   /**
@@ -1199,7 +1258,7 @@ export default class ImagexService extends Service {
     method: "GET",
     contentType: "json",
     Version: "2023-05-01",
-    queryKeys: ["Source"],
+    queryKeys: ["Source", "Project"],
   });
 
   /**
@@ -1785,6 +1844,91 @@ export default class ImagexService extends Service {
   });
 
   /**
+   * @function CreateImageAIProcessQueue
+   */
+  public CreateImageAIProcessQueue = this.createAPI<
+    types.CreateImageAIProcessQueueBody,
+    types.CreateImageAIProcessQueueRes["Result"]
+  >("CreateImageAIProcessQueue", {
+    method: "POST",
+    contentType: "json",
+    Version: "2023-05-01",
+  });
+
+  /**
+   * @function DeleteImageAIProcessQueue
+   */
+  public DeleteImageAIProcessQueue = this.createAPI<
+    types.DeleteImageAIProcessQueueBody,
+    types.DeleteImageAIProcessQueueRes["Result"]
+  >("DeleteImageAIProcessQueue", {
+    method: "POST",
+    contentType: "json",
+    Version: "2023-05-01",
+  });
+
+  /**
+   * @function CreateImageAIProcessCallback
+   */
+  public CreateImageAIProcessCallback = this.createAPI<
+    types.CreateImageAIProcessCallbackBody,
+    types.CreateImageAIProcessCallbackRes["Result"]
+  >("CreateImageAIProcessCallback", {
+    method: "POST",
+    contentType: "json",
+    Version: "2023-05-01",
+  });
+
+  /**
+   * @function UpdateImageAIProcessQueue
+   */
+  public UpdateImageAIProcessQueue = this.createAPI<
+    types.UpdateImageAIProcessQueueBody,
+    types.UpdateImageAIProcessQueueRes["Result"]
+  >("UpdateImageAIProcessQueue", {
+    method: "POST",
+    contentType: "json",
+    Version: "2023-05-01",
+  });
+
+  /**
+   * @function UpdateImageAIProcessQueueStatus
+   */
+  public UpdateImageAIProcessQueueStatus = this.createAPI<
+    types.UpdateImageAIProcessQueueStatusBody,
+    types.UpdateImageAIProcessQueueStatusRes["Result"]
+  >("UpdateImageAIProcessQueueStatus", {
+    method: "POST",
+    contentType: "json",
+    Version: "2023-05-01",
+  });
+
+  /**
+   * @function DeleteImageAIProcessDetail
+   */
+  public DeleteImageAIProcessDetail = this.createAPI<
+    types.DeleteImageAIProcessDetailBody,
+    types.DeleteImageAIProcessDetailRes["Result"]
+  >("DeleteImageAIProcessDetail", {
+    method: "POST",
+    contentType: "json",
+    Version: "2023-05-01",
+  });
+
+  /**
+   * @function GetImageAIProcessQueues
+   */
+  public GetImageAIProcessQueues = this.createAPI<
+    types.GetImageAIProcessQueuesQuery,
+    types.GetImageAIProcessQueuesRes["Result"]
+  >("GetImageAIProcessQueues", {
+    method: "GET",
+    contentType: "json",
+    Version: "2023-05-01",
+    queryKeys: ["SearchPtn", "Limit", "Offset"],
+  });
+
+  /**
    * @function GetImageAITasks
    */
   public GetImageAITasks = this.createAPI<
@@ -1803,6 +1947,7 @@ export default class ImagexService extends Service {
       "Status",
       "StartTime",
       "EndTime",
+      "SearchPtn",
     ],
   });
 
@@ -1825,6 +1970,7 @@ export default class ImagexService extends Service {
       "SearchPtn",
       "Limit",
       "Offset",
+      "ServiceId",
     ],
   });
 
@@ -2026,6 +2172,18 @@ export default class ImagexService extends Service {
     contentType: "json",
     Version: "2023-05-01",
     queryKeys: ["ServiceId", "StoreUri"],
+  });
+
+  /**
+   * @function GetImageEraseResult
+   */
+  public GetImageEraseResult = this.createAPI<
+    types.GetImageEraseResultBody,
+    types.GetImageEraseResultRes["Result"]
+  >("GetImageEraseResult", {
+    method: "POST",
+    contentType: "json",
+    Version: "2023-05-01",
   });
 
   /**
@@ -2326,18 +2484,6 @@ export default class ImagexService extends Service {
   });
 
   /**
-   * @function GetImageEraseResult
-   */
-  public GetImageEraseResult = this.createAPI<
-    types.GetImageEraseResultBody,
-    types.GetImageEraseResultRes["Result"]
-  >("GetImageEraseResult", {
-    method: "POST",
-    contentType: "json",
-    Version: "2023-05-01",
-  });
-
-  /**
    * @function GetImageSuperResolutionResult
    */
   public GetImageSuperResolutionResult = this.createAPI<
@@ -2515,6 +2661,19 @@ export default class ImagexService extends Service {
   });
 
   /**
+   * @function CreateHmExtractTask
+   */
+  public CreateHmExtractTask = this.createAPI<
+    types.CreateHmExtractTaskQuery & types.CreateHmExtractTaskBody,
+    types.CreateHmExtractTaskRes["Result"]
+  >("CreateHmExtractTask", {
+    method: "POST",
+    contentType: "json",
+    Version: "2023-05-01",
+    queryKeys: ["ServiceId"],
+  });
+
+  /**
    * @function UpdateImageExifData
    */
   public UpdateImageExifData = this.createAPI<
@@ -2643,19 +2802,6 @@ export default class ImagexService extends Service {
   });
 
   /**
-   * @function GetProductAIGCResult
-   */
-  public GetProductAIGCResult = this.createAPI<
-    types.GetProductAIGCResultQuery & types.GetProductAIGCResultBody,
-    types.GetProductAIGCResultRes["Result"]
-  >("GetProductAIGCResult", {
-    method: "POST",
-    contentType: "json",
-    Version: "2023-05-01",
-    queryKeys: ["ServiceId"],
-  });
-
-  /**
    * @function GetImageEraseModels
    */
   public GetImageEraseModels = this.createAPI<
@@ -2679,6 +2825,19 @@ export default class ImagexService extends Service {
     contentType: "json",
     Version: "2018-08-01",
     queryKeys: ["TaskId"],
+  });
+
+  /**
+   * @function GetImageHmExtractTaskInfo
+   */
+  public GetImageHmExtractTaskInfo = this.createAPI<
+    types.GetImageHmExtractTaskInfoQuery & types.GetImageHmExtractTaskInfoBody,
+    types.GetImageHmExtractTaskInfoRes["Result"]
+  >("GetImageHmExtractTaskInfo", {
+    method: "POST",
+    contentType: "json",
+    Version: "2023-05-01",
+    queryKeys: ["ServiceId"],
   });
 
   /**
@@ -3275,12 +3434,13 @@ export default class ImagexService extends Service {
    * @function GetSyncAuditResult
    */
   public GetSyncAuditResult = this.createAPI<
-    types.GetSyncAuditResultBody,
+    types.GetSyncAuditResultQuery & types.GetSyncAuditResultBody,
     types.GetSyncAuditResultRes["Result"]
   >("GetSyncAuditResult", {
     method: "POST",
     contentType: "json",
-    Version: "2018-08-01",
+    Version: "2023-05-01",
+    queryKeys: ["ServiceId"],
   });
 
   /**
