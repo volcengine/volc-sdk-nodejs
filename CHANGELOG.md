@@ -1,3 +1,7 @@
+2025-08-14 Bumped to version v1.31.0
+- imagex:
+  - codegen 生成一批新接口
+
 2025-05-22 Bumped to version v1.30.2
 - tls:
   - demo js订正，不涉及逻辑代码变更
