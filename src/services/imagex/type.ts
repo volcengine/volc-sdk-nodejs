@@ -11,15 +11,13 @@ export interface AIProcessBody {
   ServiceId: string;
   /**
    * AI 图像处理模板参数，需要将 JSON 压缩并转义为字符串。根据您需要的图像处理功能，参看 [AI 图像处理模板](https://www.volcengine.com/docs/508/1515840)页面获取模板 ID 和参数信息。
-   * 工作流模板参数。
-   * * 您可以在 [AI图像处理工作流](TODO)页面查看所有支持的工作流ID及参数信息。
-   * @example "{\"Input\":{\"ObjectKey\":\"example.webp\",\"DataType\":\"uri\"},\"GenDREnhanceParam\":{\"Multiple\":1.2}}"
+   * AI 图像处理模板参数，需要将 JSON 压缩并转义为字符串。根据您需要的图像处理功能，参看 [AI 图像处理模板](https://www.volcengine.com/docs/508/1515840)页面获取模板 ID 和参数信息。
+   * @example "{"Input":{"ObjectKey":"example.webp","DataType":"uri"},"GenDREnhanceParam":{"Multiple":1.2}}"
    */
   WorkflowParameter: string;
   /**
    * AI 图像处理模板 ID。根据您需要的图像处理功能，参看 [AI 图像处理模板](https://www.volcengine.com/docs/508/1515840)页面获取模板 ID 和参数信息。
-   * 工作流模板 ID。
-   * * 您可以在 [AI图像处理工作流](TODO)页面查看所有支持的工作流ID及参数信息。
+   * AI 图像处理模板 ID。根据您需要的图像处理功能，参看 [AI 图像处理模板](https://www.volcengine.com/docs/508/1515840)页面获取模板 ID 和参数信息。
    * @example "system_workflow_ai_super_resolution"
    */
   WorkflowTemplateId: string;
@@ -51,9 +49,8 @@ export interface AIProcessRes {
   Result: {
     /**
      * AI 图像处理结果，是 JSON 压缩并转义后的字符串。参看 [AI 图像处理模板](https://www.volcengine.com/docs/508/1515840)页面获取模板 ID 和参数信息，根据具体的工作流的说明进行解析。
-     * AI图像处理结果，是JSON序列化后的字符串。
-     * * 您可以在 [AI图像处理工作流](TODO)页面查看所有支持的工作流ID及参数信息，根据具体工作流的说明进行解析。
-     * @example "{\"ObjectKey\":\"veImageX-store/ai_super_resolution/67***\/example.webp\",\"Size\":54509,\"Format\":\"webp\"}"
+     * AI 图像处理结果，是 JSON 压缩并转义后的字符串。参看 [AI 图像处理模板](https://www.volcengine.com/docs/508/1515840)页面获取模板 ID 和参数信息，根据具体的工作流的说明进行解析。
+     * @example "{"ObjectKey":"veImageX-store/ai_super_resolution/67***a/example.webp","Size":54509,"Format":"webp"}"
      */
     Output: string;
   };
@@ -461,7 +458,7 @@ export interface ApplyVpcUploadInfoQuery {
    */
   ContentType?: string;
   /**
-   * 文件扩展名，最大长度限制为 8 个字节。
+   * 文件扩展名，最大长度限制为 20 个字节。
    *
    * :::tip
    * 仅当未指定 `StoreKeys` 时生效。
@@ -647,15 +644,15 @@ export interface ApplyVpcUploadInfoRes {
 }
 
 export interface CommitImageUploadBody {
-  DecryptKeys?: string[];
   /**
-   * 一次上传会话 Key。
-   * :::tip
-   * 请参考[获取文件上传地址](https://www.volcengine.com/docs/508/9397)获取。
-   * :::
+   * 一次上传会话 Key。您可参考[获取文件上传地址](https://www.volcengine.com/docs/508/9397)获取。
+   * @example "8h***98"
    */
   SessionKey: string;
-  /** 上传成功的资源 ID。 */
+  /**
+   * 上传成功的资源 ID。
+   * @example "101629**510102"
+   */
   SuccessOids?: string[];
 }
 
@@ -668,11 +665,15 @@ export interface CommitImageUploadQuery {
    */
   ServiceId: string;
   /**
-   * 是否返回图片meta信息。默认 false。
-   * * true：不返回图片 meta 信息。
-   * * false：获取图片 meta 信息并返回对应 meta 信息。
-   * * 其中若 meta 获取超时或失败，接口返回成功，但对应 meta 信息将为空。
-   * * 如果强依赖 meta 请参考[图片Meta信息](https://www.volcengine.com/docs/508/64085)获取。
+   * 是否返回图片 meta 信息。
+   *
+   * - `true`：不返回图片 meta 信息。
+   * - `false`：（默认）获取图片 meta 信息并返回对应 meta 信息。
+   *
+   * :::tip
+   * - 其中若 meta 获取超时或失败，接口返回成功，但对应 meta 信息将为空。
+   * - 如果您的业务要求必须获取 meta 信息，请您参考[图片Meta信息](https://www.volcengine.com/docs/508/64085)获取。
+   * :::
    * @example "false"
    */
   SkipMeta?: boolean;
@@ -692,69 +693,82 @@ export interface CommitImageUploadRes {
     Version: string;
   };
   Result: {
-    /** JSON 序列化之后的图片信息，结构体请参考 [ImageInfo](#imageinfo) 的 Array。 */
+    /**
+     * JSON 序列化之后的图片信息。
+     * @example "-"
+     */
     PluginResult?: {
-      /** 图片的 MD5 */
+      /**
+       * 图片的 `MD5` 哈希值。
+       * @example "e10adc3949ba59abbe56e057f20f883e"
+       */
       ImageMd5?: string;
-      /** 图片文件名。 */
+      /**
+       * 图片时长，单位为 ms。仅当图片为动图时有值
+       * @example 3500
+       */
+      Duration?: number;
+      /**
+       * 图片文件名。
+       * @example "f2**9a.png"
+       */
       FileName?: string;
-      /** 图片帧数量 */
+      /**
+       * 图片的帧数量。
+       * @example 5
+       */
       FrameCnt?: number;
-      /** 图片格式 */
+      /**
+       * 图片格式。
+       * @example "png"
+       */
       ImageFormat?: string;
-      /** 图片的高。 */
+      /**
+       * 图片的高。
+       * @example 1300
+       */
       ImageHeight?: number;
-      /** 图片大小 */
+      /**
+       * 图片的大小。
+       * @example 1024
+       */
       ImageSize?: number;
-      /** 图片 Uri。 */
+      /**
+       * 图片 Uri。
+       * @example "tos-cn-i-5sfo/f219a.png"
+       */
       ImageUri: string;
-      /** 图片的宽。 */
+      /**
+       * 图片的宽。
+       * @example 2718
+       */
       ImageWidth?: number;
+      /**
+       * 源文件 URI
+       * @example "tos-cn-i-5sfo/f29a.png"
+       */
+      SourceUri?: string;
     }[];
-    /** 请求的唯一标识 ID。 */
+    /**
+     * 请求的唯一标识 ID。
+     * @example "202307031500195F***DCD5E1	"
+     */
     RequestId: string;
-    /** 运行结果，数组长度对应上传的数量。 */
+    /**
+     * 运行结果，数组长度对应上传的数量。
+     * @example "-"
+     */
     Results: {
       /**
-       * 加密结果。
-       * :::tip
-       * 指定了 Encryption Function 时有值 。
-       * :::
-       */
-      Encryption?: {
-        /** 加密源 MD5。 */
-        SourceMd5: string;
-        /** 加密算法。 */
-        Algorithm: string;
-        /** 额外信息，键值均为 String。 */
-        Extra: Record<string, string>;
-        /** 加密私钥。 */
-        SecretKey: string;
-        /** 加密图片的 Uri。 */
-        Uri: string;
-        /** 加密版本。 */
-        Version: string;
-      };
-      ImageMeta?: {
-        Field75: number;
-        Md5: string;
-        Format: string;
-        Height: number;
-        Size: number;
-        Uri: string;
-      };
-      /**
        * 源图片的 Uri。
-       * @example "uri1"
+       * @example "tos-cn-i-5s**fo/f2**9a.png"
        */
       Uri: string;
       /**
-       * 图片上传结果。
-       * * 返回值为 2000，表示上传成功；
-       * * 返回值为 2001，表示上传失败。
-       * :::tip
-       * 需要传 SuccessOids 才会返回值。
-       * :::
+       * 上传结果。
+       * - 传入 SuccessOids 时，无论上传图片/非图片，成功返回 2000，失败返回 2001；
+       * - 未传入 SuccessOids 时，对于非图片返回 0；对于图片，成功返回 2000，失败返回 2001。
+       * @example 200
        */
       UriStatus: number;
     }[];
@@ -790,10 +804,7 @@ export interface CreateBatchProcessTaskBody {
   Callback?: string;
   /**
    * 自定义回调内容，取值需要符合`CallbackBodyType`指定格式。
-   * @example "{
-   * 	"param1": "value1",
-   * 	"param2": "value2"
-   * }"
+   * @example "-"
    */
   CallbackBody?: string;
   /**
@@ -1057,6 +1068,18 @@ export interface CreateHiddenWatermarkImageBody {
    * - `tracev2`：前景图层水印模型（彩色背景通用）
    *
    * 	该模型可以生成含水印的透明图像，主要应用在前端页面截图泄露溯源场景。该模型生成的水印纹理密集，在正常界面添加后肉眼基本不可见（截图放大后存在肉眼可见的水印纹理），可抵抗常见的社交软件传播。
+   *
+   * 	:::tip
+   * 	此模型建议在 PC 端使用，移动端使用视觉效果较差。
+   * 	:::
+   *
+   * - `tracev2-app`：前景图层水印模型（移动端）
+   *
+   * 	该模型可以生成含水印的透明图像，主要应用在前端页面截图泄露溯源场景。该模型生成的水印纹理密集，在正常界面添加后肉眼基本不可见（截图放大后存在肉眼可见的水印纹理），可抵抗常见的社交软件传播。
+   *
+   * 	:::tip
+   * 	此模型建议在移动端使用，PC 端使用视觉效果较差。
+   * 	:::
    * @example "tracev1，tracev2"
    */
   Algorithm: string;
@@ -1118,15 +1141,243 @@ export interface CreateHiddenWatermarkImageRes {
   };
 }
 
-/** title */
-export interface CreateImageAITaskBody {
+export interface CreateHmExtractTaskBody {
   /**
-   * 任务回调配置，缺省情况下默认使用队列回调配置。
+   * 算法模型，取值如下：
+   *
+   * - `tracev2`：前景图层水印模型（彩色背景通用）
+   * -  `tracev2-app`：前景图层水印模型（移动端）
+   *
+   * :::warning
+   * 指定 `tracev2`、`tracev2-app` 模型时，请传入已添加对应模型水印的背景网页的**截图**。若图片错误，则无法提取水印。
+   * :::
+   * 取值支持tracev2-app, tracev2
+   * @example "tracev2-app"
+   */
+  Algorithm: string;
+  /**
+   * 任务回调地址，回调内容详见[盲水印提取回调](https://www.volcengine.com/docs/508/1554763)。
+   * @example "https://example.com/callback"
+   */
+  Callback?: string;
+  /**
+   * 待提取盲水印的图片的 URI。`StoreUri` 和 `ImageUrl` 都不为空时，以 `StoreUri` 为准。
+   * 资源key
+   * @example "tos-cn-i-97**sh/example"
+   */
+  ImageUri?: string;
+  /**
+   * 待提取盲水印图片的 URL。`StoreUri` 和 `ImageUrl` 都不为空时，以 `StoreUri` 为准。
+   * 资源URL，与ImageUri必填其中一个。两者都填以ImageUri为准
+   * @example "https://test.com/example.png"
+   */
+  ImageUrl?: string;
+  /**
+   * 盲水印强度，取值如下所示：
+   * - `low`：低强度，适用于对图像质量要求高。
+   * - `medium`：中强度。
+   * - `strong`：（推荐）高强度，适合图像纹理丰富时使用。
+   * 水印强度取值low，medium，strong。推荐取值strong
+   * @example "strong"
+   */
+  Strength: string;
+}
+
+export interface CreateHmExtractTaskQuery {
+  /**
+   * 待提取水印图对应的服务 ID。
+   *
+   * - 您可以在 veImageX 控制台 [服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。
+   * - 您也可以通过 OpenAPI 的方式获取服务 ID，具体请参考[获取所有服务信息](https://www.volcengine.com/docs/508/9360)。
+   * @example "97**sh"
+   */
+  ServiceId: string;
+}
+
+export interface CreateHmExtractTaskRes {
+  ResponseMetadata: {
+    /**
+     * 请求的接口名，属于请求的公共参数。
+     * @example "{Action}"
+     */
+    Action: string;
+    /**
+     * 请求的Region，例如：cn-north-1
+     * @example "cn-north-1"
+     */
+    Region: string;
+    /** RequestId为每次API请求的唯一标识。 */
+    RequestId: string;
+    /** 请求的服务，属于请求的公共参数。 */
+    Service: string;
+    /**
+     * 请求的版本号，属于请求的公共参数。
+     * @example "{Version}"
+     */
+    Version: string;
+  };
+  /** 视请求的接口而定 */
+  Result?: {
+    /**
+     * 任务 ID。
+     * 异步任务ID
+     * @example "681b538015***5ca5ac14ef3"
+     */
+    TaskId: string;
+  };
+}
+
+export interface CreateImageAIProcessCallbackBody {
+  /**
+   * 条目 ID。
+   * 条目id
+   * @example "649a9332***80e9cc0a0ec"
+   */
+  EntryId: string;
+}
+
+export interface CreateImageAIProcessCallbackRes {
+  ResponseMetadata: {
+    /**
+     * 请求的接口名，属于请求的公共参数。
+     * @example "{Action}"
+     */
+    Action: string;
+    /**
+     * 请求的Region，例如：cn-north-1
+     * @example "cn-north-1"
+     */
+    Region: string;
+    /** RequestId为每次API请求的唯一标识。 */
+    RequestId: string;
+    /** 请求的服务，属于请求的公共参数。 */
+    Service: string;
+    /**
+     * 请求的版本号，属于请求的公共参数。
+     * @example "{Version}"
+     */
+    Version: string;
+  };
+  /** 视请求的接口而定 */
+  Result?: Record<string, unknown>;
+}
+
+export interface CreateImageAIProcessQueueBody {
+  /**
+   * 任务队列属性。取值如下：
+   * - `ai_super_resolution`：AIGC 大模型超分辨率
+   * - `bgfill`：智能图像扩展
+   * - `super_resolution`：图像超分辨率（云端）
+   * - `InfiniteCreations`：电商万创
+   * 队列属性
+   * @example "bgfill"
+   */
+  Attribute: string;
+  /**
+   * 任务队列回调设置。
    * @example "-"
    */
   CallbackConf?: {
     /**
-     * 业务自定义回调参数，将在回调消息的 `callback_args` 中透传。具体回调参数请参考[回调内容](https://www.volcengine.com/docs/508/1104726#%E5%9B%9E%E8%B0%83%E5%86%85%E5%AE%B9)。
+     * 业务自定义回调参数，将在回调消息的`callback_args`中透传出去。具体回调参数请参考[回调内容](https://www.volcengine.com/docs/508/1749069#%E6%AD%A5%E9%AA%A4%E4%BA%94%EF%BC%9A%E8%8E%B7%E5%8F%96%E5%A4%84%E7%90%86%E7%BB%93%E6%9E%9C%E8%AF%A6%E6%83%85)。
+     * 参数
+     * @example "product id"
+     */
+    Args?: string;
+    /**
+     * 回调数据格式。取值如下：
+     * - `XML`
+     * - `JSON`
+     * 回调数据格式，JSON或者XML
+     * @example "JSON"
+     */
+    DataFormat: string;
+    /**
+     * 回调 HTTP 请求地址，用于接收批量处理结果详情。支持使用 https 和 http 协议。
+     * 回调url
+     * @example "https://demo.com"
+     */
+    Endpoint: string;
+    /**
+     * 回调方式。仅支持取值 `HTTP`。
+     * 回到url协议，默认http
+     * @example "HTTP"
+     */
+    Method: string;
+    /**
+     * 回调触发类型。取值如下：
+     * - `task`：整个任务处理完成后触发回调
+     * - `entry`：单个条目处理完成后触发回调
+     * 回调类型，支持task 或entry
+     * @example "task"
+     */
+    Type: string;
+  };
+  /**
+   * 任务队列描述，可用于备注该队列的用途。
+   * 队列描述
+   * @example "ceshi"
+   */
+  Desc?: string;
+  /**
+   * 是否启动队列，开始执行批量处理操作。取值如下：
+   * - `true`：启动
+   * - `false`：不启动
+   *
+   * 是否开启队列
+   * @example "true"
+   */
+  IsStart?: boolean;
+  /**
+   * 任务队列名称。
+   * 队列名
+   * @example "test"
+   */
+  Name: string;
+}
+
+export interface CreateImageAIProcessQueueRes {
+  ResponseMetadata: {
+    /**
+     * 请求的接口名，属于请求的公共参数。
+     * @example "{Action}"
+     */
+    Action: string;
+    /**
+     * 请求的Region，例如：cn-north-1
+     * @example "cn-north-1"
+     */
+    Region: string;
+    /** RequestId为每次API请求的唯一标识。 */
+    RequestId: string;
+    /** 请求的服务，属于请求的公共参数。 */
+    Service: string;
+    /**
+     * 请求的版本号，属于请求的公共参数。
+     * @example "{Version}"
+     */
+    Version: string;
+  };
+  /** 视请求的接口而定 */
+  Result?: {
+    /**
+     * 任务队列 ID。
+     * 队列id
+     * @example "62f224ce61ef23826e38c29a"
+     */
+    QueueId: string;
+  };
+}
+
+/** title */
+export interface CreateImageAITaskBody {
+  /**
+   * 任务回调配置。
+   * @example "-"
+   */
+  CallbackConf?: {
+    /**
+     * 业务自定义回调参数，将在回调消息的 `callback_args` 中透传。具体回调参数请参考 [AI 图像处理回调](https://www.volcengine.com/docs/508/1526662)。
      * @example "product id"
      */
     Args?: string;
@@ -1142,7 +1393,6 @@ export interface CreateImageAITaskBody {
     Endpoint: string;
     /**
      * 回调方式，仅支持取值 `HTTP`。
-     * HTTP
      * @example "HTTP"
      */
     Method: string;
@@ -1151,18 +1401,16 @@ export interface CreateImageAITaskBody {
      *
      * - `task`：将按照任务级别进行回调。可分批回调，一个批次内最多一次性可回调 5000 条图片转码条目执行信息。
      * - `entry`：将按照条目级别进行回调。当该条目执行完毕，将立即产生回调。
-     * 参数类型。
      * @example "task"
      */
     Type?: string;
   };
   /**
-   * 待进行 AI 处理的图片 URI 或 URL 列表，其中 URI 不需要带 `tos-cn-i-***` 前缀。
+   * 待进行 AI 处理的图片 URI 或 URL 列表，其中 URI 不需要带 `tos-cn-i-***` 前缀，最多传入 10,000 张图片。传入图片的宽高、大小等要求请参看对应的[附加组件使用限制](https://www.volcengine.com/docs/508/1270839)。
    *
    * :::warning
    * 若 `DataType` 取值 `uri`，则待转码图片 URI 必须为指定服务 ID 下的存储 URI。您可通过调用 [GetImageUploadFiles](https://www.volcengine.com/docs/508/9392) 获取指定服务下全部的上传文件存储 URI。
    * :::
-   * 数据列表。
    * @example "["a.png","uridemo.png"]"
    */
   DataList: string[];
@@ -1174,6 +1422,7 @@ export interface CreateImageAITaskBody {
    * @example "uri"
    */
   DataType: string;
+  QueueId: string;
   /**
    * 服务 ID。若 `DataType` 取值 `uri`，则提交的图片 URI 列表需在该服务内。
    *
@@ -1184,16 +1433,14 @@ export interface CreateImageAITaskBody {
   ServiceId: string;
   /**
    * AI 图像处理模板参数，需要将 JSON 压缩并转义为字符串。根据您需要的图像处理功能，参看 [AI 图像处理模板](https://www.volcengine.com/docs/508/1515840)页面获取模板 ID 和参数信息。
-   * 工作流参数，序列化的 JSON 字符串。
    * @example "{\"GenDREnhanceParam\":{\"Multiple\":1.2}}"
    */
   WorkflowParameter: string;
   /**
    * AI 图像处理模板 ID。根据您需要的图像处理功能，参看 [AI 图像处理模板](https://www.volcengine.com/docs/508/1515840)页面获取模板 ID 和参数信息。
-   * 工作流ID。
    * @example "system_workflow_ai_super_resolution"
    */
-  WorkflowTemplateld: string;
+  WorkflowTemplateId: string;
 }
 
 export interface CreateImageAITaskRes {
@@ -1889,9 +2136,10 @@ export interface CreateImageHmExtractQuery {
    * - `natural`：文本嵌入基础模型（彩色图片通用）
    * - `tracev1`：前景图层水印模型（纯色背景适用）
    * - `tracev2`：前景图层水印模型（彩色背景通用）
+   * - `tracev2-app`：前景图层水印模型（移动端）
    *
    * :::warning
-   * 指定 `tracev1` 或 `tracev2` 模型时，请传入已添加对应模型水印的背景网页的**截图**。若模型错误，则无法提取水印。
+   * 指定 `tracev1`、`tracev2`、`tracev2-app` 模型时，请传入已添加对应模型水印的背景网页的**截图**。若图片错误，则无法提取水印。
    * :::
    * @example "default"
    */
@@ -2670,7 +2918,7 @@ export interface CreateImageServiceBody {
    * 创建服务时绑定的域名列表
    * @example "-"
    */
-  Domains: {
+  Domains?: {
     /**
      * 待绑定的证书 ID。
      * 证书ID
@@ -3476,7 +3724,7 @@ export interface CreateImageTemplatesByImportBody {
   /**
    * 待导入的模板 JSON 内容列表。
    * 待导入的模板JSON内容列表
-   * @example "["{\"name\":\"tplv-n8**e0-13\",\"output\":{\"quality\":30,\"format\":\"jpeg\",\"extra\":{\"heic.alpha.reserve\":\"true\"},\"exif\":{\"auto_orient_off\":true}},\"input\":{},\"max_age\":2592000,\"filters\":[]}"]"
+   * @example "[]"
    */
   Templates: string[];
 }
@@ -3899,6 +4147,88 @@ export interface DelDomainRes {
      */
     Region: string;
     /** RequestID为每次API请求的唯一标识。 */
+    RequestId: string;
+    /** 请求的服务，属于请求的公共参数。 */
+    Service: string;
+    /**
+     * 请求的版本号，属于请求的公共参数。
+     * @example "{Version}"
+     */
+    Version: string;
+  };
+  /** 视请求的接口而定 */
+  Result?: Record<string, unknown>;
+}
+
+export interface DeleteImageAIProcessDetailBody {
+  /**
+   * 待批量删除条目的 ID。
+   * :::tip
+   * 至少传入 `EntryId` 和 `Entries` 其中之一。
+   * :::
+   * 批量删除的条目id
+   * @example "["62f224ce61ef23826e38c29a", "62f224ce61ef23826e38c29a"]"
+   */
+  Entries?: string[];
+  /**
+   * 待删除条目的 ID。
+   * :::tip
+   * 至少传入 `EntryId` 和 `Entries` 其中之一。
+   * :::
+   * 条目id
+   * @example "649a9332***80e9cc0a0ec"
+   */
+  EntryId?: string;
+}
+
+export interface DeleteImageAIProcessDetailRes {
+  ResponseMetadata: {
+    /**
+     * 请求的接口名，属于请求的公共参数。
+     * @example "{Action}"
+     */
+    Action: string;
+    /**
+     * 请求的Region，例如：cn-north-1
+     * @example "cn-north-1"
+     */
+    Region: string;
+    /** RequestId为每次API请求的唯一标识。 */
+    RequestId: string;
+    /** 请求的服务，属于请求的公共参数。 */
+    Service: string;
+    /**
+     * 请求的版本号，属于请求的公共参数。
+     * @example "{Version}"
+     */
+    Version: string;
+  };
+  /** 视请求的接口而定 */
+  Result?: Record<string, unknown>;
+}
+
+export interface DeleteImageAIProcessQueueBody {
+  /**
+   * 任务队列 ID。您可通过调用 [GetImageAIProcessQueues](https://www.volcengine.com/docs/508/1755529) 获取该账号下全部任务队列 ID。
+   * 队列id
+   * @example "62f224ce61ef23826e38c29a"
+   */
+  QueueId: string;
+}
+
+export interface DeleteImageAIProcessQueueRes {
+  ResponseMetadata: {
+    /**
+     * 请求的接口名，属于请求的公共参数。
+     * @example "{Action}"
+     */
+    Action: string;
+    /**
+     * 请求的Region，例如：cn-north-1
+     * @example "cn-north-1"
+     */
+    Region: string;
+    /** RequestId为每次API请求的唯一标识。 */
     RequestId: string;
     /** 请求的服务，属于请求的公共参数。 */
     Service: string;
@@ -4774,9 +5104,10 @@ export interface DescribeImageXAIRequestCntUsageQuery {
    */
   EndTime: string;
   /**
-   * 维度拆分的维度值。不传表示不拆分维度，只能传入单个参数。支持取值如下：
+   * 维度拆分的维度值。不传表示不拆分维度，传入多个时用英文逗号“,”分割。支持取值如下：
    * - `ServiceId`：服务
    * - `AdvFeat`：组件
+   * - `Model`：模型
    * @example "AdvFeat"
    */
   GroupBy?: string;
@@ -4856,12 +5187,109 @@ export interface DescribeImageXAIRequestCntUsageRes {
          */
         Value: number;
       }[];
+      /** 附加组件模型，`GroupBy`包含`Model`时有返回值。 */
+      Model: string;
       /**
        * 服务 ID，`GroupBy`包含`ServiceId`时有返回值。
        * 服务 ID，`GroupBy`包含`ServiceId`时有返回值。
        * @example "s1"
        */
       ServiceId?: string;
+    }[];
+  };
+}
+
+export interface DescribeImageXAddOnQPSUsageQuery {
+  /**
+   * 附加组件名称。仅传单个。您可通过调用 [GetImageAddOnConf](https://www.volcengine.com/docs/508/66145) 查看`Key`返回值。
+   * @example "a1"
+   */
+  AdvFeat: string;
+  /**
+   * 获取数据结束时间点。日期格式按照 ISO8601 表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如`2019-06-02T00:00:00+08:00`。
+   * @example "2019-06-02T00:00:00+08:00"
+   */
+  EndTime: string;
+  /**
+   * 查询数据的时间粒度。单位为秒。缺省时查询`StartTime`和`EndTime`时间段全部数据，此时单次查询最大时间跨度为 93 天。取值如下所示：
+   *
+   * - `1`: 单次查询最大时间跨度为 6 小时
+   * - `60`：单次查询最大时间跨度为 6 小时
+   * - `120`：单次查询最大时间跨度为 6 小时
+   * - `300`：单次查询最大时间跨度为 31 天
+   * - `600`：单次查询最大时间跨度为 31 天
+   * - `1200`：单次查询最大时间跨度为 31 天
+   * - `1800`：单次查询最大时间跨度为 31 天
+   * - `3600`：单次查询最大时间跨度为 93 天
+   * - `86400`：单次查询最大时间跨度为 93 天
+   * - `604800`：单次查询最大时间跨度为 93 天
+   * @example "300"
+   */
+  Interval?: string;
+  /**
+   * 服务 ID。支持查询多个服务，传入多个时用英文逗号“,”分割，缺省情况下表示查询所有服务。您可以在 veImageX 控制台的[服务管理](https://console.volcengine.com/imagex/service_manage/)模块或者调用 [GetAllImageServices](https://www.volcengine.com/docs/508/9360) 接口获取服务 ID。
+   * @example "s1,s2"
+   */
+  ServiceIds?: string;
+  /**
+   * 获取数据起始时间点。日期格式按照 ISO8601 表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如`2019-06-02T00:00:00+08:00`。
+   * :::tip
+   * 由于仅支持查询近 93 天的历史数据，则若此刻时间为`2011-11-21T16:14:00+08:00`，那么您可输入最早的开始时间为`2011-08-21T00:00:00+08:00`。
+   * :::
+   * @example "2019-06-02T00:00:00+08:00"
+   */
+  StartTime: string;
+}
+
+export interface DescribeImageXAddOnQPSUsageRes {
+  ResponseMetadata: {
+    /** 请求的接口名，属于请求的公共参数。 */
+    Action: string;
+    /** 请求的Region，例如：cn-north-1 */
+    Region: string;
+    /** RequestID为每次API请求的唯一标识。 */
+    RequestId: string;
+    /** 请求的服务，属于请求的公共参数。 */
+    Service: string;
+    /** 请求的版本号，属于请求的公共参数。 */
+    Version: string;
+  };
+  /** 视请求的接口而定 */
+  Result: {
+    /**
+     * QPS 用量
+     * @example "-"
+     */
+    QPSData: {
+      /**
+       * 时序数据。
+       * @example "-"
+       */
+      Data: {
+        /**
+         * 统计时间点，时间片开始时刻，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。
+         * 统计时间点，时间片开始时刻。日期格式按照ISO8601表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm，比如2019-06-02T00:00:00+08:00。
+         * @example "2023-01-01T00:00:00+08:00"
+         */
+        TimeStamp: string;
+        /**
+         * QPS 用量的值。单位为 "次/秒"，表示每秒处理的请求数量。
+         * 请求QPS
+         * @example 12
+         */
+        Value: number;
+      }[];
+      /**
+       * 附加组件模型。
+       *
+       * - 取值为`total`：表示总请求QPS。
+       * - 取值不为`total`：表示附加组件使用模型的请求QPS。
+       * 附加组件模型。
+       * - 取值为`total`：表示总请求QPS。
+       * - 取值不为`total`：表示附加组件使用模型的请求QPS。
+       * @example "total"
+       */
+      Model: string;
     }[];
   };
 }
@@ -5067,6 +5495,12 @@ export interface DescribeImageXBucketRetrievalUsageQuery {
    */
   GroupBy?: string;
   /**
+   * 是否查询数据取回量。
+   * - `true`：查询取回量。
+   * - `false`：查询存储量。
+   */
+  IsRetrieval?: boolean;
+  /**
    * 服务 ID。为空时表示不筛选，支持查询多个服务，使用逗号分隔不同的服务。
    *
    * - 您可以在 veImageX 控制台[服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。
@@ -5102,6 +5536,7 @@ export interface DescribeImageXBucketRetrievalUsageRes {
     StorageData: {
       /**
        * Bucket 名称，`GroupBy`包含`BucketName`时有返回值。
+       * Bucket 名称，`GroupBy`包含`BucketName`时有返回值。
        * @example "b1"
        */
       BucketName?: string;
@@ -5123,15 +5558,41 @@ export interface DescribeImageXBucketRetrievalUsageRes {
       }[];
       /**
        * 服务 ID，`GroupBy`包含`ServiceId`时有返回值。
+       * 服务 ID，`GroupBy`包含`ServiceId`时有返回值。
        * @example "s1"
        */
       ServiceId?: string;
       /**
-       * 存储类型，`GroupBy`包含`StorageType`时有返回值。取值：
+       * 存储类型，`GroupBy`包含`StorageType`时有返回值。
+       * 当传参`IsRetrieval`=`false`时，表示存储值，取值：
        * - `STANDARD`：标准存储
        * - `IA`：低频存储
        * - `ARCHIVE`：归档存储
        * - `COLD_ARCHIVE`：冷归档存储
+       * - `ARCHIVE_FR`：归档闪回存储
+       *
+       * 当传参`IsRetrieval`=`true`时，表示取回值，取值：
+       * - `IA`：低频取回
+       * - `ARCHIVE`：归档标准取回
+       * - `COLD_ARCHIVE`：冷归档快速取回
+       * - `ARCHIVE_FR`：归档闪回取回
+       * - `COLD_ARCHIVE_STANDARD`：冷归档标准取回
+       * - `COLD_ARCHIVE_BULK`：冷归档批量取回
+       * 存储类型，`GroupBy`包含`StorageType`时有返回值。
+       * 当传参`IsRetrieval`=`false`时，表示存储值，取值：
+       * - `STANDARD`：标准存储
+       * - `IA`：低频存储
+       * - `ARCHIVE`：归档存储
+       * - `COLD_ARCHIVE`：冷归档存储
+       * - `ARCHIVE_FR`：归档闪回存储
+       *
+       * 当传参`IsRetrieval`=`true`时，表示取回值，取值：
+       * - `IA`：低频取回
+       * - `ARCHIVE`：归档标准取回
+       * - `COLD_ARCHIVE`：冷归档快速取回
+       * - `ARCHIVE_FR`：归档闪回取回
+       * - `COLD_ARCHIVE_STANDARD`：冷归档标准取回
+       * - `COLD_ARCHIVE_BULK`：冷归档批量取回
        * @example "STANDARD"
        */
       StorageType?: string;
@@ -11888,6 +12349,11 @@ export interface DescribeImageXEdgeRequestRegionsQuery {
    */
   EndTime: string;
   /**
+   * 服务 ID。支持查询多个服务，传入多个时用英文逗号“,”分割，缺省情况下表示查询所有服务。您可以在 veImageX 控制台的[服务管理](https://console.volcengine.com/imagex/service_manage/)模块或者调用 [GetAllImageServices](https://www.volcengine.com/docs/508/9360) 接口获取服务 ID。
+   * @example "s1,s2"
+   */
+  ServiceIds?: string;
+  /**
    * 获取数据起始时间点。日期格式按照 ISO8601 表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。例如`2019-06-02T00:00:00+08:00`。<br>起始时间与结束时间间隔小于等于 90 天。
    * @example "2019-06-02T00:00:00+08:00"
    */
@@ -14357,9 +14823,10 @@ export interface DescribeImageXRequestCntUsageQuery {
    */
   EndTime: string;
   /**
-   * 维度拆分的维度值。不传表示不拆分维度，只能传入单个参数。支持取值如下：
+   * 维度拆分的维度值。不传表示不拆分维度，传入多个时用英文逗号“,”分割。支持取值如下：
    * - `ServiceId`：服务
    * - `AdvFeat`：组件
+   * - `Model`：模型
    * @example "AdvFeat"
    */
   GroupBy?: string;
@@ -14439,6 +14906,11 @@ export interface DescribeImageXRequestCntUsageRes {
          */
         Value: number;
       }[];
+      /**
+       * 模型名称，`GroupBy`包含`Model`时有返回值。
+       * @example "m1"
+       */
+      Model?: string;
       /**
        * 服务 ID，`GroupBy`包含`ServiceId`时有返回值。
        * 服务 ID，`GroupBy`包含`ServiceId`时有返回值。
@@ -16363,6 +16835,141 @@ export interface DescribeImageXSourceRequestTrafficRes {
        * @example "d1"
        */
       DomainName?: string;
+    }[];
+  };
+}
+
+export interface DescribeImageXStorageUsageQuery {
+  /**
+   * Bucket 名称。支持同时查询多个 BucketName，不同的 BucketNmae 使用逗号分隔。
+   * 您可以通过调用 [GetAllImageServices](https://www.volcengine.com/docs/508/9360) 获取所需的 Bucket 名称。
+   * @example "b1,b2"
+   */
+  BucketNames?: string;
+  /**
+   * 获取数据结束时间点。日期格式按照 ISO8601 表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。例如`2019-06-02T00:00:00+08:00`。
+   * @example "2019-06-02T00:00:00+08:00"
+   */
+  EndTime: string;
+  /**
+   * 需要分组查询的参数，多个数据用逗号分隔。支持取值如下：
+   *
+   * - `ServiceId`：服务 ID
+   * - `BucketName`：Bucket 名称
+   * - `StorageType`：存储类型
+   * @example "ServiceId,BucketName,StorageType"
+   */
+  GroupBy?: string;
+  /**
+   * 查询数据的时间粒度。单位为秒，缺省时查询`StartTime`和`EndTime`时间段全部数据，此时单次查询最大时间跨度为 93 天。支持以下取值：
+   *
+   * - `300`：单次查询最大时间跨度为 31 天
+   * - `3600`：单次查询最大时间跨度为 93 天
+   * - `86400`：单次查询最大时间跨度为 93 天
+   * @example "300"
+   */
+  Interval: string;
+  /**
+   * 是否查询数据取回量。
+   * - `true`：查询取回量。
+   * - `false`：查询存储量。
+   */
+  IsRetrieval?: boolean;
+  /**
+   * 服务 ID。为空时表示不筛选，支持查询多个服务，使用逗号分隔不同的服务。
+   *
+   * - 您可以在 veImageX 控制台[服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。
+   * - 您也可以通过 OpenAPI 的方式获取服务 ID，具体请参考 [GetAllImageServices](https://www.volcengine.com/docs/508/9360)。
+   * @example "s1,s2"
+   */
+  ServiceIds?: string;
+  /**
+   * 获取数据起始时间点。日期格式按照 ISO8601 表示法，格式为：YYYY-MM-DDThh:mm:ss±hh:mm。例如`2019-06-02T00:00:00+08:00`。
+   * :::tip
+   * 由于仅支持查询近一年历史数据，则若此刻时间为`2011-11-21T16:14:00+08:00`，那么您可输入最早的开始时间为`2010-11-21T00:00:00+08:00`。
+   * :::
+   * @example "2019-06-02T00:00:00+08:00"
+   */
+  StartTime: string;
+}
+
+export interface DescribeImageXStorageUsageRes {
+  ResponseMetadata: {
+    /** 请求的接口名，属于请求的公共参数。 */
+    Action: string;
+    /** 请求的Region，例如：cn-north-1 */
+    Region: string;
+    /** RequestID为每次API请求的唯一标识。 */
+    RequestId: string;
+    /** 请求的服务，属于请求的公共参数。 */
+    Service: string;
+    /** 请求的版本号，属于请求的公共参数。 */
+    Version: string;
+  };
+  Result: {
+    /** 计量数据列表 */
+    StorageData: {
+      /**
+       * Bucket 名称，`GroupBy`包含`BucketName`时有返回值。
+       * Bucket 名称，`GroupBy`包含`BucketName`时有返回值。
+       * @example "b1"
+       */
+      BucketName?: string;
+      /** 具体数据 */
+      Data: {
+        /**
+         * 统计时间点，时间片开始时刻，格式为：格式为：YYYY-MM-DDThh:mm:ss±hh:mm
+         * 统计时间点，时间片开始时刻，格式为：YYYY-MM-DDThh:mm:ss±hh:mm
+         * @example "2023-01-01T00:00:00+08:00"
+         */
+        TimeStamp: string;
+        /**
+         * 单位：Byte
+         * 单位：Byte
+         * @example 123
+         */
+        Value: number;
+      }[];
+      /**
+       * 服务 ID，`GroupBy`包含`ServiceId`时有返回值。
+       * 服务 ID，`GroupBy`包含`ServiceId`时有返回值。
+       * @example "s1"
+       */
+      ServiceId?: string;
+      /**
+       * 存储类型，`GroupBy`包含`StorageType`时有返回值。
+       * 当传参`IsRetrieval`=`false`时，表示存储值，取值：
+       * - `STANDARD`：标准存储
+       * - `IA`：低频存储
+       * - `ARCHIVE`：归档存储
+       * - `COLD_ARCHIVE`：冷归档存储
+       * - `ARCHIVE_FR`：归档闪回存储
+       *
+       * 当传参`IsRetrieval`=`true`时，表示取回值，取值：
+       * - `IA`：低频取回
+       * - `ARCHIVE`：归档标准取回
+       * - `COLD_ARCHIVE`：冷归档快速取回
+       * - `ARCHIVE_FR`：归档闪回取回
+       * - `COLD_ARCHIVE_STANDARD`：冷归档标准取回
+       * - `COLD_ARCHIVE_BULK`：冷归档批量取回
+       * 存储类型，`GroupBy`包含`StorageType`时有返回值。
+       * 当传参`IsRetrieval`=`false`时，表示存储值，取值：
+       * - `STANDARD`：标准存储
+       * - `IA`：低频存储
+       * - `ARCHIVE`：归档存储
+       * - `COLD_ARCHIVE`：冷归档存储
+       * - `ARCHIVE_FR`：归档闪回存储
+       *
+       * 当传参`IsRetrieval`=`true`时，表示取回值，取值：
+       * - `IA`：低频取回
+       * - `ARCHIVE`：归档标准取回
+       * - `COLD_ARCHIVE`：冷归档快速取回
+       * - `ARCHIVE_FR`：归档闪回取回
+       * - `COLD_ARCHIVE_STANDARD`：冷归档标准取回
+       * - `COLD_ARCHIVE_BULK`：冷归档批量取回
+       * @example "STANDARD"
+       */
+      StorageType?: string;
     }[];
   };
 }
@@ -20004,40 +20611,44 @@ export interface GetCVImageGenerateTaskRes {
 export interface GetCVTextGenerateImageBody {
   /**
    * 服务下绑定的域名，域名状态需正常可用。
+   *
    * - 您可以在 veImageX 控制台 [服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取绑定的域名信息。
    * - 您也可以通过 OpenAPI 的方式获取域名，具体请参考[获取服务下全部域名](https://www.volcengine.com/docs/508/9379)。
    * @example "test.example.com"
    */
   Domain: string;
   /**
-   * 在[文生图系列模型](#使用说明)中选择一个本次调用的智能生图模型，并并传入该模型对应接口的 Action 名称。
+   * 在[文生图系列模型](#使用说明)中选择一个本次调用的智能生图模型，并传入该模型对应接口的 Action 名称。
    *
-   * 例如，使用[通用 2.0S-文生图异步](https://www.volcengine.com/docs/6791/1347773)，则 `ModelAction` 需要取值为 `CVSync2AsyncSubmitTask`。
+   * 例如，如果使用[通用 2.0L-文生图](https://www.volcengine.com/docs/6791/1339374)，则 `ModelAction` 需要取值为 `CVProcess`；如果使用[通用 1.2-文生图](https://www.volcengine.com/docs/6791/1213130)，则 `ModelAction` 需要取值为 `HighAesSmartDrawing`。
    * 操作模型action
    * @example "CVProcess"
    */
   ModelAction: string;
   /**
-   * 在[文生图系列模型](#使用说明)中选择一个本次调用的智能生图模型，并并传入该模型对应接口的 Version 名称。
+   * 在[文生图系列模型](#使用说明)中选择一个本次调用的智能生图模型，并传入该模型对应接口的 Version 名称。
    *
-   * 例如，使用[通用 2.0S-文生图异步](https://www.volcengine.com/docs/6791/1347773)，则 `ModelVersion` 需要取值为 `2022-08-31`。
+   * 例如，使用[通用 2.0L-文生图](https://www.volcengine.com/docs/6791/1339374)，则 `ModelVersion` 需要取值为 `2022-08-31`。
    * 模型版本。
    * @example "2022-08-31"
    */
   ModelVersion: string;
   /**
    * 指定输出图片的文件名，输入限制如下所示：
+   *
    * - 数组长度为 1，若指定多个文件名，仅第一个取值生效。
    * - 不支持空格。
    * - 不支持以/开头或结尾，不支持/连续出现，最大长度限制为 180 个字节。
    * 输出结果。
-   * @example "["AI/demo.png"]"
+   * @example "["demo1"]"
    */
   Outputs: string[];
   /**
    * 是否覆盖服务下同名文件，取值如下所示：
+   *
    * - `false`：（默认）不覆盖
    * - `true`：覆盖
+   *
    * :::tip
    * 请确保您已开启[重名覆盖上传](https://www.volcengine.com/docs/508/1119912)功能，否则，此处配置无效。
    * :::
@@ -20046,48 +20657,28 @@ export interface GetCVTextGenerateImageBody {
    */
   Overwrite?: boolean;
   /**
-   * 在[文生图系列模型](#使用说明)中选择一个本次调用的智能生图模型，并并传入该模型对应接口的请求 JSON 字符串。
+   * 在[文生图系列模型](#使用说明)中选择一个本次调用的智能生图模型，并传入该模型对应接口的请求 JSON 字符串。
    *
-   * 例如，使用[通用 2.0S-文生图异步](https://www.volcengine.com/docs/6791/1347773)，则 `ReqJson` 需要取值为：
+   * 例如，使用[通用 2.0L-文生图](https://www.volcengine.com/docs/6791/1339374)的必填参数，则 `ReqJson` 传值示例如下所示：
+   *
    * ```json
    * {
-   *     "req_key":"high_aes_general_v20",
-   *     "prompt":"千军万马",
-   *     "model_version":"general_v2.0",
-   *     "seed":-1,
-   *     "scale":3.5,
-   *     "ddim_steps":16,
-   *     "width":512,
-   *     "height":512,
-   *     "use_sr":true
+   *     "req_key":"high_aes_general_v20_L",
+   *     "prompt":"千军万马"
    * }
    * ```
+   *
+   * :::tip
+   * 您可忽略 `return_url`，该参数的取值并不会影响最终返回的结果图地址的类型。
+   * :::
    * 请求的JSON数据。
-   * @example "{
-   *     "req_key":"high_aes_general_v20",
-   *     "prompt":"千军万马",
-   *     "model_version":"general_v2.0",
-   *     "seed":-1,
-   *     "scale":3.5,
-   *     "ddim_steps":16,
-   *     "width":512,
-   *     "height":512,
-   *     "use_sr":true,
-   *     "return_url":true,
-   *     "logo_info": {
-   *         "add_logo": false,
-   *         "position": 0,
-   *         "language": 0,
-   *         "logo_text_content": "这里是明水印内容"
-   *     }
-   * }"
+   * @example "详见描述内取值示例"
    */
   ReqJson: Record<string, Record<string, unknown>>;
   /**
-   * 服务下创建的图片处理模板名称，指定后，将按照模板中的处理配置对豆包大模型生成的图片进行图片处理。
-   *
-   * 您可在 veImageX 控制台的处理配置页面，参考[新建模板](https://www.volcengine.com/docs/508/8087)配置模板并获取模版名称，例如 `tplv-f0****5k-test`。
-   * @example "tplv-serviceid-test"
+   * 服务下创建的图片处理模板配置（不带~），指定后，将按照模板中的处理配置对豆包大模型生成的图片进行图片处理。
+   * 您可在 veImageX 控制台的处理配置页面，参考[新建模板](https://www.volcengine.com/docs/508/8087)配置模板并获取模版信息，例如 `tplv-f0****5k-test.image`。
+   * @example "tplv-serviceid-test.image"
    */
   Template: string;
 }
@@ -20095,6 +20686,7 @@ export interface GetCVTextGenerateImageBody {
 export interface GetCVTextGenerateImageQuery {
   /**
    * 指定存储结果图并计量计费的服务 ID。
+   *
    * - 您可以在 veImageX 控制台 [服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。
    * - 您也可以通过 OpenAPI 的方式获取服务 ID，具体请参考[获取所有服务信息](https://www.volcengine.com/docs/508/9360)。
    * @example "serviceid"
@@ -20129,13 +20721,13 @@ export interface GetCVTextGenerateImageRes {
     /**
      * 最终上传至 veImageX 服务的结果图访问 URL，数量为 1。
      * 存储URI列表。
-     * @example "["http://test.example.cn/tos-cn-i-serviceid/demo1~tplv-serviceid-image.image"]"
+     * @example "["http://test.example.cn/demo1~tplv-serviceid-image.image"]"
      */
     ImageUrls: string[];
     /**
      * 根据指定的文生图模型接口信息，接收的该接口响应的 JSON 数据。
      *
-     * 例如，使用[通用 2.0S-文生图异步](https://www.volcengine.com/docs/6791/1347773)，则 RespJson 接收到的相应信息为：
+     * 例如，使用[通用 2.0L-文生图](https://www.volcengine.com/docs/6791/1339374)，则 RespJson 接收到的响应信息示例为：
      * ```json
      * {
      *     "code": 10000,
@@ -20149,19 +20741,14 @@ export interface GetCVTextGenerateImageRes {
      * }
      * ```
      * 响应的JSON字符串。
-     * @example "{
-     *     "code": 10000,
-     *     "data": {
-     *         "task_id": "7418048504813240370"
-     *     },
-     *     "message": "Success",
-     *     "request_id": "2024092411365866C579D2A96A35DA62A9",
-     *     "status": 10000,
-     *     "time_elapsed": "23.099216ms"
-     * }"
+     * @example "详见描述内取值示例"
      */
     RespJson: Record<string, Record<string, unknown>>;
-    /** 存储URI。 */
+    /**
+     * 最终上传至 veImageX 服务的结果图存储 URI，数量为 1。
+     * 存储URI。
+     * @example "["tos-cn-i-serviceid/demo1"]"
+     */
     StoreUris: string[];
   };
 }
@@ -20687,13 +21274,11 @@ export interface GetDomainConfigRes {
          */
         values: string[];
       };
-      /** @example "" */
-      refer_link: any;
       /**
        * Referer 防盗链配置
        * @example "-"
        */
-      referer_link: {
+      refer_link: {
         /**
          * 是否允许空 Refer，取值如下所示：
          *
@@ -21390,6 +21975,69 @@ export interface GetDomainConfigRes {
   };
 }
 
+export interface GetDomainOwnerVerifyContentQuery {
+  /**
+   * 待校验的域名。仅支持单域名校验。
+   * @example "test.imagex.com"
+   */
+  Domain: string;
+}
+
+export interface GetDomainOwnerVerifyContentRes {
+  ResponseMetadata: {
+    /**
+     * 请求的接口名，属于请求的公共参数。
+     * @example "{Action}"
+     */
+    Action: string;
+    /**
+     * 请求的Region，例如：cn-north-1
+     * @example "cn-north-1"
+     */
+    Region: string;
+    /** RequestId为每次API请求的唯一标识。 */
+    RequestId: string;
+    /** 请求的服务，属于请求的公共参数。 */
+    Service: string;
+    /**
+     * 请求的版本号，属于请求的公共参数。
+     * @example "{Version}"
+     */
+    Version: string;
+  };
+  /** 视请求的接口而定 */
+  Result?: {
+    /**
+     * DNS 解析校验信息，仅当 NeedVerify 为 true 时返回。
+     * DNS 解析校验信息，仅当 NeedVerify 为 true 时返回。
+     */
+    DNSVerifyInfo: {
+      /**
+       * 主机记录。
+       * @example "imagexauth"
+       */
+      Host: string;
+      /**
+       * 记录类型。
+       * @example "TXT"
+       */
+      RecordType: string;
+      /**
+       * 记录值。
+       * @example "imagex_800f1eee36864b29baa465a30b55e7af"
+       */
+      RecordValue: string;
+    };
+    /**
+     * 域名是否需要归属权校验：
+     * true: 需要校验
+     * false: 无需校验
+     * @example "true"
+     */
+    NeedVerify: boolean;
+  };
+}
+
 /**
  * 尺寸单位。当前仅支持取值px表示像素。
  * @example "px"
@@ -21423,6 +22071,7 @@ export enum GetGetImageTranscodeQueuesTypeEnum {
 export interface GetImageAIDetailsQuery {
   /**
    * 查询的结束 Unix 时间戳，`StartTime` 与 `EndTime` 时间间隔最大不超过 7 天。
+   * @format int64
    * @example 1685913599
    */
   EndTime: number;
@@ -21449,6 +22098,14 @@ export interface GetImageAIDetailsQuery {
    */
   SearchPtn?: string;
   /**
+   * 服务 ID。若 `DataType` 取值 `uri`，则提交的图片 URI 列表需在该服务内。
+   *
+   * - 您可以在 veImageX 控制台[服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。
+   * - 您也可以通过 OpenAPI 的方式获取服务 ID，具体请参考[获取所有服务信息](https://www.volcengine.com/docs/508/9360)。
+   * @example "5s****fo"
+   */
+  ServiceId: string;
+  /**
    * 查询的起始 Unix 时间戳，`StartTime` 与 `EndTime` 时间间隔最大不超过 7 天。
    * @format int64
    * @example 1684713599
@@ -21458,7 +22115,7 @@ export interface GetImageAIDetailsQuery {
    * 执行状态，填入多个时使用英文逗号分隔。取值如下所示：
    *
    * - `Pending`：排队中
-   * - `Running`：执行中
+   * - `Dispatched`：执行中
    * - `Success`：执行成功
    * - `Fail`：执行失败
    * @example "Pending"
@@ -21466,7 +22123,7 @@ export interface GetImageAIDetailsQuery {
   Status?: string;
   /**
    * 任务 ID，通过 CreateImageAITask 接口返回，缺省时查询指定队列下全部的任务。
-   * @example "67174744adc54449623155b9"
+   * @example "67174744a**54449623155b9"
    */
   TaskId: string;
 }
@@ -21506,6 +22163,14 @@ export interface GetImageAIDetailsRes {
        */
       ExecInput?: {
         /**
+         * 数据类型，取值如下所示：
+         *
+         * - `uri`：指定 ServiceId 下存储 URI。
+         * - `url`：公网可访问的 URL。
+         * @example "url"
+         */
+        DataType: string;
+        /**
          * 图片 URL 或 URI。
          * @example "2e39b35b98524100ae12b2ae07283cb2"
          */
@@ -21528,7 +22193,7 @@ export interface GetImageAIDetailsRes {
         ErrMsg: string;
         /**
          * AI 图像处理结果，是 JSON 压缩并转义后的字符串，仅当 `Status` 值为 `Success` 时，`Output` 有值。参看 [AI 图像处理模板](https://www.volcengine.com/docs/508/1515840)页面获取模板 ID 和参数信息，根据具体的工作流的说明进行解析。
-         * @example "{\"ObjectKey\":\"veImageX-store/ai_super_resolution/67***\/example.webp\",\"Size\":54509,\"Format\":\"webp\"}"
+         * @example "{\"ObjectKey\":\"veImageX-store/ai_super_resolution/67***a/example.webp\",\"Size\":54509,\"Format\":\"webp\"}"
          */
         Output: string;
       };
@@ -21541,7 +22206,7 @@ export interface GetImageAIDetailsRes {
        * 执行状态。取值如下所示：
        *
        * - `Pending`：排队中
-       * - `Running`：执行中
+       * - `Dispatched`：执行中
        * - `Success`：执行成功
        * - `Fail`：执行失败
        * @example "Fail"
@@ -21552,6 +22217,11 @@ export interface GetImageAIDetailsRes {
        * @example "2023-06-27 15:43:46"
        */
       SubmitAt?: string;
+      /**
+       * 使用的 AI 图像处理模板 ID，参看 [AI 图像处理模板](https://www.volcengine.com/docs/508/1515840)页面获取模板 ID 对应的模板信息。
+       * @example "system_workflow_product_img"
+       */
+      WorkflowTemplateId: string;
     }[];
     /**
      * 任务中包含的条目数。
@@ -21562,14 +22232,170 @@ export interface GetImageAIDetailsRes {
   };
 }
 
+export interface GetImageAIProcessQueuesQuery {
+  /**
+   * 分页条数，取值范围为 (0, 100]。
+   * @example 10
+   */
+  Limit: number;
+  /**
+   * 分页偏移量，默认为 0。取值为 1 时，表示跳过第一条数据，从第二条数据取值。
+   * @example 0
+   */
+  Offset?: number;
+  /**
+   * 返回队列名称或队列描述中包含该值的队列。
+   * @example "test"
+   */
+  SearchPtn?: string;
+}
+
+export interface GetImageAIProcessQueuesRes {
+  ResponseMetadata: {
+    /**
+     * 请求的接口名，属于请求的公共参数。
+     * @example "{Action}"
+     */
+    Action: string;
+    /**
+     * 请求的Region，例如：cn-north-1
+     * @example "cn-north-1"
+     */
+    Region: string;
+    /** RequestId为每次API请求的唯一标识。 */
+    RequestId: string;
+    /** 请求的服务，属于请求的公共参数。 */
+    Service: string;
+    /**
+     * 请求的版本号，属于请求的公共参数。
+     * @example "{Version}"
+     */
+    Version: string;
+  };
+  /** 视请求的接口而定 */
+  Result: {
+    /**
+     * 当前分页队列详细信息。
+     * @example "-"
+     */
+    Queues: {
+      /**
+       * 任务队列属性。取值如下：
+       * - `ai_super_resolution`：AIGC 大模型超分辨率
+       * - `bgfill`：智能图像扩展
+       * - `super_resolution`：图像超分辨率（云端）
+       * - `InfiniteCreations`：电商万创
+       * 队列属性
+       * @example "bgfill"
+       */
+      Attribute?: string;
+      /**
+       * 任务队列回调设置。
+       * @example "-"
+       */
+      CallbackConf?: {
+        /**
+         * 业务自定义回调参数，将在回调消息的`callback_args`中透传出去。具体回调参数请参考[回调内容](https://www.volcengine.com/docs/508/1749069#%E6%AD%A5%E9%AA%A4%E4%BA%94%EF%BC%9A%E8%8E%B7%E5%8F%96%E5%A4%84%E7%90%86%E7%BB%93%E6%9E%9C%E8%AF%A6%E6%83%85)。
+         * 回调附带参数
+         * @example "product id"
+         */
+        Args?: string;
+        /**
+         * 回调数据格式。取值如下：
+         * - `XML`
+         * - `JSON`
+         * 回调数据类型，JSON或者XML
+         * @example "JSON"
+         */
+        DataFormat?: string;
+        /**
+         * 回调 HTTP 请求地址，用于接收批量处理结果详情。支持使用 https 和 http 协议。
+         * 回调地址
+         * @example "https://demo.com"
+         */
+        Endpoint: string;
+        /**
+         * 回调方式。仅支持取值 `HTTP`。
+         * 回调协议
+         * @example "HTTP"
+         */
+        Method: string;
+        /**
+         * 回调触发类型。取值如下：
+         * - `task`：整个任务处理完成后触发回调
+         * - `entry`：单个条目处理完成后触发回调
+         * 回调触发类型，整个任务回调或者单个条目回调
+         * @example "task"
+         */
+        Type?: string;
+      };
+      /**
+       * 任务队列的创建时间。
+       * 队列创建时间
+       * @example "2006-01-02 15:04:05"
+       */
+      CreateAt?: string;
+      /**
+       * 任务队列描述。
+       * 队列描述
+       * @example "ceshi"
+       */
+      Desc?: string;
+      /**
+       * 任务队列是否开启回调配置，取值如下：
+       * - `true`：开启
+       * - `false`：不开启
+       * 队列是否开启回调配置
+       * @example "true"
+       */
+      EnableCallback?: boolean;
+      /**
+       * 任务队列 ID。
+       * 队列ID
+       * @example "62f224ce61ef23826e38c29a"
+       */
+      Id: string;
+      /**
+       * 任务队列名称。
+       * 队列名称
+       * @example "test"
+       */
+      Name: string;
+      /**
+       * 任务队列状态。取值如下：
+       * - `Pending`：排队中
+       * - `Running`：执行中
+       * 队列状态
+       * @example "Pending"
+       */
+      Status?: string;
+      /**
+       * 任务队列类型。取值如下：
+       * - `default`：表示账号默认队列，每个账号一个
+       * - `user`：表示用户创建队列，个数将有配额限制
+       * 队列类型
+       * @example "ai"
+       */
+      Type?: string;
+    }[];
+    /**
+     * 符合条件的队列总数。
+     * 总数
+     */
+    Total: number;
+  };
+}
+
 export interface GetImageAITasksQuery {
   /**
    * 查询的结束 Unix 时间戳，`StartTime` 与 `EndTime` 时间间隔最大不超过 7 天。
+   * @format int64
    * @example 1729612799
    */
   EndTime: number;
   /**
    * 单次查询列出的任务的个数，取值范围为 (0,1000]，默认值为 1000。
+   * @format int64
    * @example 10
    */
   Limit?: number;
@@ -21583,16 +22409,19 @@ export interface GetImageAITasksQuery {
    * @example "63db57e36**cce1ffee11bb1"
    */
   QueueId: string;
+  /** 搜索url、uri */
+  SearchPtn?: string;
   /**
    * 服务 ID。
    *
-   * - 您可以在 veImageX 控制台 [服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。
+   * - 您可以在 veImageX 控制台[服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。
    * - 您也可以通过 OpenAPI 的方式获取服务 ID，具体请参考[获取所有服务信息](https://www.volcengine.com/docs/508/9360)。
    * @example "5s****fo"
    */
-  ServiceId: string;
+  ServiceId?: string;
   /**
    * 查询的起始 Unix 时间戳，`StartTime` 与 `EndTime` 时间间隔最大不超过 7 天。
+   * @format int64
    * @example 1728921600
    */
   StartTime: number;
@@ -21661,6 +22490,14 @@ export interface GetImageAITasksRes {
      */
     TaskInfo: {
       /**
+       * 数据类型，取值如下所示：
+       *
+       * - `uri`：指定 ServiceId 下存储 URI。
+       * - `url`：公网可访问的 URL。
+       * @example "url"
+       */
+      DataType: string;
+      /**
        * 任务的结束执行时间。
        * @example "2024-10-22 14:28:16"
        */
@@ -21719,6 +22556,16 @@ export interface GetImageAITasksRes {
        * @example 1
        */
       Total: number;
+      /**
+       * AI 图像处理模板参数，参看 [AI 图像处理模板](https://www.volcengine.com/docs/508/1515840)页面获取参数信息。
+       * @example "{\"CreativeFlowId\":\"6803aa651f5749dee5a6980f\",\"ComprehensiveEnhance\":{\"Enable\":true,\"Mode\":1},\"ProductAIGC\":{\"Scene\":\"general\",\"PositivePrompt\":\"on a empty white table, kitchen, close to window, bright background, background blur, bright light, soft lighting, high quality\",\"OutputHeight\":512,\"OutputWidth\":512,\"BatchSize\":2,\"ProductRatio\":0.6}}"
+       */
+      WorkflowParameter: string;
+      /**
+       * 使用的 AI 图像处理模板 ID，参看 [AI 图像处理模板](https://www.volcengine.com/docs/508/1515840)页面获取模板 ID 对应的模板信息。
+       * @example "system_workflow_product_img"
+       */
+      WorkflowTemplateId: string;
     }[];
   };
 }
@@ -22875,8 +23722,9 @@ export interface GetImageBgFillResultBody {
   Left?: number;
   /**
    * 填充模型，取值如下所示：
-   * * 0：国漫风格模型；
-   * * 1：通用模型。
+   * * 0：国漫风格模型
+   * * 1：通用模型
+   * *
    * @example 0
    */
   Model: number;
@@ -23717,6 +24565,21 @@ export interface GetImageEraseResultBody {
      * @example "0.7"
      */
     Y2: number;
+    /**
+     * 是否模糊匹配，开启文字匹配后必选
+     * @example 0
+     */
+    OCRMode?: number;
+    /**
+     * 匹配的文本
+     * @example "-"
+     */
+    Text?: string;
+    /**
+     * 是否开启文字匹配
+     * @example 0
+     */
+    UseOCR?: number;
   }[];
   /**
    * 修复模型，支持取值如下所示：
@@ -23823,6 +24686,75 @@ export interface GetImageFontsRes {
        */
       Uri: string;
     }[];
+  };
+}
+
+export interface GetImageHmExtractTaskInfoBody {
+  /**
+   * 待查询的任务 ID，通过 CreateHmExtractTask 接口返回。
+   * 任务id
+   * @example "681b538015***5ca5ac14ef3"
+   */
+  TaskId: string;
+}
+
+export interface GetImageHmExtractTaskInfoQuery {
+  /**
+   * 提取水印图任务对应的服务 ID。
+   *
+   * - 您可以在 veImageX 控制台 [服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。
+   * - 您也可以通过 OpenAPI 的方式获取服务 ID，具体请参考[获取所有服务信息](https://www.volcengine.com/docs/508/9360)。
+   * @example "97**sh"
+   */
+  ServiceId: string;
+}
+
+export interface GetImageHmExtractTaskInfoRes {
+  ResponseMetadata: {
+    /**
+     * 请求的接口名，属于请求的公共参数。
+     * @example "{Action}"
+     */
+    Action: string;
+    /**
+     * 请求的Region，例如：cn-north-1
+     * @example "cn-north-1"
+     */
+    Region: string;
+    /** RequestId为每次API请求的唯一标识。 */
+    RequestId: string;
+    /** 请求的服务，属于请求的公共参数。 */
+    Service: string;
+    /**
+     * 请求的版本号，属于请求的公共参数。
+     * @example "{Version}"
+     */
+    Version: string;
+  };
+  /** 视请求的接口而定 */
+  Result?: {
+    /**
+     * 错误信息。
+     * 错误信息
+     * @example "extract fail"
+     */
+    ErrMsg?: string;
+    /**
+     * 提取出的盲水印文本信息。
+     * 水印信息
+     * @example "你好 abc123%^$%"
+     */
+    HmInfo?: string;
+    /**
+     * 任务状态。
+     * - `Pending`：未开始
+     * - `Running`：盲水印信息匹配中
+     * - `Success`：提取成功
+     * - `Failed`：提取失败
+     * 任务状态
+     * @example "Success"
+     */
+    TaskStatus?: string;
   };
 }
 
@@ -26760,7 +27692,7 @@ export interface GetImageTemplateRes {
      * 是否同步处理，仅对 heic 图有效。
      * 是否同步处理，仅对heic图有效
      */
-    Sync: string;
+    Sync: boolean;
     /**
      * 模板名称。
      * 模板名称，必须使用该服务的图片模板固定前缀，具体参考GetImageService接口的返回参数TemplatePrefix。模板名称能包含的字符正则集合为[a-zA-Z0-9_-]
@@ -27379,6 +28311,8 @@ export interface GetImageUploadFilesRes {
 }
 
 export interface GetImageXQueryAppsQuery {
+  /** 项目名。仅子用户使用。 */
+  Project?: string;
   /**
    * 数据来源，账号下近 60 天内有数据上报的应用 ID，缺省情况下返回账号对应的全部应用 ID。取值如下所示：
    * * `upload`：上传 1.0 数据。
@@ -27449,9 +28383,9 @@ export interface GetImageXQueryAppsRes {
 
 export interface GetImageXQueryDimsQuery {
   /**
-   * 应用 ID。默认为空，匹配账号下所有的 AppID。
+   * 应用 ID。传入多个用英文逗号分割。默认为空，匹配账号下所有的 AppID。
    * :::tip
-   * 您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/1213042)的方式获取所需的 AppID。
+   * 您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/1213042)的方式获取所需的应用 ID。
    * :::
    * @example "123"
    */
@@ -27506,11 +28440,11 @@ export interface GetImageXQueryDimsRes {
 
 export interface GetImageXQueryRegionsQuery {
   /**
-   * 应用 ID。默认为空，匹配账号下所有的 AppID。
+   * 应用 ID。传入多个用英文逗号分割。默认为空，匹配账号下所有的 AppID。
    * :::tip
    * 您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/1213042)的方式获取所需的应用 ID。
    * :::
-   * @example "13"
+   * @example "123,456"
    */
   Appid?: string;
   /**
@@ -27566,7 +28500,7 @@ export interface GetImageXQueryRegionsRes {
 
 export interface GetImageXQueryValsQuery {
   /**
-   * 应用 ID。默认为空，匹配中账号下所有的 AppID。
+   * 应用 ID。传入多个用英文逗号分割。默认为空，匹配中账号下所有的 AppID。
    * :::tip
    * 您可以通过调用[获取应用列表](https://www.volcengine.com/docs/508/1213042)的方式获取所需的 AppID。
    * :::
@@ -27795,340 +28729,6 @@ export interface GetPrivateImageTypeRes {
      * @example 1
      */
     Face: number;
-  };
-}
-
-export interface GetProductAIGCResultBody {
-  /**
-   * 是否返回最高分生成图及其得分，取值如下所示：
-   *
-   * - `true`：是，只返回最高分生成图及其得分。
-   *
-   * - `false`：（默认）否，返回所有生成图及其得分。
-   * 根据业务需要，取值为True时，只返回最高分的生成图及其得分，否则返回所有生成图及其得分
-   * @example "false"
-   */
-  ReturnTop1?: boolean;
-  /**
-   * 智能生成的结果图是否仅生成场景图（仅包含商品主体，不采用文字卖点），取值如下所示：
-   * - `true`：（默认）是
-   * - `false`：否
-   * 默认为True
-   * @example "true"
-   */
-  BackgroundOnly: boolean;
-  /**
-   * 每次生成的图片数量，取值范围为 [1,4]，默认值为 4。
-   * 每次生成的图片数量，[0,4], 默认4
-   * @example 4
-   */
-  BatchSize?: number;
-  /**
-   * 设置商品放置的安全区中心坐标和宽高。取值需大于等于 `-1`，设为默认值 `-1` 时，商品自动居中，安全区为全图；否则需同时指定区安全区四个参数的值。
-   * 设置商品放置的安全区中心坐标和宽高：设为默认值-1时，商品自动居中，安全区为全图；否则用户需同时指定四个参数的值，取值范围大于等于-1
-   * @example 0
-   */
-  CX?: number;
-  /**
-   * 设置商品放置的安全区中心坐标和宽高。取值需大于等于 `-1`，设为默认值 `-1` 时，商品自动居中，安全区为全图；否则需同时指定区安全区四个参数的值。
-   * 设置商品放置的安全区中心坐标和宽高：设为默认值-1时，商品自动居中，安全区为全图；否则用户需同时指定四个参数的值，取值范围大于等于-1
-   * @example 0
-   */
-  CY?: number;
-  /**
-   * 保留字段，用于传递商品 ID，类目 ID 信息。
-   * 额外参数
-   * @example "-"
-   */
-  Extra?: string;
-  /** Lora 配置。 */
-  LoraConfig?: string;
-  /**
-   * 是否使用分割处理图片，取值如下所示：
-   * - `true`：分隔处理。
-   * - `false`：（默认）不分割处理，将从输入图像读取 alpha 通道作为商品图数据。
-   * 	:::warning
-   * 	指定为 `false` 时，确保通过 `Url` 传入的商品主体图是已经过分割的白底图或透底图。
-   * 	:::
-   * 使用分割处理图片，False则不做分割，从输入图像读取alpha通道作为mask
-   * @example "false"
-   */
-  NeedSeg?: boolean;
-  /**
-   * 输入到 AIGC 模型的负向提示词，提示词和 `Scene` 二选一必填。两者均存在时，以 `Scene` 为准。当前仅支持英文，最多不超过 300 个字母。
-   *
-   * - `indoor wooden table` 场景下可采用的负向提示词为：
-   * 	- `top view, empty background, extra connection, wheel, stand, lowres, ugly, bad anatomy, bad hands, cropped, worst quality, baby, body, human, brand, bad face`
-   * - `flower and leaves`场景下可采用的负向提示词为：
-   * 	- `top view, empty background, extra connection, wheel, stand, lowres, ugly, bad anatomy, bad hands, cropped, worst quality, baby, body, human, brand, bad face`
-   * - `white marble table`场景下可采用的负向提示词为：
-   * 	- `top view, empty background, extra connection, wheel, stand, lowres, ugly, bad anatomy, bad hands, cropped, worst quality, baby, body, human, brand, bad face`
-   * - `outdoor snow scene`场景下可采用的负向提示词为：
-   * 	- `op view, empty background, extra connection, wheel, stand, lowres, ugly, bad anatomy, bad hands, cropped, worst quality, baby, body, human, brand, bad face`
-   * - `supermarket show scene`场景下可采用的负向提示词为：
-   * 	- `top view, float things, extra connection, adjunct, appendages, stand, bracket, bad anatomy, text, word, grid, brown, grey, bubble, high saturation, sunlight, sun, stripe, spot, empty background, wheel, lowres, ugly, bad hands, cropped, worst quality, baby, body, human, brand, bad face`
-   * - `food in kitchen`场景下可采用的负向提示词为
-   * 	- `top view, float things, extra connection, adjunct, appendages, stand, bracket, bad anatomy, text, word, grid, brown, grey, bubble, high saturation, sunlight, sun, stripe, spot, empty background, wheel, lowres, ugly, bad hands, cropped, worst quality, baby, body, human, brand, bad face`
-   * - `sports style`场景下可采用的负向提示词为：
-   * 	- `top view, float things, extra connection, adjunct, appendages, stand, bracket, bad anatomy, text, word, grid, brown, grey, bubble, high saturation, sunlight, sun, stripe, spot, empty background, wheel, lowres, ugly, bad hands, cropped, worst quality, baby, body, human, brand, bad face`
-   * - `modern room`场景下可采用的负向提示词为：
-   * 	- `top view, float things, extra connection, adjunct, appendages, stand, bracket, bad anatomy, text, word, grid, brown, grey, bubble, high saturation, sunlight, sun, stripe, spot, empty background, wheel, lowres, ugly, bad hands, cropped, worst quality, baby, body, human, brand, bad face`
-   * 输入到AIGC模型的正向提示词,长度限制为300个字符内
-   * @example "top view, empty background, extra connection, wheel, stand, lowres, ugly, bad anatomy, bad hands, cropped, worst quality, baby, body, human, brand, bad face"
-   */
-  NegativePrompt?: string;
-  /**
-   * 场景图输出高度
-   * @format int64
-   */
-  OutputHeight?: number;
-  /**
-   * 同时指定结果图长和宽的值，单位为 px。取值范围为 [512,1024]。
-   *
-   * :::tip
-   * 结果图是指定`BatchSize`张长宽比为 1:1 的方图。
-   * :::
-   * 输出图片的长度，512~1024
-   * @example 1
-   */
-  OutputSize: number;
-  /**
-   * 场景图输出宽度
-   * @format int64
-   */
-  OutputWidth?: number;
-  /**
-   * 输入到 AIGC 模型的正向提示词，提示词和 `Scene` 二选一必填。两者均存在时，以 `Scene` 为准。当前仅支持英文，最多不超过 300 个字母。
-   *
-   * - `indoor wooden table` 场景下可采用的正向提示词为：
-   * 	- `best quality, front view, standing on a wooden table close to window, some plants in the background, bright sunlight, product photography`
-   * - `flower and leaves`场景下可采用的正向提示词为：
-   * 	- `best quality, front view, standing on a circular platform, surrounded by flowers and leaves, sunlight from the right, product photography`
-   * - `white marble table`场景下可采用的正向提示词为：
-   * 	- `best quality, front view, standing on a white marble table in a living room, shallow depth of field, sunlight, shadows,  product photography`
-   * - `outdoor snow scene`场景下可采用的正向提示词为：
-   * 	- `best quality, front view, standing on a pile of snow outdoors, with sky and mountains in the background, shallow depth of field,  product photography`
-   * - `supermarket show scene`场景下可采用的正向提示词为：
-   * 	- `on a empty white table, kitchen, close to window, bright background, background blur, bright light, soft lighting, high quality`
-   * - `food in kitchen`场景下可采用的正向提示词为
-   * 	- `on a empty table,in the kitchen,product picture, bright background, background blur, bright light, soft lighting, high quality`
-   * - `sports style`场景下可采用的正向提示词为：
-   * 	- `in a stadium, stadium in the background, sports style, product picture , bright light, soft lighting, high quality`
-   * - `modern room`场景下可采用的正向提示词为：
-   * 	- `in a modern room, fashion style, soft light, high resolution`
-   * 输入到AIGC模型的负向提示词,长度限制为300个字符内
-   * @example "best quality, front view, standing on a circular platform, surrounded by flowers and leaves, sunlight from the right, product photography"
-   */
-  PositivePrompt?: string;
-  /**
-   * 商品比例，即商品图的长宽与 `OutputSize` 指定的结果图长宽的比值上限。默认值为 0.6，取值范围为 (0,1)。取值越小，则商品图在生成的结果图中所占的大小越小。
-   * 商品mask长宽与output_size比值的上限，（0，1）
-   * @format float
-   * @example "0.6"
-   */
-  ProductRatio?: number;
-  /** 商品比例 */
-  ProductRatios?: number[][];
-  /**
-   * 是否返回场景图，取值如下所示：
-   * - `true`：（默认）是
-   * - `false`：否
-   * 是否返回场景图默认为True
-   * @example "true"
-   */
-  ReturnBackgroundImage: boolean;
-  /**
-   * 设置商品放置的安全区中心坐标和宽高。取值需大于等于 `-1`，设为默认值 `-1` 时，商品自动居中，安全区为全图；否则需同时指定区安全区四个参数的值。
-   * 设置商品放置的安全区中心坐标和宽高：设为默认值-1时，商品自动居中，安全区为全图；否则用户需同时指定四个参数的值，取值范围大于等于-1
-   * @example 0
-   */
-  SafeH?: number;
-  /**
-   * 设置商品放置的安全区中心坐标和宽高。取值需大于等于 `-1`，设为默认值 `-1` 时，商品自动居中，安全区为全图；否则需同时指定区安全区四个参数的值。
-   * 设置商品放置的安全区中心坐标和宽高：设为默认值-1时，商品自动居中，安全区为全图；否则用户需同时指定四个参数的值，取值范围大于等于-1
-   * @example 0
-   */
-  SafeW?: number;
-  /**
-   * 根据所选场景生成结果图，场景支持以下选项：
-   *
-   * - `indoor wooden table`：室内木桌场景
-   *
-   * - `flower and leaves`：鲜花绿植场景
-   *
-   * - `white marble table`：白色大理石场景
-   *
-   * - `outdoor snow scene`：室外雪景场景
-   *
-   * - `supermarket show scene`：超市小件商品
-   *
-   * - `food in kitchen`：食品厨房场景
-   *
-   * - `sports style`：运动场景
-   *
-   * - `modern room`：现代室内
-   *
-   * 提示词和 `Scene` 二选一必填，两者均存在时，以 `Scene` 为准。
-   * aigc场景
-   * @example "flower and leaves"
-   */
-  Scene?: string;
-  /**
-   * 卖点图配置信息。
-   * @example "-"
-   */
-  SellingPointConfig?: {
-    /**
-     * 指定的商品场景图访问 URL（公网可访问）。若为空，将采用`Scene` 或提示词智能生成的场景图。
-     *
-     * - 指定场景图时，若指定了任一方式的卖点信息，则在指定场景图渲染卖点文本。
-     * - 指定为空时，若指定了任一方式的卖点信息，则在 `Scene` 或提示词生成的场景图渲染卖点文本。
-     * 用户指定的场景图
-     * @example "http://test.com/demo1.png"
-     */
-    BackgroundUrl?: string;
-    /** 场景图对应图层ID */
-    ProdUniqueId?: string;
-    /**
-     * 与 `ProductDetailImages` 搭配使用，视为方式 2。若同时配置方式 1 与方式 2，则方式 1 优先生效。
-     *
-     * 商详图中的商品卖点描述，支持中英文，不得超过 430 个字符。
-     * 商品卖点描述,不超过430字符
-     * @example "精选优质原料，只为用户放心"
-     */
-    ProductDescription?: string;
-    /**
-     * 商详图（带有商品描述） URI/URL 列表，最大支持三张。
-     * - 指定 URI 时：需满足该图片时指定该服务下存储。
-     * - 指定 URL 时：满足公网可访问。
-     * 商详图url列表,最大支持三张
-     * @example "["tos-cn-serviceid/example.jpg"]"
-     */
-    ProductDetailImages?: string[];
-    /** @format json */
-    SellingPointExtractConfig?: {
-      /** 选择需要提取的卖点类型、取值：core_sp（核心卖点提取）, short_title(短标题), product_desc_sp(商品信息类卖点)，product_promotion_sp(导购激发类卖点) */
-      Category?: string;
-      /** 卖点渲染图层索引列表 */
-      UniqueIds?: string[];
-      /** 卖点信息 */
-      Value?: string;
-    }[];
-    /**
-     * 卖点渲染时的图层设置
-     * @format json
-     */
-    SellingPointRenderStyle?: Record<string, Record<string, unknown>>;
-    /**
-     * 卖点渲染模板，固定取值为 `default`。
-     * 卖点渲染模板，使用默认卖点格式使用default，自定义卖点提取类型使用custom
-     * @example "default"
-     */
-    SellingPointRenderTemplate?: string;
-    /**
-     * 与 `SellingPointRenderTemplate` 搭配使用，视为方式 1。若同时配置方式 1 与方式 2，则方式 1 优先生效。
-     *
-     * 卖点文本。填写方式为 "maidian1\nmaidian2\nmaidian3"或者"0.mdian1\n1.maindian2\n3.maiian"，支持中英文，每个卖点字符限制 5 个字符。
-     * 卖点文本.形如"maidian1\nmaidian2\nmaidian3"或者"0.mdian1\n1.maindian2\n3.maiian".每个卖点不超过5个字.
-     * @example "美味\健康"
-     */
-    SellingPointText?: string;
-  };
-  /** 打分策略规则。 */
-  StrategyRules?: Record<string, Record<string, unknown>>;
-  /**
-   * 商品主体图的访问 URL（公网可访问）。建议为包含完整商品主体的白底图或透底图，尽量避免复杂背景的影响，以确保最终生成效果的质量。
-   * @example "http://test.com/demo.jpeg"
-   */
-  Url: string;
-  /**
-   * 是否使用从商品图中提取的描述，取值如下所示：
-   *
-   * - `true`：（默认）提取原图中商品的描述，和`PositivePrompt`共同作为输入到 AIGC 模型的正向提示词。
-   *
-   * - `false`：不使用。
-   * 取值为True时，使用blip模型提取对商品的描述，和positive_prompt共同作为输入到AIGC模型的正向提示词
-   * @example "false"
-   */
-  UseCaption?: boolean;
-  /** 使用默认的背景图 */
-  UseDefaultBg?: boolean;
-}
-
-export interface GetProductAIGCResultQuery {
-  /**
-   * 用于存储结果图和计量计费的服务 ID。
-   *
-   * - 您可以在veImageX 控制台[服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。
-   *
-   * - 您也可以通过 OpenAPI 的方式获取服务 ID，具体请参考[获取所有服务信息](https://www.volcengine.com/docs/508/9360)。
-   * @example "8h**7j"
-   */
-  ServiceId: string;
-}
-
-export interface GetProductAIGCResultRes {
-  ResponseMetadata: {
-    /**
-     * 请求的接口名，属于请求的公共参数。
-     * @example "{Action}"
-     */
-    Action: string;
-    /**
-     * 请求的Region，例如：cn-north-1
-     * @example "cn-north-1"
-     */
-    Region: string;
-    /** RequestID为每次API请求的唯一标识。 */
-    RequestId: string;
-    /** 请求的服务，属于请求的公共参数。 */
-    Service: string;
-    /**
-     * 请求的版本号，属于请求的公共参数。
-     * @example "{Version}"
-     */
-    Version: string;
-  };
-  /** 视请求的接口而定 */
-  Result?: {
-    /**
-     * 商品场景图对应的美学得分，值越高表示图片越符合美学测评。
-     * @example "[0.91, 0.83, 0.52, 0.61]"
-     */
-    AestheticScores?: number[];
-    /** AIGC图像评分。 */
-    AigcImageScores?: Record<string, number[]>;
-    /**
-     * 商品场景图 URI 列表，未采用文字卖点。
-     * @example "["tos-cn-i-8h**7j/8912623**1276102"]"
-     */
-    BackgroundImages?: string[];
-    ComposedJsons?: Record<string, Record<string, unknown>>[];
-    /**
-     * 指定的商品信息
-     * @example "id:987289220"
-     */
-    Extra?: string;
-    /**
-     * 商品场景图与正向提示词的匹配度得分，值越高表示匹配度越高。
-     * @example "[0.35, 0.11, 0.04, -0.61]"
-     */
-    SDScores?: number[];
-    /**
-     * 指定的卖点渲染模板
-     * @example "default"
-     */
-    SellingPointRenderTemplate?: string;
-    /**
-     * 卖点文本信息
-     * @example "美味\健康"
-     */
-    SellingPointText?: string;
-    /**
-     * 生成的商品卖点图 URI 列表。排序规则为，当存在`SDScores > 0`的返回结果时，首个返回结果为`SDScores > 0`且总分(SDScores+AestheticScores)最高的结果图 URI，否则首个返回结果为`SDScores < 0`且总分最高的结果；其余结果按总分降序排序。
-     * @example "["tos-cn-i-8h**7j/89123**238290"]"
-     */
-    SellpointImages?: string[];
   };
 }
 
@@ -28528,6 +29128,14 @@ export interface GetSyncAuditResultBody {
   EnableLargeImageDetect: boolean;
   /** @example "xx" */
   ImageUri: string;
+}
+
+export interface GetSyncAuditResultQuery {
+  /**
+   * 服务唯一id
+   * @example "xxx"
+   */
+  ServiceId: string;
 }
 
 export interface GetSyncAuditResultRes {
@@ -29499,6 +30107,154 @@ export interface UpdateHttpsRes {
   Result?: string;
 }
 
+export interface UpdateImageAIProcessQueueBody {
+  /**
+   * 任务队列属性。取值如下：
+   * - `ai_super_resolution`：AIGC 大模型超分辨率
+   * - `bgfill`：智能图像扩展
+   * - `super_resolution`：图像超分辨率（云端）
+   * - `InfiniteCreations`：电商万创
+   * ai_super_resolution、bgfill、super_resolution、InfiniteCreations
+   * @example "bgfill"
+   */
+  Attribute: string;
+  /**
+   * 任务队列回调设置。
+   * @example "-"
+   */
+  CallbackConf?: {
+    /**
+     * 业务自定义回调参数，将在回调消息的`callback_args`中透传出去。具体回调参数请参考[回调内容](https://www.volcengine.com/docs/508/1749069#%E6%AD%A5%E9%AA%A4%E4%BA%94%EF%BC%9A%E8%8E%B7%E5%8F%96%E5%A4%84%E7%90%86%E7%BB%93%E6%9E%9C%E8%AF%A6%E6%83%85)。
+     * 回调附带参数
+     * @example "product id"
+     */
+    Args?: string;
+    /**
+     * 回调数据格式。取值如下：
+     * - `XML`
+     * - `JSON`
+     * 回调参数类型，JSON或者XML
+     * @example "JSON"
+     */
+    DataFormat?: string;
+    /**
+     * 回调 HTTP 请求地址，用于接收批量处理结果详情。支持使用 https 和 http 协议。
+     * 回调地址
+     * @example "https://demo.com"
+     */
+    Endpoint?: string;
+    /**
+     * 回调方式。仅支持取值 `HTTP`。
+     * 回调请求协议
+     * @example "HTTP"
+     */
+    Method?: string;
+    /**
+     * 回调触发类型。取值如下：
+     * - `task`：整个任务处理完成后触发回调
+     * - `entry`：单个条目处理完成后触发回调
+     * 回调触发类型，任务级别或者单个条目
+     * @example "task"
+     */
+    Type?: string;
+  };
+  /**
+   * 任务队列描述，可用于备注该队列的用途。
+   * 队列描述
+   * @example "ceshi"
+   */
+  Desc?: string;
+  /**
+   * 任务队列是否开启回调配置，取值如下：
+   * - `true`：开启
+   * - `false`：不开启
+   * 是否开启回调配置
+   * @example "true"
+   */
+  EnableCallback?: boolean;
+  /**
+   * 任务队列 ID。您可通过调用 [GetImageAIProcessQueues](https://www.volcengine.com/docs/508/1755529) 获取该账号下全部任务队列 ID。
+   * 队列ID
+   * @example "62f224ce61ef23826e38c29a"
+   */
+  Id: string;
+  /**
+   * 任务队列名称。
+   * 队列名
+   * @example "test"
+   */
+  Name: string;
+}
+
+export interface UpdateImageAIProcessQueueRes {
+  ResponseMetadata: {
+    /**
+     * 请求的接口名，属于请求的公共参数。
+     * @example "{Action}"
+     */
+    Action: string;
+    /**
+     * 请求的Region，例如：cn-north-1
+     * @example "cn-north-1"
+     */
+    Region: string;
+    /** RequestId为每次API请求的唯一标识。 */
+    RequestId: string;
+    /** 请求的服务，属于请求的公共参数。 */
+    Service: string;
+    /**
+     * 请求的版本号，属于请求的公共参数。
+     * @example "{Version}"
+     */
+    Version: string;
+  };
+  /** 视请求的接口而定 */
+  Result?: Record<string, unknown>;
+}
+
+export interface UpdateImageAIProcessQueueStatusBody {
+  /**
+   * 任务队列 ID。您可通过调用 [GetImageAIProcessQueues](https://www.volcengine.com/docs/508/1755529) 获取该账号下全部任务队列 ID。
+   * 队列id
+   * @example "62f224ce61ef23826e38c29a"
+   */
+  Id: string;
+  /**
+   * 任务队列状态。取值如下：
+   * - `Pending`：排队中
+   * - `Running`：执行中
+   * 状态Pending,Running
+   * @example "Pending"
+   */
+  Status: string;
+}
+
+export interface UpdateImageAIProcessQueueStatusRes {
+  ResponseMetadata: {
+    /**
+     * 请求的接口名，属于请求的公共参数。
+     * @example "{Action}"
+     */
+    Action: string;
+    /**
+     * 请求的Region，例如：cn-north-1
+     * @example "cn-north-1"
+     */
+    Region: string;
+    /** RequestId为每次API请求的唯一标识。 */
+    RequestId: string;
+    /** 请求的服务，属于请求的公共参数。 */
+    Service: string;
+    /**
+     * 请求的版本号，属于请求的公共参数。
+     * @example "{Version}"
+     */
+    Version: string;
+  };
+  /** 视请求的接口而定 */
+  Result?: Record<string, unknown>;
+}
+
 /** title */
 export interface UpdateImageAnalyzeTaskBody {
   /**
@@ -30349,7 +31105,7 @@ export interface UpdateImageDomainConfigBody {
     /**
      * 正则表达式规则列表，最大限制为 100 条。
      * 请提供具体的参数名字和类型。
-     * @example "\192\.23\.1\.8\b"
+     * @example "192.23.1.8\b"
      */
     regex_values?: string[];
     /**
@@ -32458,7 +33214,7 @@ export interface UpdateReferBody {
     is_white_mode?: boolean;
     /**
      * Referer 的正则表达式的列表，仅支持填写 IPv4 和 IPv6 格式的 IP 地址，参数长度范围为（1，1024）。不支持域名、泛域名、CIDR 网段。最多支持设置 100 条规则。
-     * @example "["192\.23\.1\.8\b"]"
+     * @example "["192.23.1.8\b"]"
      */
     regex_values?: string[];
     /**
@@ -32541,7 +33297,7 @@ export interface UpdateResEventRuleBody {
     EventType: string[];
     /**
      * 匹配规则的正则表达式。仅当资源的 `StoreKey` 匹配该正则表达式时触发事件通知。缺省情况下表示匹配所有资源。
-     * @example "\test\.png\b"
+     * @example "test.png\b"
      */
     MatchRule?: string;
   }[];
@@ -32923,4 +33679,66 @@ export interface UpdateStorageRulesV2Res {
   };
   /** 视请求的接口而定 */
   Result?: Record<string, unknown>;
+}
+
+export interface VerifyDomainOwnerBody {
+  /**
+   * 待校验的域名。仅支持单域名校验。
+   * 待校验的域名。仅支持单域名校验。
+   * @example "test.imagex.com"
+   */
+  Domain: string;
+  /**
+   * 校验方式，取值如下：
+   * dns: DNS 解析验证。
+   * @example "dns"
+   */
+  VerifyType: string;
+}
+
+export interface VerifyDomainOwnerRes {
+  ResponseMetadata: {
+    /**
+     * 请求的接口名，属于请求的公共参数。
+     * @example "{Action}"
+     */
+    Action: string;
+    /**
+     * 请求的Region，例如：cn-north-1
+     * @example "cn-north-1"
+     */
+    Region: string;
+    /** RequestId为每次API请求的唯一标识。 */
+    RequestId: string;
+    /** 请求的服务，属于请求的公共参数。 */
+    Service: string;
+    /**
+     * 请求的版本号，属于请求的公共参数。
+     * @example "{Version}"
+     */
+    Version: string;
+  };
+  /** 视请求的接口而定 */
+  Result?: {
+    /**
+     * 校验失败的原因，当 VerifyResult 为 false 时返回。
+     * verify domain owner by dns error: 域名归属权 DNS 验证错误，DNS 解析失败。
+     * verify domain owner by dns failed, record value not match: 域名归属权 DNS 验证错误，TXT 记录值不匹配。
+     * 校验失败的原因，当 VerifyResult 为 false 时返回。
+     * verify domain owner by dns error: 域名归属权 DNS 验证错误，DNS 解析失败。
+     * verify domain owner by dns failed, record value not match: 域名归属权 DNS 验证错误，TXT 记录值不匹配。
+     * @example "verify domain owner by dns error"
+     */
+    ErrorMessage: string;
+    /**
+     * 校验是否成功：
+     * true: 校验成功
+     * false: 校验失败
+     * 校验是否成功：
+     * true: 校验成功
+     * false: 校验失败
+     * @example "true"
+     */
+    VerifyResult: boolean;
+  };
 }
