@@ -1,6 +1,7 @@
-2025-08-14 Bumped to version v1.31.0
+2025-08-14 Bumped to version v1.31.1
 - imagex:
   - codegen 生成一批新接口
+- add @types/node devDependencies
 
 2025-05-22 Bumped to version v1.30.2
 - tls:
