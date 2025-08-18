@@ -3,20 +3,15 @@ export interface AIProcessBody {
    * 服务 ID。
    * * 您可以在 veImageX 控制台[服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。
    * * 您也可以通过 OpenAPI 的方式获取服务 ID，具体请参考[获取所有服务信息](https://www.volcengine.com/docs/508/9360)。
-   * 服务 ID。
-   * * 您可以在 veImageX 控制台 [服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。
-   * * 您也可以通过 OpenAPI 的方式获取服务 ID，具体请参考[获取所有服务信息](https://www.volcengine.com/docs/508/9360)。
    * @example "91**2g"
    */
   ServiceId: string;
   /**
    * AI 图像处理模板参数，需要将 JSON 压缩并转义为字符串。根据您需要的图像处理功能，参看 [AI 图像处理模板](https://www.volcengine.com/docs/508/1515840)页面获取模板 ID 和参数信息。
-   * AI 图像处理模板参数，需要将 JSON 压缩并转义为字符串。根据您需要的图像处理功能，参看 [AI 图像处理模板](https://www.volcengine.com/docs/508/1515840)页面获取模板 ID 和参数信息。
    * @example "{"Input":{"ObjectKey":"example.webp","DataType":"uri"},"GenDREnhanceParam":{"Multiple":1.2}}"
    */
   WorkflowParameter: string;
   /**
-   * AI 图像处理模板 ID。根据您需要的图像处理功能，参看 [AI 图像处理模板](https://www.volcengine.com/docs/508/1515840)页面获取模板 ID 和参数信息。
    * AI 图像处理模板 ID。根据您需要的图像处理功能，参看 [AI 图像处理模板](https://www.volcengine.com/docs/508/1515840)页面获取模板 ID 和参数信息。
    * @example "system_workflow_ai_super_resolution"
    */
@@ -48,7 +43,6 @@ export interface AIProcessRes {
   /** 视请求的接口而定 */
   Result: {
     /**
-     * AI 图像处理结果，是 JSON 压缩并转义后的字符串。参看 [AI 图像处理模板](https://www.volcengine.com/docs/508/1515840)页面获取模板 ID 和参数信息，根据具体的工作流的说明进行解析。
      * AI 图像处理结果，是 JSON 压缩并转义后的字符串。参看 [AI 图像处理模板](https://www.volcengine.com/docs/508/1515840)页面获取模板 ID 和参数信息，根据具体的工作流的说明进行解析。
      * @example "{"ObjectKey":"veImageX-store/ai_super_resolution/67***a/example.webp","Size":54509,"Format":"webp"}"
      */
@@ -643,6 +637,196 @@ export interface ApplyVpcUploadInfoRes {
   };
 }
 
+export interface BatchImageAuditBody {
+  /**
+   * 是否异步进行审核，默认值为 `0`。支持的取值如下所示。
+   * - `0`：同步返回结果；
+   * - `1`：异步进行审核。
+   * 是否异步进行审核，取值 0：同步返回结果，1：异步进行审核，默认为0。
+   * @example 0
+   */
+  Async?: number;
+  /**
+   * 审核能力类型，用于指定审核任务所使用的审核模型。支持的取值如下所示。
+   * - `0`：基础审核能力；
+   * - `1`：智能审核能力。
+   * 审核类型
+   * @example 1
+   */
+  AuditAbility: number;
+  /**
+   * 审核维度，根据审核能力的不同，其具体取值不同。基础审核与智能审核之间不支持混用。
+   *
+   * - 基础安全审核，仅当 `AuditAbility` 取值为 `0` 时，配置生效。
+   *
+   * 	- `govern`：涉政
+   * 	- `porn` ：涉黄
+   * 	- `illegal`：违法违规
+   * 	- `terror`：涉暴
+   *
+   * - 智能安全审核，仅当 `AuditAbility` 取值为 `1` 时，配置生效。
+   *
+   * 	- 图像风险识别
+   * 		- `porn` ：涉黄，主要适用于通用色情、色情动作、性行为、性暗示、性分泌物、色情动漫、色情裸露等涉黄场景的风险识别
+   * 		- `sensitive1`：涉敏 1，具体指涉及暴恐风险
+   * 		- `sensitive2`：涉敏 2，具体值涉及政治内容风险
+   * 		- `forbidden`：违禁，主要适用于打架斗殴、爆炸、劣迹艺人等场景的风险识别
+   * 		- `uncomfortable`：引人不适，主要适用于恶心、恐怖、尸体、血腥等引人不适场景的风险识别
+   * 		- `qrcode`：二维码，主要适用于识别常见二维码（QQ、微信、其他二维码等）
+   * 		- `badpicture`：不良画面，主要适用于自我伤害、丧葬、不当车播、吸烟/纹身/竖中指等不良社会风气的风险识别
+   * 		- `sexy`：性感低俗，主要适用于舌吻、穿衣性行为、擦边裸露等多种性感低俗场景的风险识别
+   * 		- `age`：年龄，主要适用于图中人物对应的年龄段识别
+   * 		- `underage`：未成年相关，主要适用于儿童色情、儿童邪典等风险识别
+   * 		- `quality`：图片质量，主要适用于图片模糊、纯色边框、纯色屏等风险识别
+   * 	- 图文风险识别，您可在 [`AuditTextDimensions`](#audittextdimensions) 配置文字审核的维度。
+   *
+   * :::tip
+   * 您可将智能安全审核的图像风险识别和图文风险识别搭配使用。
+   * :::
+   * 审核维度
+   * @example "["porn","sexy"]"
+   */
+  AuditDimensions: string[];
+  /**
+   * 智能安全审核类型下图文风险审核的具体维度，仅当 `AuditAbility` 取值为 `1` 时生效。支持的取值如下所示。
+   * - `ad`：广告，综合图像及文字内容智能识别广告；
+   * - `defraud`：诈骗，综合图像及文字内容智能识别诈骗；
+   * - `charillegal`：文字违规，存在涉黄、涉敏、违禁等违规文字。
+   *
+   * :::tip
+   * 您可将 `AuditTextDimensions` 与 `AuditDimensions` 搭配使用，实现图像和图文内容的综合审核。
+   * :::
+   * 文本审核维度
+   * @example "["ad","charillegal"]"
+   */
+  AuditTextDimensions: string[];
+  /**
+   * 审核结果（Detail 版本）以回调形式发送至您的回调地址，仅当 `Async` 取值为 `1` 时生效。支持以 `http://` 或者 `https://` 开头的地址。
+   * 审核结果（Detail版本）以回调形式发送至您的回调地址，异步审核时生效，支持以 `http://` 或者 `https://` 开头的地址，例如： `http://www.callback.com`。
+   * @example "https://www.example.com/callback"
+   */
+  CallbackUrl?: string;
+  /**
+   * 待审核的图片信息列表，包含每张图片的 URI、唯一标识及是否启用大图检测的开关。
+   * @example "[{"EnableLargeImageDetect":true,"ImageUri":"http://test.com/demo.png","DataId":"unique_id_123"}]"
+   */
+  Inputs: {
+    /**
+     * 自定义标识，用于区分待审核图片 `ImageUri` 的唯一标识，建议根据实际业务需求设置。
+     * 唯一id
+     * @example "92bodw28122j19***018h3i1928g"
+     */
+    DataId: string;
+    /**
+     * 是否开启大图审核功能。默认值为 `false`。支持的取值如下所示。
+     * - `true`：开启大图审核，系统会对 5MB~32MB 的图片进行压缩后再审核；
+     * - `false`：不开启大图审核。
+     *
+     * :::tip
+     * - 未开启时若图片大小 ≥ 5 MB，可能导致系统超时报错；
+     * - 已开启时若图片大小 ≥ 32 MB，可能导致系统超时报错；
+     * - 开启后将对压缩能力按照[基础图片处理](https://www.volcengine.com/docs/508/65935#%E5%9F%BA%E7%A1%80%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86%E6%9C%8D%E5%8A%A1)进行计费（每月有 20TB 免费额度）。
+     * :::
+     * @example "true"
+     */
+    EnableLargeImageDetect: boolean;
+    /**
+     * 待审核图片的访问地址，支持以下两种形式：
+     * - 公网可访问的 URL 地址；
+     * - 火山引擎对象存储（TOS）的唯一 Key。
+     * 公网可访问url或火山tos唯一key
+     * @example "http://example.com/image.jpg"
+     */
+    ImageUri: string;
+  }[];
+}
+
+export interface BatchImageAuditQuery {
+  /**
+   * 用于存储结果图和计量计费的服务 ID。
+   * * 您可以在 veImageX 控制台 [服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。
+   * * 您也可以通过 OpenAPI 的方式获取服务 ID，具体请参考[获取所有服务信息](https://www.volcengine.com/docs/508/9360)。
+   * @example "ln***tb"
+   */
+  ServiceId: string;
+}
+
+export interface BatchImageAuditRes {
+  ResponseMetadata: {
+    /**
+     * 请求的接口名，属于请求的公共参数。
+     * @example "{Action}"
+     */
+    Action: string;
+    /**
+     * 请求的Region，例如：cn-north-1
+     * @example "cn-north-1"
+     */
+    Region: string;
+    /** RequestID为每次API请求的唯一标识。 */
+    RequestId: string;
+    /** 请求的服务，属于请求的公共参数。 */
+    Service: string;
+    /**
+     * 请求的版本号，属于请求的公共参数。
+     * @example "{Version}"
+     */
+    Version: string;
+  };
+  /** 视请求的接口而定 */
+  Result?: {
+    /**
+     * 包含图片批量审核的结果数组，每个元素代表一张图片的审核结果。
+     * @example "[{"DataId":"xxx","ImageUri":"http://example.com","Advice":"pass","Label":["porn"],"SubLabel":["explicit"],"ImageType":"normal"}]"
+     */
+    Outputs: {
+      /**
+       * 图片审核的建议结果，表示系统对图片内容的审核意见。支持的取值如下所示。
+       * - `pass`：审核通过；
+       * - `block`：审核不通过；
+       * - `review`：需要人工复核。
+       * 审核建议
+       * @example "pass"
+       */
+      Advice: string;
+      /**
+       * 建议您根据实际业务情况，将该参数作为可区分审核图片 `ImageUri` 的自定义标识。
+       * 唯一id
+       * @example "92bodw28122j19***018h3i1928g"
+       */
+      DataId: string;
+      /**
+       * 审核结果，取值如下所示：
+       *
+       * - `problem`：问题图片
+       * - `frozen`：冻结图片
+       * - `normal`：正常图片
+       * 审核判断图片类型
+       * @example "normal"
+       */
+      ImageType: string;
+      /**
+       * 图片的公网可访问 URL，用于指定需要审核的图片资源地址。
+       * 公网可访问url
+       * @example "http://example.com/image.jpg"
+       */
+      ImageUri: string;
+      /**
+       * 图片内容的一级审核标签，用于标识图片内容的主要分类。
+       * 一级标签
+       * @example "["porn"]"
+       */
+      Label?: string[];
+      /**
+       * 图片内容的二级审核标签，用于进一步细化 `Label` 的分类，提供更具体的审核结果。
+       * 二级标签
+       * @example "["30302"]"
+       */
+      SubLabel?: string[];
+    }[];
+  };
+}
+
 export interface CommitImageUploadBody {
   /**
    * 一次上传会话 Key。您可参考[获取文件上传地址](https://www.volcengine.com/docs/508/9397)获取。
@@ -772,6 +956,225 @@ export interface CommitImageUploadRes {
        */
       UriStatus: number;
     }[];
+  };
+}
+
+/** title */
+export interface CreateAudioAuditTaskBody {
+  /**
+   * 审核能力类型，用于指定审核任务所使用的审核模型。支持的取值如下所示。
+   * - `0`：基础审核能力；
+   * - `1`：智能审核能力。
+   * @example 1
+   */
+  AuditAbility: number;
+  /**
+   * 审核维度，根据审核能力的不同，其具体取值不同。基础审核与智能审核之间不支持混用。
+   *
+   * - 智能安全审核，仅当 `AuditAbility` 取值为 `1` 时，配置生效。
+   *
+   * 	- 图像风险识别
+   * 		- `audio_porn` ：涉黄，主要适用于通用色情、色情动作、性行为、性暗示、性分泌物、色情动漫、色情裸露等涉黄场景的风险识别
+   * 		- `audio_sensitive1` ：涉敏1，具体指涉及暴恐风险
+   * 		- `audio_sensitive2`：涉敏2，具体值涉及政治内容风险
+   * 		- `audio_forbidden`：违禁，主要适用于打架斗殴、爆炸、劣迹艺人等场景的风险识别
+   * 		- `audio_uncomfortable`：引人不适，主要适用于恶心、恐怖、尸体、血腥等引人不适场景的风险识别
+   * 		- `audio_qrcode`：二维码，主要适用于识别常见二维码（QQ、微信、其他二维码等）
+   * 		- `audio_badpicture`：不良画面，主要适用于自我伤害、丧葬、不当车播、吸烟/纹身/竖中指等不良社会风气的风险识别
+   * 		- `audio_sexy`：性感低俗，主要适用于舌吻、穿衣性行为、擦边裸露等多种性感低俗场景的风险识别
+   * 		- `audio_age`：年龄，主要适用于图中人物对应的年龄段识别
+   * 		- `audio_underage`：未成年相关，主要适用于儿童色情、儿童邪典等风险识别
+   * 		- `audio_quality`：图片质量，主要适用于图片模糊、纯色边框、纯色屏等风险识别
+   * 	- 图文风险识别，您可在 `AuditTextDimensions` 配置文字审核的维度。
+   *
+   * 	:::tip
+   * 	您可将智能安全审核的图像风险识别和图文风险识别搭配使用。
+   * 	:::
+   * "audio_porn"          // 涉黄
+   * "audio_govern"        // 涉政
+   * "audio_terror"        // 涉恐
+   * "audio_illegal"       // 违法违规
+   * "audio_sensitive1"    // 涉敏1
+   * "audio_sensitive2"    // 涉敏2
+   * "audio_forbidden"     // 违禁
+   * "audio_uncomfortable" // 引人不适
+   * "audio_qrcode"        // 二维码
+   * "audio_badpicture"    // 不良画面
+   * "audio_sexy"          // 性感低俗
+   * "audio_age"           // 年龄
+   * "audio_underage"      // 未成年
+   * "audio_quality"       // 图片质量
+   * @example "["audio_pron","audio_sexy"]"
+   */
+  AuditDimensions: string[];
+  /**
+   * 指定需要审核的文件前缀列表，仅当 `EnableAuditRange` 取值为 `1` 时生效。若需要对某个目录进行审核，请设置路径为对应的目录名并以 `/` 结尾，例如 `123/test/`。
+   * @example "["images/","temp/"]"
+   */
+  AuditPrefix?: string[];
+  /**
+   * 智能安全审核类型下图文风险审核的具体维度，仅当 `AuditAbility` 取值为 `1` 时生效。支持的取值如下所示。
+   * - `ad`：广告，综合图像及文字内容智能识别广告；
+   * - `defraud`：诈骗，综合图像及文字内容智能识别诈骗；
+   * - `charillegal`：文字违规，存在涉黄、涉敏、违禁等违规文字。
+   *
+   * :::tip
+   * 您可将 `AuditTextDimensions` 与 `AuditDimensions` 搭配使用，实现图像和图文内容的综合审核。
+   * :::
+   * "audio_ad"          // 广告 "defraud"     // 诈骗 "audio_charillegal" // 文字违规
+   * @example "["ad","charillegal"]"
+   */
+  AuditTextDimensions?: string[];
+  /**
+   * 指定通配符匹配的审核范围，支持使用 `*` 进行多字符匹配和 `?` 进行单字符匹配。不同通配符需用逗号隔开。例如 `/a/*b/c` 匹配 `/a/testb/c`，`/a/b/c/test12?/*` 匹配 `/a/b/c/test123/file.mp4`。
+   * 当前支持的通配符为`*` `?`不同通配符请用“，”隔开
+   * @example "["/*_image","/test?/*"]"
+   */
+  Auditwildcard?: string[];
+  /**
+   * 回调类型，取值需要与 `AuditDimensions` 审核维度保持一致或少于 `AuditDimensions`。例如，若 `AuditDimensions` 取值为 `["porn","sexy"]`，`AuditTextDimensions` 取值为 `["ad"]`，则支持以下任意一种组合：
+   * - `["porn","sexy","ad"]`
+   * - `["porn","sexy"]`
+   * - `["porn","ad"]`
+   * - `["sexy","ad"]`
+   * @example "["porn","sexy"]"
+   */
+  CallbackDimensions?: string[];
+  /**
+   * 指定需要回调的图片类型，需配合 `EnableCallback` 使用。支持的取值如下所示。
+   * - `normal`：正常图片；
+   * - `problem`：问题图片；
+   * - `frozen`：冻结图片；
+   * - `fail`：审核失败图片。
+   * @example "["problem","frozen"]"
+   */
+  CallbackImageTypes?: string[];
+  /**
+   * 接收审核结果回调的 URL，veImageX 将以 POST 方式向该地址发送 JSON 格式的回调数据。需配合 `EnableCallback` 参数开启回调功能使用。回调数据格式请参考[回调内容文档](https://www.volcengine.com/docs/508/134676#%E5%9B%9E%E8%B0%83%E5%86%85%E5%AE%B9)。
+   * @example "https://api.example.com/audit/callback"
+   */
+  CallbackUrl?: string;
+  /**
+   * 是否开启审核范围配置，仅当 `Type` 取值为 `Upload` 时生效。默认值为 `0`。支持的取值如下所示。
+   * - `0`：不限范围；
+   * - `1`：指定前缀匹配（需配合 `AuditPrefix` 或 `NoAuditPrefix` 使用）；
+   * - `2`：指定通配符匹配（需配合 `AuditPrefix` 或 `NoAuditPrefix` 使用）。
+   * 默认0
+   * @example 1
+   */
+  EnableAuditRange?: number;
+  /**
+   * 是否开启审核结果回调功能，默认值为 `false`。支持的取值如下所示。
+   * - `true`：开启回调；
+   * - `false`：不开启回调。
+   *
+   * :::tip
+   * 开启回调功能后，需配合 `CallbackUrl`、`CallbackDimensions` 和 `CallbackImageTypes` 使用。
+   * :::
+   * @example "true"
+   */
+  EnableCallback?: boolean;
+  /**
+   * 是否开启冻结功能，默认值为 `false`。支持的取值如下所示。
+   * - `true`：开启；
+   * - `false`：不开启。
+   *
+   * :::tip
+   * 开启冻结功能后，需配合 `FreezeType`、`FreezeDimensions` 和 `FreezeStrategy` 使用。
+   * :::
+   * @example "true"
+   */
+  EnableFreeze?: boolean;
+  /**
+   * 冻结维度，取值需要与 `AuditDimensions` 审核维度保持一致或少于 `AuditDimensions`。例如，若 `AuditDimensions` 取值为 `["porn","sexy"]`，`AuditTextDimensions` 取值为 `["ad"]`，则支持以下任意一种组合：
+   * - `["porn","sexy","ad"]`
+   * - `["porn","sexy"]`
+   * - `["porn","ad"]`
+   * - `["sexy","ad"]`
+   * 若开启冻结，则不可为空
+   * @example "["porn","sexy"]"
+   */
+  FreezeDimensions?: string[];
+  /**
+   * 冻结策略，当前仅支持取值为 `0`，表示禁用音频。
+   * 若开启冻结，则不可为空
+   * @example 0
+   */
+  FreezeStrategy?: number;
+  /**
+   * 冻结措施，仅当 `EnableFreeze` 为 `true` 时生效。支持的取值如下所示。
+   * - `recheck`：建议复审；
+   * - `nopass`：审核不通过。
+   * 若开启冻结，则不可为空
+   * @example "["recheck","nopass"]"
+   */
+  FreezeType?: string[];
+  /**
+   * 指定不进行审核的文件前缀列表，仅当 `EnableAuditRange` 取值为 `1` 时生效。若需要对某个目录不进行审核，请设置路径为对应的目录名并以 `/` 结尾，例如 `123/test/`。
+   * @example "["images/temp/", "test/"]"
+   */
+  NoAuditPrefix?: string[];
+  /**
+   * 指定通配符匹配的不审核范围，支持使用 `*` 进行多字符匹配和 `?` 进行单字符匹配。不同通配符需用逗号隔开。例如 `/a/*b/c` 匹配 `/a/testb/c`，`/a/b/c/test12?/*` 匹配 `/a/b/c/test123/file.mp4`。
+   * 当前支持的通配符为`*` `?`不同通配符请用“，”隔开
+   * @example "["/*_image","/test?/*"]"
+   */
+  NoAuditwildcard?: string[];
+  /**
+   * 指定审核任务所属的地区。当前仅支持国内地区，取值为 `cn`。
+   * @example "cn"
+   */
+  Region: string;
+  /**
+   * 审核文件的 StoreUri，仅当 `Type` 为 `UrlFile` 时生效。该文件为 .txt 格式，需上传至指定服务对应存储中，文件内容为待审核文件的 URL 列表，每行一个 URL，最多支持 10000 行。
+   * @example "["example-service/audit-list.txt"]"
+   */
+  ResUri?: string[];
+  /**
+   * 服务 ID。
+   *
+   * - 您可以在 veImageX 控制台 [服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。
+   * - 您也可以通过 OpenAPI 的方式获取服务 ID，具体请参考[获取所有服务信息](https://www.volcengine.com/docs/508/9360)。
+   * @example "9u**6i"
+   */
+  ServiceId: string;
+  /**
+   * 任务类型，当前仅支持取值为 `audit`。
+   * 审核任务类型,支持取值为`audit_audio`。
+   * - `audit`: 图片审核
+   * - `audit_audio` 音频审核
+   * - `audit_video` 视频审核
+   * @example "audit"
+   */
+  TaskType: string;
+  /**
+   * 审核任务场景。取值如下所示：
+   * - `UrlFile`：存量文件处理，针对已有存储内的文件请求获取审核结果。传入方式是 `ResUri` 方式，即在 TXT 文件（审核文件）内填写了待审核文件 URL，并将该 TXT 文件上传至指定服务后获取并传入该文件的 StoreUri。
+   * - `Upload`：上传场景，针对上传文件到指定服务下的场景。可通过 `EnableAuditRange` 参数指定审核的范围，例如对指定上传到某目录下的文件进行审核。
+   * @example "UrlFile"
+   */
+  Type: string;
+}
+
+export interface CreateAudioAuditTaskRes {
+  ResponseMetadata: {
+    /** @example "{Action}" */
+    Action: string;
+    /** @example "cn-north-1" */
+    Region: string;
+    /** @example "201806041104200100100232280022D30" */
+    RequestId: string;
+    /** @example "imagex" */
+    Service: string;
+    /** @example "2023-05-01" */
+    Version: string;
+  };
+  Result: {
+    /**
+     * 异步任务的唯一标识符，用于后续查询任务状态或结果。
+     * @example "652ceffd309a6dd937a3780d"
+     */
+    TaskId: string;
   };
 }
 
@@ -1544,9 +1947,9 @@ export interface CreateImageAnalyzeTaskRes {
 /** title */
 export interface CreateImageAuditTaskBody {
   /**
-   * 审核能力，取值如下所示：
-   * - `0`：基础审核能力
-   * - `1`：智能审核能力
+   * 审核能力类型，用于指定审核任务所使用的审核模型。支持的取值如下所示。
+   * - `0`：基础审核能力；
+   * - `1`：智能审核能力。
    * @example 1
    */
   AuditAbility: number;
@@ -1597,159 +2000,186 @@ export interface CreateImageAuditTaskBody {
    */
   AuditDimensions: string[];
   /**
-   * 仅当 `EnableAuditRange` 取值 `1` 时，配置生效。
-   * 指定前缀审核，若你希望对某个目录进行审核，请设置路径为对应的目录名，以`/`结尾。例如`123/test/`
-   * @example "["a/"]"
+   * 指定需要审核的文件前缀列表，仅当 `EnableAuditRange` 取值为 `1` 时生效。若需要对某个目录进行审核，请设置路径为对应的目录名并以 `/` 结尾，例如 `123/test/`。
+   * @example "["images/","temp/"]"
    */
   AuditPrefix?: string[];
   /**
-   * 智能安全审核类型下图文风险审核的具体维度，取值如下所示：
-   * - `ad`：广告，综合图像及文字内容智能识别广告
-   * - `defraud`：诈骗，综合图像及文字内容智能识别诈骗
-   * - `charillegal`：文字违规，图片上存在涉黄、涉敏、违禁等违规文字
+   * 智能安全审核类型下图文风险审核的具体维度，仅当 `AuditAbility` 取值为 `1` 时生效。支持的取值如下所示。
+   * - `ad`：广告，综合图像及文字内容智能识别广告；
+   * - `defraud`：诈骗，综合图像及文字内容智能识别诈骗；
+   * - `charillegal`：文字违规，存在涉黄、涉敏、违禁等违规文字。
    *
    * :::tip
-   * 仅当 `AuditDimensions` 取值为智能安全审核模型时，您可将 `AuditTextDimensions` 与 `AuditDimensions` 搭配使用。
+   * 您可将 `AuditTextDimensions` 与 `AuditDimensions` 搭配使用，实现图像和图文内容的综合审核。
    * :::
    * "ad"          // 广告 "defraud"     // 诈骗 "charillegal" // 文字违规
-   * @example "["ad"]"
+   * @example "["ad","charillegal"]"
    */
   AuditTextDimensions?: string[];
   /**
-   * 回调类型，取值需要与 `AuditDimensions` 审核维度保持一致或少于 `AuditDimensions`。
-   *
-   * 例如，`AuditDimensions` 取值 ["pron","sexy"]，`AuditTextDimensions` 取值 ["ad"]，支持您将 `FreezeDimensions` 取值 ["pron","sexy","ad"] 、 ["pron","sexy"]、["pron","ad"] 和 ["sexy","ad"] 任意一种。
-   * @example "["ad"]"
+   * 指定需要审核的文件通配符列表，仅当 `EnableAuditRange` 取值为 `1` 时生效。当前支持的通配符为 `*` 和 `?`，不同通配符请用英文逗号隔开。
+   * 当前支持的通配符为`*` `?`不同通配符请用“，”隔开
+   * @example "["*_image","test?.jpg"]"
+   */
+  AuditWildCard?: string[];
+  /**
+   * 指定审核任务关联的存储桶名称，用于标识审核任务对应的存储位置。
+   * @example "example-bucket"
+   */
+  BktName?: string;
+  /**
+   * 底层存储类型，用于标识审核任务关联的存储桶的底层存储服务类型。支持的取值为 `volc_tos`（火山 TOS）
+   * @example "volc_tos"
+   */
+  BktType?: string;
+  /**
+   * 回调类型，取值需要与 `AuditDimensions` 审核维度保持一致或少于 `AuditDimensions`。例如，若 `AuditDimensions` 取值为 `["porn","sexy"]`，`AuditTextDimensions` 取值为 `["ad"]`，则支持以下任意一种组合：
+   * - `["porn","sexy","ad"]`
+   * - `["porn","sexy"]`
+   * - `["porn","ad"]`
+   * - `["sexy","ad"]`
+   * @example "["porn","sexy"]"
    */
   CallbackDimensions?: string[];
   /**
-   * 回调图片类型，取值如下所示：
-   * - `normal`：正常图片
-   *
-   * - `problem`：问题图片
-   *
-   * - `frozen`：冻结图片
-   *
-   * - `fail`：审核失败图片
-   * @example "["problem","frozen","fail"]"
+   * 指定需要回调的图片类型，需配合 `EnableCallback` 使用。支持的取值如下所示。
+   * - `normal`：正常图片；
+   * - `problem`：问题图片；
+   * - `frozen`：冻结图片；
+   * - `fail`：审核失败图片。
+   * @example "["problem","frozen"]"
    */
   CallbackImageTypes?: string[];
   /**
-   * 回调 URL，veImageX 以 Post 方式向业务服务器发送 JSON 格式回调数据。具体回调参数请参考[回调内容](https://www.volcengine.com/docs/508/134676#%E5%9B%9E%E8%B0%83%E5%86%85%E5%AE%B9)。
-   * @example "https://example.callback.com"
+   * 接收审核结果回调的 URL，veImageX 将以 POST 方式向该地址发送 JSON 格式的回调数据。需配合 `EnableCallback` 参数开启回调功能使用。回调数据格式请参考[回调内容文档](https://www.volcengine.com/docs/508/134676#%E5%9B%9E%E8%B0%83%E5%86%85%E5%AE%B9)。
+   * @example "https://api.example.com/audit/callback"
    */
   CallbackUrl?: string;
   /**
-   * 仅当 `Type` 取值 `Upload` 时，配置生效。
-   * 审核范围，取值如下所示：
-   * - `0`：（默认）不限范围
-   * - `1`：指定范围
+   * 是否开启审核范围配置，仅当 `Type` 取值为 `Upload` 时生效。默认值为 `0`。支持的取值如下所示。
+   * - `0`：不限范围；
+   * - `1`：指定前缀匹配（需配合 `AuditPrefix` 或 `NoAuditPrefix` 使用）；
+   * - `2`：指定通配符匹配（需配合 `AuditPrefix` 或 `NoAuditPrefix` 使用）。
    * 默认0
    * @example 1
    */
   EnableAuditRange?: number;
   /**
-   * 是否开启回调，取值如下所示：
-   * - `true`：开启
-   * - `false`：（默认）不开启
+   * 是否开启审核结果回调功能，默认值为 `false`。支持的取值如下所示。
+   * - `true`：开启回调；
+   * - `false`：不开启回调。
+   *
+   * :::tip
+   * 开启回调功能后，需配合 `CallbackUrl`、`CallbackDimensions` 和 `CallbackImageTypes` 使用。
+   * :::
    * @example "true"
    */
   EnableCallback?: boolean;
   /**
-   * 是否开启冻结，取值如下所示：
-   * - `true`：开启
-   * - `false`：（默认）不开启
+   * 是否开启冻结功能，默认值为 `false`。支持的取值如下所示。
+   * - `true`：开启；
+   * - `false`：不开启。
+   *
+   * :::tip
+   * 开启冻结功能后，需配合 `FreezeType`、`FreezeDimensions` 和 `FreezeStrategy` 使用。
+   * :::
    * @example "true"
    */
   EnableFreeze?: boolean;
   /**
-   * 图片审核仅支持审核 5MB 以下的图片，若您的图片大小在 5MB~32MB，您可以开启大图审核功能，veImageX 会对图片压缩后再进行审核。开启后，将对压缩能力按照[基础图片处理](https://www.volcengine.com/docs/508/65935#%E5%9F%BA%E7%A1%80%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86%E6%9C%8D%E5%8A%A1)进行计费。（您每月可使用 20TB 的免费额度）
-   * 取值如下所示：
-   * - `true`：开启
-   * - `false`：（默认）不开启
+   * 是否开启大图审核功能。默认值为 `false`。支持的取值如下所示。
+   * - `true`：开启大图审核，系统会对 5MB~32MB 的图片进行压缩后再审核；
+   * - `false`：不开启大图审核。
    *
    * :::tip
-   * - 若未开启大图审核且图片大小 ≥ 5 MB，可能会导致系统超时报错；
-   * - 若已开启大图审核但图片大小 ≥ 32 MB，可能会导致系统超时报错。
+   * - 未开启时若图片大小 ≥ 5 MB，可能导致系统超时报错；
+   * - 已开启时若图片大小 ≥ 32 MB，可能导致系统超时报错；
+   * - 开启后将对压缩能力按照[基础图片处理](https://www.volcengine.com/docs/508/65935#%E5%9F%BA%E7%A1%80%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86%E6%9C%8D%E5%8A%A1)进行计费（每月有 20TB 免费额度）。
    * :::
    * @example "true"
    */
   EnableLargeImageDetect?: boolean;
   /**
-   * 冻结维度，取值需要与 `AuditDimensions` 审核维度保持一致或少于 `AuditDimensions`。
-   *
-   * 例如，`AuditDimensions` 取值 ["pron","sexy"]，`AuditTextDimensions` 取值 ["ad"]，支持您将 `FreezeDimensions` 取值 ["pron","sexy","ad"] 、 ["pron","sexy"]、["pron","ad"] 和 ["sexy","ad"] 任意一种。
+   * 冻结维度，取值需要与 `AuditDimensions` 审核维度保持一致或少于 `AuditDimensions`。例如，若 `AuditDimensions` 取值为 `["porn","sexy"]`，`AuditTextDimensions` 取值为 `["ad"]`，则支持以下任意一种组合：
+   * - `["porn","sexy","ad"]`
+   * - `["porn","sexy"]`
+   * - `["porn","ad"]`
+   * - `["sexy","ad"]`
    * 若开启冻结，则不可为空
-   * @example "["pron","sexy","ad"] "
+   * @example "["porn","sexy"]"
    */
   FreezeDimensions?: string[];
   /**
-   * 冻结策略，当前仅支持取 `0`，表示禁用图片。
+   * 冻结策略，当前仅支持取值为 `0`，表示禁用文件。
    * 若开启冻结，则不可为空
    */
   FreezeStrategy?: number;
   /**
-   * 冻结措施，取值如下所示：
-   * - `recheck`：建议复审
-   * - `nopass`：审核不通过
+   * 冻结措施，仅当 `EnableFreeze` 为 `true` 时生效。支持的取值如下所示。
+   * - `recheck`：建议复审；
+   * - `nopass`：审核不通过。
    * 若开启冻结，则不可为空
    * @example "["recheck","nopass"]"
    */
   FreezeType?: string[];
   /**
-   * 仅当 `Type` 为 `Url` 时，配置生效。
-   *
-   * 批量提交图片 URL 列表
+   * 当 `Type` 为 `Url` 时，用于批量提交待审核文件的 URL 列表。每个元素包含文件 URL 和自定义标识。
    * @example "-"
    */
   ImageInfos?: {
     /**
-     * 建议您根据实际业务情况，将该参数作为可区分审核图片 `ImageUri` 的自定义标识。
+     * 自定义标识，用于区分待审核图片 `ImageUri` 的唯一标识，建议根据实际业务需求设置。
      * @example "92bodw28122j19***018h3i1928g"
      */
     DataId?: string;
     /**
-     * 待审核图片 URL，需满足公网可访问。
-     * @example "https://test.png"
+     * 待审核图片的 URL 地址，需满足公网可访问。当 `Type` 为 `Url` 时，通过该字段批量提交待审核图片的 URL 列表。
+     * @example "https://example.com/images/test.jpg"
      */
     ImageUri?: string;
   }[];
   /**
-   * 仅当 `EnableAuditRange` 取值 `1` 时，配置生效。
-   * 指定前缀不审核，若你希望对某个目录不进行审核，请设置路径为对应的目录名，以`/`结尾。例如`123/test/`
-   * @example "["b/"]"
+   * 指定不进行审核的文件前缀列表，仅当 `EnableAuditRange` 取值为 `1` 时生效。若需要对某个目录不进行审核，请设置路径为对应的目录名并以 `/` 结尾，例如 `123/test/`。
+   * @example "["images/temp/", "test/"]"
    */
   NoAuditPrefix?: string[];
   /**
-   * 任务地区。当前仅支持取值 `cn`，表示国内。
+   * 指定不进行审核的文件通配符列表，仅当 `EnableAuditRange` 取值为 `1` 时生效。当前支持的通配符为 `*` 和 `?`，不同通配符请用英文逗号隔开。
+   * 当前支持的通配符为`*` `?`不同通配符请用“，”隔开
+   * @example "["*_image","test?.jpg"]"
+   */
+  NoAuditWildCard?: string[];
+  /**
+   * 指定审核任务所属的地区。当前仅支持国内地区，取值为 `cn`。
    * @example "cn"
    */
   Region: string;
   /**
-   * 仅当 `Type` 为 `UrlFile` 时，配置生效。
-   *
-   * 审核文件的 StoreUri，为 .txt 文件，该文件需上传至指定服务对应存储中。该 txt 文件内需填写待审核图片文件的 URL，每行填写一个，最多可填写 10000 行。
-   * @example "[ "指定服务/图片审核文件.txt" ]"
+   * 审核文件的 StoreUri，仅当 `Type` 为 `UrlFile` 时生效。该文件为 .txt 格式，需上传至指定服务对应存储中，文件内容为待审核文件的 URL 列表，每行一个 URL，最多支持 10000 行。
+   * @example "["example-service/audit-list.txt"]"
    */
   ResUri?: string[];
   /**
-   * 服务 ID。
+   * 指定审核任务所属的服务 ID。
    *
-   * - 您可以在 veImageX 控制台 [服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。
-   * - 您也可以通过 OpenAPI 的方式获取服务 ID，具体请参考[获取所有服务信息](https://www.volcengine.com/docs/508/9360)。
+   * - 可在 veImageX 控制台 [服务管理](https://console.volcengine.com/imagex/service_manage/) 页面获取；
+   * - 也可通过 [获取所有服务信息](https://www.volcengine.com/docs/508/9360) OpenAPI 获取。
    * @example "9u**6i"
    */
   ServiceId: string;
   /**
-   * 任务类型，当前仅支持取值为 `audit`。
+   * 任务类型。当前接口仅支持取值为 `audit`。
+   * 审核任务类型,支持取值为 `audit`。
+   * - `audit`: 图片审核
    * @example "audit"
    */
   TaskType: string;
   /**
-   * 图片审核任务场景。取值如下所示：
-   * - `UrlFile`：存量图片处理，进针对已有存储内的图片请求获取审核结果。传入方式是 `ResUri`方式，即在.txt 文件（审核文件）内填写了待审核图片文件 URL，并将该 txt 文件上传至指定服务后获取并传入该文件的 StoreUri。
-   * - `Url`：URL 直传场景。传入方式为 `ImageInfos` 方式，即可直接传入待审核图片的 URL 及区分标识。
-   * - `Upload`：图片上传场景，针对上传图片到指定服务下的场景。可在 `EnableAuditRange`下指定审核的范围，例如对指定上传到某目录下的图片进行审核。
+   * 审核任务场景。取值如下所示：
+   * - `UrlFile`：存量文件处理，针对已有存储内的文件请求获取审核结果。传入方式是 `ResUri` 方式，即在 TXT 文件（审核文件）内填写了待审核文件 URL，并将该 TXT 文件上传至指定服务后获取并传入该文件的 StoreUri。
+   * - `Url`：URL 直传场景。传入方式为 `ImageInfos` 方式，即可直接传入待审核文件的 URL 及区分标识。
+   * - `Upload`：上传场景，针对上传文件到指定服务下的场景。可通过 `EnableAuditRange` 参数指定审核的范围，例如对指定上传到某目录下的文件进行审核。
    * @example "UrlFile"
    */
   Type: string;
@@ -1770,7 +2200,7 @@ export interface CreateImageAuditTaskRes {
   };
   Result: {
     /**
-     * 任务 ID
+     * 审核任务的唯一标识符，用于后续查询或管理该任务。
      * @example "652ceffd309a6dd937a3780d"
      */
     TaskId: string;
@@ -4112,6 +4542,229 @@ export interface CreateTemplatesFromBinRes {
        */
       Success: boolean;
     }[];
+  };
+}
+
+/** title */
+export interface CreateVideoAuditTaskBody {
+  /**
+   * 审核能力类型，用于指定审核任务所使用的审核模型。支持的取值如下所示。
+   * - `0`：基础审核能力；
+   * - `1`：智能审核能力。
+   * @example 1
+   */
+  AuditAbility: number;
+  /**
+   * 审核维度，根据审核能力的不同，其具体取值不同。基础审核与智能审核之间不支持混用。
+   *
+   * - 智能安全审核，仅当 `AuditAbility` 取值为 `1` 时，配置生效。
+   *
+   * 	- 图像风险识别
+   * 		- `video_porn` ：涉黄，主要适用于通用色情、色情动作、性行为、性暗示、性分泌物、色情动漫、色情裸露等涉黄场景的风险识别
+   * 		- `video_sensitive1` ：涉敏1，具体指涉及暴恐风险
+   * 		- `video_sensitive2`：涉敏2，具体值涉及政治内容风险
+   * 		- `video_forbidden`：违禁，主要适用于打架斗殴、爆炸、劣迹艺人等场景的风险识别
+   * 		- `video_uncomfortable`：引人不适，主要适用于恶心、恐怖、尸体、血腥等引人不适场景的风险识别
+   * 		- `video_qrcode`：二维码，主要适用于识别常见二维码（QQ、微信、其他二维码等）
+   * 		- `video_badpicture`：不良画面，主要适用于自我伤害、丧葬、不当车播、吸烟/纹身/竖中指等不良社会风气的风险识别
+   * 		- `video_sexy`：性感低俗，主要适用于舌吻、穿衣性行为、擦边裸露等多种性感低俗场景的风险识别
+   * 		- `video_age`：年龄，主要适用于图中人物对应的年龄段识别
+   * 		- `video_underage`：未成年相关，主要适用于儿童色情、儿童邪典等风险识别
+   * 		- `video_quality`：图片质量，主要适用于图片模糊、纯色边框、纯色屏等风险识别
+   * 	- 图文风险识别，您可在 `AuditTextDimensions` 配置文字审核的维度。
+   *
+   * 	:::tip
+   * 	您可将智能安全审核的图像风险识别和图文风险识别搭配使用。
+   * 	:::
+   * "porn"          // 涉黄
+   * "govern"        // 涉政
+   * "terror"        // 涉恐
+   * "illegal"       // 违法违规
+   * "sensitive1"    // 涉敏1
+   * "sensitive2"    // 涉敏2
+   * "forbidden"     // 违禁
+   * "uncomfortable" // 引人不适
+   * "qrcode"        // 二维码
+   * "badpicture"    // 不良画面
+   * "sexy"          // 性感低俗
+   * "age"           // 年龄
+   * "underage"      // 未成年
+   * "quality"       // 图片质量
+   * @example "["video_pron","video_sexy"]"
+   */
+  AuditDimensions: string[];
+  /**
+   * 指定需要审核的文件前缀列表，仅当 `EnableAuditRange` 取值为 `1` 时生效。若需要对某个目录进行审核，请设置路径为对应的目录名并以 `/` 结尾，例如 `123/test/`。
+   * @example "["images/","temp/"]"
+   */
+  AuditPrefix?: string[];
+  /**
+   * 智能安全审核类型下图文风险审核的具体维度，仅当 `AuditAbility` 取值为 `1` 时生效。支持的取值如下所示。
+   * - `ad`：广告，综合图像及文字内容智能识别广告；
+   * - `defraud`：诈骗，综合图像及文字内容智能识别诈骗；
+   * - `charillegal`：文字违规，存在涉黄、涉敏、违禁等违规文字。
+   *
+   * :::tip
+   * 您可将 `AuditTextDimensions` 与 `AuditDimensions` 搭配使用，实现图像和图文内容的综合审核。
+   * :::
+   * "ad"          // 广告 "defraud"     // 诈骗 "charillegal" // 文字违规
+   * @example "["ad","charillegal"]"
+   */
+  AuditTextDimensions?: string[];
+  /**
+   * 指定通配符匹配的审核范围，支持使用 `*` 进行多字符匹配和 `?` 进行单字符匹配。不同通配符需用逗号隔开。例如 `/a/*b/c` 匹配 `/a/testb/c`，`/a/b/c/test12?/*` 匹配 `/a/b/c/test123/file.mp4`。
+   * 当前支持的通配符为`*` `?`不同通配符请用“，”隔开
+   * @example "["/*_image","/test?/*"]"
+   */
+  Auditwildcard?: string[];
+  /**
+   * 回调类型，取值需要与 `AuditDimensions` 审核维度保持一致或少于 `AuditDimensions`。例如，若 `AuditDimensions` 取值为 `["porn","sexy"]`，`AuditTextDimensions` 取值为 `["ad"]`，则支持以下任意一种组合：
+   * - `["porn","sexy","ad"]`
+   * - `["porn","sexy"]`
+   * - `["porn","ad"]`
+   * - `["sexy","ad"]`
+   * @example "["porn","sexy"]"
+   */
+  CallbackDimensions?: string[];
+  /**
+   * 指定需要回调的图片类型，需配合 `EnableCallback` 使用。支持的取值如下所示。
+   * - `normal`：正常图片；
+   * - `problem`：问题图片；
+   * - `frozen`：冻结图片；
+   * - `fail`：审核失败图片。
+   * @example "["problem","frozen"]"
+   */
+  CallbackImageTypes?: string[];
+  /**
+   * 接收审核结果回调的 URL，veImageX 将以 POST 方式向该地址发送 JSON 格式的回调数据。需配合 `EnableCallback` 参数开启回调功能使用。回调数据格式请参考[回调内容文档](https://www.volcengine.com/docs/508/134676#%E5%9B%9E%E8%B0%83%E5%86%85%E5%AE%B9)。
+   * @example "https://api.example.com/audit/callback"
+   */
+  CallbackUrl?: string;
+  /**
+   * 是否开启审核范围配置，仅当 `Type` 取值为 `Upload` 时生效。默认值为 `0`。支持的取值如下所示。
+   * - `0`：不限范围；
+   * - `1`：指定前缀匹配（需配合 `AuditPrefix` 或 `NoAuditPrefix` 使用）；
+   * - `2`：指定通配符匹配（需配合 `AuditPrefix` 或 `NoAuditPrefix` 使用）。
+   * 默认0
+   * @example 1
+   */
+  EnableAuditRange?: number;
+  /**
+   * 是否开启审核结果回调功能，默认值为 `false`。支持的取值如下所示。
+   * - `true`：开启回调；
+   * - `false`：不开启回调。
+   *
+   * :::tip
+   * 开启回调功能后，需配合 `CallbackUrl`、`CallbackDimensions` 和 `CallbackImageTypes` 使用。
+   * :::
+   * @example "true"
+   */
+  EnableCallback?: boolean;
+  /**
+   * 是否开启冻结功能，默认值为 `false`。支持的取值如下所示。
+   * - `true`：开启；
+   * - `false`：不开启。
+   *
+   * :::tip
+   * 开启冻结功能后，需配合 `FreezeType`、`FreezeDimensions` 和 `FreezeStrategy` 使用。
+   * :::
+   * @example "true"
+   */
+  EnableFreeze?: boolean;
+  /**
+   * 冻结维度，取值需要与 `AuditDimensions` 审核维度保持一致或少于 `AuditDimensions`。例如，若 `AuditDimensions` 取值为 `["porn","sexy"]`，`AuditTextDimensions` 取值为 `["ad"]`，则支持以下任意一种组合：
+   * - `["porn","sexy","ad"]`
+   * - `["porn","sexy"]`
+   * - `["porn","ad"]`
+   * - `["sexy","ad"]`
+   * 若开启冻结，则不可为空
+   * @example "["porn","sexy"]"
+   */
+  FreezeDimensions?: string[];
+  /**
+   * 冻结策略，当前仅支持取值为 `0`，表示禁用文件。
+   * 若开启冻结，则不可为空
+   * @example 0
+   */
+  FreezeStrategy?: number;
+  /**
+   * 冻结措施，仅当 `EnableFreeze` 为 `true` 时生效。支持的取值如下所示。
+   * - `recheck`：建议复审；
+   * - `nopass`：审核不通过。
+   * 若开启冻结，则不可为空
+   * @example "["recheck","nopass"]"
+   */
+  FreezeType?: string[];
+  /**
+   * 视频截帧频率，单位为秒，默认值为 `2`。表示每隔指定秒数对视频进行一次截帧处理。
+   * 视频截帧频率
+   * @example 1
+   */
+  Interval: number;
+  /**
+   * 指定不进行审核的文件前缀列表，仅当 `EnableAuditRange` 取值为 `1` 时生效。若需要对某个目录不进行审核，请设置路径为对应的目录名并以 `/` 结尾，例如 `123/test/`。
+   * @example "["images/temp/", "test/"]"
+   */
+  NoAuditPrefix?: string[];
+  /**
+   * 指定通配符匹配的不审核范围，支持使用 `*` 进行多字符匹配和 `?` 进行单字符匹配。不同通配符需用逗号隔开。例如 `/a/*b/c` 匹配 `/a/testb/c`，`/a/b/c/test12?/*` 匹配 `/a/b/c/test123/file.mp4`。
+   * 当前支持的通配符为`*` `?`不同通配符请用“，”隔开
+   * @example "["/*_image","/test?/*"]"
+   */
+  NoAuditwildcard?: string[];
+  /**
+   * 指定审核任务所属的地区。当前仅支持国内地区，取值为 `cn`。
+   * @example "cn"
+   */
+  Region: string;
+  /**
+   * 审核文件的 StoreUri，仅当 `Type` 为 `UrlFile` 时生效。该文件为 .txt 格式，需上传至指定服务对应存储中，文件内容为待审核文件的 URL 列表，每行一个 URL，最多支持 10000 行。
+   * @example "["example-service/audit-list.txt"]"
+   */
+  ResUri?: string[];
+  /**
+   * 服务 ID。
+   *
+   * - 您可以在 veImageX 控制台 [服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。
+   * - 您也可以通过 OpenAPI 的方式获取服务 ID，具体请参考[获取所有服务信息](https://www.volcengine.com/docs/508/9360)。
+   * @example "9u**6i"
+   */
+  ServiceId: string;
+  /**
+   * 任务类型，当前仅支持取值为 `audit`。
+   * 审核任务类型,支持取值为 `audit_video`。
+   * - `audit_video` 视频审核
+   * @example "audit"
+   */
+  TaskType: string;
+  /**
+   * 审核任务场景。取值如下所示：
+   * - `UrlFile`：存量文件处理，针对已有存储内的文件请求获取审核结果。传入方式是 `ResUri` 方式，即在 TXT 文件（审核文件）内填写了待审核文件 URL，并将该 TXT 文件上传至指定服务后获取并传入该文件的 StoreUri。
+   * - `Upload`：上传场景，针对上传文件到指定服务下的场景。可通过 `EnableAuditRange` 参数指定审核的范围，例如对指定上传到某目录下的文件进行审核。
+   * @example "UrlFile"
+   */
+  Type: string;
+}
+
+export interface CreateVideoAuditTaskRes {
+  ResponseMetadata: {
+    /** @example "{Action}" */
+    Action: string;
+    /** @example "cn-north-1" */
+    Region: string;
+    /** @example "201806041104200100100232280022D30" */
+    RequestId: string;
+    /** @example "imagex" */
+    Service: string;
+    /** @example "2023-05-01" */
+    Version: string;
+  };
+  Result: {
+    /**
+     * 任务 ID
+     * @example "652ceffd309a6dd937a3780d"
+     */
+    TaskId: string;
   };
 }
 
@@ -19829,6 +20482,176 @@ export interface GetAllImageTemplatesRes {
   };
 }
 
+export interface GetAudioAuditResultQuery {
+  /**
+   * 审核建议，缺省情况下返回全部任务。支持的取值如下所示。
+   * - `nopass`：建议不通过；
+   * - `recheck`：建议复审。
+   * @example "nopass"
+   */
+  AuditSuggestion?: string;
+  /**
+   * 图片类型，缺省情况下返回全部类型任务。支持的取值如下所示。
+   * - `problem`：问题图片；
+   * - `frozen`：冻结图片；
+   * - `fail`：审核失败图片。
+   * @example "fail"
+   */
+  ImageType?: string;
+  /**
+   * 分页条数。取值范围为 (0,100\]，默认值为 10。
+   * @example "10"
+   */
+  Limit?: string;
+  /**
+   * 上一次查询返回的位置标记，作为本次列举的起点信息。默认值为 0。
+   * @example "0"
+   */
+  Marker?: string;
+  /**
+   * 问题类型，取值根据审核类型的不同其取值不同。缺省情况下返回全部类型任务。
+   *
+   * - 基础安全审核
+   * 	- `govern`：涉政
+   * 	- `porn` ：涉黄
+   * 	- `illegal`：违法违规
+   * 	- `terror`：涉暴
+   * - 智能安全审核
+   * 	- 图像风险识别
+   * 		- `porn` ：涉黄，主要适用于通用色情、色情动作、性行为、性暗示、性分泌物、色情动漫、色情裸露等涉黄场景的风险识别
+   * 		- `sensitive1` ：涉敏1，具体指涉及暴恐风险
+   * 		- `sensitive2`：涉敏2，具体值涉及政治内容风险
+   * 		- `forbidden`：违禁，主要适用于打架斗殴、爆炸、劣迹艺人等场景的风险识别
+   * 		- `uncomfortable`：引人不适，主要适用于恶心、恐怖、尸体、血腥等引人不适场景的风险识别
+   * 		- `qrcode`：二维码，主要适用于识别常见二维码（QQ、微信、其他二维码等）
+   * 		- `badpicture`：不良画面，主要适用于自我伤害、丧葬、不当车播、吸烟/纹身/竖中指等不良社会风气的风险识别
+   * 		- `sexy`：性感低俗，主要适用于舌吻、穿衣性行为、擦边裸露等多种性感低俗场景的风险识别
+   * 		- `age`：年龄，主要适用于图中人物对应的年龄段识别
+   * 		- `underage`：未成年相关，主要适用于儿童色情、儿童邪典等风险识别
+   * 		- `quality`：图片质量，主要适用于图片模糊、纯色边框、纯色屏等风险识别
+   * 	- 图文风险识别
+   * 		- `ad`：广告，综合图像及文字内容智能识别广告
+   * 		- `defraud`：诈骗，综合图像及文字内容智能识别诈骗
+   * 		- `charillegal`：文字违规，图片上存在涉黄、涉敏、违禁等违规文字
+   * @example "pron"
+   */
+  Problem?: string;
+  /**
+   * 任务 ID，您可通过调用 [查询所有审核任务](https://www.volcengine.com/docs/508/1160409) 获取所需的任务 ID。
+   * @example "971917**019018"
+   */
+  TaskId: string;
+  /**
+   * 审核场景，缺省情况下查询全部场景的任务。取值如下所示：
+   *
+   * - `UrlFile`：上传 txt 审核文件处理场景
+   * - `Url`：上传审核图片 URL 处理场景
+   * - `Upload`：图片上传场景
+   * @example "UrlFile"
+   */
+  Type?: string;
+}
+
+export interface GetAudioAuditResultRes {
+  ResponseMetadata: {
+    /** @example "{Action}" */
+    Action: string;
+    /** @example "cn-north-1" */
+    Region: string;
+    /** @example "201806041104200100100232280022D30" */
+    RequestId: string;
+    /** @example "imagex" */
+    Service: string;
+    /** @example "2023-05-01" */
+    Version: string;
+  };
+  Result: {
+    /**
+     * 是否还有更多任务，取值如下所示：
+     *
+     * - `true`：是，还有其他任务未列举
+     * - `false`：否，已列举所有任务
+     * @example "false"
+     */
+    HaveMore: boolean;
+    /**
+     * 任务结果
+     * @example "-"
+     */
+    Results: {
+      /**
+       * 该任务的审核能力。取值如下所示：
+       *
+       * - `0`：基础审核能力
+       * - `1`：智能审核能力
+       * @example 1
+       */
+      Ability?: number;
+      /**
+       * 审核结果，取值如下所示：
+       *
+       * - `problem`：问题图片
+       * - `frozen`：冻结图片
+       * - `fail`：审核失败图片
+       * @example "fail"
+       */
+      AuditResultType?: string;
+      /**
+       * 审核建议，取值如下所示：
+       *
+       * - `nopass`：建议不通过
+       * - `recheck`：建议复审
+       * @example "nopass"
+       */
+      AuditSuggestion?: string;
+      /**
+       * 审核结束时间
+       * @example "2023-10-19 09:35:13"
+       */
+      EndAt?: string;
+      /**
+       * 条目 ID
+       * @example "653068d1**122cae20774"
+       */
+      EntryId?: string;
+      /**
+       * 错误信息
+       * @example "图片审核失败"
+       */
+      ErrMsg?: string;
+      /**
+       * `HaveMore` 取值 `true` 时，即本次查询还有未列举到的任务时。`Marker` 作为起始条目位置标记，您需要在下一次查询时传入该值。
+       * @example "653068**22cae20774"
+       */
+      Marker?: string;
+      /**
+       * 审核发现图片问题类型
+       * @example "["pron"]"
+       */
+      Problems?: string[];
+      /**
+       * 任务 ID
+       * @example "653068d1**22cae2076e"
+       */
+      TaskId?: string;
+      /**
+       * 该任务被指定的审核场景，取值如下所示：
+       *
+       * - `UrlFile`：上传 txt 审核文件处理场景
+       * - `Url`：上传审核图片 URL 处理场景
+       * - `Upload`：图片上传场景
+       * @example "UrlFile"
+       */
+      Type?: string;
+      /**
+       * 表示 txt 审核文件的存储 URI。
+       * @example "http://test.imagex.com/6.txt"
+       */
+      Uri?: string;
+    }[];
+  };
+}
+
 export interface GetAuditEntrysCountQuery {
   /**
    * 任务 ID，您可通过调用 [查询所有审核任务](https://www.volcengine.com/docs/508/1160409) 获取所需的任务 ID。
@@ -23344,6 +24167,175 @@ export interface GetImageAuditResultRes {
        * @example "UrlFile"
        */
       Type?: string;
+    }[];
+  };
+}
+
+export interface GetImageAuditTaskResultQuery {
+  /**
+   * 审核建议，缺省情况下返回全部任务。支持的取值如下所示。
+   * - `nopass`：建议不通过；
+   * - `recheck`：建议复审。
+   * @example "nopass"
+   */
+  AuditSuggestion?: string;
+  /**
+   * 图片类型，缺省情况下返回全部类型任务。支持的取值如下所示。
+   * - `problem`：问题图片；
+   * - `frozen`：冻结图片；
+   * - `fail`：审核失败图片。
+   * @example "fail"
+   */
+  ImageType?: string;
+  /**
+   * 分页条数。取值范围为 (0,100\]，默认值为 10。
+   * @example "10"
+   */
+  Limit?: string;
+  /**
+   * 上一次查询返回的位置标记，作为本次列举的起点信息。默认值为 0。
+   * @example "0"
+   */
+  Marker?: string;
+  /**
+   * 问题类型，取值根据审核类型的不同其取值不同。缺省情况下返回全部类型任务。
+   *
+   * - 基础安全审核
+   * 	- `govern`：涉政
+   * 	- `porn` ：涉黄
+   * 	- `illegal`：违法违规
+   * 	- `terror`：涉暴
+   * - 智能安全审核
+   * 	- 图像风险识别
+   * 		- `porn` ：涉黄，主要适用于通用色情、色情动作、性行为、性暗示、性分泌物、色情动漫、色情裸露等涉黄场景的风险识别
+   * 		- `sensitive1` ：涉敏1，具体指涉及暴恐风险
+   * 		- `sensitive2`：涉敏2，具体值涉及政治内容风险
+   * 		- `forbidden`：违禁，主要适用于打架斗殴、爆炸、劣迹艺人等场景的风险识别
+   * 		- `uncomfortable`：引人不适，主要适用于恶心、恐怖、尸体、血腥等引人不适场景的风险识别
+   * 		- `qrcode`：二维码，主要适用于识别常见二维码（QQ、微信、其他二维码等）
+   * 		- `badpicture`：不良画面，主要适用于自我伤害、丧葬、不当车播、吸烟/纹身/竖中指等不良社会风气的风险识别
+   * 		- `sexy`：性感低俗，主要适用于舌吻、穿衣性行为、擦边裸露等多种性感低俗场景的风险识别
+   * 		- `age`：年龄，主要适用于图中人物对应的年龄段识别
+   * 		- `underage`：未成年相关，主要适用于儿童色情、儿童邪典等风险识别
+   * 		- `quality`：图片质量，主要适用于图片模糊、纯色边框、纯色屏等风险识别
+   * 	- 图文风险识别
+   * 		- `ad`：广告，综合图像及文字内容智能识别广告
+   * 		- `defraud`：诈骗，综合图像及文字内容智能识别诈骗
+   * 		- `charillegal`：文字违规，图片上存在涉黄、涉敏、违禁等违规文字
+   * @example "pron"
+   */
+  Problem?: string;
+  /**
+   * 任务 ID，您可通过调用 [查询所有审核任务](https://www.volcengine.com/docs/508/1160409) 获取所需的任务 ID。
+   * @example "971917**019018"
+   */
+  TaskId: string;
+  /**
+   * 审核场景，缺省情况下查询全部场景的任务。支持的取值如下所示。
+   * - `UrlFile`：上传 txt 审核文件处理场景；
+   * - `Url`：上传审核图片 URL 处理场景；
+   * - `Upload`：图片上传场景。
+   * @example "UrlFile"
+   */
+  Type?: string;
+}
+
+export interface GetImageAuditTaskResultRes {
+  ResponseMetadata: {
+    /** @example "{Action}" */
+    Action: string;
+    /** @example "cn-north-1" */
+    Region: string;
+    /** @example "201806041104200100100232280022D30" */
+    RequestId: string;
+    /** @example "imagex" */
+    Service: string;
+    /** @example "2023-05-01" */
+    Version: string;
+  };
+  Result: {
+    /**
+     * 是否还有更多任务，取值如下所示：
+     *
+     * - `true`：是，还有其他任务未列举
+     * - `false`：否，已列举所有任务
+     * @example "false"
+     */
+    HaveMore: boolean;
+    /**
+     * 任务结果
+     * @example "-"
+     */
+    Results: {
+      /**
+       * 该任务的审核能力。取值如下所示：
+       *
+       * - `0`：基础审核能力
+       * - `1`：智能审核能力
+       * @example 1
+       */
+      Ability?: number;
+      /**
+       * 审核结果，取值如下所示：
+       *
+       * - `problem`：问题图片
+       * - `frozen`：冻结图片
+       * - `fail`：审核失败图片
+       * @example "fail"
+       */
+      AuditStatus?: string;
+      /**
+       * 审核建议，取值如下所示：
+       *
+       * - `nopass`：建议不通过
+       * - `recheck`：建议复审
+       * @example "nopass"
+       */
+      AuditSuggestion?: string;
+      /**
+       * 审核结束时间
+       * @example "2023-10-19 09:35:13"
+       */
+      EndAt?: string;
+      /**
+       * 条目 ID
+       * @example "653068d1**122cae20774"
+       */
+      EntryId?: string;
+      /**
+       * 错误信息
+       * @example "图片审核失败"
+       */
+      ErrMsg?: string;
+      /**
+       * `HaveMore` 取值 `true` 时，即本次查询还有未列举到的任务时。`Marker` 作为起始条目位置标记，您需要在下一次查询时传入该值。
+       * @example "653068**22cae20774"
+       */
+      Marker?: string;
+      /**
+       * 审核发现图片问题类型
+       * @example "["pron"]"
+       */
+      Problems?: string[];
+      /**
+       * 任务 ID
+       * @example "653068d1**22cae2076e"
+       */
+      TaskId?: string;
+      /**
+       * 该任务被指定的审核场景，取值如下所示：
+       *
+       * - `UrlFile`：上传 txt 审核文件处理场景
+       * - `Url`：上传审核图片 URL 处理场景
+       * - `Upload`：图片上传场景
+       * @example "UrlFile"
+       */
+      Type?: string;
+      /**
+       * 表示 txt 审核文件的存储 URI。
+       * @example "http://test.imagex.com/6.txt"
+       */
+      Uri?: string;
     }[];
   };
 }
@@ -29116,17 +30108,111 @@ export interface GetServiceDomainsRes {
 }
 
 export interface GetSyncAuditResultBody {
-  /** @example 1 */
+  /**
+   * 审核能力，缺省情况下查询全部审核类型的任务。取值如下所示：
+   *
+   * - `0`：基础审核能力
+   * - `1`：智能审核能力
+   * 审核能力，缺省情况下查询全部审核类型的任务。取值如下所示：
+   *
+   * - `0`：基础审核能力
+   * - `1`：智能审核能力
+   * @example 0
+   */
   AuditAbility: number;
-  /** @example "" */
+  /**
+   * 审核维度，根据审核能力的不同，其具体取值不同。基础审核与智能审核之间不支持混用。
+   *
+   * - 基础安全审核，仅当 `AuditAbility` 取值为 `0` 时，配置生效。
+   *
+   * 	- `govern`：涉政
+   * 	- `porn` ：涉黄
+   * 	- `illegal`：违法违规
+   * 	- `terror`：涉暴
+   *
+   * - 智能安全审核，仅当 `AuditAbility` 取值为 `1` 时，配置生效。
+   *
+   * 	- 图像风险识别
+   * 		- `porn` ：涉黄，主要适用于通用色情、色情动作、性行为、性暗示、性分泌物、色情动漫、色情裸露等涉黄场景的风险识别
+   * 		- `sensitive1` ：涉敏1，具体指涉及暴恐风险
+   * 		- `sensitive2`：涉敏2，具体值涉及政治内容风险
+   * 		- `forbidden`：违禁，主要适用于打架斗殴、爆炸、劣迹艺人等场景的风险识别
+   * 		- `uncomfortable`：引人不适，主要适用于恶心、恐怖、尸体、血腥等引人不适场景的风险识别
+   * 		- `qrcode`：二维码，主要适用于识别常见二维码（QQ、微信、其他二维码等）
+   * 		- `badpicture`：不良画面，主要适用于自我伤害、丧葬、不当车播、吸烟/纹身/竖中指等不良社会风气的风险识别
+   * 		- `sexy`：性感低俗，主要适用于舌吻、穿衣性行为、擦边裸露等多种性感低俗场景的风险识别
+   * 		- `age`：年龄，主要适用于图中人物对应的年龄段识别
+   * 		- `underage`：未成年相关，主要适用于儿童色情、儿童邪典等风险识别
+   * 		- `quality`：图片质量，主要适用于图片模糊、纯色边框、纯色屏等风险识别
+   * 	- 图文风险识别，您可在 `AuditTextDimensions` 配置文字审核的维度。
+   *
+   * 	:::tip
+   * 	您可将智能安全审核的图像风险识别和图文风险识别搭配使用。
+   * 	:::
+   * 审核维度，根据审核能力的不同，其具体取值不同。基础审核与智能审核之间不支持混用。
+   *
+   * - 基础安全审核，仅当 `AuditAbility` 取值为 `0` 时，配置生效。
+   * 	- `govern`：涉政
+   * 	- `porn` ：涉黄
+   * 	- `illegal`：违法违规
+   * 	- `terror`：涉暴
+   * - 智能安全审核，仅当 `AuditAbility` 取值为 `1` 时，配置生效。
+   *
+   * 	- 图像风险识别
+   * 		- `porn` ：涉黄，主要适用于通用色情、色情动作、性行为、性暗示、性分泌物、色情动漫、色情裸露等涉黄场景的风险识别
+   * 		- `sensitive1` ：涉敏1，具体指涉及暴恐风险
+   * 		- `sensitive2`：涉敏2，具体值涉及政治内容风险
+   * 		- `forbidden`：违禁，主要适用于打架斗殴、爆炸、劣迹艺人等场景的风险识别
+   * 		- `uncomfortable`：引人不适，主要适用于恶心、恐怖、尸体、血腥等引人不适场景的风险识别
+   * 		- `qrcode`：二维码，主要适用于识别常见二维码（QQ、微信、其他二维码等）
+   * 		- `badpicture`：不良画面，主要适用于自我伤害、丧葬、不当车播、吸烟/纹身/竖中指等不良社会风气的风险识别
+   * 		- `sexy`：性感低俗，主要适用于舌吻、穿衣性行为、擦边裸露等多种性感低俗场景的风险识别
+   * 		- `age`：年龄，主要适用于图中人物对应的年龄段识别
+   * 		- `underage`：未成年相关，主要适用于儿童色情、儿童邪典等风险识别
+   * 		- `quality`：图片质量，主要适用于图片模糊、纯色边框、纯色屏等风险识别
+   * 	- 图文风险识别，您可在 `AuditTextDimensions` 配置文字审核的维度。
+   * @example "["pron","sexy"]"
+   */
   AuditDimensions: string[];
-  /** @example "" */
+  /**
+   * 智能安全审核类型下图文风险审核的具体维度，取值如下所示：
+   * - `ad`：广告，综合图像及文字内容智能识别广告
+   * - `defraud`：诈骗，综合图像及文字内容智能识别诈骗
+   * - `charillegal`：文字违规，图片上存在涉黄、涉敏、违禁等违规文字
+   *
+   * :::tip
+   * 仅当 `AuditDimensions` 取值为智能安全审核模型时，您可将 `AuditTextDimensions` 与 `AuditDimensions` 搭配使用。
+   * :::
+   * 智能安全审核类型下图文风险审核的具体维度，取值如下所示：
+   *
+   * - `ad`：广告，综合图像及文字内容智能识别广告
+   * - `defraud`：诈骗，综合图像及文字内容智能识别诈骗
+   * - `charillegal`：文字违规，图片上存在涉黄、涉敏、违禁等违规文字
+   * @example "["ad"]"
+   */
   AuditTextDimensions: string[];
-  /** @example "xx" */
+  /**
+   * 建议您根据实际业务情况，将该参数作为可区分审核图片 `ImageUri` 的自定义标识。
+   * 建议您根据实际业务情况，将该参数作为可区分审核图片 ImageUri 的自定义标识。
+   * @example "92bodw28122j19***018h3i1928g"
+   */
   DataId: string;
-  /** @example "true" */
+  /**
+   * 是否开启大图审核，取值如下所示：
+   * - `true`：开启
+   * - `false`：不开启
+   * 是否开启大图审核，取值如下所示：
+   *
+   * - `true`：开启
+   * - `false`：不开启
+   * @example "false"
+   */
   EnableLargeImageDetect: boolean;
-  /** @example "xx" */
+  /**
+   * 待审核图片的 URI 地址，用于指定需要审核的图片资源。
+   * 待审核图片的 URI 地址，用于指定需要审核的图片资源。
+   * @example "http://example.com/image.jpg"
+   */
   ImageUri: string;
 }
 
@@ -29162,17 +30248,58 @@ export interface GetSyncAuditResultRes {
   };
   /** 视请求的接口而定 */
   Result?: {
-    /** @example "" */
+    /**
+     * 图片审核的建议结果，表示系统对图片内容的审核意见。支持的取值如下所示。
+     * - `pass`：审核通过；
+     * - `block`：审核不通过；
+     * - `review`：需要人工复核。
+     * 图片审核的建议结果，表示系统对图片内容的审核意见。支持的取值如下所示。
+     *
+     * - `pass`：审核通过；
+     * - `block`：审核不通过；
+     * - `review`：需要人工复核。
+     * @example "pass"
+     */
     Advice: string;
-    /** @example "" */
+    /**
+     * 建议您根据实际业务情况，将该参数作为可区分审核图片 `ImageUri` 的自定义标识。
+     * 建议您根据实际业务情况，将该参数作为可区分审核图片 `ImageUri` 的自定义标识。
+     * @example "92bodw28122j19***018h3i1928g"
+     */
     DataId: string;
-    /** @example "" */
+    /**
+     * 审核结果，取值如下所示：
+     *
+     * - `problem`：问题图片
+     * - `frozen`：冻结图片
+     * - `normal`：正常图片
+     * 审核结果，取值如下所示：
+     *
+     * - `problem`：问题图片
+     * - `frozen`：冻结图片
+     * - `normal`：正常图片
+     * @example "normal"
+     */
     ImageType: string;
-    /** @example "" */
+    /**
+     * 图片的 URI 地址，用于标识审核的图片资源。
+     * 图片的 URI 地址，用于标识审核的图片资源。
+     * @example "https://example.com/image.jpg"
+     */
     ImageUri: string;
-    /** @example "" */
+    /**
+     * 图片内容的一级审核标签，用于标识图片内容的主要分类。
+     * 图片内容的一级审核标签，用于标识图片内容的主要分类。
+     * @example "["porn"]"
+     */
     Label?: string[];
-    /** @example "" */
+    /**
+     * 图片内容的二级审核标签，用于进一步细化 `Label` 的分类，提供更具体的审核结果。
+     * | 图片内容的二级审核标签，用于进一步细化 `Label` 的分类，提供更具体的审核结果。 |
+     * | --- |
+     * |  |
+     * @example "["30302"]"
+     */
     SubLabel?: string[];
   };
 }
@@ -29482,6 +30609,176 @@ export interface GetVendorBucketsRes {
   };
 }
 
+export interface GetVideoAuditResultQuery {
+  /**
+   * 审核建议，缺省情况下返回全部任务。支持的取值如下所示。
+   * - `nopass`：建议不通过；
+   * - `recheck`：建议复审。
+   * @example "nopass"
+   */
+  AuditSuggestion?: string;
+  /**
+   * 图片类型，缺省情况下返回全部类型任务。支持的取值如下所示。
+   * - `problem`：问题图片；
+   * - `frozen`：冻结图片；
+   * - `fail`：审核失败图片。
+   * @example "fail"
+   */
+  ImageType?: string;
+  /**
+   * 分页条数。取值范围为 (0,100\]，默认值为 10。
+   * @example "10"
+   */
+  Limit?: string;
+  /**
+   * 上一次查询返回的位置标记，作为本次列举的起点信息。默认值为 0。
+   * @example "0"
+   */
+  Marker?: string;
+  /**
+   * 问题类型，取值根据审核类型的不同其取值不同。缺省情况下返回全部类型任务。
+   *
+   * - 基础安全审核
+   * 	- `video_govern`：涉政
+   * 	- `video_porn` ：涉黄
+   * 	- `video_illegal`：违法违规
+   * 	- `video_terror`：涉暴
+   * - 智能安全审核
+   * 	- 视频风险识别
+   * 		- `video_porn` ：涉黄，主要适用于通用色情、色情动作、性行为、性暗示、性分泌物、色情动漫、色情裸露等涉黄场景的风险识别
+   * 		- `video_sensitive1` ：涉敏1，具体指涉及暴恐风险
+   * 		- `video_sensitive2`：涉敏2，具体值涉及政治内容风险
+   * 		- `video_forbidden`：违禁，主要适用于打架斗殴、爆炸、劣迹艺人等场景的风险识别
+   * 		- `video_uncomfortable`：引人不适，主要适用于恶心、恐怖、尸体、血腥等引人不适场景的风险识别
+   * 		- `video_qrcode`：二维码，主要适用于识别常见二维码（QQ、微信、其他二维码等）
+   * 		- `video_badpicture`：不良画面，主要适用于自我伤害、丧葬、不当车播、吸烟/纹身/竖中指等不良社会风气的风险识别
+   * 		- `video_sexy`：性感低俗，主要适用于舌吻、穿衣性行为、擦边裸露等多种性感低俗场景的风险识别
+   * 		- `video_age`：年龄，主要适用于图中人物对应的年龄段识别
+   * 		- `video_underage`：未成年相关，主要适用于儿童色情、儿童邪典等风险识别
+   * 		- `video_quality`：图片质量，主要适用于图片模糊、纯色边框、纯色屏等风险识别
+   * 	- 图文风险识别
+   * 		- `video_ad`：广告，综合图像及文字内容智能识别广告
+   * 		- `video_defraud`：诈骗，综合图像及文字内容智能识别诈骗
+   * 		- `video_charillegal`：文字违规，图片上存在涉黄、涉敏、违禁等违规文字
+   * @example "video_pron"
+   */
+  Problem?: string;
+  /**
+   * 任务 ID，您可通过调用 [查询所有审核任务](https://www.volcengine.com/docs/508/1160409) 获取所需的任务 ID。
+   * @example "971917**019018"
+   */
+  TaskId: string;
+  /**
+   * 审核场景，缺省情况下查询全部场景的任务。取值如下所示：
+   *
+   * - `UrlFile`：上传 txt 审核文件处理场景
+   * - `Url`：上传审核图片 URL 处理场景
+   * - `Upload`：图片上传场景
+   * @example "UrlFile"
+   */
+  Type?: string;
+}
+
+export interface GetVideoAuditResultRes {
+  ResponseMetadata: {
+    /** @example "{Action}" */
+    Action: string;
+    /** @example "cn-north-1" */
+    Region: string;
+    /** @example "201806041104200100100232280022D30" */
+    RequestId: string;
+    /** @example "imagex" */
+    Service: string;
+    /** @example "2023-05-01" */
+    Version: string;
+  };
+  Result: {
+    /**
+     * 是否还有更多任务，取值如下所示：
+     *
+     * - `true`：是，还有其他任务未列举
+     * - `false`：否，已列举所有任务
+     * @example "false"
+     */
+    HaveMore: boolean;
+    /**
+     * 任务结果
+     * @example "-"
+     */
+    Results: {
+      /**
+       * 该任务的审核能力。取值如下所示：
+       *
+       * - `0`：基础审核能力
+       * - `1`：智能审核能力
+       * @example 1
+       */
+      Ability?: number;
+      /**
+       * 审核结果，取值如下所示：
+       *
+       * - `problem`：问题图片
+       * - `frozen`：冻结图片
+       * - `fail`：审核失败图片
+       * @example "fail"
+       */
+      AuditResultType?: string;
+      /**
+       * 审核建议，取值如下所示：
+       *
+       * - `nopass`：建议不通过
+       * - `recheck`：建议复审
+       * @example "nopass"
+       */
+      AuditSuggestion?: string;
+      /**
+       * 审核结束时间
+       * @example "2023-10-19 09:35:13"
+       */
+      EndAt?: string;
+      /**
+       * 条目 ID
+       * @example "653068d1**122cae20774"
+       */
+      EntryId?: string;
+      /**
+       * 错误信息
+       * @example "图片审核失败"
+       */
+      ErrMsg?: string;
+      /**
+       * `HaveMore` 取值 `true` 时，即本次查询还有未列举到的任务时。`Marker` 作为起始条目位置标记，您需要在下一次查询时传入该值。
+       * @example "653068**22cae20774"
+       */
+      Marker?: string;
+      /**
+       * 审核发现图片问题类型
+       * @example "["pron"]"
+       */
+      Problems?: string[];
+      /**
+       * 任务 ID
+       * @example "653068d1**22cae2076e"
+       */
+      TaskId?: string;
+      /**
+       * 该任务被指定的审核场景，取值如下所示：
+       *
+       * - `UrlFile`：上传 txt 审核文件处理场景
+       * - `Url`：上传审核图片 URL 处理场景
+       * - `Upload`：图片上传场景
+       * @example "UrlFile"
+       */
+      Type?: string;
+      /**
+       * 表示 txt 审核文件的存储 URI。
+       * @example "http://test.imagex.com/6.txt"
+       */
+      Uri?: string;
+    }[];
+  };
+}
+
 /**
  * 要素类型，取值如下所示：
  * * image：图片要素；
@@ -29694,6 +30991,183 @@ export interface SetDefaultDomainRes {
   Result?: Record<string, unknown>;
 }
 
+export interface SingleImageAuditBody {
+  /**
+   * 是否异步进行审核，默认值为 `0`。支持的取值如下所示。
+   * - `0`：同步返回结果；
+   * - `1`：异步进行审核。
+   * 是否异步进行审核，取值 0：同步返回结果，1：异步进行审核，默认为0。
+   * @example 0
+   */
+  Async?: number;
+  /**
+   * 审核能力类型，用于指定审核任务所使用的审核模型。支持的取值如下所示。
+   * - `0`：基础审核能力；
+   * - `1`：智能审核能力。
+   * 审核能力类型
+   * @example 1
+   */
+  AuditAbility: number;
+  /**
+   * 审核维度，根据审核能力的不同，其具体取值不同。基础审核与智能审核之间不支持混用。
+   *
+   * - 基础安全审核，仅当 `AuditAbility` 取值为 `0` 时，配置生效。
+   *
+   * 	- `govern`：涉政
+   * 	- `porn` ：涉黄
+   * 	- `illegal`：违法违规
+   * 	- `terror`：涉暴
+   *
+   * - 智能安全审核，仅当 `AuditAbility` 取值为 `1` 时，配置生效。
+   *
+   * 	- 图像风险识别
+   * 		- `porn` ：涉黄，主要适用于通用色情、色情动作、性行为、性暗示、性分泌物、色情动漫、色情裸露等涉黄场景的风险识别
+   * 		- `sensitive1`：涉敏 1，具体指涉及暴恐风险
+   * 		- `sensitive2`：涉敏 2，具体值涉及政治内容风险
+   * 		- `forbidden`：违禁，主要适用于打架斗殴、爆炸、劣迹艺人等场景的风险识别
+   * 		- `uncomfortable`：引人不适，主要适用于恶心、恐怖、尸体、血腥等引人不适场景的风险识别
+   * 		- `qrcode`：二维码，主要适用于识别常见二维码（QQ、微信、其他二维码等）
+   * 		- `badpicture`：不良画面，主要适用于自我伤害、丧葬、不当车播、吸烟/纹身/竖中指等不良社会风气的风险识别
+   * 		- `sexy`：性感低俗，主要适用于舌吻、穿衣性行为、擦边裸露等多种性感低俗场景的风险识别
+   * 		- `age`：年龄，主要适用于图中人物对应的年龄段识别
+   * 		- `underage`：未成年相关，主要适用于儿童色情、儿童邪典等风险识别
+   * 		- `quality`：图片质量，主要适用于图片模糊、纯色边框、纯色屏等风险识别
+   * 	- 图文风险识别，您可在 [`AuditTextDimensions`](#audittextdimensions) 配置文字审核的维度。
+   *
+   * :::tip
+   * 您可将智能安全审核的图像风险识别和图文风险识别搭配使用。
+   * :::
+   * 审核维度
+   * @example "["porn","sexy"]"
+   */
+  AuditDimensions: string[];
+  /**
+   * 智能安全审核类型下图文风险审核的具体维度，仅当 `AuditAbility` 取值为 `1` 时生效。支持的取值如下所示。
+   * - `ad`：广告，综合图像及文字内容智能识别广告；
+   * - `defraud`：诈骗，综合图像及文字内容智能识别诈骗；
+   * - `charillegal`：文字违规，存在涉黄、涉敏、违禁等违规文字。
+   *
+   * :::tip
+   * 您可将 `AuditTextDimensions` 与 `AuditDimensions` 搭配使用，实现图像和图文内容的综合审核。
+   * :::
+   * 文本审核维度
+   * @example "["ad","charillegal"]"
+   */
+  AuditTextDimensions: string[];
+  /**
+   * 审核结果（Detail 版本）以回调形式发送至您的回调地址，仅当 `Async` 取值为 `1` 时生效。支持以 `http://` 或者 `https://` 开头的地址。
+   * 审核结果（Detail版本）以回调形式发送至您的回调地址，异步审核时生效，支持以 `http://` 或者 `https://` 开头的地址，例如： `http://www.callback.com`。
+   * @example "https://www.example.com/callback"
+   */
+  CallbackUrl?: string;
+  /**
+   * 建议您根据实际业务情况，将该参数作为可区分审核图片 `ImageUri` 的自定义标识。
+   * 唯一id
+   * @example "92bodw28122j19***018h3i1928g"
+   */
+  DataId: string;
+  /**
+   * 是否开启大图审核功能。默认值为 `false`。支持的取值如下所示。
+   * - `true`：开启大图审核，系统会对 5MB~32MB 的图片进行压缩后再审核；
+   * - `false`：不开启大图审核。
+   *
+   * :::tip
+   * - 未开启时若图片大小 ≥ 5 MB，可能导致系统超时报错；
+   * - 已开启时若图片大小 ≥ 32 MB，可能导致系统超时报错；
+   * - 开启后将对压缩能力按照[基础图片处理](https://www.volcengine.com/docs/508/65935#%E5%9F%BA%E7%A1%80%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86%E6%9C%8D%E5%8A%A1)进行计费（每月有 20TB 免费额度）。
+   * :::
+   * 是否开启大图审核
+   * @example "true"
+   */
+  EnableLargeImageDetect: boolean;
+  /**
+   * 图片的公网可访问 URL，用于指定需要审核的图片资源地址。
+   * 公网可访问url
+   * @example "http://example.com/image.jpg"
+   */
+  ImageUri: string;
+}
+
+export interface SingleImageAuditQuery {
+  /**
+   * 用于存储结果图和计量计费的服务 ID。
+   * * 您可以在 veImageX 控制台 [服务管理](https://console.volcengine.com/imagex/service_manage/)页面，在创建好的图片服务中获取服务 ID。
+   * * 您也可以通过 OpenAPI 的方式获取服务 ID，具体请参考[获取所有服务信息](https://www.volcengine.com/docs/508/9360)。
+   * @example "ln***tb"
+   */
+  ServiceId: string;
+}
+
+export interface SingleImageAuditRes {
+  ResponseMetadata: {
+    /**
+     * 请求的接口名，属于请求的公共参数。
+     * @example "{Action}"
+     */
+    Action: string;
+    /**
+     * 请求的Region，例如：cn-north-1
+     * @example "cn-north-1"
+     */
+    Region: string;
+    /** RequestID为每次API请求的唯一标识。 */
+    RequestId: string;
+    /** 请求的服务，属于请求的公共参数。 */
+    Service: string;
+    /**
+     * 请求的版本号，属于请求的公共参数。
+     * @example "{Version}"
+     */
+    Version: string;
+  };
+  /** 视请求的接口而定 */
+  Result?: {
+    /**
+     * 图片审核的建议结果，表示系统对图片内容的审核意见。支持的取值如下所示。
+     * - `pass`：审核通过；
+     * - `block`：审核不通过；
+     * - `review`：需要人工复核。
+     * 审核建议
+     * @example "pass"
+     */
+    Advice: string;
+    /**
+     * 建议您根据实际业务情况，将该参数作为可区分审核图片 `ImageUri` 的自定义标识。
+     * 唯一id
+     * @example "92bodw28122j19***018h3i1928g"
+     */
+    DataId: string;
+    /**
+     * 审核结果，取值如下所示：
+     *
+     * - `problem`：问题图片
+     * - `frozen`：冻结图片
+     * - `normal`：正常图片
+     * 审核判断图片类型
+     * @example "normal"
+     */
+    ImageType: string;
+    /**
+     * 图片的公网可访问 URL，用于指定需要审核的图片资源地址。
+     * 公网可访问url
+     * @example "http://example.com/image.jpg"
+     */
+    ImageUri: string;
+    /**
+     * 图片内容的一级审核标签，用于标识图片内容的主要分类。
+     * 一级标签
+     * @example "["porn"]"
+     */
+    Label?: string[];
+    /**
+     * 图片内容的二级审核标签，用于进一步细化 `Label` 的分类，提供更具体的审核结果。
+     * 二级标签
+     * @example "["30302"]"
+     */
+    SubLabel?: string[];
+  };
+}
+
 export interface TerminateImageMigrateTaskQuery {
   /**
    * 任务地区（即任务目标服务的地区），默认空，返回国内任务。
@@ -29809,6 +31283,182 @@ export interface UpdateAdvanceRes {
    * @example "ok"
    */
   Result?: Record<string, unknown>;
+}
+
+/** title */
+export interface UpdateAudioAuditTaskBody {
+  /**
+   * 审核维度，根据审核能力的不同，其具体取值不同。基础审核与智能审核之间不支持混用。
+   *
+   * - 智能安全审核，仅当 `AuditAbility` 取值为 `1` 时，配置生效。
+   *
+   * 	- 图像风险识别
+   * 		- `audio_porn` ：涉黄，主要适用于通用色情、色情动作、性行为、性暗示、性分泌物、色情动漫、色情裸露等涉黄场景的风险识别
+   * 		- `audio_sensitive1` ：涉敏1，具体指涉及暴恐风险
+   * 		- `audio_sensitive2`：涉敏2，具体值涉及政治内容风险
+   * 		- `audio_forbidden`：违禁，主要适用于打架斗殴、爆炸、劣迹艺人等场景的风险识别
+   * 		- `audio_uncomfortable`：引人不适，主要适用于恶心、恐怖、尸体、血腥等引人不适场景的风险识别
+   * 		- `audio_qrcode`：二维码，主要适用于识别常见二维码（QQ、微信、其他二维码等）
+   * 		- `audio_badpicture`：不良画面，主要适用于自我伤害、丧葬、不当车播、吸烟/纹身/竖中指等不良社会风气的风险识别
+   * 		- `audio_sexy`：性感低俗，主要适用于舌吻、穿衣性行为、擦边裸露等多种性感低俗场景的风险识别
+   * 		- `audio_age`：年龄，主要适用于图中人物对应的年龄段识别
+   * 		- `audio_underage`：未成年相关，主要适用于儿童色情、儿童邪典等风险识别
+   * 		- `audio_quality`：图片质量，主要适用于图片模糊、纯色边框、纯色屏等风险识别
+   * 	- 图文风险识别，您可在 `AuditTextDimensions` 配置文字审核的维度。
+   *
+   * 	:::tip
+   * 	您可将智能安全审核的图像风险识别和图文风险识别搭配使用。
+   * 	:::
+   * @example "["audio_porn","audio_sensitive1","audio_sensitive2"]"
+   */
+  AuditDimensions: string[];
+  /**
+   * 指定需要审核的文件前缀列表，仅当 `EnableAuditRange` 取值为 `1` 时生效。若需要对某个目录进行审核，请设置路径为对应的目录名并以 `/` 结尾，例如 `123/test/`。
+   * @example "["images/","temp/"]"
+   */
+  AuditPrefix?: string[];
+  /**
+   * 智能安全审核类型下图文风险审核的具体维度，仅当 `AuditAbility` 取值为 `1` 时生效。支持的取值如下所示。
+   * - `ad`：广告，综合图像及文字内容智能识别广告；
+   * - `defraud`：诈骗，综合图像及文字内容智能识别诈骗；
+   * - `charillegal`：文字违规，存在涉黄、涉敏、违禁等违规文字。
+   *
+   * :::tip
+   * 您可将 `AuditTextDimensions` 与 `AuditDimensions` 搭配使用，实现图像和图文内容的综合审核。
+   * :::
+   * @example "["ad","charillegal"]"
+   */
+  AuditTextDimensions?: string[];
+  /**
+   * 指定通配符匹配的审核范围，支持使用 `*` 进行多字符匹配和 `?` 进行单字符匹配。不同通配符需用逗号隔开。例如 `/a/*b/c` 匹配 `/a/testb/c`，`/a/b/c/test12?/*` 匹配 `/a/b/c/test123/file.mp4`。
+   * 当前支持的通配符为`*` `?`不同通配符请用“，”隔开
+   * @example "["/*_image","/test?/*"]"
+   */
+  Auditwildcard?: string[];
+  /**
+   * 回调类型，取值需要与 `AuditDimensions` 审核维度保持一致或少于 `AuditDimensions`。例如，若 `AuditDimensions` 取值为 `["porn","sexy"]`，`AuditTextDimensions` 取值为 `["ad"]`，则支持以下任意一种组合：
+   * - `["porn","sexy","ad"]`
+   * - `["porn","sexy"]`
+   * - `["porn","ad"]`
+   * - `["sexy","ad"]`
+   * @example "["porn","sexy"]"
+   */
+  CallbackDimensions?: string[];
+  /**
+   * 指定需要回调的图片类型，需配合 `EnableCallback` 使用。支持的取值如下所示。
+   * - `normal`：正常图片；
+   * - `problem`：问题图片；
+   * - `frozen`：冻结图片；
+   * - `fail`：审核失败图片。
+   * @example "["problem","frozen"]"
+   */
+  CallbackImageTypes?: string[];
+  /**
+   * 接收审核结果回调的 URL，veImageX 将以 POST 方式向该地址发送 JSON 格式的回调数据。需配合 `EnableCallback` 参数开启回调功能使用。回调数据格式请参考[回调内容文档](https://www.volcengine.com/docs/508/134676#%E5%9B%9E%E8%B0%83%E5%86%85%E5%AE%B9)。
+   * @example "https://api.example.com/audit/callback"
+   */
+  CallbackUrl?: string;
+  /**
+   * 是否开启审核范围配置，仅当 `Type` 取值为 `Upload` 时生效。默认值为 `0`。支持的取值如下所示。
+   * - `0`：不限范围；
+   * - `1`：指定前缀匹配（需配合 `AuditPrefix` 或 `NoAuditPrefix` 使用）；
+   * - `2`：指定通配符匹配（需配合 `AuditPrefix` 或 `NoAuditPrefix` 使用）。
+   * @example 1
+   */
+  EnableAuditRange?: number;
+  /**
+   * 是否开启审核结果回调功能，默认值为 `false`。支持的取值如下所示。
+   * - `true`：开启回调；
+   * - `false`：不开启回调。
+   *
+   * :::tip
+   * 开启回调功能后，需配合 `CallbackUrl`、`CallbackDimensions` 和 `CallbackImageTypes` 使用。
+   * :::
+   * @example "true"
+   */
+  EnableCallback?: boolean;
+  /**
+   * 是否开启冻结功能，默认值为 `false`。支持的取值如下所示。
+   * - `true`：开启；
+   * - `false`：不开启。
+   *
+   * :::tip
+   * 开启冻结功能后，需配合 `FreezeType`、`FreezeDimensions` 和 `FreezeStrategy` 使用。
+   * :::
+   * @example "true"
+   */
+  EnableFreeze?: boolean;
+  /**
+   * 冻结维度，取值需要与 `AuditDimensions` 审核维度保持一致或少于 `AuditDimensions`。例如，若 `AuditDimensions` 取值为 `["porn","sexy"]`，`AuditTextDimensions` 取值为 `["ad"]`，则支持以下任意一种组合：
+   * - `["porn","sexy","ad"]`
+   * - `["porn","sexy"]`
+   * - `["porn","ad"]`
+   * - `["sexy","ad"]`
+   * 若开启冻结，则不可为空
+   * @example "["porn","sexy"]"
+   */
+  FreezeDimensions?: string[];
+  /**
+   * 冻结策略，当前仅支持取值为 `0`，表示禁用文件。
+   * 若开启冻结，则不可为空
+   * @example 0
+   */
+  FreezeStrategy?: number;
+  /**
+   * 冻结措施，仅当 `EnableFreeze` 为 `true` 时生效。支持的取值如下所示。
+   * - `recheck`：建议复审；
+   * - `nopass`：审核不通过。
+   * 若开启冻结，则不可为空
+   * @example "["recheck","nopass"]"
+   */
+  FreezeType?: string[];
+  /**
+   * 指定不进行审核的文件前缀列表，仅当 `EnableAuditRange` 取值为 `1` 时生效。若需要对某个目录不进行审核，请设置路径为对应的目录名并以 `/` 结尾，例如 `123/test/`。
+   * @example "["images/temp/", "test/"]"
+   */
+  NoAuditPrefix?: string[];
+  /**
+   * 指定通配符匹配的不审核范围，支持使用 `*` 进行多字符匹配和 `?` 进行单字符匹配。不同通配符需用逗号隔开。例如 `/a/*b/c` 匹配 `/a/testb/c`，`/a/b/c/test12?/*` 匹配 `/a/b/c/test123/file.mp4`。
+   * 当前支持的通配符为`*` `?`不同通配符请用“，”隔开
+   * @example "["/*_image","/test?/*"]"
+   */
+  NoAuditwildcard?: string[];
+  /**
+   * 任务地区。当前仅支持取值 `cn`，表示国内。
+   * @example "cn"
+   */
+  Region?: string;
+  /**
+   * 审核文件的 StoreUri，仅当 `Type` 为 `UrlFile` 时生效。该文件为 .txt 格式，需上传至指定服务对应存储中，文件内容为待审核文件的 URL 列表，每行一个 URL，最多支持 10000 行。
+   * @example "["example-service/audit-list.txt"]"
+   */
+  ResUri?: string[];
+  /**
+   * 指定待更新审核任务所在的服务 ID，您可通过调用 [查询所有审核任务](https://www.volcengine.com/docs/508/1158717) 获取待更新任务对应的服务 ID。
+   * @example "lk**i0"
+   */
+  ServiceId: string;
+  /**
+   * 任务 ID，您可通过调用 [查询所有审核任务](https://www.volcengine.com/docs/508/1158717) 获取所需的任务 ID。
+   * @example "98172790****918301"
+   */
+  TaskId: string;
+}
+
+export interface UpdateAudioAuditTaskRes {
+  ResponseMetadata: {
+    /** @example "{Action}" */
+    Action: string;
+    /** @example "cn-north-1" */
+    Region: string;
+    /** @example "201806041104200100100232280022D30" */
+    RequestId: string;
+    /** @example "imagex" */
+    Service: string;
+    /** @example "2023-05-01" */
+    Version: string;
+  };
+  Result: Record<string, unknown>;
 }
 
 /** title */
@@ -30386,119 +32036,136 @@ export interface UpdateImageAuditTaskBody {
    */
   AuditDimensions: string[];
   /**
-   * 仅当 `EnableAuditRange` 取值 `1` 时，配置生效。
-   * 指定前缀审核，若你希望对某个目录进行审核，请设置路径为对应的目录名，以`/`结尾。例如`123/`
-   * @example "["123/"]"
+   * 指定需要审核的文件前缀列表，仅当 `EnableAuditRange` 取值为 `1` 时生效。若需要对某个目录进行审核，请设置路径为对应的目录名并以 `/` 结尾，例如 `123/test/`。
+   * @example "["images/","temp/"]"
    */
   AuditPrefix?: string[];
   /**
-   * 智能安全审核类型下图片文本审核的具体维度，取值如下所示：
-   * - `ad`：广告，综合图像及文字内容智能识别广告
-   * - `defraud`：诈骗，综合图像及文字内容智能识别诈骗
-   * - `charillegal`：文字违规，图片上存在涉黄、涉敏、违禁等违规文字
+   * 智能安全审核类型下图文风险审核的具体维度，仅当 `AuditAbility` 取值为 `1` 时生效。支持的取值如下所示。
+   * - `ad`：广告，综合图像及文字内容智能识别广告；
+   * - `defraud`：诈骗，综合图像及文字内容智能识别诈骗；
+   * - `charillegal`：文字违规，图片上存在涉黄、涉敏、违禁等违规文字。
    *
    * :::tip
-   * 仅当 `AuditDimensions` 取值为智能安全审核模型时，您可将 `AuditTextDimensions` 与 `AuditDimensions` 搭配使用。
+   * 您可将 `AuditTextDimensions` 与 `AuditDimensions` 搭配使用，实现图像和图文内容的综合审核。
    * :::
-   * @example "["ad"]"
+   * @example "["ad","charillegal"]"
    */
   AuditTextDimensions?: string[];
   /**
-   * 回调类型，取值需要与 `AuditDimensions` 审核维度保持一致或少于 `AuditDimensions`。
-   *
-   * 例如，`AuditDimensions` 取值 ["pron","sexy"]，`AuditTextDimensions` 取值 ["ad"]，支持您将 `FreezeDimensions` 取值 ["pron","sexy","ad"] 、 ["pron","sexy"]、["pron","ad"] 和 ["sexy","ad"] 任意一种。
-   * @example "["porn","sensitive1"]"
+   * 指定需要审核的文件通配符列表，仅当 `EnableAuditRange` 取值为 `1` 时生效。当前支持的通配符为 `*` 和 `?`，不同通配符请用英文逗号隔开。
+   * 当前支持的通配符为* ?不同通配符请用“，”隔开
+   * @example "["*_image","test?.jpg"]"
+   */
+  AuditWildCard: string[];
+  /**
+   * 回调类型，取值需要与 `AuditDimensions` 审核维度保持一致或少于 `AuditDimensions`。例如，若 `AuditDimensions` 取值为 `["porn","sexy"]`，`AuditTextDimensions` 取值为 `["ad"]`，则支持以下任意一种组合：
+   * - `["porn","sexy","ad"]`
+   * - `["porn","sexy"]`
+   * - `["porn","ad"]`
+   * - `["sexy","ad"]`
+   * @example "["porn","sexy"]"
    */
   CallbackDimensions?: string[];
   /**
-   * 回调图片类型，取值如下所示：
-   * - `normal`：正常图片
-   *
-   * - `problem`：问题图片
-   *
-   * - `frozen`：冻结图片
-   *
-   * - `fail`：审核失败图片
+   * 指定需要回调的图片类型，需配合 `EnableCallback` 使用。支持的取值如下所示。
+   * - `normal`：正常图片；
+   * - `problem`：问题图片；
+   * - `frozen`：冻结图片；
+   * - `fail`：审核失败图片。
    * @example "["problem","frozen"]"
    */
   CallbackImageTypes?: string[];
   /**
-   * 回调 URL，veImageX 以 Post 方式向业务服务器发送 JSON 格式回调数据。具体回调参数请参考[回调内容](https://www.volcengine.com/docs/508/134676#%E5%9B%9E%E8%B0%83%E5%86%85%E5%AE%B9)。
-   * @example "http://example.callback.com"
+   * 接收审核结果回调的 URL，veImageX 将以 POST 方式向该地址发送 JSON 格式的回调数据。需配合 `EnableCallback` 参数开启回调功能使用。回调数据格式请参考[回调内容文档](https://www.volcengine.com/docs/508/134676#%E5%9B%9E%E8%B0%83%E5%86%85%E5%AE%B9)。
+   * @example "https://api.example.com/audit/callback"
    */
   CallbackUrl?: string;
   /**
-   * 仅当 `Type` 取值 `Upload` 时，配置生效。
-   * 审核范围，取值如下所示：
-   *
-   * - `0`：（默认）不限范围
-   * - `1`：指定范围
+   * 是否开启审核范围配置，仅当 `Type` 取值为 `Upload` 时生效。支持的取值如下所示。
+   * - `0`：不限范围（默认）；
+   * - `1`：指定范围（需配合 `AuditPrefix` 或 `NoAuditPrefix` 使用）。
+   * @example 1
    */
   EnableAuditRange?: number;
   /**
-   * 是否开启回调，取值如下所示：
-   * - `true`：开启
-   * - `false`：（默认）不开启
+   * 是否开启审核结果回调功能，默认值为 `false`。支持的取值如下所示。
+   * - `true`：开启回调；
+   * - `false`：不开启回调。
+   *
+   * :::tip
+   * 开启回调功能后，需配合 `CallbackUrl`、`CallbackDimensions` 和 `CallbackImageTypes` 使用。
+   * :::
    * @example "true"
    */
   EnableCallback?: boolean;
   /**
-   * 是否开启冻结，取值如下所示：
-   * - `true`：开启
-   * - `false`：（默认）不开启
+   * 是否开启冻结功能，默认值为 `false`。支持的取值如下所示。
+   * - `true`：开启；
+   * - `false`：不开启。
+   *
+   * :::tip
+   * 开启冻结功能后，需配合 `FreezeType`、`FreezeDimensions` 和 `FreezeStrategy` 使用。
+   * :::
    * @example "true"
    */
   EnableFreeze?: boolean;
   /**
-   * 图片审核仅支持审核 5MB 以下的图片，若您的图片大小在 5MB~32MB，您可以开启大图审核功能，veImageX 会对图片压缩后再进行审核。开启后，将对压缩能力按照[基础图片处理](https://www.volcengine.com/docs/508/65935#%E5%9F%BA%E7%A1%80%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86%E6%9C%8D%E5%8A%A1)进行计费。（您每月可使用 20TB 的免费额度）
-   * 取值如下所示：
-   * - `true`：开启
-   * - `false`：（默认）不开启
+   * 是否开启大图审核功能。默认值为 `false`。支持的取值如下所示。
+   * - `true`：开启大图审核，系统会对 5MB~32MB 的图片进行压缩后再审核；
+   * - `false`：不开启大图审核。
    *
    * :::tip
-   * - 若未开启大图审核且图片大小 ≥ 5 MB，可能会导致系统超时报错；
-   * - 若已开启大图审核但图片大小 ≥ 32 MB，可能会导致系统超时报错。
+   * - 未开启时若图片大小 ≥ 5 MB，可能导致系统超时报错；
+   * - 已开启时若图片大小 ≥ 32 MB，可能导致系统超时报错；
+   * - 开启后将对压缩能力按照[基础图片处理](https://www.volcengine.com/docs/508/65935#%E5%9F%BA%E7%A1%80%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86%E6%9C%8D%E5%8A%A1)进行计费（每月有 20TB 免费额度）。
    * :::
    * @example "true"
    */
   EnableLargeImageDetect?: boolean;
   /**
-   * 冻结维度，取值需要与 `AuditDimensions` 审核维度保持一致或少于 `AuditDimensions`。
-   *
-   * 例如，`AuditDimensions` 取值 ["pron","sexy"]，`AuditTextDimensions` 取值 ["ad"]，支持您将 `FreezeDimensions` 取值 ["pron","sexy","ad"] 、 ["pron","sexy"]、["pron","ad"] 和 ["sexy","ad"] 任意一种。
+   * 冻结维度，取值需要与 `AuditDimensions` 审核维度保持一致或少于 `AuditDimensions`。例如，若 `AuditDimensions` 取值为 `["porn","sexy"]`，`AuditTextDimensions` 取值为 `["ad"]`，则支持以下任意一种组合：
+   * - `["porn","sexy","ad"]`
+   * - `["porn","sexy"]`
+   * - `["porn","ad"]`
+   * - `["sexy","ad"]`
    * 若开启冻结，则不可为空
-   * @example "["porn","sensitive1"]"
+   * @example "["porn","sexy"]"
    */
   FreezeDimensions?: string[];
   /**
-   * 冻结策略，当前仅支持取 `0`，表示禁用图片。
+   * 冻结策略，当前仅支持取值为 `0`，表示禁用图片。
    * 若开启冻结，则不可为空
+   * @example 0
    */
   FreezeStrategy?: number;
   /**
-   * 冻结措施，取值如下所示：
-   * - `recheck`：建议复审
-   * - `nopass`：审核不通过
+   * 冻结措施，仅当 `EnableFreeze` 为 `true` 时生效。支持的取值如下所示。
+   * - `recheck`：建议复审；
+   * - `nopass`：审核不通过。
    * 若开启冻结，则不可为空
-   * @example "["nopass","recheck"]"
+   * @example "["recheck","nopass"]"
    */
   FreezeType?: string[];
   /**
-   * 仅当 `EnableAuditRange` 取值 `1` 时，配置生效。
-   * 指定前缀不审核，若你希望对某个目录不进行审核，请设置路径为对应的目录名，以`/`结尾。例如`123/`
-   * @example "["abc/"]"
+   * 指定不进行审核的文件前缀列表，仅当 `EnableAuditRange` 取值为 `1` 时生效。若需要对某个目录不进行审核，请设置路径为对应的目录名并以 `/` 结尾，例如 `123/test/`。
+   * @example "["images/temp/", "test/"]"
    */
   NoAuditPrefix?: string[];
   /**
-   * 任务地区。当前仅支持取值 `cn`，表示国内。
+   * 指定不进行审核的文件通配符列表，仅当 `EnableAuditRange` 取值为 `1` 时生效。当前支持的通配符为 `*` 和 `?`，不同通配符请用英文逗号隔开。
+   * 当前支持的通配符为* ?不同通配符请用“，”隔开
+   * @example "["*_image","test?.jpg"]"
+   */
+  NoAuditWildCard: string[];
+  /**
+   * 指定审核任务所属的地区。当前仅支持国内地区，取值为 `cn`。
    * @example "cn"
    */
   Region?: string;
   /**
-   * 仅当 `Type` 为 `UrlFile` 时，配置生效。
-   *
-   * 审核文件的 StoreUri，为 .txt 文件，该文件需上传至指定服务对应存储中。该 txt 文件内需填写待审核图片文件的 URL，每行填写一个，最多可填写 10000 行。
-   * @example "["指定服务/图片审核文件.txt"]"
+   * 审核文件的 StoreUri，仅当 `Type` 为 `UrlFile` 时生效。该文件为 .txt 格式，需上传至指定服务对应存储中，文件内容为待审核图片的 URL 列表，每行一个 URL，最多支持 10000 行。
+   * @example "["example-service/audit-list.txt"]"
    */
   ResUri?: string[];
   /**
@@ -33679,6 +35346,182 @@ export interface UpdateStorageRulesV2Res {
   };
   /** 视请求的接口而定 */
   Result?: Record<string, unknown>;
+}
+
+/** title */
+export interface UpdateVideoAuditTaskBody {
+  /**
+   * 审核维度，根据审核能力的不同，其具体取值不同。基础审核与智能审核之间不支持混用。
+   *
+   * - 智能安全审核，仅当 `AuditAbility` 取值为 `1` 时，配置生效。
+   *
+   * 	- 图像风险识别
+   * 		- `video_porn` ：涉黄，主要适用于通用色情、色情动作、性行为、性暗示、性分泌物、色情动漫、色情裸露等涉黄场景的风险识别
+   * 		- `video_sensitive1` ：涉敏1，具体指涉及暴恐风险
+   * 		- `video_sensitive2`：涉敏2，具体值涉及政治内容风险
+   * 		- `video_forbidden`：违禁，主要适用于打架斗殴、爆炸、劣迹艺人等场景的风险识别
+   * 		- `video_uncomfortable`：引人不适，主要适用于恶心、恐怖、尸体、血腥等引人不适场景的风险识别
+   * 		- `video_qrcode`：二维码，主要适用于识别常见二维码（QQ、微信、其他二维码等）
+   * 		- `video_badpicture`：不良画面，主要适用于自我伤害、丧葬、不当车播、吸烟/纹身/竖中指等不良社会风气的风险识别
+   * 		- `video_sexy`：性感低俗，主要适用于舌吻、穿衣性行为、擦边裸露等多种性感低俗场景的风险识别
+   * 		- `video_age`：年龄，主要适用于图中人物对应的年龄段识别
+   * 		- `video_underage`：未成年相关，主要适用于儿童色情、儿童邪典等风险识别
+   * 		- `video_quality`：图片质量，主要适用于图片模糊、纯色边框、纯色屏等风险识别
+   * 	- 图文风险识别，您可在 `AuditTextDimensions` 配置文字审核的维度。
+   *
+   * 	:::tip
+   * 	您可将智能安全审核的图像风险识别和图文风险识别搭配使用。
+   * 	:::
+   * @example "["video_pron","video_sexy"]"
+   */
+  AuditDimensions: string[];
+  /**
+   * 指定需要审核的文件前缀列表，仅当 `EnableAuditRange` 取值为 `1` 时生效。若需要对某个目录进行审核，请设置路径为对应的目录名并以 `/` 结尾，例如 `123/test/`。
+   * @example "["images/","temp/"]"
+   */
+  AuditPrefix?: string[];
+  /**
+   * 智能安全审核类型下图文风险审核的具体维度，仅当 `AuditAbility` 取值为 `1` 时生效。支持的取值如下所示。
+   * - `ad`：广告，综合图像及文字内容智能识别广告；
+   * - `defraud`：诈骗，综合图像及文字内容智能识别诈骗；
+   * - `charillegal`：文字违规，存在涉黄、涉敏、违禁等违规文字。
+   *
+   * :::tip
+   * 您可将 `AuditTextDimensions` 与 `AuditDimensions` 搭配使用，实现图像和图文内容的综合审核。
+   * :::
+   * @example "["ad","charillegal"]"
+   */
+  AuditTextDimensions?: string[];
+  /**
+   * 指定通配符匹配的审核范围，支持使用 `*` 进行多字符匹配和 `?` 进行单字符匹配。不同通配符需用逗号隔开。例如 `/a/*b/c` 匹配 `/a/testb/c`，`/a/b/c/test12?/*` 匹配 `/a/b/c/test123/file.mp4`。
+   * 当前支持的通配符为`*` `?`不同通配符请用“，”隔开
+   * @example "["/*_image","/test?/*"]"
+   */
+  Auditwildcard?: string[];
+  /**
+   * 回调类型，取值需要与 `AuditDimensions` 审核维度保持一致或少于 `AuditDimensions`。例如，若 `AuditDimensions` 取值为 `["porn","sexy"]`，`AuditTextDimensions` 取值为 `["ad"]`，则支持以下任意一种组合：
+   * - `["porn","sexy","ad"]`
+   * - `["porn","sexy"]`
+   * - `["porn","ad"]`
+   * - `["sexy","ad"]`
+   * @example "["porn","sexy"]"
+   */
+  CallbackDimensions?: string[];
+  /**
+   * 指定需要回调的图片类型，需配合 `EnableCallback` 使用。支持的取值如下所示。
+   * - `normal`：正常图片；
+   * - `problem`：问题图片；
+   * - `frozen`：冻结图片；
+   * - `fail`：审核失败图片。
+   * @example "["problem","frozen"]"
+   */
+  CallbackImageTypes?: string[];
+  /**
+   * 接收审核结果回调的 URL，veImageX 将以 POST 方式向该地址发送 JSON 格式的回调数据。需配合 `EnableCallback` 参数开启回调功能使用。回调数据格式请参考[回调内容文档](https://www.volcengine.com/docs/508/134676#%E5%9B%9E%E8%B0%83%E5%86%85%E5%AE%B9)。
+   * @example "https://api.example.com/audit/callback"
+   */
+  CallbackUrl?: string;
+  /**
+   * 是否开启审核范围配置，仅当 `Type` 取值为 `Upload` 时生效。默认值为 `0`。支持的取值如下所示。
+   * - `0`：不限范围；
+   * - `1`：指定前缀匹配（需配合 `AuditPrefix` 或 `NoAuditPrefix` 使用）；
+   * - `2`：指定通配符匹配（需配合 `AuditPrefix` 或 `NoAuditPrefix` 使用）。
+   * @example 1
+   */
+  EnableAuditRange?: number;
+  /**
+   * 是否开启审核结果回调功能，默认值为 `false`。支持的取值如下所示。
+   * - `true`：开启回调；
+   * - `false`：不开启回调。
+   *
+   * :::tip
+   * 开启回调功能后，需配合 `CallbackUrl`、`CallbackDimensions` 和 `CallbackImageTypes` 使用。
+   * :::
+   * @example "true"
+   */
+  EnableCallback?: boolean;
+  /**
+   * 是否开启冻结功能，默认值为 `false`。支持的取值如下所示。
+   * - `true`：开启；
+   * - `false`：不开启。
+   *
+   * :::tip
+   * 开启冻结功能后，需配合 `FreezeType`、`FreezeDimensions` 和 `FreezeStrategy` 使用。
+   * :::
+   * @example "true"
+   */
+  EnableFreeze?: boolean;
+  /**
+   * 冻结维度，取值需要与 `AuditDimensions` 审核维度保持一致或少于 `AuditDimensions`。例如，若 `AuditDimensions` 取值为 `["porn","sexy"]`，`AuditTextDimensions` 取值为 `["ad"]`，则支持以下任意一种组合：
+   * - `["porn","sexy","ad"]`
+   * - `["porn","sexy"]`
+   * - `["porn","ad"]`
+   * - `["sexy","ad"]`
+   * 若开启冻结，则不可为空
+   * @example "["porn","sexy"]"
+   */
+  FreezeDimensions?: string[];
+  /**
+   * 冻结策略，当前仅支持取值为 `0`，表示禁用文件。
+   * 若开启冻结，则不可为空
+   * @example 0
+   */
+  FreezeStrategy?: number;
+  /**
+   * 冻结措施，仅当 `EnableFreeze` 为 `true` 时生效。支持的取值如下所示。
+   * - `recheck`：建议复审；
+   * - `nopass`：审核不通过。
+   * 若开启冻结，则不可为空
+   * @example "["recheck","nopass"]"
+   */
+  FreezeType?: string[];
+  /**
+   * 指定不进行审核的文件前缀列表，仅当 `EnableAuditRange` 取值为 `1` 时生效。若需要对某个目录不进行审核，请设置路径为对应的目录名并以 `/` 结尾，例如 `123/test/`。
+   * @example "["images/temp/", "test/"]"
+   */
+  NoAuditPrefix?: string[];
+  /**
+   * 指定通配符匹配的不审核范围，支持使用 `*` 进行多字符匹配和 `?` 进行单字符匹配。不同通配符需用逗号隔开。例如 `/a/*b/c` 匹配 `/a/testb/c`，`/a/b/c/test12?/*` 匹配 `/a/b/c/test123/file.mp4`。
+   * 当前支持的通配符为`*` `?`不同通配符请用“，”隔开
+   * @example "["/*_image","/test?/*"]"
+   */
+  NoAuditwildcard?: string[];
+  /**
+   * 任务地区。当前仅支持取值 `cn`，表示国内。
+   * @example "cn"
+   */
+  Region?: string;
+  /**
+   * 审核文件的 StoreUri，仅当 `Type` 为 `UrlFile` 时生效。该文件为 .txt 格式，需上传至指定服务对应存储中，文件内容为待审核文件的 URL 列表，每行一个 URL，最多支持 10000 行。
+   * @example "["example-service/audit-list.txt"]"
+   */
+  ResUri?: string[];
+  /**
+   * 指定待更新审核任务所在的服务 ID，您可通过调用 [查询所有审核任务](https://www.volcengine.com/docs/508/1158717) 获取待更新任务对应的服务 ID。
+   * @example "lk**i0"
+   */
+  ServiceId: string;
+  /**
+   * 任务 ID，您可通过调用 [查询所有审核任务](https://www.volcengine.com/docs/508/1158717) 获取所需的任务 ID。
+   * @example "98172790****918301"
+   */
+  TaskId: string;
+}
+
+export interface UpdateVideoAuditTaskRes {
+  ResponseMetadata: {
+    /** @example "{Action}" */
+    Action: string;
+    /** @example "cn-north-1" */
+    Region: string;
+    /** @example "201806041104200100100232280022D30" */
+    RequestId: string;
+    /** @example "imagex" */
+    Service: string;
+    /** @example "2023-05-01" */
+    Version: string;
+  };
+  Result: Record<string, unknown>;
 }
 
 export interface VerifyDomainOwnerBody {
