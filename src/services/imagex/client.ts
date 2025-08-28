@@ -3419,6 +3419,30 @@ export default class ImagexService extends Service {
   });
 
   /**
+   * @function CreateVideoAuditTask
+   */
+  public CreateVideoAuditTask = this.createAPI<
+    types.CreateVideoAuditTaskBody,
+    types.CreateVideoAuditTaskRes["Result"]
+  >("CreateVideoAuditTask", {
+    method: "POST",
+    contentType: "json",
+    Version: "2023-05-01",
+  });
+
+  /**
+   * @function CreateAudioAuditTask
+   */
+  public CreateAudioAuditTask = this.createAPI<
+    types.CreateAudioAuditTaskBody,
+    types.CreateAudioAuditTaskRes["Result"]
+  >("CreateAudioAuditTask", {
+    method: "POST",
+    contentType: "json",
+    Version: "2023-05-01",
+  });
+
+  /**
    * @function DeleteImageAuditResult
    */
   public DeleteImageAuditResult = this.createAPI<
@@ -3437,6 +3461,32 @@ export default class ImagexService extends Service {
     types.GetSyncAuditResultQuery & types.GetSyncAuditResultBody,
     types.GetSyncAuditResultRes["Result"]
   >("GetSyncAuditResult", {
+    method: "POST",
+    contentType: "json",
+    Version: "2023-05-01",
+    queryKeys: ["ServiceId"],
+  });
+
+  /**
+   * @function SingleImageAudit
+   */
+  public SingleImageAudit = this.createAPI<
+    types.SingleImageAuditQuery & types.SingleImageAuditBody,
+    types.SingleImageAuditRes["Result"]
+  >("SingleImageAudit", {
+    method: "POST",
+    contentType: "json",
+    Version: "2023-05-01",
+    queryKeys: ["ServiceId"],
+  });
+
+  /**
+   * @function BatchImageAudit
+   */
+  public BatchImageAudit = this.createAPI<
+    types.BatchImageAuditQuery & types.BatchImageAuditBody,
+    types.BatchImageAuditRes["Result"]
+  >("BatchImageAudit", {
     method: "POST",
     contentType: "json",
     Version: "2023-05-01",
@@ -3480,6 +3530,30 @@ export default class ImagexService extends Service {
   });
 
   /**
+   * @function UpdateVideoAuditTask
+   */
+  public UpdateVideoAuditTask = this.createAPI<
+    types.UpdateVideoAuditTaskBody,
+    types.UpdateVideoAuditTaskRes["Result"]
+  >("UpdateVideoAuditTask", {
+    method: "POST",
+    contentType: "json",
+    Version: "2023-05-01",
+  });
+
+  /**
+   * @function UpdateAudioAuditTask
+   */
+  public UpdateAudioAuditTask = this.createAPI<
+    types.UpdateAudioAuditTaskBody,
+    types.UpdateAudioAuditTaskRes["Result"]
+  >("UpdateAudioAuditTask", {
+    method: "POST",
+    contentType: "json",
+    Version: "2023-05-01",
+  });
+
+  /**
    * @function GetImageAuditTasks
    */
   public GetImageAuditTasks = this.createAPI<
@@ -3490,6 +3564,19 @@ export default class ImagexService extends Service {
     contentType: "json",
     Version: "2023-05-01",
     queryKeys: ["Region", "Type", "AuditAbility", "Status", "TaskType", "Limit", "Offset"],
+  });
+
+  /**
+   * @function GetImageAuditTaskResult
+   */
+  public GetImageAuditTaskResult = this.createAPI<
+    types.GetImageAuditTaskResultQuery,
+    types.GetImageAuditTaskResultRes["Result"]
+  >("GetImageAuditTaskResult", {
+    method: "GET",
+    contentType: "json",
+    Version: "2023-05-01",
+    queryKeys: ["AuditSuggestion", "ImageType", "Limit", "Marker", "Problem", "TaskId", "Type"],
   });
 
   /**
@@ -3516,6 +3603,32 @@ export default class ImagexService extends Service {
     contentType: "json",
     Version: "2023-05-01",
     queryKeys: ["TaskId"],
+  });
+
+  /**
+   * @function GetVideoAuditResult
+   */
+  public GetVideoAuditResult = this.createAPI<
+    types.GetVideoAuditResultQuery,
+    types.GetVideoAuditResultRes["Result"]
+  >("GetVideoAuditResult", {
+    method: "GET",
+    contentType: "json",
+    Version: "2023-05-01",
+    queryKeys: ["AuditSuggestion", "ImageType", "Limit", "Marker", "Problem", "TaskId", "Type"],
+  });
+
+  /**
+   * @function GetAudioAuditResult
+   */
+  public GetAudioAuditResult = this.createAPI<
+    types.GetAudioAuditResultQuery,
+    types.GetAudioAuditResultRes["Result"]
+  >("GetAudioAuditResult", {
+    method: "GET",
+    contentType: "json",
+    Version: "2023-05-01",
+    queryKeys: ["AuditSuggestion", "ImageType", "Limit", "Marker", "Problem", "TaskId", "Type"],
   });
 
   /**
