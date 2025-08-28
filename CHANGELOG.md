@@ -1,3 +1,7 @@
+2025-08-28 Bumped to version v1.32.0
+- imagex:
+  - codegen 新增一批接口
+
 2025-08-14 Bumped to version v1.31.1
 - imagex:
   - codegen 生成一批新接口
