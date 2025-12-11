@@ -1,3 +1,7 @@
+2025-12-11 Bumped to version v1.33.0
+- tls:
+  - 新增接口以及类型
+
 2025-08-28 Bumped to version v1.32.0
 - imagex:
   - codegen 新增一批接口
