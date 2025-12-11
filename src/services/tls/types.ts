@@ -30,6 +30,11 @@ export interface IProjectDescribeResp {
   ProjectId: string;
   ProjectName: string;
   TopicCount: number;
+  IamProjectName?: string;
+  Tags?: Array<{
+    Key: string;
+    Value: string;
+  }>;
 }
 
 export interface IProjectDescribeProjectsResp {
@@ -144,6 +149,22 @@ export interface ITopicModifyReq {
   TopicName?: string;
   /** 数据的保存时间，单位为天，取值范围为1~3650。 */
   Ttl?: number;
+  /** 是否开启分区的自动分裂功能。 */
+  AutoSplit?: boolean;
+  /** 分区的最大分裂数，取值范围为1~256，默认为256。 */
+  MaxSplitShard?: number;
+  /** 是否开启WebTracking功能。 */
+  EnableTracking?: boolean;
+  /** 是否开启记录外网IP功能。默认为开启状态。 */
+  LogPublicIP?: boolean;
+  /** 是否开启分层存储。 */
+  EnableHotTtl?: boolean;
+  /** 标准存储时长，取值范围为7~3650天，默认为30天。 */
+  HotTtl?: number;
+  /** 低频存储时长，取值范围为30~3650天。 */
+  ColdTtl?: number;
+  /** 归档存储时长，取值范围为60~3650天。 */
+  ArchiveTtl?: number;
 }
 export type ITopicModifyResp = { [key: string]: any };
 
@@ -188,6 +209,12 @@ export interface IIndexValue {
    - 目前支持 long - 整型，double - 浮点型，text - 字符串。
    - long和double类型不支持配置分词符、包含中文、大小写敏感。 */
   ValueType: string;
+  /** 是否为 JSON 字段中所有值为文本的字段创建索引。 */
+  IndexAll?: boolean;
+  /** JSON 子字段的索引，其值为 KeyValueInfo 数组。 */
+  JsonKeys?: Array<{ Key: string; Value: IIndexValue }>;
+  /** 该索引是否是自动索引添加。 */
+  AutoIndexFlag?: boolean;
 }
 
 export interface IIndexKeyValueInfo {
@@ -202,10 +229,13 @@ export interface IIndexKeyValueInfo {
 
 export interface IIndexDescribeIndexResp {
   CreateTime: string;
-  FullText: IIndexFullTextInfo;
+  FullText?: IIndexFullTextInfo;
   KeyValue: Array<IIndexKeyValueInfo>;
   ModifyTime: string;
   TopicId: string;
+  UserInnerKeyValue: Array<IIndexKeyValueInfo>;
+  EnableAutoIndex: boolean;
+  MaxTextLen: number;
 }
 
 export interface IIndexCreateReq {
@@ -252,6 +282,7 @@ export interface IShardQueryResp {
   ModifyTime: string;
   ShardId: number;
   Status: string;
+  StopWriteTime: string;
   TopicId: string;
 }
 export interface IShardDescribeShardsResp {
