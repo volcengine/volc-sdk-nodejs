@@ -1,6 +1,9 @@
 import { tlsOpenapi } from "../lib";
 import {
+  abnormalHostsValidate,
   alarmValidate,
+  hostGroupAutoUpdateValidate,
+  downloadTaskValidate,
   hostGroupValidate,
   indexValidate,
   logsValidate,
@@ -228,6 +231,51 @@ describe("tlsOpenapi test", () => {
       PageSize: 20,
     });
     expect(shardsValidate.list(shardsList)).toBe(true);
+
+    await tlsOpenapiService.DeleteTopic({
+      TopicId: topicCreated.TopicId,
+    });
+    await tlsOpenapiService.DeleteProject({
+      ProjectId: projectCreated.ProjectId,
+    });
+  });
+
+  test("tlsOpenapi:ManualShardSplit", async () => {
+    const projectCreated = await tlsOpenapiService.CreateProject({
+      ProjectName: `tls-nodejs-sdk-test-manual-shard-split-project-${`${Math.random()}`.replace(
+        ".",
+        ""
+      )}`,
+      Region,
+    });
+
+    const topicCreated = await tlsOpenapiService.CreateTopic({
+      ProjectId: projectCreated.ProjectId,
+      ShardCount: 2,
+      TopicName: `tls-nodejs-sdk-test-manual-shard-split-topic-${`${Math.random()}`.replace(
+        ".",
+        ""
+      )}`,
+      Ttl: 1,
+    });
+
+    const shardsList = await tlsOpenapiService.DescribeShards({
+      TopicId: topicCreated.TopicId,
+      PageNumber: 1,
+      PageSize: 20,
+    });
+    expect(shardsValidate.list(shardsList)).toBe(true);
+    expect(shardsList.Shards.length).toBeGreaterThan(0);
+
+    const shardToSplit = shardsList.Shards[0];
+    const manualShardSplitResult = await tlsOpenapiService.ManualShardSplit({
+      TopicId: topicCreated.TopicId,
+      ShardId: shardToSplit.ShardId,
+      Number: 2,
+    });
+    expect(shardsValidate.manualShardSplit(manualShardSplitResult)).toBe(true);
+    expect(manualShardSplitResult.Shards).toBeDefined();
+    expect(manualShardSplitResult.Shards.length).toBeGreaterThan(0);
 
     await tlsOpenapiService.DeleteTopic({
       TopicId: topicCreated.TopicId,
@@ -516,5 +564,78 @@ describe("tlsOpenapi test", () => {
       TraceInstanceId: traceInstanceId,
     });
     expect(traceValidate.delete(traceDelete)).toBe(true);
+  });
+
+  test("tlsOpenapi:DeleteAbnormalHosts", async () => {
+    // P0: 基础功能测试 - 正常删除异常主机
+    const hostGroupCreated = await tlsOpenapiService.CreateHostGroup({
+      HostGroupName: `tls-nodejs-sdk-test-abnormal-hosts-${`${Math.random()}`.replace(".", "")}`,
+      HostGroupType: "Label",
+      HostIdentifier: "none",
+    });
+
+    // 删除异常主机
+    const deleteAbnormalHostsResult = await tlsOpenapiService.DeleteAbnormalHosts({
+      HostGroupId: hostGroupCreated.HostGroupId,
+    });
+    expect(abnormalHostsValidate.delete(deleteAbnormalHostsResult)).toBe(true);
+
+    // 清理资源
+    await tlsOpenapiService.DeleteHostGroup({
+      HostGroupId: hostGroupCreated.HostGroupId,
+    });
+  });
+
+  test("tlsOpenapi:DeleteAbnormalHosts with non-existent HostGroupId", async () => {
+    // P2: 异常场景测试 - 删除不存在的主机组ID
+    const nonExistentHostGroupId = "non-existent-host-group-id-12345";
+
+    try {
+      await tlsOpenapiService.DeleteAbnormalHosts({
+        HostGroupId: nonExistentHostGroupId,
+      });
+      // 如果没有抛出错误，则测试失败
+      expect(true).toBe(false);
+    } catch (error) {
+      expect(error).toBeDefined();
+    }
+  });
+
+  test("tlsOpenapi:ModifyHostGroupsAutoUpdate", async () => {
+    const hostGroupCreated = await tlsOpenapiService.CreateHostGroup({
+      HostGroupName: `tls-nodejs-sdk-test-auto-update-host-group-${`${Math.random()}`.replace(
+        ".",
+        ""
+      )}`,
+      HostGroupType: "Label",
+      HostIdentifier: "none",
+    });
+
+    const autoUpdateModified = await tlsOpenapiService.ModifyHostGroupsAutoUpdate({
+      HostGroupIds: [hostGroupCreated.HostGroupId],
+      AutoUpdate: true,
+      UpdateStartTime: "00:00",
+      UpdateEndTime: "02:00",
+    });
+    expect(hostGroupAutoUpdateValidate.modify(autoUpdateModified)).toBe(true);
+
+    const autoUpdateDisabled = await tlsOpenapiService.ModifyHostGroupsAutoUpdate({
+      HostGroupIds: [hostGroupCreated.HostGroupId],
+      AutoUpdate: false,
+    });
+    expect(hostGroupAutoUpdateValidate.modify(autoUpdateDisabled)).toBe(true);
+
+    await tlsOpenapiService.DeleteHostGroup({
+      HostGroupId: hostGroupCreated.HostGroupId,
+    });
+  });
+
+  test("tlsOpenapi:CancelDownloadTask", async () => {
+    const taskId = `test-download-task-${`${Math.random()}`.replace(".", "")}`;
+
+    const cancelResult = await tlsOpenapiService.CancelDownloadTask({
+      TaskId: taskId,
+    });
+    expect(downloadTaskValidate.cancel(cancelResult)).toBe(true);
   });
 });

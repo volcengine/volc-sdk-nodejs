@@ -267,6 +267,10 @@ export const logsValidate = {
   }),
 };
 
+export const hostGroupAutoUpdateValidate = {
+  modify: ajv.compile(getSchema(null)),
+};
+
 export const shardsValidate = {
   list: ajv.compile(
     getSchema({
@@ -294,6 +298,39 @@ export const shardsValidate = {
               type: "string",
             },
             TopicId: {
+              type: "string",
+            },
+          },
+        },
+      },
+    })
+  ),
+  manualShardSplit: ajv.compile(
+    getSchema({
+      Shards: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            ExclusiveEndKey: {
+              type: "string",
+            },
+            InclusiveBeginKey: {
+              type: "string",
+            },
+            ModifyTime: {
+              type: "string",
+            },
+            ShardId: {
+              type: "number",
+            },
+            Status: {
+              type: "string",
+            },
+            TopicId: {
+              type: "string",
+            },
+            StopWriteTime: {
               type: "string",
             },
           },
@@ -949,4 +986,12 @@ export const traceValidate = {
       },
     })
   ),
+};
+
+export const abnormalHostsValidate = {
+  delete: ajv.compile(getSchema(null)),
+};
+
+export const downloadTaskValidate = {
+  cancel: ajv.compile(baseResponseSchema),
 };

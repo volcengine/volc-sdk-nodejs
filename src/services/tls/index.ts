@@ -49,6 +49,8 @@ import {
   IIndexModifyReq,
   IIndexModifyResp,
   IIndexSearchLogsReq,
+  IManualShardSplitReq,
+  IManualShardSplitResp,
   IProjectCreateReq,
   IProjectCreateResp,
   IProjectDeleteReq,
@@ -89,6 +91,12 @@ import {
   ITraceInsCreateReq,
   ITraceInsModifyReq,
   ITraceInsDeleteReq,
+  IDeleteAbnormalHostsReq,
+  IDeleteAbnormalHostsResp,
+  IModifyHostGroupsAutoUpdateReq,
+  IModifyHostGroupsAutoUpdateResp,
+  ICancelDownloadTaskReq,
+  ICancelDownloadTaskResp,
 } from "./types";
 
 const SERVICE = "TLS";
@@ -176,6 +184,13 @@ export class TlsService extends Base {
     method: "GET",
   });
 
+  ManualShardSplit = this.createAPI<IManualShardSplitReq, IManualShardSplitResp>(
+    "ManualShardSplit",
+    {
+      method: "POST",
+    }
+  );
+
   // collection and configuration related interfaces
   // 采集配置相关接口
   CreateRule = this.createAPI<IRuleCreateReq, IRuleCreateResp>("CreateRule", {
@@ -228,6 +243,13 @@ export class TlsService extends Base {
     method: "PUT",
   });
 
+  ModifyHostGroupsAutoUpdate = this.createAPI<
+    IModifyHostGroupsAutoUpdateReq,
+    IModifyHostGroupsAutoUpdateResp
+  >("ModifyHostGroupsAutoUpdate", {
+    method: "PUT",
+  });
+
   DescribeHostGroup = this.createAPI<IDescribeHostGroupReq, IHostGroupDescribeResp>(
     "DescribeHostGroup",
     {
@@ -249,6 +271,13 @@ export class TlsService extends Base {
   DeleteHost = this.createAPI<IHostDeleteReq, IHostDeleteResp>("DeleteHost", {
     method: "DELETE",
   });
+
+  DeleteAbnormalHosts = this.createAPI<IDeleteAbnormalHostsReq, IDeleteAbnormalHostsResp>(
+    "DeleteAbnormalHosts",
+    {
+      method: "DELETE",
+    }
+  );
 
   DescribeHostGroupRules = this.createAPI<
     IDescribeHostGroupRulesReq,
@@ -341,6 +370,13 @@ export class TlsService extends Base {
     "DescribeTraceInstance",
     {
       method: "GET",
+    }
+  );
+
+  CancelDownloadTask = this.createAPI<ICancelDownloadTaskReq, ICancelDownloadTaskResp>(
+    "CancelDownloadTask",
+    {
+      method: "POST",
     }
   );
 }
