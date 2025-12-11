@@ -1108,3 +1108,59 @@ export interface IDescribeTraceInstanceReq {
   /** Trace实例id */
   TraceInstanceId: string;
 }
+
+// ManualShardSplit
+export interface IManualShardSplitReq {
+  /** 日志主题 ID */
+  TopicId: string;
+  /** 待手动分裂的日志分区 ID */
+  ShardId: number;
+  /** 分区的分裂数量。应为非零偶数，例如 2、4、8 或 16。分裂后读写状态分区总数不能超过 256 个。 */
+  Number: number;
+}
+
+export interface IManualShardSplitResp {
+  /** 日志分区的范围等详细信息 */
+  Shards: Array<IShardQueryResp>;
+}
+
+export interface IDeleteAbnormalHostsReq {
+  /** 心跳异常机器对应的的机器组 ID。 */
+  HostGroupId: string;
+}
+
+export type IDeleteAbnormalHostsResp = { [key: string]: any };
+
+// ModifyHostGroupsAutoUpdate
+export interface IModifyHostGroupsAutoUpdateReq {
+  /** 机器组 ID 列表。 */
+  HostGroupIds: Array<string>;
+  /**
+   * 机器组服务器中安装的 LogCollector 是否开启自动升级功能。
+   *
+   * * true：日志服务将会在每天的指定时间段进行升级前检查，若满足升级条件，则自动升级 LogCollector，无需手动操作。
+   * * false：（默认）LogCollector 不自动升级，如需使用更高版本的 LogCollector，请参考升级 LogCollector操作。
+   *
+   * 仅 LogCollector V1.0.8 及后续版本支持自动升级。
+   */
+  AutoUpdate: boolean;
+  /**
+   * LogCollector 的自动升级的开始时间。
+   *
+   * * 仅在 AutoUpdate 为 true 时需要设置。
+   * * 自动升级时间建议设置为业务低峰期，自动升级过程中可能会重启 LogCollector，但不会丢失日志。
+   */
+  UpdateStartTime?: string;
+  /** LogCollector 的自动升级的结束时间。 */
+  UpdateEndTime?: string;
+}
+
+export type IModifyHostGroupsAutoUpdateResp = { [key: string]: any };
+
+// CancelDownloadTask
+export interface ICancelDownloadTaskReq {
+  /** 下载任务 ID。 */
+  TaskId: string;
+}
+
+export type ICancelDownloadTaskResp = { [key: string]: any };
