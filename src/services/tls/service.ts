@@ -2,6 +2,8 @@ import axios, { AxiosRequestConfig } from "axios";
 import Signer from "../../base/sign";
 import protobuf from "protobufjs";
 import LZ4 from "./lz4";
+import zlib from "zlib";
+import crypto from "crypto";
 import path from "path";
 import { getDefaultOption } from "./utils";
 import {
@@ -118,18 +120,24 @@ export default class Service {
 
   createPutLogsAPI(Path: string) {
     return async (requestData: IPutLogsReq, config?: AxiosRequestConfig): Promise<IPutLogsResp> => {
-      const { LogGroupList, CompressType, TopicId, HashKey } = requestData;
+      const { LogGroupList, CompressType, TopicId, HashKey, ContentMD5 } = requestData;
       if (!LogGroupList) throw new Error(`LogGroupList is necessary`);
 
       // transfer json to compressed protobuf buffer
       const pbMessage = LogGroupList;
-      let lz4CompressFailed = false;
+      let compressFailed = false;
       let output = pbMessage;
       if (CompressType === "lz4") {
         try {
           output = Service.LZ4Compress(pbMessage);
         } catch (err) {
-          lz4CompressFailed = true;
+          compressFailed = true;
+        }
+      } else if (CompressType === "zlib") {
+        try {
+          output = zlib.deflateSync(pbMessage);
+        } catch (err) {
+          compressFailed = true;
         }
       }
 
@@ -144,23 +152,33 @@ export default class Service {
         throw new Error(`[tls-node-sdk] ${missingParams.join(" and ")} is necessary`);
       }
 
+      const bodyRawSize = pbMessage.length;
+      const headers: any = {
+        ...config?.headers,
+        "x-tls-apiversion": version,
+        "Content-Type": "application/x-protobuf",
+        "x-tls-bodyrawsize": String(bodyRawSize),
+        "Content-MD5": ContentMD5 || crypto.createHash("md5").update(output).digest("hex"),
+      };
+
+      if (!compressFailed && CompressType) {
+        headers["x-tls-compresstype"] = CompressType;
+      }
+
+      if (HashKey && typeof HashKey === "string") {
+        const normalizedHashKey = HashKey.trim();
+        if (/^[0-9a-fA-F]{32}$/.test(normalizedHashKey)) {
+          headers["x-tls-hashkey"] = normalizedHashKey;
+        }
+      }
+
       const requestObj: any = {
         region,
         method: "POST",
         pathname: `/${Path}`,
         ...config,
-        headers: {
-          ...config?.headers,
-          "x-tls-apiversion": version,
-          "content-type": "application/x-protobuf",
-          "x-tls-compresstype": !lz4CompressFailed ? CompressType : "",
-          "x-tls-hashkey": HashKey || "",
-          "x-tls-bodyrawsize": pbMessage.length,
-        },
+        headers,
       };
-      if (!requestObj.headers["x-tls-compresstype"]) {
-        delete requestObj.headers["x-tls-compresstype"];
-      }
       requestObj.body = output;
       requestObj.data = output;
       requestObj.params = {

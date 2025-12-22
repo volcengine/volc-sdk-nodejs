@@ -265,6 +265,14 @@ export const logsValidate = {
   upload: ajv.compile({
     type: "string",
   }),
+  consume: ajv.compile({
+    type: "object",
+    properties: {
+      data: {
+        type: "object",
+      },
+    },
+  }),
 };
 
 export const hostGroupAutoUpdateValidate = {
@@ -988,10 +996,304 @@ export const traceValidate = {
   ),
 };
 
+export const logContextValidate = {
+  describe: ajv.compile(
+    getSchema({
+      LogContextInfos: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            ___context_flow___: {
+              type: "string",
+            },
+            __package_offset___: {
+              type: "string",
+            },
+          },
+          additionalProperties: true,
+        },
+      },
+      PrevOver: {
+        type: "boolean",
+      },
+      NextOver: {
+        type: "boolean",
+      },
+    })
+  ),
+};
+
+export const histogramV1Validate = {
+  describe: ajv.compile(
+    getSchema({
+      Histogram: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            Count: {
+              type: "number",
+            },
+            EndTime: {
+              type: "number",
+            },
+            StartTime: {
+              type: "number",
+            },
+            ResultStatus: {
+              type: "string",
+            },
+          },
+        },
+      },
+      ResultStatus: {
+        type: "string",
+      },
+      TotalCount: {
+        type: "number",
+      },
+    })
+  ),
+};
+
 export const abnormalHostsValidate = {
   delete: ajv.compile(getSchema(null)),
 };
 
+const downloadTaskSchema = {
+  Query: {
+    type: "string",
+  },
+  TaskId: {
+    type: "string",
+  },
+  EndTime: {
+    type: "string",
+  },
+  LogSize: {
+    type: "number",
+  },
+  TopicId: {
+    type: "string",
+  },
+  LogCount: {
+    type: "number",
+  },
+  TaskName: {
+    type: "string",
+  },
+  StartTime: {
+    type: "string",
+  },
+  CreateTime: {
+    type: "string",
+  },
+  DataFormat: {
+    type: "string",
+  },
+  TaskStatus: {
+    type: "string",
+  },
+  Compression: {
+    type: "string",
+  },
+};
+
 export const downloadTaskValidate = {
   cancel: ajv.compile(baseResponseSchema),
+  create: ajv.compile(
+    getSchema({
+      TaskId: {
+        type: "string",
+      },
+    })
+  ),
+  list: ajv.compile(
+    getSchema({
+      Total: {
+        type: "number",
+      },
+      Tasks: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            ...downloadTaskSchema,
+          },
+        },
+      },
+    })
+  ),
+};
+
+export const activeTlsAccountValidate = {
+  active: ajv.compile(baseResponseSchema),
+};
+
+// DescribeDownloadUrl schema
+const downloadUrlSchema = {
+  DownloadUrl: {
+    type: "string",
+  },
+};
+
+export const downloadUrlValidate = {
+  describe: ajv.compile(getSchema(downloadUrlSchema)),
+};
+
+export const accountValidate = {
+  getStatus: ajv.compile(
+    getSchema({
+      ArchVersion: {
+        type: "string",
+      },
+      Status: {
+        type: "string",
+      },
+    })
+  ),
+};
+
+const etlTaskDetailSchema = {
+  TaskId: {
+    type: "string",
+  },
+  Name: {
+    type: "string",
+  },
+  Description: {
+    type: ["string", "null"],
+  },
+  ProjectId: {
+    type: "string",
+  },
+  ProjectName: {
+    type: "string",
+  },
+  SourceTopicId: {
+    type: "string",
+  },
+  SourceTopicName: {
+    type: "string",
+  },
+  Script: {
+    type: "string",
+  },
+  DSLType: {
+    type: "string",
+  },
+  TaskType: {
+    type: "string",
+  },
+  ETLStatus: {
+    type: "string",
+  },
+  Enable: {
+    type: "boolean",
+  },
+  CreateTime: {
+    type: "string",
+  },
+  ModifyTime: {
+    type: "string",
+  },
+  LastEnableTime: {
+    type: ["string", "null"],
+  },
+  FromTime: {
+    type: ["number", "null"],
+  },
+  ToTime: {
+    type: ["number", "null"],
+  },
+  TargetResources: {
+    type: "array",
+    items: {
+      type: "object",
+      properties: {
+        Alias: {
+          type: ["string", "null"],
+        },
+        TopicId: {
+          type: "string",
+        },
+        ProjectId: {
+          type: "string",
+        },
+        ProjectName: {
+          type: "string",
+        },
+        Region: {
+          type: "string",
+        },
+        TopicName: {
+          type: "string",
+        },
+        RoleTrn: {
+          type: ["string", "null"],
+        },
+      },
+    },
+  },
+};
+
+const etlTaskListSchema = {
+  TaskId: {
+    type: "string",
+  },
+  TaskName: {
+    type: "string",
+  },
+  ProjectId: {
+    type: "string",
+  },
+  Description: {
+    type: ["string", "null"],
+  },
+  Status: {
+    type: "string",
+  },
+  CreateTime: {
+    type: "string",
+  },
+  ModifyTime: {
+    type: "string",
+  },
+  TaskConfig: {
+    type: ["object", "null"],
+  },
+  ErrorMessage: {
+    type: ["string", "null"],
+  },
+};
+
+export const etlTaskValidate = {
+  detail: ajv.compile(
+    getSchema({
+      ...etlTaskDetailSchema,
+    })
+  ),
+  list: ajv.compile(
+    getSchema({
+      Tasks: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            ...etlTaskListSchema,
+          },
+        },
+      },
+      Total: {
+        type: "number",
+      },
+    })
+  ),
+  modifyStatus: ajv.compile(baseResponseSchema),
+};
+
+export const etlValidate = {
+  delete: ajv.compile(baseResponseSchema),
+  modify: ajv.compile(baseResponseSchema),
 };
