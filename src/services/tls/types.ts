@@ -243,6 +243,12 @@ export interface IIndexCreateReq {
   FullText?: IIndexFullTextInfo;
   /** 键值索引配置。 */
   KeyValue?: Array<IIndexKeyValueInfo>;
+  /** 预留字段索引配置。 */
+  UserInnerKeyValue?: Array<IIndexKeyValueInfo>;
+  /** 统计字段值的最大长度，单位为字节。 */
+  MaxTextLen?: number;
+  /** 是否开启索引自动更新。 */
+  EnableAutoIndex?: boolean;
   /** 日志主题ID。 */
   TopicId: string;
 }
@@ -318,6 +324,10 @@ export interface IDaoKubernetesRule {
    - Job: 任务
    - CronJob: 定时任务 */
   WorkloadType?: string;
+  AnnotationTag?: Record<string, string>;
+  EnableAllLabelTag?: boolean;
+  ExcludePodAnnotationRegex?: Record<string, string>;
+  IncludePodAnnotationRegex?: Record<string, string>;
 }
 
 export interface IDaoContainerRule {
@@ -385,6 +395,11 @@ export interface IDaoFilterKeyRegex {
   Regex?: string;
 }
 
+export interface IDaoLogTemplate {
+  Type?: string;
+  Format?: string;
+}
+
 export interface IDaoExtractRule {
   /** 第一行日志需要匹配的regex;\n当且仅当采集的日志类型为multiline_log时有效;\n必须是合法的正则表达式; */
   BeginRegex?: string;
@@ -418,6 +433,11 @@ export interface IDaoExtractRule {
    - UnMatchUpLoadSwitch=true和UnMatchLogKey必须成对出现。
    - true表示上传解析失败的日志，false表示不上传解析失败的日志。 */
   UnMatchUpLoadSwitch?: boolean;
+  Quote?: string;
+  TimeZone?: string;
+  LogTemplate?: IDaoLogTemplate;
+  TimeExtractRegex?: string;
+  EnableNanosecond?: boolean;
 }
 
 export interface IRuleCreateReq {
@@ -558,6 +578,43 @@ export interface IRestHostGroupInfo {
   UpdateStartTime?: string;
 }
 
+export interface IDaoParsePathRule {
+  Keys?: string[];
+  Regex?: string;
+  PathSample?: string;
+}
+export interface IDaoShardHashKey {
+  HashKey?: string;
+}
+export interface IDaoAdvanced {
+  CloseEOF?: boolean;
+  CloseRemoved?: boolean;
+  CloseRenamed?: boolean;
+  CloseTimeout?: number;
+  CloseInactive?: number;
+  NoLineTerminatorEOFMaxTime?: number;
+}
+export interface IDaoPlugin {
+  processors?: Array<Record<string, any>>;
+}
+export interface IDaoUserDefineRule {
+  Fields?: Record<string, string>;
+  Plugin?: IDaoPlugin;
+  Advanced?: IDaoAdvanced;
+  RawLogKey?: string;
+  TailFiles?: boolean;
+  HostnameKey?: string;
+  EnableRawLog?: boolean;
+  ShardHashKey?: IDaoShardHashKey;
+  ParsePathRule?: IDaoParsePathRule;
+  EnableHostname?: boolean;
+  HostGroupLabelKey?: string;
+  EnableHostGroupLabel?: boolean;
+  TailSizeKb?: number;
+  IgnoreOlder?: number;
+  MultiCollectsType?: string;
+}
+
 export interface IRuleRuleInfo {
   ContainerRule?: IDaoContainerRule;
   CreateTime?: string;
@@ -572,7 +629,8 @@ export interface IRuleRuleInfo {
   RuleName?: string;
   TopicId?: string;
   TopicName?: string;
-  UserDefineRule?: string;
+  UserDefineRule?: IDaoUserDefineRule;
+  Pause?: number;
 }
 
 export interface IRuleDescribeResp {
@@ -667,6 +725,8 @@ export interface IHostGroupModifyReq {
   UpdateEndTime?: string;
   /** 升级开始时间 */
   UpdateStartTime?: string;
+  /** 是否开启LogCollector服务日志功能 */
+  ServiceLogging?: boolean;
 }
 
 export type IHostGroupModifyResp = { [key: string]: any };
@@ -958,10 +1018,26 @@ export interface IDescribeNotifyGroupReq {
   /** 页面大小 */
   PageSize?: number;
 }
-export interface IAlarmNoticeGroupDescribeResp {
+export type IAlarmNoticeGroupDescribeResp = {
   AlarmNotifyGroups: Array<IAlarmNoticeGroupNotifyGroupsInfo>;
   Total: number;
+};
+
+export interface IWebTracksReq {
+  /** 日志项目 ID。 */
+  ProjectId: string;
+  /** 日志主题 ID。 */
+  TopicId: string;
+  /**
+   * 日志组（LogGroup），表示由多个 Log 组成的集合，一个 Log 表示一条日志。
+   * 一个 LogGroup 中 Log 个数不能超过 10000。
+   */
+  Logs: Array<Record<string, string>>;
+  /** 日志来源，一般使用机器 IP 作为标识。 */
+  Source?: string;
 }
+
+export type IWebTracksResp = { [key: string]: any };
 
 export interface IIndexSearchLogsReq {
   /** 翻页加载更多日志时使用，透传上次返回的context值，获取后续的日志内容。 */
@@ -981,6 +1057,10 @@ export interface IIndexSearchLogsReq {
   StartTime: number;
   /** 要检索的日志主题ID。 */
   TopicId: string;
+  /** 是否使用纳秒精度查询日志。
+   - true：使用纳秒精度查询日志。
+   - false：使用毫秒精度查询日志。 */
+  AccurateQuery?: boolean;
 }
 
 export interface IEsclientAnalysisResult {
@@ -994,12 +1074,14 @@ export interface IEsclientResult {
   AnalysisResult?: IEsclientAnalysisResult;
   Context?: string;
   Count?: number;
-  HighLight?: Array<string>;
+  HighLight?: Array<Record<string, { [key: string]: any }>>;
   HitCount?: number;
   Limit?: number;
   ListOver?: boolean;
   Logs?: Array<Record<string, { [key: string]: any }>>;
   ResultStatus?: string;
+  /** 本次检索所使用的时间，单位为毫秒。 */
+  ElapsedMillisecond?: number;
 }
 
 export interface LogContent {
@@ -1010,6 +1092,7 @@ export interface LogContent {
 export interface Log {
   Time: number;
   Contents: LogContent[];
+  OptionalTimeNs?: { TimeNs: number };
 }
 
 export interface LogTag {
@@ -1032,9 +1115,11 @@ export interface LogGroupList {
 export interface IPutLogsReq {
   /** 日志主题id */
   TopicId: string;
-  CompressType?: "lz4";
+  CompressType?: "lz4" | "zlib";
   HashKey?: string;
   LogGroupList: Buffer;
+  BodyRawSize: number;
+  ContentMD5?: string;
 }
 
 export type IPutLogsResp = { [key: string]: any };
@@ -1140,6 +1225,51 @@ export interface IDescribeTraceInstanceReq {
   TraceInstanceId: string;
 }
 
+export interface IHistogramInfoV1 {
+  /** 子区间中对应搜索结果的数量，即该时段内符合条件的日志条数 */
+  Count: number;
+  /** 查询的结束时间点 */
+  EndTime: number;
+  /** 查询的开始时间点 */
+  StartTime: number;
+  /**
+   * 查询的状态
+   * - complete：查询完成，返回结果完整
+   * - incomplete：查询完成，返回部分结果
+   * - error：查询未完成，返回错误
+   * - time_out：查询超时，返回的结果可能不完整
+   */
+  ResultStatus: string;
+}
+
+export interface IDescribeHistogramV1Req {
+  /** 查询结束时间点，精确到毫秒。Unix 时间戳格式，表示从 1970-1-1 00:00:00 UTC 开始计算的毫秒数。如果指定为秒级别，服务端会自动转换精度为毫秒。EndTime 必须大于 StartTime */
+  EndTime: number;
+  /** 直方图的子区间长度。单位为毫秒。该值必须大于 1。指定查询的时间范围后，还可以通过 Interval 指定直方图中每个子区间代表的时长，默认通过 60 个子区间展示直方图，即默认情况下 Interval = (EndTime-StartTime)/60，并向上取整。直方图中最多可以指定 60 个子区间，请合理规划查询的时间范围及子区间大小 */
+  Interval?: number;
+  /** 查询语句，语句长度最大为 4KiB。日志服务支持的检索语法请参考检索语法 */
+  Query: string;
+  /** 查询开始时间点，精确到毫秒。Unix 时间戳格式，表示从 1970-1-1 00:00:00 UTC 开始计算的毫秒数。如果指定为秒级别，服务端会自动转换精度为毫秒 */
+  StartTime: number;
+  /** 要检索的日志主题 ID */
+  TopicId: string;
+}
+
+export interface IDescribeHistogramV1Resp {
+  /** 所有子区间的结果集 */
+  Histogram: Array<IHistogramInfoV1>;
+  /**
+   * 查询的状态
+   * - complete：查询完成，返回结果完整
+   * - incomplete：查询完成，返回部分结果
+   * - error：查询未完成，返回错误
+   * - time_out：查询超时，返回的结果可能不完整
+   */
+  ResultStatus: string;
+  /** 此次请求所有直方图数据总和，即对应时间内符合条件的日志条数 */
+  TotalCount: number;
+}
+
 // ManualShardSplit
 export interface IManualShardSplitReq {
   /** 日志主题 ID */
@@ -1193,5 +1323,359 @@ export interface ICancelDownloadTaskReq {
   /** 下载任务 ID。 */
   TaskId: string;
 }
-
 export type ICancelDownloadTaskResp = { [key: string]: any };
+
+// GetAccountStatus
+export interface IGetAccountStatusReq {}
+
+export interface IGetAccountStatusResp {
+  /** 日志服务版本：2.0：新架构；1.0：老架构 */
+  ArchVersion: string;
+  /** 是否已开通日志服务：Activated：已开通日志服务；NonActivated：未开通日志服务 */
+  Status: string;
+}
+
+// ActiveTlsAccount
+export interface IActiveTlsAccountReq {}
+
+export type IActiveTlsAccountResp = { [key: string]: any };
+
+// ModifyETLTaskStatus
+export interface IModifyETLTaskStatusReq {
+  /** 是否开启数据加工任务。
+   * true：开启。
+   * false：不开启。 */
+  Enable: boolean;
+  /** 加工任务 ID。 */
+  TaskId: string;
+}
+
+export type IModifyETLTaskStatusResp = { [key: string]: any };
+
+// ConsumeLogs
+export interface IConsumeLogsReq {
+  /** 游标，表示从什么位置开始读取数据，相当于起点。 */
+  Cursor: string;
+  /** 结束游标，表示读取数据到什么地方结束，相当于终点。EndCursor 为空则不设 end。 */
+  EndCursor?: string;
+  /** 想要返回的最大 LogGroup 数量。最大值为 1000。 */
+  LogGroupCount?: number;
+  /** 返回数据的压缩格式。支持设置为：lz4：压缩格式为 lz4；zlib：压缩格式为 zlib。 */
+  Compression?: string;
+}
+
+export interface IConsumeLogsResp {
+  /** 响应消息的 Content-Type 为 application/x-protobuf，返回 PB 格式数据 */
+  data: Buffer;
+}
+
+// CreateDownloadTask
+export interface IDownloadTaskCreateReq {
+  /** 下载任务名称。长度范围为 1~63 字符。 */
+  TaskName: string;
+  /** 日志所在日志主题的 ID。 */
+  TopicId: string;
+  /**
+   * 检索分析语句，语句长度最大为 4KiB。
+   *
+   * 支持仅指定检索语句，例如指定为`*`表示下载指定时段的所有原始日志。
+   * 日志服务支持的检索语法请参考检索语法，SQL 分析语法与函数列表请参考分析语法。
+   */
+  Query: string;
+  /** 查询开始时间点，精确到毫秒。Unix 时间戳格式，表示从 1970-1-1 00:00:00 UTC 开始计算的毫秒数。 */
+  StartTime: number;
+  /** 查询结束时间点，精确到毫秒。Unix 时间戳格式，表示从 1970-1-1 00:00:00 UTC 开始计算的毫秒数。 */
+  EndTime: number;
+  /**
+   * 导出的文件格式，支持设置为：
+   *
+   * * csv：CSV 格式
+   * * json：JSON 格式
+   */
+  DataFormat: string;
+  /**
+   * 仅检索不分析时，日志的排序方式。
+   *
+   * * asc：升序
+   * * desc：倒序
+   */
+  Sort: string;
+  /** 下载的原始日志条数，或分析结果的行数。必须符合下载任务的数据量限制。详细说明请参考使用说明。 */
+  Limit: number;
+  /**
+   * 导出文件的压缩格式。
+   *
+   * * none：不压缩。建议数据量较小时，才使用不压缩方式。
+   * * gzip：使用 gzip 格式压缩。
+   * * zip：使用 zip 格式压缩。
+   */
+  Compression: string;
+}
+
+// DescribeDownloadTasks
+export interface IDescribeDownloadTasksReq {
+  /** 分页查询时的页码。默认为 1，即从第一页数据开始返回。 */
+  PageNumber?: number;
+  /** 分页大小。默认为 20，最大为 100。 */
+  PageSize?: number;
+  /** 日志所在的日志主题 ID。 */
+  TopicId: string;
+  /** 根据任务名称进行筛选，支持模糊搜索。 */
+  TaskName?: string;
+}
+
+export interface IDownloadTaskResp {
+  /** 日志检索分析语句。 */
+  Query: string;
+  /** 下载任务的 ID。 */
+  TaskId: string;
+  /**
+   * 检索分析时需指定日志时间范围，此参数用于指定结束时间。格式为 `yyyy-MM-dd HH:mm:ss`。
+   */
+  EndTime: string;
+  /** 下载的日志量，单位为字节（Byte）。 */
+  LogSize: number;
+  /** 日志主题名称。 */
+  TopicId: string;
+  /** 下载的日志条数。 */
+  LogCount: number;
+  /** 下载任务的名称。 */
+  TaskName: string;
+  /**
+   * 检索分析时需指定日志时间范围，此参数用于指定起始时间。格式为 `yyyy-MM-dd HH:mm:ss`。
+   */
+  StartTime: string;
+  /** 下载任务的创建时间，格式为 `yyyy-MM-dd HH:mm:ss`。 */
+  CreateTime: string;
+  /** 导出的文件格式，支持 CSV 文件格式或 JSON 格式。 */
+  DataFormat: string;
+  /**
+   * 下载任务状态，即日志压缩文件的生成状态。包括：
+   * - creating：文件生成中
+   * - created_cut：文件生成中断
+   * - success：文件已生成
+   * - wait：等待中
+   * - fail：已失败
+   */
+  TaskStatus: string;
+  /**
+   * 导出文件的压缩格式。
+   * - none：不压缩。
+   * - gzip：使用 gzip 格式压缩。
+   * - zip：使用 zip 格式压缩。
+   */
+  Compression: string;
+}
+
+export interface IDownloadTaskCreateResp {
+  /** 日志主题 ID。 */
+  TaskId: string;
+}
+
+export interface IDescribeCursorReq {
+  TopicId: string;
+  ShardId: number;
+  From: string;
+}
+
+export interface IDescribeCursorResp {
+  Cursor: string;
+}
+
+export interface IDownloadTaskDescribeDownloadTasksResp {
+  /** 下载任务详情。 */
+  Tasks: Array<IDownloadTaskResp>;
+  /** 日志下载任务的数量。日志服务仅支持保存一天以内的下载任务信息。 */
+  Total: number;
+}
+
+// DescribeDownloadUrl
+export interface IDescribeDownloadUrlReq {
+  /** 下载任务的任务 ID。 */
+  TaskId: string;
+}
+
+export interface IDescribeDownloadUrlResp {
+  /** 指定下载任务对应的下载链接。
+   * 链接有效期为 5 分钟，获取下载链接后请及时下载。若链接失效，需要重新调用此接口获取新的下载链接。 */
+  DownloadUrl: string;
+}
+
+// DescribeLogContext
+export interface IDescribeLogContextReq {
+  /** 日志主题 ID。 */
+  TopicId: string;
+  /** 指定日志所在的 LogGroup 的 ID。 */
+  ContextFlow: string;
+  /** 指定日志在 LogGroup 的序号。 */
+  PackageOffset: number;
+  /** 日志来源主机 IP。 */
+  Source: string;
+  /** 指定日志的上文日志条数，即往前查看多少条日志。取值范围为 1~1000，默认值为 10。 */
+  PrevLogs?: number;
+  /** 指定日志的下文日志条数，即往后查看多少条日志。取值范围为 1~1000，默认值为 10。 */
+  NextLogs?: number;
+}
+
+export interface ILogContextInfo {
+  /** 该日志所在的 LogGroup 的 ID。 */
+  ___context_flow___: string;
+  /** 该日志在 LogGroup 的序号。 */
+  __package_offset___: string;
+  /** 其他字段 - 根据实际日志内容变化 */
+  [key: string]: any;
+}
+
+export interface IDescribeLogContextResp {
+  /** 指定日志的上下文日志信息。按上下文顺序排列。 */
+  LogContextInfos: Array<ILogContextInfo>;
+  /** 除 LogContextInfos 中的日志以外，是否还存在其他上文。 */
+  PrevOver: boolean;
+  /** 除 LogContextInfos 中的日志以外，是否还存在其他下文。 */
+  NextOver: boolean;
+}
+
+// ETL Task
+// DeleteETLTask
+export interface IDeleteETLTaskReq {
+  /** 待删除的加工任务的 ID。 */
+  TaskId: string;
+}
+
+export type IDeleteETLTaskResp = { [key: string]: any };
+// DescribeETLTask
+export interface IDescribeETLTaskReq {
+  /** 待查询的加工任务 ID。 */
+  TaskId: string;
+}
+
+export interface ITargetResourcesResp {
+  /** 自定义输出目标的名称。 */
+  Alias?: string;
+  /** 用于存储加工后日志的日志主题 ID。 */
+  TopicId?: string;
+  /** 用于存储加工后日志的日志项目 ID。 */
+  ProjectId?: string;
+  /** 用于存储加工后日志的日志项目名称。 */
+  ProjectName?: string;
+  /** 用于存储加工后日志的日志项目所属地域。 */
+  Region?: string;
+  /** 用于存储加工后日志的日志主题名称。 */
+  TopicName?: string;
+  /** 跨账号授权角色名。 */
+  RoleTrn?: string;
+}
+
+export interface IDescribeETLTaskResp {
+  /** 加工任务的创建时间。 */
+  CreateTime?: string;
+  /** DSL 类型，固定为 NORMAL。 */
+  DSLType?: string;
+  /** 数据加工任务的描述信息。 */
+  Description?: string;
+  /** 任务调度状态。 */
+  ETLStatus?: string;
+  /** 是否启用数据任务。 */
+  Enable?: boolean;
+  /** 待加工数据的开始时间，空代表加工所有历史数据。 */
+  FromTime?: number;
+  /** 最近启动时间。 */
+  LastEnableTime?: string;
+  /** 加工任务的修改时间。 */
+  ModifyTime?: string;
+  /** 加工任务名称。 */
+  Name?: string;
+  /** 待加工数据所在的日志项目 ID。 */
+  ProjectId?: string;
+  /** 待加工数据所在的日志项目名称。 */
+  ProjectName?: string;
+  /** 加工规则。 */
+  Script?: string;
+  /** 待加工数据所在的日志主题 ID。 */
+  SourceTopicId?: string;
+  /** 待加工数据所在的日志主题名称。 */
+  SourceTopicName?: string;
+  /** 输出目标的相关信息。 */
+  TargetResources?: Array<ITargetResourcesResp>;
+  /** 加工任务 ID。 */
+  TaskId?: string;
+  /** 任务类型，固定为 Resident。 */
+  TaskType?: string;
+  /** 日志加工数据范围的结束时间，空代表无限制。 */
+  ToTime?: number;
+}
+
+// ETL Task types
+export interface IDescribeETLTasksReq {
+  /** 分页页码 */
+  PageNumber?: number;
+  /** 页面大小 */
+  PageSize?: number;
+  /** 项目ID */
+  ProjectId?: string;
+  /** 任务名称，支持模糊匹配 */
+  TaskName?: string;
+  /** 任务ID */
+  TaskId?: string;
+  /** 任务状态 */
+  Status?: string;
+  /** 创建时间起始时间戳 */
+  CreateTimeStart?: number;
+  /** 创建时间结束时间戳 */
+  CreateTimeEnd?: number;
+}
+
+export interface IETLTaskInfo {
+  /** 任务ID */
+  TaskId: string;
+  /** 任务名称 */
+  TaskName: string;
+  /** 项目ID */
+  ProjectId: string;
+  /** 任务描述 */
+  Description?: string;
+  /** 任务状态 */
+  Status: string;
+  /** 创建时间 */
+  CreateTime: string;
+  /** 修改时间 */
+  ModifyTime: string;
+  /** 任务配置信息 */
+  TaskConfig?: { [key: string]: any };
+  /** 错误信息 */
+  ErrorMessage?: string;
+}
+
+export interface IDescribeETLTasksResp {
+  /** 任务列表 */
+  Tasks: Array<IETLTaskInfo>;
+  /** 总数量 */
+  Total: number;
+}
+
+// ETL Task Management
+export interface ITargetResource {
+  /** 自定义输出目标的名称，在数据加工规则中需要使用此名称指代输出目标。 */
+  Alias: string;
+  /** 用于存储加工后日志的日志主题。 */
+  TopicId: string;
+  /** 用于存储加工后日志的日志主题的地域。 */
+  Region: string;
+  /** 跨账号授权角色名。<br><br>可登录IAM控制台，在**角色管理**单击对应角色名称，查看**基本信息**中的**角色TRN**。 */
+  RoleTrn?: string;
+}
+
+export interface IModifyETLTaskReq {
+  /** 数据加工任务的描述信息。<br><br>* 不支持 `<>、'、\\、\\\\`。<br>* 长度为 0～64 个字符。 */
+  Description?: string;
+  /** 加工任务名称。 */
+  Name?: string;
+  /** 加工规则。 */
+  Script?: string;
+  /** 输出目标的相关信息。 */
+  TargetResources?: Array<ITargetResource>;
+  /** 加工任务 ID。 */
+  TaskId: string;
+}
+
+export type IModifyETLTaskResp = { [key: string]: any };

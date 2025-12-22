@@ -20,12 +20,16 @@ import {
   IDescribeHostGroupsReq,
   IDescribeHostsReq,
   IDescribeIndexReq,
+  IDescribeLogContextReq,
+  IDescribeLogContextResp,
   IDescribeNotifyGroupReq,
   IDescribeProjectReq,
   IDescribeProjectsReq,
   IDescribeRuleReq,
   IDescribeRulesReq,
   IDescribeShardsReq,
+  IDescribeCursorReq,
+  IDescribeCursorResp,
   IDescribeTopicReq,
   IDescribeTopicsReq,
   IEsclientResult,
@@ -91,12 +95,38 @@ import {
   ITraceInsCreateReq,
   ITraceInsModifyReq,
   ITraceInsDeleteReq,
+  IDescribeHistogramV1Req,
+  IDescribeHistogramV1Resp,
   IDeleteAbnormalHostsReq,
   IDeleteAbnormalHostsResp,
   IModifyHostGroupsAutoUpdateReq,
   IModifyHostGroupsAutoUpdateResp,
   ICancelDownloadTaskReq,
   ICancelDownloadTaskResp,
+  IGetAccountStatusReq,
+  IGetAccountStatusResp,
+  IActiveTlsAccountReq,
+  IActiveTlsAccountResp,
+  IModifyETLTaskStatusReq,
+  IModifyETLTaskStatusResp,
+  IWebTracksReq,
+  IWebTracksResp,
+  IConsumeLogsReq,
+  IConsumeLogsResp,
+  IDownloadTaskCreateReq,
+  IDownloadTaskCreateResp,
+  IDescribeDownloadTasksReq,
+  IDownloadTaskDescribeDownloadTasksResp,
+  IDescribeDownloadUrlReq,
+  IDescribeDownloadUrlResp,
+  IDeleteETLTaskReq,
+  IDeleteETLTaskResp,
+  IDescribeETLTaskReq,
+  IDescribeETLTaskResp,
+  IDescribeETLTasksReq,
+  IDescribeETLTasksResp,
+  IModifyETLTaskReq,
+  IModifyETLTaskResp,
 } from "./types";
 
 const SERVICE = "TLS";
@@ -190,6 +220,10 @@ export class TlsService extends Base {
       method: "POST",
     }
   );
+
+  DescribeCursor = this.createAPI<IDescribeCursorReq, IDescribeCursorResp>("DescribeCursor", {
+    method: "GET",
+  });
 
   // collection and configuration related interfaces
   // 采集配置相关接口
@@ -338,6 +372,24 @@ export class TlsService extends Base {
     method: "POST",
   });
 
+  DescribeHistogramV1 = this.createAPI<IDescribeHistogramV1Req, IDescribeHistogramV1Resp>(
+    "DescribeHistogramV1",
+    {
+      method: "POST",
+    }
+  );
+
+  ConsumeLogs = this.createAPI<IConsumeLogsReq, IConsumeLogsResp>("ConsumeLogs", {
+    method: "POST",
+  });
+
+  DescribeLogContext = this.createAPI<IDescribeLogContextReq, IDescribeLogContextResp>(
+    "DescribeLogContext",
+    {
+      method: "POST",
+    }
+  );
+
   DescribeTraceInstances = this.createAPI<
     IDescribeTraceInstancesReq,
     ITraceInsDescribeTraceInstancesResp
@@ -366,10 +418,42 @@ export class TlsService extends Base {
     }
   );
 
+  CreateDownloadTask = this.createAPI<IDownloadTaskCreateReq, IDownloadTaskCreateResp>(
+    "CreateDownloadTask",
+    {
+      method: "POST",
+    }
+  );
+
   DescribeTraceInstance = this.createAPI<IDescribeTraceInstanceReq, ITraceInsDescribeResp>(
     "DescribeTraceInstance",
     {
       method: "GET",
+    }
+  );
+
+  DescribeETLTask = this.createAPI<IDescribeETLTaskReq, IDescribeETLTaskResp>("DescribeETLTask", {
+    method: "GET",
+  });
+
+  DescribeETLTasks = this.createAPI<IDescribeETLTasksReq, IDescribeETLTasksResp>(
+    "DescribeETLTasks",
+    {
+      method: "GET",
+    }
+  );
+
+  GetAccountStatus = this.createAPI<IGetAccountStatusReq, IGetAccountStatusResp>(
+    "GetAccountStatus",
+    {
+      method: "GET",
+    }
+  );
+
+  ActiveTlsAccount = this.createAPI<IActiveTlsAccountReq, IActiveTlsAccountResp>(
+    "ActiveTlsAccount",
+    {
+      method: "POST",
     }
   );
 
@@ -379,5 +463,38 @@ export class TlsService extends Base {
       method: "POST",
     }
   );
+
+  ModifyETLTaskStatus = this.createAPI<IModifyETLTaskStatusReq, IModifyETLTaskStatusResp>(
+    "ModifyETLTaskStatus",
+    {
+      method: "PUT",
+    }
+  );
+
+  DescribeDownloadTasks = this.createAPI<
+    IDescribeDownloadTasksReq,
+    IDownloadTaskDescribeDownloadTasksResp
+  >("DescribeDownloadTasks", {
+    method: "GET",
+  });
+
+  DescribeDownloadUrl = this.createAPI<IDescribeDownloadUrlReq, IDescribeDownloadUrlResp>(
+    "DescribeDownloadUrl",
+    {
+      method: "GET",
+    }
+  );
+
+  WebTracks = this.createAPI<IWebTracksReq, IWebTracksResp>("WebTracks", {
+    method: "POST",
+  });
+
+  ModifyETLTask = this.createAPI<IModifyETLTaskReq, IModifyETLTaskResp>("ModifyETLTask", {
+    method: "PUT",
+  });
+
+  DeleteETLTask = this.createAPI<IDeleteETLTaskReq, IDeleteETLTaskResp>("DeleteETLTask", {
+    method: "DELETE",
+  });
 }
 export const defaultService = new TlsService();

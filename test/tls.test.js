@@ -4,15 +4,22 @@ import {
   alarmValidate,
   hostGroupAutoUpdateValidate,
   downloadTaskValidate,
+  etlTaskValidate,
+  etlValidate,
+  accountValidate,
+  activeTlsAccountValidate,
   hostGroupValidate,
   indexValidate,
   logsValidate,
+  logContextValidate,
+  histogramV1Validate,
   projectValidate,
   ruleHostGroupValidate,
   rulesValidate,
   shardsValidate,
   topicValidate,
   traceValidate,
+  downloadUrlValidate,
 } from "./schema/tls";
 
 const tlsOpenapiService = tlsOpenapi.defaultService;
@@ -204,6 +211,50 @@ describe("tlsOpenapi test", () => {
     });
     expect(logsValidate.upload(putLogsResult)).toBe(true);
 
+    // Test DescribeLogContext - we need to get a valid ContextFlow and PackageOffset from SearchLogs result
+    if (searchLogsResult.Logs && searchLogsResult.Logs.length > 0) {
+      const firstLog = searchLogsResult.Logs[0];
+      // Extract ContextFlow and PackageOffset from the log data
+      const contextFlow = firstLog.___context_flow___ || "test-context-flow";
+      const packageOffset = firstLog.__package_offset___ || 0;
+
+      const describeLogContextResult = await tlsOpenapiService.DescribeLogContext({
+        TopicId: topicCreated.TopicId,
+        ContextFlow: contextFlow,
+        PackageOffset: packageOffset,
+        Source: "TEST",
+        PrevLogs: 5,
+        NextLogs: 5,
+      });
+
+      expect(logContextValidate.describe(describeLogContextResult)).toBe(true);
+    }
+
+    // 测试 ConsumeLogs 接口
+    const shardsList = await tlsOpenapiService.DescribeShards({
+      TopicId: topicCreated.TopicId,
+      PageNumber: 1,
+      PageSize: 20,
+    });
+    expect(shardsList.Shards.length).toBeGreaterThan(0);
+
+    const shardId = shardsList.Shards[0].ShardId;
+
+    // 消费日志
+    const consumeLogsResult = await tlsOpenapiService.ConsumeLogs(
+      {
+        Cursor: "begin", // 从开始位置消费
+        LogGroupCount: 10,
+      },
+      {
+        params: {
+          TopicId: topicCreated.TopicId,
+          ShardId: shardId,
+        },
+      }
+    );
+    expect(logsValidate.consume(consumeLogsResult)).toBe(true);
+
     await tlsOpenapiService.DeleteTopic({
       TopicId: topicCreated.TopicId,
     });
@@ -231,6 +282,78 @@ describe("tlsOpenapi test", () => {
       PageSize: 20,
     });
     expect(shardsValidate.list(shardsList)).toBe(true);
+
+    await tlsOpenapiService.DeleteTopic({
+      TopicId: topicCreated.TopicId,
+    });
+    await tlsOpenapiService.DeleteProject({
+      ProjectId: projectCreated.ProjectId,
+    });
+  });
+
+  test("tlsOpenapi:Cursor", async () => {
+    const projectCreated = await tlsOpenapiService.CreateProject({
+      ProjectName: `tls-nodejs-sdk-test-topic-project-${`${Math.random()}`.replace(".", "")}`,
+      Region,
+    });
+
+    const topicCreated = await tlsOpenapiService.CreateTopic({
+      ProjectId: projectCreated.ProjectId,
+      ShardCount: 1,
+      TopicName: `tls-nodejs-sdk-test-topic-${`${Math.random()}`.replace(".", "")}`,
+      Ttl: 1,
+    });
+
+    const shardsList = await tlsOpenapiService.DescribeShards({
+      TopicId: topicCreated.TopicId,
+      PageNumber: 1,
+      PageSize: 20,
+    });
+
+    const cursor = await tlsOpenapiService.DescribeCursor({
+      TopicId: topicCreated.TopicId,
+      ShardId: shardsList.Shards[0].ShardId,
+      From: "begin",
+    });
+
+    expect(cursor).toBeDefined();
+    expect(typeof cursor.Cursor).toBe("string");
+
+    await tlsOpenapiService.DeleteTopic({
+      TopicId: topicCreated.TopicId,
+    });
+    await tlsOpenapiService.DeleteProject({
+      ProjectId: projectCreated.ProjectId,
+    });
+  });
+
+  test("tlsOpenapi:Cursor", async () => {
+    const projectCreated = await tlsOpenapiService.CreateProject({
+      ProjectName: `tls-nodejs-sdk-test-topic-project-${`${Math.random()}`.replace(".", "")}`,
+      Region,
+    });
+
+    const topicCreated = await tlsOpenapiService.CreateTopic({
+      ProjectId: projectCreated.ProjectId,
+      ShardCount: 1,
+      TopicName: `tls-nodejs-sdk-test-topic-${`${Math.random()}`.replace(".", "")}`,
+      Ttl: 1,
+    });
+
+    const shardsList = await tlsOpenapiService.DescribeShards({
+      TopicId: topicCreated.TopicId,
+      PageNumber: 1,
+      PageSize: 20,
+    });
+
+    const cursor = await tlsOpenapiService.DescribeCursor({
+      TopicId: topicCreated.TopicId,
+      ShardId: shardsList.Shards[0].ShardId,
+      From: "begin",
+    });
+
+    expect(cursor).toBeDefined();
+    expect(typeof cursor.Cursor).toBe("string");
 
     await tlsOpenapiService.DeleteTopic({
       TopicId: topicCreated.TopicId,
@@ -566,6 +689,51 @@ describe("tlsOpenapi test", () => {
     expect(traceValidate.delete(traceDelete)).toBe(true);
   });
 
+  test("tlsOpenapi:DescribeHistogramV1", async () => {
+    const projectCreated = await tlsOpenapiService.CreateProject({
+      ProjectName: `tls-nodejs-sdk-test-histogram-project-${`${Math.random()}`.replace(".", "")}`,
+      Region,
+    });
+
+    const topicCreated = await tlsOpenapiService.CreateTopic({
+      ProjectId: projectCreated.ProjectId,
+      ShardCount: 1,
+      TopicName: `tls-nodejs-sdk-test-histogram-topic-${`${Math.random()}`.replace(".", "")}`,
+      Ttl: 1,
+    });
+
+    // 搜索日志需要先创建主题索引
+    await tlsOpenapiService.CreateIndex({
+      TopicId: topicCreated.TopicId,
+      FullText: {
+        CaseSensitive: false,
+        Delimiter: "_",
+        IncludeChinese: false,
+      },
+    });
+
+    const now = Date.now();
+    const startTime = now - 3600 * 1000; // 1小时前
+    const endTime = now;
+
+    const histogramResult = await tlsOpenapiService.DescribeHistogramV1({
+      TopicId: topicCreated.TopicId,
+      Query: "error",
+      StartTime: startTime,
+      EndTime: endTime,
+      Interval: 60000, // 1分钟间隔
+    });
+
+    expect(histogramV1Validate.describe(histogramResult)).toBe(true);
+
+    await tlsOpenapiService.DeleteTopic({
+      TopicId: topicCreated.TopicId,
+    });
+    await tlsOpenapiService.DeleteProject({
+      ProjectId: projectCreated.ProjectId,
+    });
+  });
+
   test("tlsOpenapi:DeleteAbnormalHosts", async () => {
     // P0: 基础功能测试 - 正常删除异常主机
     const hostGroupCreated = await tlsOpenapiService.CreateHostGroup({
@@ -630,6 +798,57 @@ describe("tlsOpenapi test", () => {
     });
   });
 
+  test("tlsOpenapi:GetAccountStatus", async () => {
+    const accountStatus = await tlsOpenapiService.GetAccountStatus({});
+    expect(accountValidate.getStatus(accountStatus)).toBe(true);
+  });
+
+  test("tlsOpenapi:DescribeETLTask", async () => {
+    const taskId = `test-etl-task-${`${Math.random()}`.replace(".", "")}`;
+
+    const etlTaskDetail = await tlsOpenapiService.DescribeETLTask({
+      TaskId: taskId,
+    });
+    expect(etlTaskValidate.detail(etlTaskDetail)).toBe(true);
+  });
+
+  test("tlsOpenapi:DescribeETLTasks", async () => {
+    const projectCreated = await tlsOpenapiService.CreateProject({
+      ProjectName: `tls-nodejs-sdk-test-etl-project-${`${Math.random()}`.replace(".", "")}`,
+      Region,
+    });
+
+    // Test DescribeETLTasks with basic pagination
+    const etlTasks = await tlsOpenapiService.DescribeETLTasks({
+      ...commonQuery,
+      ProjectId: projectCreated.ProjectId,
+    });
+    expect(etlTaskValidate.list(etlTasks)).toBe(true);
+
+    // Test DescribeETLTasks with additional filters
+    const etlTasksFiltered = await tlsOpenapiService.DescribeETLTasks({
+      ...commonQuery,
+      ProjectId: projectCreated.ProjectId,
+      TaskName: "test-etl-task",
+      Status: "running",
+    });
+    expect(etlTaskValidate.list(etlTasksFiltered)).toBe(true);
+
+    // Test DescribeETLTasks with time range filters
+    const currentTime = Math.floor(Date.now() / 1000);
+    const etlTasksWithTimeRange = await tlsOpenapiService.DescribeETLTasks({
+      ...commonQuery,
+      ProjectId: projectCreated.ProjectId,
+      CreateTimeStart: currentTime - 3600,
+      CreateTimeEnd: currentTime + 3600,
+    });
+    expect(etlTaskValidate.list(etlTasksWithTimeRange)).toBe(true);
+
+    await tlsOpenapiService.DeleteProject({
+      ProjectId: projectCreated.ProjectId,
+    });
+  });
+
   test("tlsOpenapi:CancelDownloadTask", async () => {
     const taskId = `test-download-task-${`${Math.random()}`.replace(".", "")}`;
 
@@ -637,5 +856,212 @@ describe("tlsOpenapi test", () => {
       TaskId: taskId,
     });
     expect(downloadTaskValidate.cancel(cancelResult)).toBe(true);
+  });
+
+  test("tlsOpenapi:ActiveTlsAccount", async () => {
+    const activeResult = await tlsOpenapiService.ActiveTlsAccount({});
+    expect(activeTlsAccountValidate.active(activeResult)).toBe(true);
+  });
+
+  test("tlsOpenapi:ModifyETLTaskStatus", async () => {
+    const taskId = `test-etl-task-${`${Math.random()}`.replace(".", "")}`;
+
+    // Test enabling ETL task
+    const enableResult = await tlsOpenapiService.ModifyETLTaskStatus({
+      TaskId: taskId,
+      Enable: true,
+    });
+    expect(etlTaskValidate.modifyStatus(enableResult)).toBe(true);
+
+    // Test disabling ETL task
+    const disableResult = await tlsOpenapiService.ModifyETLTaskStatus({
+      TaskId: taskId,
+      Enable: false,
+    });
+    expect(etlTaskValidate.modifyStatus(disableResult)).toBe(true);
+  });
+
+  test("tlsOpenapi:ModifyETLTask", async () => {
+    const taskId = `test-etl-task-${`${Math.random()}`.replace(".", "")}`;
+
+    const modifyResult = await tlsOpenapiService.ModifyETLTask({
+      TaskId: taskId,
+      Name: `test-etl-task-name-${`${Math.random()}`.replace(".", "")}`,
+      Description: "This is a test ETL task",
+      Script: 'f_set("key","value")',
+      TargetResources: [
+        {
+          Alias: "test",
+          TopicId: "test-topic-id",
+          Region: "cn-beijing",
+          RoleTrn: "trn:iam::2100000001:role/TLSETLAccessForUserA",
+        },
+      ],
+    });
+    expect(etlValidate.modify(modifyResult)).toBe(true);
+  });
+
+  test("tlsOpenapi:CreateDownloadTask", async () => {
+    const projectCreated = await tlsOpenapiService.CreateProject({
+      ProjectName: `tls-nodejs-sdk-test-download-task-project-${`${Math.random()}`.replace(
+        ".",
+        ""
+      )}`,
+      Region,
+    });
+
+    const topicCreated = await tlsOpenapiService.CreateTopic({
+      ProjectId: projectCreated.ProjectId,
+      ShardCount: 1,
+      TopicName: `tls-nodejs-sdk-test-download-task-topic-${`${Math.random()}`.replace(".", "")}`,
+      Ttl: 1,
+    });
+
+    const startTime = Date.now() - 3600000;
+    const endTime = Date.now();
+
+    const downloadTaskCreated = await tlsOpenapiService.CreateDownloadTask({
+      TaskName: `test-download-task-${`${Math.random()}`.replace(".", "")}`,
+      TopicId: topicCreated.TopicId,
+      Query: "*",
+      StartTime: startTime,
+      EndTime: endTime,
+      DataFormat: "csv",
+      Sort: "asc",
+      Limit: 100,
+      Compression: "gzip",
+    });
+
+    expect(downloadTaskValidate.create(downloadTaskCreated)).toBe(true);
+    expect(downloadTaskCreated.TaskId).toBeDefined();
+    expect(typeof downloadTaskCreated.TaskId).toBe("string");
+
+    await tlsOpenapiService.DeleteTopic({
+      TopicId: topicCreated.TopicId,
+    });
+    await tlsOpenapiService.DeleteProject({
+      ProjectId: projectCreated.ProjectId,
+    });
+  });
+
+  test("tlsOpenapi:DescribeDownloadTasks", async () => {
+    const projectCreated = await tlsOpenapiService.CreateProject({
+      ProjectName: `tls-nodejs-sdk-test-download-project-${`${Math.random()}`.replace(".", "")}`,
+      Region,
+    });
+
+    const topicCreated = await tlsOpenapiService.CreateTopic({
+      ProjectId: projectCreated.ProjectId,
+      ShardCount: 1,
+      TopicName: `tls-nodejs-sdk-test-download-topic-${`${Math.random()}`.replace(".", "")}`,
+      Ttl: 1,
+    });
+
+    const downloadTasksList = await tlsOpenapiService.DescribeDownloadTasks({
+      TopicId: topicCreated.TopicId,
+      PageNumber: 1,
+      PageSize: 20,
+    });
+
+    expect(downloadTaskValidate.list(downloadTasksList)).toBe(true);
+
+    await tlsOpenapiService.DeleteTopic({
+      TopicId: topicCreated.TopicId,
+    });
+    await tlsOpenapiService.DeleteProject({
+      ProjectId: projectCreated.ProjectId,
+    });
+  });
+
+  test("tlsOpenapi:DescribeDownloadUrl", async () => {
+    // 创建一个下载任务来获取TaskId
+    const projectCreated = await tlsOpenapiService.CreateProject({
+      ProjectName: `tls-nodejs-sdk-test-download-project-${`${Math.random()}`.replace(".", "")}`,
+      Region,
+    });
+
+    const topicCreated = await tlsOpenapiService.CreateTopic({
+      ProjectId: projectCreated.ProjectId,
+      ShardCount: 1,
+      TopicName: `tls-nodejs-sdk-test-download-topic-${`${Math.random()}`.replace(".", "")}`,
+      Ttl: 1,
+    });
+
+    // 创建索引以便创建下载任务
+    await tlsOpenapiService.CreateIndex({
+      TopicId: topicCreated.TopicId,
+      FullText: {
+        CaseSensitive: false,
+        Delimiter: "_",
+        IncludeChinese: false,
+      },
+    });
+
+    // 首先搜索日志以创建下载任务
+    await tlsOpenapiService.SearchLogs({
+      StartTime: Math.floor(Date.now() / 1000) - 3600,
+      EndTime: Math.floor(Date.now() / 1000),
+      Limit: 1,
+      Query: "",
+      TopicId: topicCreated.TopicId,
+    });
+
+    // 假设我们有一个TaskId用于测试
+    const testTaskId = "4a9bd4bd-53f1-43ff-b88a-64ee1be5****";
+
+    // 测试DescribeDownloadUrl接口
+    const downloadUrlResult = await tlsOpenapiService.DescribeDownloadUrl({
+      TaskId: testTaskId,
+    });
+
+    expect(downloadUrlValidate.describe(downloadUrlResult)).toBe(true);
+    expect(downloadUrlResult.DownloadUrl).toBeTruthy();
+    expect(typeof downloadUrlResult.DownloadUrl).toBe("string");
+
+    // 清理资源
+    await tlsOpenapiService.DeleteTopic({
+      TopicId: topicCreated.TopicId,
+    });
+    await tlsOpenapiService.DeleteProject({
+      ProjectId: projectCreated.ProjectId,
+    });
+  });
+
+  test("tlsOpenapi:WebTracks", async () => {
+    const projectCreated = await tlsOpenapiService.CreateProject({
+      ProjectName: `tls-nodejs-sdk-test-topic-project-${`${Math.random()}`.replace(".", "")}`,
+      Region,
+    });
+
+    const topicCreated = await tlsOpenapiService.CreateTopic({
+      ProjectId: projectCreated.ProjectId,
+      ShardCount: 1,
+      TopicName: `tls-nodejs-sdk-test-topic-${`${Math.random()}`.replace(".", "")}`,
+      Ttl: 1,
+    });
+
+    const webTracksResult = await tlsOpenapiService.WebTracks({
+      ProjectId: projectCreated.ProjectId,
+      TopicId: topicCreated.TopicId,
+      Logs: [{ key1: "value1", key2: "value2" }],
+      Source: "test-source",
+    });
+    expect(webTracksResult).toEqual({});
+
+    await tlsOpenapiService.DeleteTopic({
+      TopicId: topicCreated.TopicId,
+    });
+    await tlsOpenapiService.DeleteProject({
+      ProjectId: projectCreated.ProjectId,
+    });
+  });
+
+  test("tlsOpenapi:DeleteETLTask", async () => {
+    const taskId = `test-etl-task-${`${Math.random()}`.replace(".", "")}`;
+
+    const deleteResult = await tlsOpenapiService.DeleteETLTask({
+      TaskId: taskId,
+    });
+    expect(etlValidate.delete(deleteResult)).toBe(true);
   });
 });
