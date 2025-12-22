@@ -1,3 +1,7 @@
+2025-12-22 Bumped to version v1.34.0
+- tls:
+  - 新增接口与存量接口参数补齐
+
 2025-12-11 Bumped to version v1.33.0
 - tls:
   - 新增接口以及类型
