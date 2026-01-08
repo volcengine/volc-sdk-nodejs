@@ -1,5 +1,5 @@
 import Ajv from "ajv";
-const ajv = new Ajv();
+const ajv = new Ajv({ allowUnionTypes: true });
 
 const baseResponseSchema = {
   type: "object",
@@ -265,14 +265,7 @@ export const logsValidate = {
   upload: ajv.compile({
     type: "string",
   }),
-  consume: ajv.compile({
-    type: "object",
-    properties: {
-      data: {
-        type: "object",
-      },
-    },
-  }),
+  consume: ajv.compile(baseResponseSchema),
 };
 
 export const hostGroupAutoUpdateValidate = {
@@ -996,6 +989,58 @@ export const traceValidate = {
   ),
 };
 
+export const describeTraceValidate = {
+  describe: ajv.compile(
+    getSchema({
+      Trace: {
+        type: "object",
+      },
+    })
+  ),
+};
+
+export const searchTracesValidate = {
+  search: ajv.compile(
+    getSchema({
+      Total: {
+        type: "number",
+      },
+      TraceInfos: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            TraceId: {
+              type: "string",
+            },
+            ServiceName: {
+              type: "string",
+            },
+            OperationName: {
+              type: "string",
+            },
+            Attributes: {
+              type: "object",
+            },
+            StartTime: {
+              type: "number",
+            },
+            EndTime: {
+              type: "number",
+            },
+            Duration: {
+              type: "number",
+            },
+            StatusCode: {
+              type: "string",
+            },
+          },
+        },
+      },
+    })
+  ),
+};
+
 export const logContextValidate = {
   describe: ajv.compile(
     getSchema({
@@ -1052,6 +1097,171 @@ export const histogramV1Validate = {
       },
       TotalCount: {
         type: "number",
+      },
+    })
+  ),
+};
+
+const shipperSchema = {
+  ContentInfo: {
+    type: "object",
+    properties: {
+      Format: {
+        type: "string",
+      },
+      CsvInfo: {
+        type: "object",
+        properties: {
+          Keys: {
+            type: "array",
+            items: {
+              type: "string",
+            },
+          },
+          Delimiter: {
+            type: "string",
+          },
+          EscapeChar: {
+            type: "string",
+          },
+          PrintHeader: {
+            type: "boolean",
+          },
+          NonFieldContent: {
+            type: "string",
+          },
+        },
+      },
+      JsonInfo: {
+        type: "object",
+        properties: {
+          Keys: {
+            type: "array",
+            items: {
+              type: "string",
+            },
+          },
+          Enable: {
+            type: "boolean",
+          },
+          Escape: {
+            type: "boolean",
+          },
+        },
+      },
+    },
+  },
+  CreateTime: {
+    type: "string",
+  },
+  DashboardId: {
+    type: "string",
+  },
+  KafkaShipperInfo: {
+    type: "object",
+    properties: {
+      EndTime: {
+        type: "number",
+      },
+      Compress: {
+        type: "string",
+      },
+      Instance: {
+        type: "string",
+      },
+      StartTime: {
+        type: "number",
+      },
+      KafkaTopic: {
+        type: "string",
+      },
+    },
+  },
+  ModifyTime: {
+    type: "string",
+  },
+  ProjectId: {
+    type: "string",
+  },
+  ProjectName: {
+    type: "string",
+  },
+  RoleTrn: {
+    type: "string",
+  },
+  ShipperEndTime: {
+    type: "number",
+  },
+  ShipperId: {
+    type: "string",
+  },
+  ShipperName: {
+    type: "string",
+  },
+  ShipperStartTime: {
+    type: "number",
+  },
+  ShipperType: {
+    type: "string",
+  },
+  Status: {
+    type: "boolean",
+  },
+  TopicId: {
+    type: "string",
+  },
+  TopicName: {
+    type: "string",
+  },
+  TosShipperInfo: {
+    type: "object",
+    properties: {
+      Bucket: {
+        type: "string",
+      },
+      Prefix: {
+        type: "string",
+      },
+      MaxSize: {
+        type: "number",
+      },
+      Interval: {
+        type: "number",
+      },
+      Compress: {
+        type: "string",
+      },
+      PartitionFormat: {
+        type: "string",
+      },
+    },
+  },
+};
+
+export const shipperValidate = {
+  delete: ajv.compile(getSchema(null)),
+  modify: ajv.compile(baseResponseSchema),
+  create: ajv.compile(
+    getSchema({
+      ShipperId: {
+        type: "string",
+      },
+    })
+  ),
+  detail: ajv.compile(getSchema(shipperSchema)),
+  list: ajv.compile(
+    getSchema({
+      Total: {
+        type: "number",
+      },
+      Shippers: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            ...shipperSchema,
+          },
+        },
       },
     })
   ),
@@ -1269,6 +1479,13 @@ const etlTaskListSchema = {
 };
 
 export const etlTaskValidate = {
+  create: ajv.compile(
+    getSchema({
+      TaskId: {
+        type: "string",
+      },
+    })
+  ),
   detail: ajv.compile(
     getSchema({
       ...etlTaskDetailSchema,
@@ -1296,4 +1513,540 @@ export const etlTaskValidate = {
 export const etlValidate = {
   delete: ajv.compile(baseResponseSchema),
   modify: ajv.compile(baseResponseSchema),
+};
+
+const importTaskSchema = {
+  TaskId: {
+    type: "string",
+  },
+  TaskName: {
+    type: "string",
+  },
+  Status: {
+    type: "string",
+  },
+  CreateTime: {
+    type: "string",
+  },
+  UpdateTime: {
+    type: "string",
+  },
+  StartTime: {
+    type: ["string", "null"],
+  },
+  EndTime: {
+    type: ["string", "null"],
+  },
+  Progress: {
+    type: "number",
+  },
+  TaskConfig: {
+    type: "object",
+    properties: {
+      ProjectId: {
+        type: "string",
+      },
+      TopicId: {
+        type: "string",
+      },
+      SourceConfig: {
+        type: "object",
+        properties: {
+          Type: {
+            type: "string",
+          },
+          Config: {
+            type: "object",
+          },
+        },
+      },
+      ScheduleConfig: {
+        type: ["object", "null"],
+        properties: {
+          Type: {
+            type: "string",
+          },
+          Config: {
+            type: "object",
+          },
+        },
+      },
+    },
+  },
+  Statistics: {
+    type: ["object", "null"],
+    properties: {
+      ImportedCount: {
+        type: "number",
+      },
+      FailedCount: {
+        type: "number",
+      },
+      TotalCount: {
+        type: "number",
+      },
+    },
+  },
+  ErrorInfo: {
+    type: ["object", "null"],
+    properties: {
+      ErrorCode: {
+        type: "string",
+      },
+      ErrorMessage: {
+        type: "string",
+      },
+    },
+  },
+};
+
+export const importTaskValidate = {
+  create: ajv.compile(
+    getSchema({
+      TaskId: {
+        type: "string",
+      },
+    })
+  ),
+  detail: ajv.compile(
+    getSchema({
+      TaskInfo: {
+        type: "object",
+        properties: {
+          ...importTaskSchema,
+        },
+      },
+    })
+  ),
+};
+
+const scheduleSqlTaskDetailSchema = {
+  TaskId: {
+    type: "string",
+  },
+  TaskName: {
+    type: "string",
+  },
+  Description: {
+    type: ["string", "null"],
+  },
+  SourceProjectID: {
+    type: "string",
+  },
+  SourceProjectName: {
+    type: "string",
+  },
+  SourceTopicID: {
+    type: "string",
+  },
+  SourceTopicName: {
+    type: "string",
+  },
+  DestRegion: {
+    type: "string",
+  },
+  DestProjectID: {
+    type: "string",
+  },
+  DestTopicName: {
+    type: "string",
+  },
+  DestTopicID: {
+    type: "string",
+  },
+  Status: {
+    type: "number",
+  },
+  ProcessStartTime: {
+    type: ["number", "null"],
+  },
+  ProcessEndTime: {
+    type: ["number", "null"],
+  },
+  RequestCycle: {
+    type: "object",
+    properties: {
+      ...requestCycleSchema,
+    },
+  },
+  ProcessTimeWindow: {
+    type: "string",
+  },
+  Query: {
+    type: "string",
+  },
+  ProcessSqlDelay: {
+    type: ["number", "null"],
+  },
+  MaxRetryTimes: {
+    type: "number",
+  },
+  MaxTimeout: {
+    type: "number",
+  },
+  TaskType: {
+    type: "number",
+  },
+  CreateTimeStamp: {
+    type: "number",
+  },
+  ModifyTimeStamp: {
+    type: "number",
+  },
+};
+
+// ScheduleSqlTask validators (Create/Delete/DescribeTask/DescribeTasks/ModifyStatus only)
+export const scheduleSqlTaskValidate = {
+  create: ajv.compile(
+    getSchema({
+      TaskId: {
+        type: "string",
+      },
+    })
+  ),
+  delete: ajv.compile(baseResponseSchema),
+  detail: ajv.compile(
+    getSchema({
+      ...scheduleSqlTaskDetailSchema,
+    })
+  ),
+  list: ajv.compile(
+    getSchema({
+      Total: {
+        type: "number",
+      },
+      Tasks: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            ...scheduleSqlTaskDetailSchema,
+          },
+        },
+      },
+    })
+  ),
+  modifyStatus: ajv.compile(baseResponseSchema),
+};
+
+const webhookContentTemplateSchema = {
+  Content: {
+    type: "string",
+  },
+};
+
+const emailContentTemplateSchema = {
+  Content: {
+    type: "string",
+  },
+  Subject: {
+    type: "string",
+  },
+  Locale: {
+    type: "string",
+  },
+};
+
+const vmsContentTemplateSchema = {
+  Content: {
+    type: "string",
+  },
+  Locale: {
+    type: "string",
+  },
+};
+
+const smsContentTemplateSchema = {
+  Content: {
+    type: "string",
+  },
+  Locale: {
+    type: "string",
+  },
+};
+
+const larkContentTemplateSchema = {
+  Content: {
+    type: "string",
+  },
+  Title: {
+    type: "string",
+  },
+  Locale: {
+    type: "string",
+  },
+};
+
+const dingTalkContentTemplateSchema = {
+  Content: {
+    type: "string",
+  },
+  Title: {
+    type: "string",
+  },
+  Locale: {
+    type: "string",
+  },
+};
+
+const weChatContentTemplateSchema = {
+  Content: {
+    type: "string",
+  },
+  Title: {
+    type: "string",
+  },
+  Locale: {
+    type: "string",
+  },
+};
+
+const alarmContentTemplateItemSchema = {
+  AlarmContentTemplateName: {
+    type: "string",
+  },
+  AlarmContentTemplateId: {
+    type: "string",
+  },
+  Webhook: {
+    type: "object",
+    properties: {
+      ...webhookContentTemplateSchema,
+    },
+  },
+  Email: {
+    type: "object",
+    properties: {
+      ...emailContentTemplateSchema,
+    },
+  },
+  Vms: {
+    type: "object",
+    properties: {
+      ...vmsContentTemplateSchema,
+    },
+  },
+  Sms: {
+    type: "object",
+    properties: {
+      ...smsContentTemplateSchema,
+    },
+  },
+  Lark: {
+    type: "object",
+    properties: {
+      ...larkContentTemplateSchema,
+    },
+  },
+  DingTalk: {
+    type: "object",
+    properties: {
+      ...dingTalkContentTemplateSchema,
+    },
+  },
+  WeChat: {
+    type: "object",
+    properties: {
+      ...weChatContentTemplateSchema,
+    },
+  },
+  CreateTime: {
+    type: "string",
+  },
+  ModifyTime: {
+    type: "string",
+  },
+  IsDefault: {
+    type: "boolean",
+  },
+};
+
+// AlarmContentTemplate validators for Create/Delete/Modify/List, based on alarmContentTemplateItemSchema and baseResponseSchema
+export const alarmContentTemplateValidate = {
+  create: ajv.compile(
+    getSchema({
+      AlarmContentTemplateId: {
+        type: "string",
+      },
+    })
+  ),
+  delete: ajv.compile(baseResponseSchema),
+  modify: ajv.compile(baseResponseSchema),
+  list: ajv.compile(
+    getSchema({
+      Total: {
+        type: "number",
+      },
+      AlarmContentTemplates: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            ...alarmContentTemplateItemSchema,
+          },
+        },
+      },
+    })
+  ),
+};
+
+const alarmWebhookHeaderSchema = {
+  Key: {
+    type: "string",
+  },
+  Value: {
+    type: "string",
+  },
+};
+
+const alarmWebhookIntegrationSchema = {
+  WebhookID: {
+    type: "string",
+  },
+  WebhookName: {
+    type: "string",
+  },
+  WebhookType: {
+    type: "string",
+  },
+  WebhookUrl: {
+    type: "string",
+  },
+  WebhookSecret: {
+    type: ["string", "null"],
+  },
+  WebhookMethod: {
+    type: ["string", "null"],
+  },
+  WebhookHeaders: {
+    type: "array",
+    items: {
+      type: "object",
+      properties: {
+        ...alarmWebhookHeaderSchema,
+      },
+    },
+  },
+  CreateTime: {
+    type: "string",
+  },
+  ModifyTime: {
+    type: "string",
+  },
+};
+
+// AlarmWebhookIntegration validators for Create/Delete/Modify/List, based on alarmWebhookIntegrationSchema and baseResponseSchema
+export const alarmWebhookIntegrationValidate = {
+  create: ajv.compile(
+    getSchema({
+      AlarmWebhookIntegrationId: {
+        type: "string",
+      },
+    })
+  ),
+  delete: ajv.compile(baseResponseSchema),
+  modify: ajv.compile(baseResponseSchema),
+  list: ajv.compile(
+    getSchema({
+      Total: {
+        type: "number",
+      },
+      WebhookIntegrations: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            ...alarmWebhookIntegrationSchema,
+          },
+        },
+      },
+    })
+  ),
+};
+
+export const consumerGroupValidate = {
+  delete: ajv.compile(baseResponseSchema),
+  modify: ajv.compile(baseResponseSchema),
+};
+
+export const describeConsumerGroupsValidate = {
+  list: ajv.compile(
+    getSchema({
+      ConsumerGroups: {
+        type: "array",
+        items: {
+          type: "object",
+        },
+      },
+      Total: {
+        type: "number",
+      },
+      DashboardId: {
+        type: ["string", "null"],
+      },
+    })
+  ),
+};
+
+export const describeCheckPointValidate = {
+  describe: ajv.compile(
+    getSchema({
+      ShardID: {
+        type: "number",
+      },
+      Checkpoint: {
+        type: "string",
+      },
+    })
+  ),
+};
+
+export const modifyCheckPointValidate = {
+  modify: ajv.compile(baseResponseSchema),
+};
+
+export const resetCheckPointValidate = {
+  reset: ajv.compile(baseResponseSchema),
+};
+
+const resourceTagSchema = {
+  ResourceType: {
+    type: "string",
+  },
+  ResourceId: {
+    type: "string",
+  },
+  TagKey: {
+    type: "string",
+  },
+  TagValue: {
+    type: "string",
+  },
+};
+
+export const listTagsForResourcesValidate = {
+  list: ajv.compile(
+    getSchema({
+      ResourceTags: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            ...resourceTagSchema,
+          },
+        },
+      },
+      NextToken: {
+        type: ["string", "null"],
+      },
+    })
+  ),
+};
+
+export const tagResourcesValidate = {
+  tag: ajv.compile(baseResponseSchema),
+};
+
+export const untagResourcesValidate = {
+  untag: ajv.compile(baseResponseSchema),
 };

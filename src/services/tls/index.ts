@@ -1,5 +1,5 @@
 import Base from "./service";
-import {
+import type {
   IAlarmNoticeGroupCreateReq,
   IAlarmNoticeGroupCreateResp,
   IAlarmNoticeGroupDeleteReq,
@@ -20,8 +20,6 @@ import {
   IDescribeHostGroupsReq,
   IDescribeHostsReq,
   IDescribeIndexReq,
-  IDescribeLogContextReq,
-  IDescribeLogContextResp,
   IDescribeNotifyGroupReq,
   IDescribeProjectReq,
   IDescribeProjectsReq,
@@ -30,6 +28,8 @@ import {
   IDescribeShardsReq,
   IDescribeCursorReq,
   IDescribeCursorResp,
+  IDescribeShipperReq,
+  IDescribeShipperResp,
   IDescribeTopicReq,
   IDescribeTopicsReq,
   IEsclientResult,
@@ -88,6 +88,10 @@ import {
   ITraceInsDescribeResp,
   IDescribeTraceInstancesReq,
   ITraceInsDescribeTraceInstancesResp,
+  IDescribeTraceReq,
+  IDescribeTraceResp,
+  ISearchTracesReq,
+  ISearchTracesResp,
   ITraceInsCreateResp,
   ITraceInsDeleteResp,
   ITraceInsModifyResp,
@@ -95,14 +99,26 @@ import {
   ITraceInsCreateReq,
   ITraceInsModifyReq,
   ITraceInsDeleteReq,
-  IDescribeHistogramV1Req,
-  IDescribeHistogramV1Resp,
   IDeleteAbnormalHostsReq,
   IDeleteAbnormalHostsResp,
   IModifyHostGroupsAutoUpdateReq,
   IModifyHostGroupsAutoUpdateResp,
   ICancelDownloadTaskReq,
   ICancelDownloadTaskResp,
+  ICreateConsumerGroupReq,
+  ICreateConsumerGroupResp,
+  IDescribeConsumerGroupsReq,
+  IDescribeConsumerGroupsResp,
+  IModifyConsumerGroupReq,
+  IModifyConsumerGroupResp,
+  IConsumerHeartbeatReq,
+  IConsumerHeartbeatResp,
+  ICloseKafkaConsumerReq,
+  ICloseKafkaConsumerResp,
+  IOpenKafkaConsumerReq,
+  IOpenKafkaConsumerResp,
+  IDescribeKafkaConsumerReq,
+  IDescribeKafkaConsumerResp,
   IGetAccountStatusReq,
   IGetAccountStatusResp,
   IActiveTlsAccountReq,
@@ -111,8 +127,6 @@ import {
   IModifyETLTaskStatusResp,
   IWebTracksReq,
   IWebTracksResp,
-  IConsumeLogsReq,
-  IConsumeLogsResp,
   IDownloadTaskCreateReq,
   IDownloadTaskCreateResp,
   IDescribeDownloadTasksReq,
@@ -127,6 +141,72 @@ import {
   IDescribeETLTasksResp,
   IModifyETLTaskReq,
   IModifyETLTaskResp,
+  ICreateETLTaskReq,
+  ICreateETLTaskResp,
+  IDeleteImportTaskReq,
+  IDeleteImportTaskResp,
+  ICreateImportTaskReq,
+  ICreateImportTaskResp,
+  IDescribeImportTaskReq,
+  IDescribeImportTaskResp,
+  IDeleteShipperReq,
+  IDeleteShipperResp,
+  IModifyShipperReq,
+  IModifyShipperResp,
+  ICreateShipperReq,
+  ICreateShipperResp,
+  IDescribeShippersReq,
+  IDescribeShippersResp,
+  ICreateScheduleSqlTaskReq,
+  ICreateScheduleSqlTaskResp,
+  IDeleteScheduleSqlTaskReq,
+  IDeleteScheduleSqlTaskResp,
+  IDescribeScheduleSqlTaskReq,
+  IDescribeScheduleSqlTaskResp,
+  IDescribeScheduleSqlTasksReq,
+  IDescribeScheduleSqlTasksResp,
+  IModifyScheduleSqlTaskReq,
+  IModifyScheduleSqlTaskResp,
+  ICreateAlarmContentTemplateReq,
+  ICreateAlarmContentTemplateResp,
+  IDeleteAlarmContentTemplateReq,
+  IDeleteAlarmContentTemplateResp,
+  IModifyAlarmContentTemplateReq,
+  IModifyAlarmContentTemplateResp,
+  IDescribeAlarmContentTemplatesReq,
+  IDescribeAlarmContentTemplatesResp,
+  ICreateAlarmWebhookIntegrationReq,
+  ICreateAlarmWebhookIntegrationResp,
+  IDeleteAlarmWebhookIntegrationReq,
+  IDeleteAlarmWebhookIntegrationResp,
+  IModifyAlarmWebhookIntegrationReq,
+  IModifyAlarmWebhookIntegrationResp,
+  IDescribeAlarmWebhookIntegrationsReq,
+  IDescribeAlarmWebhookIntegrationsResp,
+  IDeleteConsumerGroupReq,
+  IDeleteConsumerGroupResp,
+  IDescribeCheckPointReq,
+  IDescribeCheckPointResp,
+  IModifyCheckPointReq,
+  IModifyCheckPointResp,
+  IResetCheckPointReq,
+  IResetCheckPointResp,
+  IListTagsForResourcesReq,
+  IListTagsForResourcesResp,
+  IAddTagsToResourceReq,
+  IAddTagsToResourceResp,
+  ITagResourcesReq,
+  ITagResourcesResp,
+  IUntagResourcesReq,
+  IUntagResourcesResp,
+  IRemoveTagsFromResourceReq,
+  IRemoveTagsFromResourceResp,
+  IDescribeHistogramV1Req,
+  IDescribeHistogramV1Resp,
+  IConsumeLogsReq,
+  IConsumeLogsResp,
+  IDescribeLogContextReq,
+  IDescribeLogContextResp,
 } from "./types";
 
 const SERVICE = "TLS";
@@ -223,6 +303,7 @@ export class TlsService extends Base {
 
   DescribeCursor = this.createAPI<IDescribeCursorReq, IDescribeCursorResp>("DescribeCursor", {
     method: "GET",
+    queryKeys: ["TopicId", "ShardId"],
   });
 
   // collection and configuration related interfaces
@@ -380,7 +461,14 @@ export class TlsService extends Base {
   );
 
   ConsumeLogs = this.createAPI<IConsumeLogsReq, IConsumeLogsResp>("ConsumeLogs", {
-    method: "POST",
+    method: "GET",
+    queryKeys: ["TopicId", "ShardId"],
+    axiosConfig: {
+      responseType: "arraybuffer",
+      headers: {
+        Accept: "application/x-protobuf",
+      },
+    },
   });
 
   DescribeLogContext = this.createAPI<IDescribeLogContextReq, IDescribeLogContextResp>(
@@ -418,13 +506,6 @@ export class TlsService extends Base {
     }
   );
 
-  CreateDownloadTask = this.createAPI<IDownloadTaskCreateReq, IDownloadTaskCreateResp>(
-    "CreateDownloadTask",
-    {
-      method: "POST",
-    }
-  );
-
   DescribeTraceInstance = this.createAPI<IDescribeTraceInstanceReq, ITraceInsDescribeResp>(
     "DescribeTraceInstance",
     {
@@ -432,12 +513,38 @@ export class TlsService extends Base {
     }
   );
 
+  DescribeShipper = this.createAPI<IDescribeShipperReq, IDescribeShipperResp>("DescribeShipper", {
+    method: "GET",
+  });
+
+  DescribeShippers = this.createAPI<IDescribeShippersReq, IDescribeShippersResp>(
+    "DescribeShippers",
+    {
+      method: "GET",
+    }
+  );
+
+  DescribeTrace = this.createAPI<IDescribeTraceReq, IDescribeTraceResp>("DescribeTrace", {
+    method: "POST",
+  });
+
+  SearchTraces = this.createAPI<ISearchTracesReq, ISearchTracesResp>("SearchTraces", {
+    method: "POST",
+  });
+
   DescribeETLTask = this.createAPI<IDescribeETLTaskReq, IDescribeETLTaskResp>("DescribeETLTask", {
     method: "GET",
   });
 
   DescribeETLTasks = this.createAPI<IDescribeETLTasksReq, IDescribeETLTasksResp>(
     "DescribeETLTasks",
+    {
+      method: "GET",
+    }
+  );
+
+  DescribeImportTask = this.createAPI<IDescribeImportTaskReq, IDescribeImportTaskResp>(
+    "DescribeImportTask",
     {
       method: "GET",
     }
@@ -457,8 +564,128 @@ export class TlsService extends Base {
     }
   );
 
+  CreateImportTask = this.createAPI<ICreateImportTaskReq, ICreateImportTaskResp>(
+    "CreateImportTask",
+    {
+      method: "POST",
+    }
+  );
+
+  // consumer group related interface
+  // 消费组相关接口
+  CreateConsumerGroup = this.createAPI<ICreateConsumerGroupReq, ICreateConsumerGroupResp>(
+    "CreateConsumerGroup",
+    {
+      method: "POST",
+    }
+  );
+
+  DeleteShipper = this.createAPI<IDeleteShipperReq, IDeleteShipperResp>("DeleteShipper", {
+    method: "DELETE",
+  });
+
+  DescribeConsumerGroups = this.createAPI<IDescribeConsumerGroupsReq, IDescribeConsumerGroupsResp>(
+    "DescribeConsumerGroups",
+    {
+      method: "GET",
+    }
+  );
+
+  ModifyConsumerGroup = this.createAPI<IModifyConsumerGroupReq, IModifyConsumerGroupResp>(
+    "ModifyConsumerGroup",
+    {
+      method: "PUT",
+    }
+  );
+
+  DeleteConsumerGroup = this.createAPI<IDeleteConsumerGroupReq, IDeleteConsumerGroupResp>(
+    "DeleteConsumerGroup",
+    {
+      method: "DELETE",
+    }
+  );
+
+  DescribeCheckPoint = this.createAPI<IDescribeCheckPointReq, IDescribeCheckPointResp>(
+    "DescribeCheckPoint",
+    {
+      method: "GET",
+    }
+  );
+
+  ModifyCheckPoint = this.createAPI<IModifyCheckPointReq, IModifyCheckPointResp>(
+    "ModifyCheckPoint",
+    {
+      method: "PUT",
+    }
+  );
+
+  ResetCheckPoint = this.createAPI<IResetCheckPointReq, IResetCheckPointResp>("ResetCheckPoint", {
+    method: "PUT",
+  });
+
+  ListTagsForResources = this.createAPI<IListTagsForResourcesReq, IListTagsForResourcesResp>(
+    "ListTagsForResources",
+    {
+      method: "POST",
+    }
+  );
+
+  AddTagsToResource = this.createAPI<IAddTagsToResourceReq, IAddTagsToResourceResp>(
+    "AddTagsToResource",
+    {
+      method: "POST",
+    }
+  );
+
+  TagResources = this.createAPI<ITagResourcesReq, ITagResourcesResp>("TagResources", {
+    method: "POST",
+  });
+
+  UntagResources = this.createAPI<IUntagResourcesReq, IUntagResourcesResp>("UntagResources", {
+    method: "POST",
+  });
+
+  RemoveTagsFromResource = this.createAPI<IRemoveTagsFromResourceReq, IRemoveTagsFromResourceResp>(
+    "RemoveTagsFromResource",
+    {
+      method: "POST",
+    }
+  );
+
   CancelDownloadTask = this.createAPI<ICancelDownloadTaskReq, ICancelDownloadTaskResp>(
     "CancelDownloadTask",
+    {
+      method: "POST",
+    }
+  );
+
+  ModifyShipper = this.createAPI<IModifyShipperReq, IModifyShipperResp>("ModifyShipper", {
+    method: "PUT",
+  });
+
+  CloseKafkaConsumer = this.createAPI<ICloseKafkaConsumerReq, ICloseKafkaConsumerResp>(
+    "CloseKafkaConsumer",
+    {
+      method: "PUT",
+    }
+  );
+
+  OpenKafkaConsumer = this.createAPI<IOpenKafkaConsumerReq, IOpenKafkaConsumerResp>(
+    "OpenKafkaConsumer",
+    {
+      method: "PUT",
+    }
+  );
+
+  DescribeKafkaConsumer = this.createAPI<IDescribeKafkaConsumerReq, IDescribeKafkaConsumerResp>(
+    "DescribeKafkaConsumer",
+    {
+      method: "GET",
+    }
+  );
+
+  ConsumerHeartbeat = this.createAPI<IConsumerHeartbeatReq, IConsumerHeartbeatResp>(
+    "ConsumerHeartbeat",
     {
       method: "POST",
     }
@@ -468,6 +695,13 @@ export class TlsService extends Base {
     "ModifyETLTaskStatus",
     {
       method: "PUT",
+    }
+  );
+
+  CreateDownloadTask = this.createAPI<IDownloadTaskCreateReq, IDownloadTaskCreateResp>(
+    "CreateDownloadTask",
+    {
+      method: "POST",
     }
   );
 
@@ -493,8 +727,114 @@ export class TlsService extends Base {
     method: "PUT",
   });
 
+  CreateETLTask = this.createAPI<ICreateETLTaskReq, ICreateETLTaskResp>("CreateETLTask", {
+    method: "POST",
+  });
+
   DeleteETLTask = this.createAPI<IDeleteETLTaskReq, IDeleteETLTaskResp>("DeleteETLTask", {
     method: "DELETE",
+  });
+
+  DeleteImportTask = this.createAPI<IDeleteImportTaskReq, IDeleteImportTaskResp>(
+    "DeleteImportTask",
+    {
+      method: "DELETE",
+    }
+  );
+
+  CreateShipper = this.createAPI<ICreateShipperReq, ICreateShipperResp>("CreateShipper", {
+    method: "POST",
+  });
+
+  CreateScheduleSqlTask = this.createAPI<ICreateScheduleSqlTaskReq, ICreateScheduleSqlTaskResp>(
+    "CreateScheduleSqlTask",
+    {
+      method: "POST",
+    }
+  );
+
+  DeleteScheduleSqlTask = this.createAPI<IDeleteScheduleSqlTaskReq, IDeleteScheduleSqlTaskResp>(
+    "DeleteScheduleSqlTask",
+    {
+      method: "DELETE",
+    }
+  );
+
+  DescribeScheduleSqlTask = this.createAPI<
+    IDescribeScheduleSqlTaskReq,
+    IDescribeScheduleSqlTaskResp
+  >("DescribeScheduleSqlTask", {
+    method: "GET",
+  });
+
+  DescribeScheduleSqlTasks = this.createAPI<
+    IDescribeScheduleSqlTasksReq,
+    IDescribeScheduleSqlTasksResp
+  >("DescribeScheduleSqlTasks", {
+    method: "GET",
+  });
+
+  ModifyScheduleSqlTask = this.createAPI<IModifyScheduleSqlTaskReq, IModifyScheduleSqlTaskResp>(
+    "ModifyScheduleSqlTask",
+    {
+      method: "PUT",
+    }
+  );
+
+  CreateAlarmContentTemplate = this.createAPI<
+    ICreateAlarmContentTemplateReq,
+    ICreateAlarmContentTemplateResp
+  >("CreateAlarmContentTemplate", {
+    method: "POST",
+  });
+
+  DeleteAlarmContentTemplate = this.createAPI<
+    IDeleteAlarmContentTemplateReq,
+    IDeleteAlarmContentTemplateResp
+  >("DeleteAlarmContentTemplate", {
+    method: "DELETE",
+  });
+
+  ModifyAlarmContentTemplate = this.createAPI<
+    IModifyAlarmContentTemplateReq,
+    IModifyAlarmContentTemplateResp
+  >("ModifyAlarmContentTemplate", {
+    method: "PUT",
+  });
+
+  DescribeAlarmContentTemplates = this.createAPI<
+    IDescribeAlarmContentTemplatesReq,
+    IDescribeAlarmContentTemplatesResp
+  >("DescribeAlarmContentTemplates", {
+    method: "GET",
+  });
+
+  CreateAlarmWebhookIntegration = this.createAPI<
+    ICreateAlarmWebhookIntegrationReq,
+    ICreateAlarmWebhookIntegrationResp
+  >("CreateAlarmWebhookIntegration", {
+    method: "POST",
+  });
+
+  DeleteAlarmWebhookIntegration = this.createAPI<
+    IDeleteAlarmWebhookIntegrationReq,
+    IDeleteAlarmWebhookIntegrationResp
+  >("DeleteAlarmWebhookIntegration", {
+    method: "DELETE",
+  });
+
+  ModifyAlarmWebhookIntegration = this.createAPI<
+    IModifyAlarmWebhookIntegrationReq,
+    IModifyAlarmWebhookIntegrationResp
+  >("ModifyAlarmWebhookIntegration", {
+    method: "PUT",
+  });
+
+  DescribeAlarmWebhookIntegrations = this.createAPI<
+    IDescribeAlarmWebhookIntegrationsReq,
+    IDescribeAlarmWebhookIntegrationsResp
+  >("DescribeAlarmWebhookIntegrations", {
+    method: "GET",
   });
 }
 export const defaultService = new TlsService();

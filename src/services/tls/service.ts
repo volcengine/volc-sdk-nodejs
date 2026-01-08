@@ -78,7 +78,13 @@ export default class Service {
   }
 
   createAPI<RequestData, Result>(Path: string, createParams?: TlsCreateAPIParams) {
-    const { method = "GET", version: versionFromParam } = createParams || {};
+    const {
+      method = "GET",
+      version: versionFromParam,
+      queryKeys = [],
+      axiosConfig: axiosConfigFromCreateParams,
+    } = createParams || {};
+    const queryKeySet = queryKeys.length ? new Set(queryKeys) : undefined;
     return async (requestData: RequestData, config?: AxiosRequestConfig) => {
       const {
         accessKeyId,
@@ -96,17 +102,35 @@ export default class Service {
       if (!accessKeyId || !secretKey || !host)
         throw new Error(`[tls-node-sdk] host and accessKeyId and secretKey is necessary`);
       const requestObj: any = {
+        ...(axiosConfigFromCreateParams ?? {}),
         region,
         method,
         pathname: `/${Path}`,
         ...config,
         headers: {
+          ...axiosConfigFromCreateParams?.headers,
           ...config?.headers,
           "x-tls-apiversion": version,
         },
       };
       if (method === "GET") {
-        requestObj.params = requestData;
+        if (queryKeys.length === 0) {
+          requestObj.params = requestData;
+        } else {
+          // 需要将 queryKeys 以外的参数放到 body 中
+          const query: Record<string, unknown> = {};
+          const body: Record<string, unknown> = {};
+          for (const [key, val] of Object.entries(requestData as Record<string, unknown>)) {
+            if (queryKeySet?.has(key)) {
+              if (val !== undefined) query[key] = val;
+              continue;
+            }
+            body[key] = val;
+          }
+          requestObj.params = query;
+          requestObj.body = body;
+          requestObj.data = body;
+        }
       } else {
         requestObj.headers["content-type"] = "application/json";
         requestObj.body = requestData;
