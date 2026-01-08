@@ -1,13 +1,15 @@
-const { tlsOpenapi } = require("@volcengine/openapi");
-export async function main(AccessKeyId, SecretKey, SessionToken) {
+const { tlsOpenapi } = require("../../../lib");
+const { getDefaultOption } = require("../../../lib/base/utils");
+
+async function main(AccessKeyId, SecretKey, SessionToken) {
   const tlsOpenapiService = tlsOpenapi.defaultService;
-  // tls的openApi需要设置host
-  tlsOpenapiService.setHost("your host");
-  // 指定host对应的region，如不设置默认region为 cn-north-1
-  tlsOpenapiService.setRegion("your region");
-  // 设置aksk
-  tlsOpenapiService.setSecretKey(SecretKey);
-  tlsOpenapiService.setAccessKeyId(AccessKeyId);
+  const defaultOption = getDefaultOption();
+
+  tlsOpenapiService.setHost("tls-cn-chongqing-sdv.volces.com");
+  tlsOpenapiService.setRegion("cn-chongqing-sdv");
+  tlsOpenapiService.setAccessKeyId(AccessKeyId ?? defaultOption.accessKeyId);
+  tlsOpenapiService.setSecretKey(SecretKey ?? defaultOption.secretKey);
+
   // 设置协议版本，如不设置则默认是https
   tlsOpenapiService.setProtocol("http:");
   // 设置openApi版本，如不设置默认为0.2.0
@@ -26,3 +28,5 @@ export async function main(AccessKeyId, SecretKey, SessionToken) {
     ProjectId: "项目ID",
   });
 }
+
+main();
