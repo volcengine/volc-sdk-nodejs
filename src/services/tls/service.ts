@@ -113,24 +113,25 @@ export default class Service {
           "x-tls-apiversion": version,
         },
       };
-      if (method === "GET") {
-        if (queryKeys.length === 0) {
-          requestObj.params = requestData;
-        } else {
-          // 需要将 queryKeys 以外的参数放到 body 中
-          const query: Record<string, unknown> = {};
-          const body: Record<string, unknown> = {};
-          for (const [key, val] of Object.entries(requestData as Record<string, unknown>)) {
-            if (queryKeySet?.has(key)) {
-              if (val !== undefined) query[key] = val;
-              continue;
-            }
-            body[key] = val;
+
+      if (queryKeys.length > 0) {
+        const query: Record<string, unknown> = {};
+        const body: Record<string, unknown> = {};
+        for (const [key, val] of Object.entries(requestData as Record<string, unknown>)) {
+          if (queryKeySet?.has(key)) {
+            if (val !== undefined) query[key] = val;
+            continue;
           }
-          requestObj.params = query;
-          requestObj.body = body;
-          requestObj.data = body;
+          body[key] = val;
         }
+        requestObj.params = query;
+        requestObj.body = body;
+        requestObj.data = body;
+        if (method === "POST") {
+          requestObj.headers["content-type"] = "application/json";
+        }
+      } else if (method === "GET") {
+        requestObj.params = requestData;
       } else {
         requestObj.headers["content-type"] = "application/json";
         requestObj.body = requestData;

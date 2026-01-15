@@ -64,6 +64,104 @@ const commonQuery = {
   PageSize: 10,
 };
 
+function generateRandomId() {
+  return Math.random().toString(36).substring(2, 8);
+}
+
+async function writeLogsToTopic({
+  tlsOpenapiService,
+  tlsOpenapi,
+  topicId,
+  logGroupCount = 1000,
+  logCountPerGroup = 100,
+}) {
+  const logGroups = [];
+  for (let i = 0; i < logGroupCount; i++) {
+    const logs = [];
+    for (let j = 0; j < logCountPerGroup; j++) {
+      logs.push({
+        Time: Date.now(),
+        Contents: [
+          { Key: "index", Value: `${i}-${j}` },
+          { Key: "message", Value: `test log message ${i}-${j}` },
+          { Key: "level", Value: "INFO" },
+        ],
+      });
+    }
+    logGroups.push({
+      Logs: logs,
+      Source: "test-source",
+      LogTags: [{ Key: "env", Value: "test" }],
+      FileName: "test.log",
+      ContextFlow: `context-${i}`,
+    });
+  }
+
+  const logsBuffer = await tlsOpenapi.TlsService.objToProtoBuffer({
+    LogGroups: logGroups,
+  });
+
+  await tlsOpenapiService.PutLogs({
+    TopicId: topicId,
+    CompressType: "lz4",
+    LogGroupList: logsBuffer,
+  });
+}
+
+async function cancelDownloadTaskWithRaceTolerance({ tlsOpenapiService, taskId, topicId }) {
+  try {
+    const cancelResult = await tlsOpenapiService.CancelDownloadTask({
+      TaskId: taskId,
+    });
+    return { cancelResult };
+  } catch (e) {
+    const terminal = new Set(["success", "created_cut", "fail", "cancel", "incomplete"]);
+    const status = e?.response?.status;
+    const errData = e?.response?.data;
+    const errText = typeof errData === "string" ? errData : JSON.stringify(errData ?? {});
+    const maybeAlreadyDone =
+      (status === 400 || status === 404 || status === 409) &&
+      /cancel|task|status|already|finish|success|complete|done/i.test(errText);
+
+    if (topicId) {
+      for (let i = 0; i < 3; i++) {
+        let tasksResp;
+        try {
+          tasksResp = await tlsOpenapiService.DescribeDownloadTasks({
+            TopicId: topicId,
+            PageNumber: 1,
+            PageSize: 20,
+          });
+        } catch (_) {
+          tasksResp = undefined;
+        }
+
+        const task = tasksResp?.Tasks?.find((t) => t?.TaskId === taskId);
+        if (task) {
+          if (terminal.has(task.TaskStatus)) {
+            if (task.TaskStatus === "success") {
+              console.warn(
+                `[tlsOpenapi:CancelDownloadTask] skip cancel: task already success. taskId=${taskId}, topicId=${topicId}`
+              );
+            }
+            return { terminalTaskStatus: task.TaskStatus };
+          }
+          throw e;
+        }
+        await new Promise((r) => setTimeout(r, 200));
+      }
+    }
+
+    if (maybeAlreadyDone) {
+      console.warn(
+        `[tlsOpenapi:CancelDownloadTask] skip cancel: task may already completed. taskId=${taskId}, topicId=${topicId}, status=${status}`
+      );
+      return { cancelSkipped: true };
+    }
+    throw e;
+  }
+}
+
 const describeName = hasEnv ? "tlsOpenapi test" : "Skip TLS integration tests: missing env";
 const describeFn = hasEnv ? describe : describe.skip;
 
@@ -80,7 +178,9 @@ describeFn(describeName, () => {
             `[Test Error] ${name} config:\n`,
             e?.config,
             "\nresponse data:",
-            e?.response?.data
+            e?.response?.data,
+            "\nresponse headers:",
+            e?.response?.headers
           );
           throw e;
         }
@@ -91,9 +191,18 @@ describeFn(describeName, () => {
   Object.assign(test, originalTest);
   global.test = test;
 
+  const TLS_TOS_BUCKET = process.env.TLS_TOS_BUCKET || "";
+  const TLS_TOS_PREFIX = process.env.TLS_TOS_PREFIX || "tls-nodejs-sdk-test";
+  const hasTosEnv = !!TLS_TOS_BUCKET;
+  const testTos = hasTosEnv ? test : test.skip;
+
+  const TLS_RECEIVER_NAME = process.env.TLS_RECEIVER_NAME || "";
+  const hasReceiverEnv = !!TLS_RECEIVER_NAME;
+  const testAlarm = hasReceiverEnv ? test : test.skip;
+
   test("tlsOpenapi:Project", async () => {
     const projectCreated = await tlsOpenapiService.CreateProject({
-      ProjectName: `tls-nodejs-sdk-test-project-${`${Math.random()}`.replace(".", "")}`,
+      ProjectName: `tls-nodejs-sdk-test-project-${generateRandomId()}`,
       Region,
     });
     expect(projectValidate.create(projectCreated)).toBe(true);
@@ -122,14 +231,14 @@ describeFn(describeName, () => {
 
   test("tlsOpenapi:Topic", async () => {
     const projectCreated = await tlsOpenapiService.CreateProject({
-      ProjectName: `tls-nodejs-sdk-test-topic-project-${`${Math.random()}`.replace(".", "")}`,
+      ProjectName: `tls-nodejs-sdk-test-topic-project-${generateRandomId()}`,
       Region,
     });
 
     const topicCreated = await tlsOpenapiService.CreateTopic({
       ProjectId: projectCreated.ProjectId,
       ShardCount: 1,
-      TopicName: `tls-nodejs-sdk-test-topic-${`${Math.random()}`.replace(".", "")}`,
+      TopicName: `tls-nodejs-sdk-test-topic-${generateRandomId()}`,
       Ttl: 1,
     });
     expect(topicValidate.create(topicCreated)).toBe(true);
@@ -163,14 +272,14 @@ describeFn(describeName, () => {
 
   test("tlsOpenapi:Index", async () => {
     const projectCreated = await tlsOpenapiService.CreateProject({
-      ProjectName: `tls-nodejs-sdk-test-topic-project-${`${Math.random()}`.replace(".", "")}`,
+      ProjectName: `tls-nodejs-sdk-test-topic-project-${generateRandomId()}`,
       Region,
     });
 
     const topicCreated = await tlsOpenapiService.CreateTopic({
       ProjectId: projectCreated.ProjectId,
       ShardCount: 1,
-      TopicName: `tls-nodejs-sdk-test-topic-${`${Math.random()}`.replace(".", "")}`,
+      TopicName: `tls-nodejs-sdk-test-topic-${generateRandomId()}`,
       Ttl: 1,
     });
 
@@ -211,14 +320,14 @@ describeFn(describeName, () => {
 
   test("tlsOpenapi:Logs", async () => {
     const projectCreated = await tlsOpenapiService.CreateProject({
-      ProjectName: `tls-nodejs-sdk-test-topic-project-${`${Math.random()}`.replace(".", "")}`,
+      ProjectName: `tls-nodejs-sdk-test-topic-project-${generateRandomId()}`,
       Region,
     });
 
     const topicCreated = await tlsOpenapiService.CreateTopic({
       ProjectId: projectCreated.ProjectId,
       ShardCount: 1,
-      TopicName: `tls-nodejs-sdk-test-topic-${`${Math.random()}`.replace(".", "")}`,
+      TopicName: `tls-nodejs-sdk-test-topic-${generateRandomId()}`,
       Ttl: 1,
     });
 
@@ -317,14 +426,14 @@ describeFn(describeName, () => {
 
   test("tlsOpenapi:Shards", async () => {
     const projectCreated = await tlsOpenapiService.CreateProject({
-      ProjectName: `tls-nodejs-sdk-test-topic-project-${`${Math.random()}`.replace(".", "")}`,
+      ProjectName: `tls-nodejs-sdk-test-topic-project-${generateRandomId()}`,
       Region,
     });
 
     const topicCreated = await tlsOpenapiService.CreateTopic({
       ProjectId: projectCreated.ProjectId,
       ShardCount: 1,
-      TopicName: `tls-nodejs-sdk-test-topic-${`${Math.random()}`.replace(".", "")}`,
+      TopicName: `tls-nodejs-sdk-test-topic-${generateRandomId()}`,
       Ttl: 1,
     });
 
@@ -345,50 +454,14 @@ describeFn(describeName, () => {
 
   test("tlsOpenapi:Cursor", async () => {
     const projectCreated = await tlsOpenapiService.CreateProject({
-      ProjectName: `tls-nodejs-sdk-test-topic-project-${`${Math.random()}`.replace(".", "")}`,
+      ProjectName: `tls-nodejs-sdk-test-topic-project-${generateRandomId()}`,
       Region,
     });
 
     const topicCreated = await tlsOpenapiService.CreateTopic({
       ProjectId: projectCreated.ProjectId,
       ShardCount: 1,
-      TopicName: `tls-nodejs-sdk-test-topic-${`${Math.random()}`.replace(".", "")}`,
-      Ttl: 1,
-    });
-
-    const shardsList = await tlsOpenapiService.DescribeShards({
-      TopicId: topicCreated.TopicId,
-      PageNumber: 1,
-      PageSize: 20,
-    });
-
-    const cursor = await tlsOpenapiService.DescribeCursor({
-      TopicId: topicCreated.TopicId,
-      ShardId: shardsList.Shards[0].ShardId,
-      From: "begin",
-    });
-
-    expect(cursor).toBeDefined();
-    expect(typeof cursor.Cursor).toBe("string");
-
-    await tlsOpenapiService.DeleteTopic({
-      TopicId: topicCreated.TopicId,
-    });
-    await tlsOpenapiService.DeleteProject({
-      ProjectId: projectCreated.ProjectId,
-    });
-  });
-
-  test("tlsOpenapi:Cursor", async () => {
-    const projectCreated = await tlsOpenapiService.CreateProject({
-      ProjectName: `tls-nodejs-sdk-test-topic-project-${`${Math.random()}`.replace(".", "")}`,
-      Region,
-    });
-
-    const topicCreated = await tlsOpenapiService.CreateTopic({
-      ProjectId: projectCreated.ProjectId,
-      ShardCount: 1,
-      TopicName: `tls-nodejs-sdk-test-topic-${`${Math.random()}`.replace(".", "")}`,
+      TopicName: `tls-nodejs-sdk-test-topic-${generateRandomId()}`,
       Ttl: 1,
     });
 
@@ -417,19 +490,14 @@ describeFn(describeName, () => {
 
   test("tlsOpenapi:ManualShardSplit", async () => {
     const projectCreated = await tlsOpenapiService.CreateProject({
-      ProjectName: `tls-nodejs-sdk-test-manual-shard-split-project-${`${Math.random()
-        .toString()
-        .slice(4)}`.replace(".", "")}`,
+      ProjectName: `tls-nodejs-sdk-test-manual-shard-split-project-${generateRandomId()}`,
       Region,
     });
 
     const topicCreated = await tlsOpenapiService.CreateTopic({
       ProjectId: projectCreated.ProjectId,
       ShardCount: 2,
-      TopicName: `tls-nodejs-sdk-test-manual-shard-split-topic-${`${Math.random()}`.replace(
-        ".",
-        ""
-      )}`,
+      TopicName: `tls-nodejs-sdk-test-manual-shard-split-topic-${generateRandomId()}`,
       Ttl: 1,
     });
 
@@ -461,20 +529,20 @@ describeFn(describeName, () => {
 
   test("tlsOpenapi:Rule", async () => {
     const projectCreated = await tlsOpenapiService.CreateProject({
-      ProjectName: `tls-nodejs-sdk-test-topic-project-${`${Math.random()}`.replace(".", "")}`,
+      ProjectName: `tls-nodejs-sdk-test-topic-project-${generateRandomId()}`,
       Region,
     });
 
     const topicCreated = await tlsOpenapiService.CreateTopic({
       ProjectId: projectCreated.ProjectId,
       ShardCount: 1,
-      TopicName: `tls-nodejs-sdk-test-topic-${`${Math.random()}`.replace(".", "")}`,
+      TopicName: `tls-nodejs-sdk-test-topic-${generateRandomId()}`,
       Ttl: 1,
     });
 
     const ruleCreated = await tlsOpenapiService.CreateRule({
       Paths: ["/test"],
-      RuleName: `tls-nodejs-sdk-test-createrule-${`${Math.random()}`.replace(".", "")}`,
+      RuleName: `tls-nodejs-sdk-test-createrule-${generateRandomId()}`,
       TopicId: topicCreated.TopicId,
     });
     expect(rulesValidate.create(ruleCreated)).toBe(true);
@@ -486,7 +554,7 @@ describeFn(describeName, () => {
 
     const ruleModified = await tlsOpenapiService.ModifyRule({
       RuleId: ruleCreated.RuleId,
-      RuleName: `tls-nodejs-sdk-test-modifyrule-${`${Math.random()}`.replace(".", "")}`,
+      RuleName: `tls-nodejs-sdk-test-modifyrule-${generateRandomId()}`,
     });
     expect(rulesValidate.modify(ruleModified)).toBe(true);
 
@@ -513,25 +581,25 @@ describeFn(describeName, () => {
 
   test("tlsOpenapi:RuleHostGroup", async () => {
     const projectCreated = await tlsOpenapiService.CreateProject({
-      ProjectName: `tls-nodejs-sdk-test-topic-project-${`${Math.random()}`.replace(".", "")}`,
+      ProjectName: `tls-nodejs-sdk-test-topic-project-${generateRandomId()}`,
       Region,
     });
 
     const topicCreated = await tlsOpenapiService.CreateTopic({
       ProjectId: projectCreated.ProjectId,
       ShardCount: 1,
-      TopicName: `tls-nodejs-sdk-test-topic-${`${Math.random()}`.replace(".", "")}`,
+      TopicName: `tls-nodejs-sdk-test-topic-${generateRandomId()}`,
       Ttl: 1,
     });
 
     const ruleCreated = await tlsOpenapiService.CreateRule({
       Paths: ["/test"],
-      RuleName: `tls-nodejs-sdk-test-createrule-${`${Math.random()}`.replace(".", "")}`,
+      RuleName: `tls-nodejs-sdk-test-createrule-${generateRandomId()}`,
       TopicId: topicCreated.TopicId,
     });
 
     const hostGroupCreated = await tlsOpenapiService.CreateHostGroup({
-      HostGroupName: `tls-nodejs-sdk-test-create-host-group-${`${Math.random()}`.replace(".", "")}`,
+      HostGroupName: `tls-nodejs-sdk-test-create-host-group-${generateRandomId()}`,
       HostGroupType: "Label",
       HostIdentifier: "none",
     });
@@ -564,7 +632,7 @@ describeFn(describeName, () => {
 
   test("tlsOpenapi:HostGroup", async () => {
     const hostGroupCreated = await tlsOpenapiService.CreateHostGroup({
-      HostGroupName: `tls-nodejs-sdk-test-create-host-group-${`${Math.random()}`.replace(".", "")}`,
+      HostGroupName: `tls-nodejs-sdk-test-create-host-group-${generateRandomId()}`,
       HostGroupType: "Label",
       HostIdentifier: "none",
     });
@@ -577,7 +645,7 @@ describeFn(describeName, () => {
 
     const hostGroupModified = await tlsOpenapiService.ModifyHostGroup({
       HostGroupId: hostGroupCreated.HostGroupId,
-      HostGroupName: `tls-nodejs-sdk-test-modify-host-group-${`${Math.random()}`.replace(".", "")}`,
+      HostGroupName: `tls-nodejs-sdk-test-modify-host-group-${generateRandomId()}`,
       HostGroupType: "Label",
       HostIdentifier: "none1",
     });
@@ -602,39 +670,45 @@ describeFn(describeName, () => {
     expect(hostGroupValidate.list(hostGroupList)).toBe(true);
   });
 
-  test("tlsOpenapi:Alarm", async () => {
+  testAlarm("tlsOpenapi:Alarm", async () => {
     const projectCreated = await tlsOpenapiService.CreateProject({
-      ProjectName: `tls-nodejs-sdk-test-alarm-project-${`${Math.random()}`.replace(".", "")}`,
+      ProjectName: `tls-nodejs-sdk-test-alarm-project-${generateRandomId()}`,
       Region,
     });
 
     const topicCreated = await tlsOpenapiService.CreateTopic({
       ProjectId: projectCreated.ProjectId,
       ShardCount: 1,
-      TopicName: `tls-nodejs-sdk-test-topic-${`${Math.random()}`.replace(".", "")}`,
+      TopicName: `tls-nodejs-sdk-test-topic-${generateRandomId()}`,
       Ttl: 1,
     });
 
-    const alarmNotifyGroupCreated = await tlsOpenapiService.CreateAlarmNotifyGroup({
-      AlarmNotifyGroupName: `tls-nodejs-sdk-test-create-alarm-notify-group-${`${Math.random().toFixed(
-        8
-      )}`.replace(".", "")}`,
-      NotifyType: ["Trigger"],
-      Receivers: [
+    const receiverName = TLS_RECEIVER_NAME;
+    const alarmNotifyGroupReq = {
+      AlarmNotifyGroupName: `tls-nodejs-sdk-test-create-alarm-notify-group-${generateRandomId()}`,
+    };
+
+    if (receiverName) {
+      alarmNotifyGroupReq.NotifyType = ["Trigger"];
+      alarmNotifyGroupReq.Receivers = [
         {
           EndTime: "10:00:00",
           StartTime: "08:00:00",
           ReceiverChannels: ["Sms"],
-          ReceiverNames: ["test-wzx"],
+          ReceiverNames: [receiverName],
           ReceiverType: "User",
         },
-      ],
-    });
+      ];
+    }
+
+    const alarmNotifyGroupCreated = await tlsOpenapiService.CreateAlarmNotifyGroup(
+      alarmNotifyGroupReq
+    );
 
     expect(alarmValidate.createNotifyGroup(alarmNotifyGroupCreated)).toBe(true);
 
     const alarmCreated = await tlsOpenapiService.CreateAlarm({
-      AlarmName: `tls-nodejs-sdk-test-create-alarm-${`${Math.random()}`.replace(".", "")}`,
+      AlarmName: `tls-nodejs-sdk-test-create-alarm-${generateRandomId()}`,
       AlarmNotifyGroup: [alarmNotifyGroupCreated.AlarmNotifyGroupId],
       AlarmPeriod: 10,
       Condition: "$1.count>=100",
@@ -702,12 +776,17 @@ describeFn(describeName, () => {
   });
 
   test("tlsOpenapi:Trace", async () => {
-    const ProjectId = "d0b016d4-5ba0-454d-bd87-2d7cabf78cab";
+    const projectCreated = await tlsOpenapiService.CreateProject({
+      ProjectName: `tls-nodejs-sdk-test-trace-project-${generateRandomId()}`,
+      Region,
+    });
+
     const random1 = (Math.random() * 100).toFixed(0);
     const random2 = (Math.random() * 100).toFixed(0);
     const traceName = `单元测试${random1}-${random2}`;
 
     const traceList = await tlsOpenapiService.DescribeTraceInstances({
+      ProjectId: projectCreated.ProjectId,
       PageNumber: 1,
       PageSize: 20,
     });
@@ -715,7 +794,7 @@ describeFn(describeName, () => {
     expect(traceValidate.list(traceList)).toBe(true);
 
     const traceCreate = await tlsOpenapiService.CreateTraceInstance({
-      ProjectId: ProjectId,
+      ProjectId: projectCreated.ProjectId,
       TraceInstanceName: traceName,
     });
 
@@ -738,6 +817,10 @@ describeFn(describeName, () => {
       TraceInstanceId: traceInstanceId,
     });
     expect(traceValidate.delete(traceDelete)).toBe(true);
+
+    await tlsOpenapiService.DeleteProject({
+      ProjectId: projectCreated.ProjectId,
+    });
   });
 
   test("tlsOpenapi-types:DescribeTrace", () => {
@@ -832,14 +915,14 @@ describeFn(describeName, () => {
 
   test("tlsOpenapi:DescribeHistogramV1", async () => {
     const projectCreated = await tlsOpenapiService.CreateProject({
-      ProjectName: `tls-nodejs-sdk-test-histogram-project-${`${Math.random()}`.replace(".", "")}`,
+      ProjectName: `tls-nodejs-sdk-test-histogram-project-${generateRandomId()}`,
       Region,
     });
 
     const topicCreated = await tlsOpenapiService.CreateTopic({
       ProjectId: projectCreated.ProjectId,
       ShardCount: 1,
-      TopicName: `tls-nodejs-sdk-test-histogram-topic-${`${Math.random()}`.replace(".", "")}`,
+      TopicName: `tls-nodejs-sdk-test-histogram-topic-${generateRandomId()}`,
       Ttl: 1,
     });
 
@@ -878,7 +961,7 @@ describeFn(describeName, () => {
   test("tlsOpenapi:DeleteAbnormalHosts", async () => {
     // P0: 基础功能测试 - 正常删除异常主机
     const hostGroupCreated = await tlsOpenapiService.CreateHostGroup({
-      HostGroupName: `tls-nodejs-sdk-test-abnormal-hosts-${`${Math.random()}`.replace(".", "")}`,
+      HostGroupName: `tls-nodejs-sdk-test-abnormal-hosts-${generateRandomId()}`,
       HostGroupType: "Label",
       HostIdentifier: "none",
     });
@@ -912,10 +995,7 @@ describeFn(describeName, () => {
 
   test("tlsOpenapi:ModifyHostGroupsAutoUpdate", async () => {
     const hostGroupCreated = await tlsOpenapiService.CreateHostGroup({
-      HostGroupName: `tls-nodejs-sdk-test-auto-update-host-group-${`${Math.random()}`.replace(
-        ".",
-        ""
-      )}`,
+      HostGroupName: `tls-nodejs-sdk-test-auto-update-host-group-${generateRandomId()}`,
       HostGroupType: "Label",
       HostIdentifier: "none",
     });
@@ -945,17 +1025,69 @@ describeFn(describeName, () => {
   });
 
   test("tlsOpenapi:DescribeETLTask", async () => {
-    const taskId = `test-etl-task-${`${Math.random()}`.replace(".", "")}`;
+    const projectCreated = await tlsOpenapiService.CreateProject({
+      ProjectName: `tls-nodejs-sdk-test-etl-project-${generateRandomId()}`,
+      Region,
+    });
+
+    const sourceTopicCreated = await tlsOpenapiService.CreateTopic({
+      ProjectId: projectCreated.ProjectId,
+      ShardCount: 1,
+      TopicName: `tls-nodejs-sdk-test-source-topic-${generateRandomId()}`,
+      Ttl: 1,
+    });
+
+    const targetTopicCreated = await tlsOpenapiService.CreateTopic({
+      ProjectId: projectCreated.ProjectId,
+      ShardCount: 1,
+      TopicName: `tls-nodejs-sdk-test-target-topic-${generateRandomId()}`,
+      Ttl: 1,
+    });
+
+    const etlTaskCreated = await tlsOpenapiService.CreateETLTask({
+      DSLType: "NORMAL",
+      Name: `tls-nodejs-sdk-test-etl-task-${generateRandomId()}`,
+      Description: "Test ETL task for describe",
+      Enable: true,
+      SourceTopicId: sourceTopicCreated.TopicId,
+      Script: 'f_set("key", "value")',
+      TaskType: "Resident",
+      TargetResources: [
+        {
+          Alias: "test",
+          TopicId: targetTopicCreated.TopicId,
+          Region,
+        },
+      ],
+    });
+
+    expect(etlTaskValidate.create(etlTaskCreated)).toBe(true);
 
     const etlTaskDetail = await tlsOpenapiService.DescribeETLTask({
-      TaskId: taskId,
+      TaskId: etlTaskCreated.TaskId,
     });
     expect(etlTaskValidate.detail(etlTaskDetail)).toBe(true);
+
+    await tlsOpenapiService.DeleteETLTask({
+      TaskId: etlTaskCreated.TaskId,
+    });
+
+    await tlsOpenapiService.DeleteTopic({
+      TopicId: targetTopicCreated.TopicId,
+    });
+
+    await tlsOpenapiService.DeleteTopic({
+      TopicId: sourceTopicCreated.TopicId,
+    });
+
+    await tlsOpenapiService.DeleteProject({
+      ProjectId: projectCreated.ProjectId,
+    });
   });
 
   test("tlsOpenapi:DescribeETLTasks", async () => {
     const projectCreated = await tlsOpenapiService.CreateProject({
-      ProjectName: `tls-nodejs-sdk-test-etl-project-${`${Math.random()}`.replace(".", "")}`,
+      ProjectName: `tls-nodejs-sdk-test-etl-project-${generateRandomId()}`,
       Region,
     });
 
@@ -971,7 +1103,6 @@ describeFn(describeName, () => {
       ...commonQuery,
       ProjectId: projectCreated.ProjectId,
       TaskName: "test-etl-task",
-      Status: "running",
     });
     expect(etlTaskValidate.list(etlTasksFiltered)).toBe(true);
 
@@ -990,82 +1121,107 @@ describeFn(describeName, () => {
     });
   });
 
-  test("tlsOpenapi:DeleteShipper", async () => {
-    const shipperId = `test-shipper-${`${Math.random()}`.replace(".", "")}`;
-
-    const deleteResult = await tlsOpenapiService.DeleteShipper({
-      ShipperId: shipperId,
-    });
-    expect(shipperValidate.delete(deleteResult)).toBe(true);
-  });
-
-  test("tlsOpenapi:ModifyShipper", async () => {
-    // Create a project first
+  testTos("tlsOpenapi:DeleteShipper", async () => {
     const projectCreated = await tlsOpenapiService.CreateProject({
-      ProjectName: `tls-nodejs-sdk-test-shipper-project-${`${Math.random()}`.replace(".", "")}`,
+      ProjectName: `tls-nodejs-sdk-test-shipper-project-${generateRandomId()}`,
       Region,
     });
 
-    // Create a topic
     const topicCreated = await tlsOpenapiService.CreateTopic({
       ProjectId: projectCreated.ProjectId,
       ShardCount: 1,
-      TopicName: `tls-nodejs-sdk-test-shipper-topic-${`${Math.random()}`.replace(".", "")}`,
+      TopicName: `tls-nodejs-sdk-test-shipper-topic-${generateRandomId()}`,
       Ttl: 1,
     });
 
-    // Note: Since we don't have CreateShipper API implemented yet, we'll test ModifyShipper with a mock shipper ID
-    // This test will verify the API call structure and response validation
-    const shipperIdForModify = `test-shipper-${`${Math.random()}`.replace(".", "")}`;
+    const tosShipperCreated = await tlsOpenapiService.CreateShipper({
+      ContentInfo: {
+        Format: "json",
+        JsonInfo: {
+          Enable: true,
+          Escape: true,
+        },
+      },
+      ShipperName: `tls-nodejs-sdk-test-tos-shipper-${generateRandomId()}`,
+      ShipperType: "tos",
+      TopicId: topicCreated.TopicId,
+      TosShipperInfo: {
+        Bucket: TLS_TOS_BUCKET,
+        Prefix: TLS_TOS_PREFIX,
+        MaxSize: 5,
+        Compress: "snappy",
+        Interval: 300,
+        PartitionFormat: "%Y/%m/%d/%H/%M",
+      },
+    });
 
-    try {
-      const modifyResult = await tlsOpenapiService.ModifyShipper({
-        ShipperId: shipperIdForModify,
-        ShipperName: `test-shipper-name-${`${Math.random()}`.replace(".", "")}`,
-        ShipperType: "tos",
-        Status: true,
-        ContentInfo: {
-          Format: "json",
-        },
-        TosShipperInfo: {
-          Prefix: "test-prefix",
-          MaxSize: 5,
-          Compress: "snappy",
-          Interval: 300,
-          PartitionFormat: "%Y/%m/%d/%H/%M",
-        },
-      });
-      expect(shipperValidate.modify(modifyResult)).toBe(true);
-    } catch (error) {
-      // Since we don't have a real shipper ID, we expect this to fail
-      // But we can still validate the error structure
-      expect(error).toBeDefined();
-    }
+    const deleteResult = await tlsOpenapiService.DeleteShipper({
+      ShipperId: tosShipperCreated.ShipperId,
+    });
+    expect(shipperValidate.delete(deleteResult)).toBe(true);
 
-    // Test with Kafka configuration
-    try {
-      const modifyKafkaResult = await tlsOpenapiService.ModifyShipper({
-        ShipperId: shipperIdForModify,
-        ShipperName: `test-kafka-shipper-${`${Math.random()}`.replace(".", "")}`,
-        ShipperType: "kafka",
-        Status: true,
-        ContentInfo: {
-          Format: "original",
-        },
-        KafkaShipperInfo: {
-          Compress: "snappy",
-          Instance: "kafka-test-instance",
-          KafkaTopic: "test-topic",
-        },
-      });
-      expect(shipperValidate.modify(modifyKafkaResult)).toBe(true);
-    } catch (error) {
-      // Since we don't have a real shipper ID, we expect this to fail
-      // But we can still validate the error structure
-      expect(error).toBeDefined();
-    }
+    await tlsOpenapiService.DeleteTopic({
+      TopicId: topicCreated.TopicId,
+    });
+    await tlsOpenapiService.DeleteProject({
+      ProjectId: projectCreated.ProjectId,
+    });
+  });
 
-    // Clean up
+  testTos("tlsOpenapi:ModifyShipper", async () => {
+    const projectCreated = await tlsOpenapiService.CreateProject({
+      ProjectName: `tls-nodejs-sdk-test-shipper-project-${generateRandomId()}`,
+      Region,
+    });
+
+    const topicCreated = await tlsOpenapiService.CreateTopic({
+      ProjectId: projectCreated.ProjectId,
+      ShardCount: 1,
+      TopicName: `tls-nodejs-sdk-test-shipper-topic-${generateRandomId()}`,
+      Ttl: 1,
+    });
+
+    const tosShipperCreated = await tlsOpenapiService.CreateShipper({
+      ContentInfo: {
+        Format: "json",
+        JsonInfo: {
+          Enable: true,
+          Escape: true,
+        },
+      },
+      ShipperName: `tls-nodejs-sdk-test-tos-shipper-${generateRandomId()}`,
+      ShipperType: "tos",
+      TopicId: topicCreated.TopicId,
+      TosShipperInfo: {
+        Bucket: TLS_TOS_BUCKET,
+        Prefix: TLS_TOS_PREFIX,
+        MaxSize: 5,
+        Compress: "snappy",
+        Interval: 300,
+        PartitionFormat: "%Y/%m/%d/%H/%M",
+      },
+    });
+    expect(shipperValidate.create(tosShipperCreated)).toBe(true);
+
+    const modifyResult = await tlsOpenapiService.ModifyShipper({
+      ShipperId: tosShipperCreated.ShipperId,
+      ShipperName: `test-shipper-name-${generateRandomId()}`,
+      Status: true,
+      TosShipperInfo: {
+        Bucket: TLS_TOS_BUCKET,
+        Prefix: TLS_TOS_PREFIX,
+        MaxSize: 10,
+        Compress: "snappy",
+        Interval: 600,
+        PartitionFormat: "%Y/%m/%d/%H",
+      },
+    });
+    expect(shipperValidate.modify(modifyResult)).toBe(true);
+
+    await tlsOpenapiService.DeleteShipper({
+      ShipperId: tosShipperCreated.ShipperId,
+    });
+
     await tlsOpenapiService.DeleteTopic({
       TopicId: topicCreated.TopicId,
     });
@@ -1075,35 +1231,34 @@ describeFn(describeName, () => {
     });
   });
 
-  test("tlsOpenapi:CreateImportTask", async () => {
+  testTos("tlsOpenapi:CreateImportTask", async () => {
     // 创建项目和主题用于测试
     const projectCreated = await tlsOpenapiService.CreateProject({
-      ProjectName: `tls-nodejs-sdk-test-import-task-project-${`${Math.random()}`.replace(".", "")}`,
+      ProjectName: `tls-nodejs-sdk-test-import-task-project-${generateRandomId()}`,
       Region,
     });
 
     const topicCreated = await tlsOpenapiService.CreateTopic({
       ProjectId: projectCreated.ProjectId,
       ShardCount: 1,
-      TopicName: `tls-nodejs-sdk-test-import-task-topic-${`${Math.random()}`.replace(".", "")}`,
+      TopicName: `tls-nodejs-sdk-test-import-task-topic-${generateRandomId()}`,
       Ttl: 1,
     });
 
     // 测试创建 TOS 导入任务
     const importTaskResult = await tlsOpenapiService.CreateImportTask({
-      TaskName: `tls-nodejs-sdk-test-import-task-${`${Math.random()}`.replace(".", "")}`,
+      TaskName: `tls-nodejs-sdk-test-import-task-${generateRandomId()}`,
       TopicID: topicCreated.TopicId,
       SourceType: "tos",
       ImportSourceInfo: {
         TosSourceInfo: {
-          Bucket: "test-bucket",
-          Prefix: "test-prefix/",
-          Region: "cn-shanghai",
+          Bucket: TLS_TOS_BUCKET,
+          Prefix: `${TLS_TOS_PREFIX}/import/`,
           CompressType: "none",
         },
       },
       TargetInfo: {
-        Region: "cn-shanghai",
+        Region,
         LogType: "json_log",
       },
       Description: "测试导入任务",
@@ -1120,46 +1275,118 @@ describeFn(describeName, () => {
     });
   });
 
-  test("tlsOpenapi:DescribeImportTask", async () => {
-    const taskId = `test-import-task-${`${Math.random()}`.replace(".", "")}`;
-
-    try {
-      const importTaskDetail = await tlsOpenapiService.DescribeImportTask({
-        TaskId: taskId,
-      });
-      expect(importTaskValidate.detail(importTaskDetail)).toBe(true);
-    } catch (error) {
-      // The task might not exist, but the API should be callable
-      expect(error).toBeDefined();
-    }
-  });
-
-  test("tlsOpenapi:DescribeShipper", async () => {
-    // Since we don't have shipper creation APIs implemented yet, we'll test the error case
-    const shipperId = `test-shipper-${`${Math.random()}`.replace(".", "")}`;
-
-    try {
-      await tlsOpenapiService.DescribeShipper({
-        ShipperId: shipperId,
-      });
-      // If we get here, the shipper somehow exists, which is unexpected for this test
-      expect(true).toBe(false);
-    } catch (error) {
-      // We expect this to fail since the shipper doesn't exist
-      expect(error).toBeDefined();
-    }
-  });
-
-  test("tlsOpenapi:DescribeShippers", async () => {
+  testTos("tlsOpenapi:DescribeImportTask", async () => {
     const projectCreated = await tlsOpenapiService.CreateProject({
-      ProjectName: `tls-nodejs-sdk-test-shipper-project-${`${Math.random()}`.replace(".", "")}`,
+      ProjectName: `tls-nodejs-sdk-test-import-task-project-${generateRandomId()}`,
       Region,
     });
 
     const topicCreated = await tlsOpenapiService.CreateTopic({
       ProjectId: projectCreated.ProjectId,
       ShardCount: 1,
-      TopicName: `tls-nodejs-sdk-test-shipper-topic-${`${Math.random()}`.replace(".", "")}`,
+      TopicName: `tls-nodejs-sdk-test-import-task-topic-${generateRandomId()}`,
+      Ttl: 1,
+    });
+
+    const importTaskCreated = await tlsOpenapiService.CreateImportTask({
+      TaskName: `tls-nodejs-sdk-test-import-task-${generateRandomId()}`,
+      TopicID: topicCreated.TopicId,
+      SourceType: "tos",
+      ImportSourceInfo: {
+        TosSourceInfo: {
+          Bucket: TLS_TOS_BUCKET,
+          Prefix: `${TLS_TOS_PREFIX}/import/`,
+          CompressType: "none",
+        },
+      },
+      TargetInfo: {
+        Region,
+        LogType: "json_log",
+      },
+      Description: "测试导入任务",
+    });
+    expect(importTaskValidate.create(importTaskCreated)).toBe(true);
+
+    const importTaskDetail = await tlsOpenapiService.DescribeImportTask({
+      TaskId: importTaskCreated.TaskId,
+    });
+    expect(importTaskValidate.detail(importTaskDetail)).toBe(true);
+
+    await tlsOpenapiService.DeleteImportTask({
+      TaskId: importTaskCreated.TaskId,
+    });
+
+    await tlsOpenapiService.DeleteTopic({
+      TopicId: topicCreated.TopicId,
+    });
+
+    await tlsOpenapiService.DeleteProject({
+      ProjectId: projectCreated.ProjectId,
+    });
+  });
+
+  testTos("tlsOpenapi:DescribeShipper", async () => {
+    const projectCreated = await tlsOpenapiService.CreateProject({
+      ProjectName: `tls-nodejs-sdk-test-shipper-project-${generateRandomId()}`,
+      Region,
+    });
+
+    const topicCreated = await tlsOpenapiService.CreateTopic({
+      ProjectId: projectCreated.ProjectId,
+      ShardCount: 1,
+      TopicName: `tls-nodejs-sdk-test-shipper-topic-${generateRandomId()}`,
+      Ttl: 1,
+    });
+
+    const tosShipperCreated = await tlsOpenapiService.CreateShipper({
+      ContentInfo: {
+        Format: "json",
+        JsonInfo: {
+          Enable: true,
+          Escape: true,
+        },
+      },
+      ShipperName: `tls-nodejs-sdk-test-tos-shipper-${generateRandomId()}`,
+      ShipperType: "tos",
+      TopicId: topicCreated.TopicId,
+      TosShipperInfo: {
+        Bucket: TLS_TOS_BUCKET,
+        Prefix: TLS_TOS_PREFIX,
+        MaxSize: 5,
+        Compress: "snappy",
+        Interval: 300,
+        PartitionFormat: "%Y/%m/%d/%H/%M",
+      },
+    });
+    expect(shipperValidate.create(tosShipperCreated)).toBe(true);
+
+    const shipperDetail = await tlsOpenapiService.DescribeShipper({
+      ShipperId: tosShipperCreated.ShipperId,
+    });
+    expect(shipperValidate.detail(shipperDetail)).toBe(true);
+
+    await tlsOpenapiService.DeleteShipper({
+      ShipperId: tosShipperCreated.ShipperId,
+    });
+
+    await tlsOpenapiService.DeleteTopic({
+      TopicId: topicCreated.TopicId,
+    });
+    await tlsOpenapiService.DeleteProject({
+      ProjectId: projectCreated.ProjectId,
+    });
+  });
+
+  test("tlsOpenapi:DescribeShippers", async () => {
+    const projectCreated = await tlsOpenapiService.CreateProject({
+      ProjectName: `tls-nodejs-sdk-test-shipper-project-${generateRandomId()}`,
+      Region,
+    });
+
+    const topicCreated = await tlsOpenapiService.CreateTopic({
+      ProjectId: projectCreated.ProjectId,
+      ShardCount: 1,
+      TopicName: `tls-nodejs-sdk-test-shipper-topic-${generateRandomId()}`,
       Ttl: 1,
     });
 
@@ -1184,21 +1411,76 @@ describeFn(describeName, () => {
   });
 
   test("tlsOpenapi:CancelDownloadTask", async () => {
-    const taskId = `test-download-task-${`${Math.random()}`.replace(".", "")}`;
-
-    const cancelResult = await tlsOpenapiService.CancelDownloadTask({
-      TaskId: taskId,
+    const projectCreated = await tlsOpenapiService.CreateProject({
+      ProjectName: `tls-njs-cancel-dl-${generateRandomId()}`,
+      Region,
     });
-    expect(downloadTaskValidate.cancel(cancelResult)).toBe(true);
+
+    const topicCreated = await tlsOpenapiService.CreateTopic({
+      ProjectId: projectCreated.ProjectId,
+      ShardCount: 1,
+      TopicName: `tls-njs-cancel-dl-topic-${generateRandomId()}`,
+      Ttl: 1,
+    });
+
+    await tlsOpenapiService.CreateIndex({
+      TopicId: topicCreated.TopicId,
+      FullText: {
+        CaseSensitive: false,
+        Delimiter: "_",
+        IncludeChinese: false,
+      },
+    });
+
+    await writeLogsToTopic({
+      tlsOpenapiService,
+      tlsOpenapi,
+      topicId: topicCreated.TopicId,
+    });
+
+    const now = Math.floor(Date.now() / 1000);
+    const startTime = now - 3600;
+    const endTime = now;
+
+    const downloadTaskCreated = await tlsOpenapiService.CreateDownloadTask({
+      TaskName: `test-cancel-download-task-${generateRandomId()}`,
+      TopicId: topicCreated.TopicId,
+      Query: "*",
+      StartTime: startTime,
+      EndTime: endTime,
+      DataFormat: "csv",
+      Sort: "asc",
+      Limit: 100000,
+      Compression: "gzip",
+    });
+    const cancelOutcome = await cancelDownloadTaskWithRaceTolerance({
+      tlsOpenapiService,
+      taskId: downloadTaskCreated.TaskId,
+      topicId: topicCreated.TopicId,
+    });
+    expect(downloadTaskValidate.create(downloadTaskCreated)).toBe(true);
+
+    if (cancelOutcome?.cancelResult) {
+      expect(downloadTaskValidate.cancel(cancelOutcome.cancelResult)).toBe(true);
+    } else {
+      const terminal = new Set(["success", "created_cut", "fail", "cancel", "incomplete"]);
+      expect(
+        cancelOutcome?.cancelSkipped === true || terminal.has(cancelOutcome?.terminalTaskStatus)
+      ).toBe(true);
+    }
+
+    await tlsOpenapiService.DeleteTopic({
+      TopicId: topicCreated.TopicId,
+    });
+    await tlsOpenapiService.DeleteProject({
+      ProjectId: projectCreated.ProjectId,
+    });
   });
 
   test("tlsOpenapi:DescribeKafkaConsumer", async () => {
     // 创建项目
     const projectCreated = await tlsOpenapiService.CreateProject({
-      ProjectName: `tls-nodejs-sdk-test-kafka-consumer-project-${`${Math.random()}`.replace(
-        ".",
-        ""
-      )}`,
+      ProjectName: `tls-nodejs-sdk-test-kafka-consumer-project-${generateRandomId()}`,
       Region,
     });
 
@@ -1206,7 +1488,7 @@ describeFn(describeName, () => {
     const topicCreated = await tlsOpenapiService.CreateTopic({
       ProjectId: projectCreated.ProjectId,
       ShardCount: 1,
-      TopicName: `tls-nodejs-sdk-test-kafka-consumer-topic-${`${Math.random()}`.replace(".", "")}`,
+      TopicName: `tls-nodejs-sdk-test-kafka-consumer-topic-${generateRandomId()}`,
       Ttl: 1,
     });
 
@@ -1236,13 +1518,15 @@ describeFn(describeName, () => {
 
   test("tlsOpenapi:OpenKafkaConsumer", async () => {
     const projectCreated = await tlsOpenapiService.CreateProject({
-      ProjectName: `tls-nodejs-sdk-test-open-kafka-consumer-${`${Math.random()}`.replace(".", "")}`,
+      ProjectName: `tls-nodejs-sdk-test-open-kafka-consumer-${generateRandomId()}`,
       Region,
     });
 
     const topicCreated = await tlsOpenapiService.CreateTopic({
-      TopicName: `tls-nodejs-sdk-test-topic-${`${Math.random()}`.replace(".", "")}`,
       ProjectId: projectCreated.ProjectId,
+      ShardCount: 1,
+      TopicName: `tls-nodejs-sdk-test-topic-${generateRandomId()}`,
+      Ttl: 1,
       Description: "Test topic for OpenKafkaConsumer",
     });
 
@@ -1263,17 +1547,20 @@ describeFn(describeName, () => {
 
   test("tlsOpenapi:CloseKafkaConsumer", async () => {
     const projectCreated = await tlsOpenapiService.CreateProject({
-      ProjectName: `tls-nodejs-sdk-test-close-kafka-consumer-${`${Math.random()}`.replace(
-        ".",
-        ""
-      )}`,
+      ProjectName: `tls-nodejs-sdk-test-close-kafka-consumer-${generateRandomId()}`,
       Region,
     });
 
     const topicCreated = await tlsOpenapiService.CreateTopic({
-      TopicName: `tls-nodejs-sdk-test-topic-${`${Math.random()}`.replace(".", "")}`,
       ProjectId: projectCreated.ProjectId,
+      ShardCount: 1,
+      TopicName: `tls-nodejs-sdk-test-topic-${generateRandomId()}`,
+      Ttl: 1,
       Description: "Test topic for CloseKafkaConsumer",
+    });
+
+    await tlsOpenapiService.OpenKafkaConsumer({
+      TopicId: topicCreated.TopicId,
     });
 
     const closeResult = await tlsOpenapiService.CloseKafkaConsumer({
@@ -1293,20 +1580,14 @@ describeFn(describeName, () => {
 
   test("tlsOpenapi:ConsumerHeartbeat", async () => {
     const projectCreated = await tlsOpenapiService.CreateProject({
-      ProjectName: `tls-nodejs-sdk-test-consumer-heartbeat-project-${`${Math.random()}`.replace(
-        ".",
-        ""
-      )}`,
+      ProjectName: `tls-nodejs-sdk-test-consumer-heartbeat-project-${generateRandomId()}`,
       Region,
     });
 
     const topicCreated = await tlsOpenapiService.CreateTopic({
       ProjectId: projectCreated.ProjectId,
       ShardCount: 2,
-      TopicName: `tls-nodejs-sdk-test-consumer-heartbeat-topic-${`${Math.random()}`.replace(
-        ".",
-        ""
-      )}`,
+      TopicName: `tls-nodejs-sdk-test-consumer-heartbeat-topic-${generateRandomId()}`,
       Ttl: 1,
     });
 
@@ -1315,8 +1596,8 @@ describeFn(describeName, () => {
     try {
       const heartbeatResult = await tlsOpenapiService.ConsumerHeartbeat({
         ProjectID: projectCreated.ProjectId,
-        ConsumerGroupName: `test-consumer-group-${`${Math.random()}`.replace(".", "")}`,
-        ConsumerName: `test-consumer-${`${Math.random()}`.replace(".", "")}`,
+        ConsumerGroupName: `test-consumer-group-${generateRandomId()}`,
+        ConsumerName: `test-consumer-${generateRandomId()}`,
       });
       // 如果调用成功，验证返回结构
       expect(heartbeatResult).toBeDefined();
@@ -1338,27 +1619,21 @@ describeFn(describeName, () => {
 
   test("tlsOpenapi:CreateConsumerGroup", async () => {
     const projectCreated = await tlsOpenapiService.CreateProject({
-      ProjectName: `tls-nodejs-sdk-test-consumer-group-project-${`${Math.random()}`.replace(
-        ".",
-        ""
-      )}`,
+      ProjectName: `tls-nodejs-sdk-test-consumer-group-project-${generateRandomId()}`,
       Region,
     });
 
     const topicCreated = await tlsOpenapiService.CreateTopic({
       ProjectId: projectCreated.ProjectId,
       ShardCount: 1,
-      TopicName: `tls-nodejs-sdk-test-consumer-group-topic-${`${Math.random()}`.replace(".", "")}`,
+      TopicName: `tls-nodejs-sdk-test-consumer-group-topic-${generateRandomId()}`,
       Ttl: 1,
     });
 
     const consumerGroupCreated = await tlsOpenapiService.CreateConsumerGroup({
       ProjectID: projectCreated.ProjectId,
       TopicIDList: [topicCreated.TopicId],
-      ConsumerGroupName: `tls-nodejs-sdk-test-consumer-group-${`${Math.random()}`.replace(
-        ".",
-        ""
-      )}`,
+      ConsumerGroupName: `tls-nodejs-sdk-test-consumer-group-${generateRandomId()}`,
       HeartbeatTTL: 60,
       OrderedConsume: false,
     });
@@ -1375,21 +1650,29 @@ describeFn(describeName, () => {
 
   test("tlsOpenapi:DeleteConsumerGroup", async () => {
     const projectCreated = await tlsOpenapiService.CreateProject({
-      ProjectName: `tls-nodejs-sdk-test-consumer-group-project-${`${Math.random()}`.replace(
-        ".",
-        ""
-      )}`,
+      ProjectName: `tls-nodejs-sdk-test-consumer-group-project-${generateRandomId()}`,
       Region,
     });
     expect(projectValidate.create(projectCreated)).toBe(true);
 
     const topicCreated = await tlsOpenapiService.CreateTopic({
-      TopicName: `tls-nodejs-sdk-test-consumer-group-topic-${`${Math.random()}`.replace(".", "")}`,
       ProjectId: projectCreated.ProjectId,
+      ShardCount: 1,
+      TopicName: `tls-nodejs-sdk-test-consumer-group-topic-${generateRandomId()}`,
+      Ttl: 1,
     });
     expect(topicValidate.create(topicCreated)).toBe(true);
 
-    const consumerGroupName = `test-consumer-group-${`${Math.random()}`.replace(".", "")}`;
+    const consumerGroupName = `sdkcg-${generateRandomId()}`;
+
+    const consumerGroupCreated = await tlsOpenapiService.CreateConsumerGroup({
+      ProjectID: projectCreated.ProjectId,
+      TopicIDList: [topicCreated.TopicId],
+      ConsumerGroupName: consumerGroupName,
+      HeartbeatTTL: 60,
+      OrderedConsume: false,
+    });
+    expect(consumerGroupCreated).toBeDefined();
 
     const deleteConsumerGroupResult = await tlsOpenapiService.DeleteConsumerGroup({
       ProjectID: projectCreated.ProjectId,
@@ -1407,18 +1690,12 @@ describeFn(describeName, () => {
 
   test("tlsOpenapi:DeleteConsumerGroup with non-existent consumer group", async () => {
     const projectCreated = await tlsOpenapiService.CreateProject({
-      ProjectName: `tls-nodejs-sdk-test-consumer-group-nonexist-project-${`${Math.random()}`.replace(
-        ".",
-        ""
-      )}`,
+      ProjectName: `tls-njs-cg-nonexist-${generateRandomId()}`,
       Region,
     });
     expect(projectValidate.create(projectCreated)).toBe(true);
 
-    const nonExistentConsumerGroupName = `non-existent-consumer-group-${`${Math.random()}`.replace(
-      ".",
-      ""
-    )}`;
+    const nonExistentConsumerGroupName = `sdkcg-nonexist-${generateRandomId()}`;
 
     try {
       await tlsOpenapiService.DeleteConsumerGroup({
@@ -1438,24 +1715,18 @@ describeFn(describeName, () => {
 
   test("tlsOpenapi:ModifyConsumerGroup", async () => {
     const projectCreated = await tlsOpenapiService.CreateProject({
-      ProjectName: `tls-nodejs-sdk-test-modify-consumer-group-project-${`${Math.random()}`.replace(
-        ".",
-        ""
-      )}`,
+      ProjectName: `tls-nodejs-sdk-test-modify-consumer-group-project-${generateRandomId()}`,
       Region,
     });
 
     const topicCreated = await tlsOpenapiService.CreateTopic({
       ProjectId: projectCreated.ProjectId,
       ShardCount: 1,
-      TopicName: `tls-nodejs-sdk-test-modify-consumer-group-topic-${`${Math.random()}`.replace(
-        ".",
-        ""
-      )}`,
+      TopicName: `tls-nodejs-sdk-test-modify-consumer-group-topic-${generateRandomId()}`,
       Ttl: 1,
     });
 
-    const consumerGroupName = `test-modify-consumer-group-${`${Math.random()}`.replace(".", "")}`;
+    const consumerGroupName = `test-modify-consumer-group-${generateRandomId()}`;
 
     await tlsOpenapiService.CreateConsumerGroup({
       ProjectID: projectCreated.ProjectId,
@@ -1485,24 +1756,18 @@ describeFn(describeName, () => {
 
   test("tlsOpenapi:DescribeConsumerGroups", async () => {
     const projectCreated = await tlsOpenapiService.CreateProject({
-      ProjectName: `tls-nodejs-sdk-test-describe-consumer-groups-project-${`${Math.random()}`.replace(
-        ".",
-        ""
-      )}`,
+      ProjectName: `tls-nodejs-sdk-test-describe-consumer-groups-project-${generateRandomId()}`,
       Region,
     });
 
     const topicCreated = await tlsOpenapiService.CreateTopic({
       ProjectId: projectCreated.ProjectId,
       ShardCount: 1,
-      TopicName: `tls-nodejs-sdk-test-describe-consumer-groups-topic-${`${Math.random()}`.replace(
-        ".",
-        ""
-      )}`,
+      TopicName: `tls-nodejs-sdk-test-describe-consumer-groups-topic-${generateRandomId()}`,
       Ttl: 1,
     });
 
-    const consumerGroupName = `test-describe-consumer-group-${`${Math.random()}`.replace(".", "")}`;
+    const consumerGroupName = `test-describe-consumer-group-${generateRandomId()}`;
 
     await tlsOpenapiService.CreateConsumerGroup({
       ProjectID: projectCreated.ProjectId,
@@ -1530,24 +1795,18 @@ describeFn(describeName, () => {
 
   test("tlsOpenapi:ResetCheckPoint", async () => {
     const projectCreated = await tlsOpenapiService.CreateProject({
-      ProjectName: `tls-nodejs-sdk-test-reset-checkpoint-project-${`${Math.random()}`.replace(
-        ".",
-        ""
-      )}`,
+      ProjectName: `tls-nodejs-sdk-test-reset-checkpoint-project-${generateRandomId()}`,
       Region,
     });
 
     const topicCreated = await tlsOpenapiService.CreateTopic({
       ProjectId: projectCreated.ProjectId,
       ShardCount: 1,
-      TopicName: `tls-nodejs-sdk-test-reset-checkpoint-topic-${`${Math.random()}`.replace(
-        ".",
-        ""
-      )}`,
+      TopicName: `tls-nodejs-sdk-test-reset-checkpoint-topic-${generateRandomId()}`,
       Ttl: 1,
     });
 
-    const consumerGroupName = `test-consumer-group-${`${Math.random()}`.replace(".", "")}`;
+    const consumerGroupName = `test-consumer-group-${generateRandomId()}`;
 
     await tlsOpenapiService.CreateConsumerGroup({
       ProjectID: projectCreated.ProjectId,
@@ -1566,11 +1825,12 @@ describeFn(describeName, () => {
     const shardId = shardsList.Shards[0].ShardId;
 
     const describeCheckpointResult = await tlsOpenapiService.DescribeCheckPoint({
-      ProjectID: projectCreated.ProjectId,
-      TopicID: topicCreated.TopicId,
+      ProjectId: projectCreated.ProjectId,
+      TopicId: topicCreated.TopicId,
+      ShardId: shardId,
       ConsumerGroupName: consumerGroupName,
-      ShardID: shardId,
     });
+
     expect(describeCheckPointValidate.describe(describeCheckpointResult)).toBe(true);
 
     // 测试重置消费位点到最早位置
@@ -1609,24 +1869,17 @@ describeFn(describeName, () => {
 
   test("tlsOpenapi:ModifyCheckPoint", async () => {
     const projectCreated = await tlsOpenapiService.CreateProject({
-      ProjectName: `tls-nodejs-sdk-test-modify-checkpoint-project-${`${Math.random()}`.replace(
-        ".",
-        ""
-      )}`,
+      ProjectName: `tls-nodejs-sdk-test-modify-checkpoint-project-${generateRandomId()}`,
       Region,
     });
 
     const topicCreated = await tlsOpenapiService.CreateTopic({
       ProjectId: projectCreated.ProjectId,
-      ShardCount: 1,
-      TopicName: `tls-nodejs-sdk-test-modify-checkpoint-topic-${`${Math.random()}`.replace(
-        ".",
-        ""
-      )}`,
+      TopicName: `tls-nodejs-sdk-test-modify-checkpoint-topic-${generateRandomId()}`,
       Ttl: 1,
     });
 
-    const consumerGroupName = `test-modify-consumer-group-${`${Math.random()}`.replace(".", "")}`;
+    const consumerGroupName = `test-modify-consumer-group-${generateRandomId()}`;
 
     await tlsOpenapiService.CreateConsumerGroup({
       ProjectID: projectCreated.ProjectId,
@@ -1644,14 +1897,18 @@ describeFn(describeName, () => {
 
     const shardId = shardsList.Shards[0].ShardId;
 
-    const checkpoint = "dGVzdC1jaGVja3BvaW50"; // "test-checkpoint" 的 Base64
+    const beginCursorResult = await tlsOpenapiService.DescribeCursor({
+      TopicId: topicCreated.TopicId,
+      ShardId: shardId,
+      From: "begin",
+    });
 
     const modifyResult = await tlsOpenapiService.ModifyCheckPoint({
       ProjectID: projectCreated.ProjectId,
       TopicID: topicCreated.TopicId,
       ConsumerGroupName: consumerGroupName,
       ShardID: shardId,
-      Checkpoint: checkpoint,
+      Checkpoint: beginCursorResult.Cursor,
     });
 
     expect(modifyCheckPointValidate.modify(modifyResult)).toBe(true);
@@ -1666,14 +1923,14 @@ describeFn(describeName, () => {
 
   test("tlsOpenapi:ListTagsForResources", async () => {
     const projectCreated = await tlsOpenapiService.CreateProject({
-      ProjectName: `tls-nodejs-sdk-test-list-tags-project-${`${Math.random()}`.replace(".", "")}`,
+      ProjectName: `tls-nodejs-sdk-test-list-tags-project-${generateRandomId()}`,
       Region,
     });
 
     const topicCreated = await tlsOpenapiService.CreateTopic({
       ProjectId: projectCreated.ProjectId,
       ShardCount: 1,
-      TopicName: `tls-nodejs-sdk-test-list-tags-topic-${`${Math.random()}`.replace(".", "")}`,
+      TopicName: `tls-nodejs-sdk-test-list-tags-topic-${generateRandomId()}`,
       Ttl: 1,
     });
 
@@ -1695,14 +1952,14 @@ describeFn(describeName, () => {
 
   test("tlsOpenapi:AddTagsToResource", async () => {
     const projectCreated = await tlsOpenapiService.CreateProject({
-      ProjectName: `tls-nodejs-sdk-test-add-tags-project-${`${Math.random()}`.replace(".", "")}`,
+      ProjectName: `tls-nodejs-sdk-test-add-tags-project-${generateRandomId()}`,
       Region,
     });
 
     const topicCreated = await tlsOpenapiService.CreateTopic({
       ProjectId: projectCreated.ProjectId,
       ShardCount: 1,
-      TopicName: `tls-nodejs-sdk-test-add-tags-topic-${`${Math.random()}`.replace(".", "")}`,
+      TopicName: `tls-nodejs-sdk-test-add-tags-topic-${generateRandomId()}`,
       Ttl: 1,
     });
 
@@ -1737,17 +1994,14 @@ describeFn(describeName, () => {
 
   test("tlsOpenapi:TagResources", async () => {
     const projectCreated = await tlsOpenapiService.CreateProject({
-      ProjectName: `tls-nodejs-sdk-test-tag-resources-project-${`${Math.random()}`.replace(
-        ".",
-        ""
-      )}`,
+      ProjectName: `tls-nodejs-sdk-test-tag-resources-project-${generateRandomId()}`,
       Region,
     });
 
     const topicCreated = await tlsOpenapiService.CreateTopic({
       ProjectId: projectCreated.ProjectId,
       ShardCount: 1,
-      TopicName: `tls-nodejs-sdk-test-tag-resources-topic-${`${Math.random()}`.replace(".", "")}`,
+      TopicName: `tls-nodejs-sdk-test-tag-resources-topic-${generateRandomId()}`,
       Ttl: 1,
     });
 
@@ -1774,17 +2028,14 @@ describeFn(describeName, () => {
 
   test("tlsOpenapi:UntagResources", async () => {
     const projectCreated = await tlsOpenapiService.CreateProject({
-      ProjectName: `tls-nodejs-sdk-test-untag-resources-project-${`${Math.random()}`.replace(
-        ".",
-        ""
-      )}`,
+      ProjectName: `tls-nodejs-sdk-test-untag-resources-project-${generateRandomId()}`,
       Region,
     });
 
     const topicCreated = await tlsOpenapiService.CreateTopic({
       ProjectId: projectCreated.ProjectId,
       ShardCount: 1,
-      TopicName: `tls-nodejs-sdk-test-untag-resources-topic-${`${Math.random()}`.replace(".", "")}`,
+      TopicName: `tls-nodejs-sdk-test-untag-resources-topic-${generateRandomId()}`,
       Ttl: 1,
     });
 
@@ -1806,14 +2057,14 @@ describeFn(describeName, () => {
 
   test("tlsOpenapi:RemoveTagsFromResource", async () => {
     const projectCreated = await tlsOpenapiService.CreateProject({
-      ProjectName: `tls-nodejs-sdk-test-remove-tags-project-${`${Math.random()}`.replace(".", "")}`,
+      ProjectName: `tls-nodejs-sdk-test-remove-tags-project-${generateRandomId()}`,
       Region,
     });
 
     const topicCreated = await tlsOpenapiService.CreateTopic({
       ProjectId: projectCreated.ProjectId,
       ShardCount: 1,
-      TopicName: `tls-nodejs-sdk-test-remove-tags-topic-${`${Math.random()}`.replace(".", "")}`,
+      TopicName: `tls-nodejs-sdk-test-remove-tags-topic-${generateRandomId()}`,
       Ttl: 1,
     });
 
@@ -1839,66 +2090,167 @@ describeFn(describeName, () => {
   });
 
   test("tlsOpenapi:ModifyETLTaskStatus", async () => {
-    const taskId = `test-etl-task-${`${Math.random()}`.replace(".", "")}`;
-
-    // Test enabling ETL task
-    const enableResult = await tlsOpenapiService.ModifyETLTaskStatus({
-      TaskId: taskId,
-      Enable: true,
-    });
-    expect(etlTaskValidate.modifyStatus(enableResult)).toBe(true);
-
-    // Test disabling ETL task
-    const disableResult = await tlsOpenapiService.ModifyETLTaskStatus({
-      TaskId: taskId,
-      Enable: false,
-    });
-    expect(etlTaskValidate.modifyStatus(disableResult)).toBe(true);
-  });
-
-  test("tlsOpenapi:ModifyETLTask", async () => {
-    const taskId = `test-etl-task-${`${Math.random()}`.replace(".", "")}`;
-
-    const modifyResult = await tlsOpenapiService.ModifyETLTask({
-      TaskId: taskId,
-      Name: `test-etl-task-name-${`${Math.random()}`.replace(".", "")}`,
-      Description: "This is a test ETL task",
-      Script: 'f_set("key","value")',
-      TargetResources: [
-        {
-          Alias: "test",
-          TopicId: "test-topic-id",
-          Region: "cn-beijing",
-          RoleTrn: "trn:iam::2100000001:role/TLSETLAccessForUserA",
-        },
-      ],
-    });
-    expect(etlValidate.modify(modifyResult)).toBe(true);
-  });
-
-  test("tlsOpenapi:CreateETLTask", async () => {
     const projectCreated = await tlsOpenapiService.CreateProject({
-      ProjectName: `tls-nodejs-sdk-test-etl-project-${`${Math.random()}`.replace(".", "")}`,
+      ProjectName: `tls-nodejs-sdk-test-etl-status-project-${generateRandomId()}`,
       Region,
     });
 
     const sourceTopicCreated = await tlsOpenapiService.CreateTopic({
       ProjectId: projectCreated.ProjectId,
       ShardCount: 1,
-      TopicName: `tls-nodejs-sdk-test-source-topic-${`${Math.random()}`.replace(".", "")}`,
+      TopicName: `tls-nodejs-sdk-test-etl-status-source-topic-${generateRandomId()}`,
       Ttl: 1,
     });
 
     const targetTopicCreated = await tlsOpenapiService.CreateTopic({
       ProjectId: projectCreated.ProjectId,
       ShardCount: 1,
-      TopicName: `tls-nodejs-sdk-test-target-topic-${`${Math.random()}`.replace(".", "")}`,
+      TopicName: `tls-nodejs-sdk-test-etl-status-target-topic-${generateRandomId()}`,
       Ttl: 1,
     });
 
     const etlTaskCreated = await tlsOpenapiService.CreateETLTask({
       DSLType: "NORMAL",
-      Name: `tls-nodejs-sdk-test-etl-task-${`${Math.random()}`.replace(".", "")}`,
+      Name: `tls-nodejs-sdk-test-etl-status-task-${generateRandomId()}`,
+      Description: "Test ETL task status",
+      Enable: true,
+      SourceTopicId: sourceTopicCreated.TopicId,
+      Script: 'f_set("key", "value")',
+      TaskType: "Resident",
+      TargetResources: [
+        {
+          Alias: "test",
+          TopicId: targetTopicCreated.TopicId,
+          Region,
+        },
+      ],
+    });
+    expect(etlTaskValidate.create(etlTaskCreated)).toBe(true);
+
+    // Test enabling ETL task
+    const enableResult = await tlsOpenapiService.ModifyETLTaskStatus({
+      TaskId: etlTaskCreated.TaskId,
+      Enable: true,
+    });
+    expect(etlTaskValidate.modifyStatus(enableResult)).toBe(true);
+
+    // Test disabling ETL task
+    const disableResult = await tlsOpenapiService.ModifyETLTaskStatus({
+      TaskId: etlTaskCreated.TaskId,
+      Enable: false,
+    });
+    expect(etlTaskValidate.modifyStatus(disableResult)).toBe(true);
+
+    await tlsOpenapiService.DeleteETLTask({
+      TaskId: etlTaskCreated.TaskId,
+    });
+
+    await tlsOpenapiService.DeleteTopic({
+      TopicId: targetTopicCreated.TopicId,
+    });
+
+    await tlsOpenapiService.DeleteTopic({
+      TopicId: sourceTopicCreated.TopicId,
+    });
+
+    await tlsOpenapiService.DeleteProject({
+      ProjectId: projectCreated.ProjectId,
+    });
+  });
+
+  test("tlsOpenapi:ModifyETLTask", async () => {
+    const projectCreated = await tlsOpenapiService.CreateProject({
+      ProjectName: `tls-nodejs-sdk-test-modify-etl-project-${generateRandomId()}`,
+      Region,
+    });
+
+    const sourceTopicCreated = await tlsOpenapiService.CreateTopic({
+      ProjectId: projectCreated.ProjectId,
+      ShardCount: 1,
+      TopicName: `tls-nodejs-sdk-test-modify-etl-source-topic-${generateRandomId()}`,
+      Ttl: 1,
+    });
+
+    const targetTopicCreated = await tlsOpenapiService.CreateTopic({
+      ProjectId: projectCreated.ProjectId,
+      ShardCount: 1,
+      TopicName: `tls-nodejs-sdk-test-modify-etl-target-topic-${generateRandomId()}`,
+      Ttl: 1,
+    });
+
+    const etlTaskCreated = await tlsOpenapiService.CreateETLTask({
+      DSLType: "NORMAL",
+      Name: `tls-nodejs-sdk-test-modify-etl-task-${generateRandomId()}`,
+      Description: "Test ETL task for modify",
+      Enable: true,
+      SourceTopicId: sourceTopicCreated.TopicId,
+      Script: 'f_set("key", "value")',
+      TaskType: "Resident",
+      TargetResources: [
+        {
+          Alias: "test",
+          TopicId: targetTopicCreated.TopicId,
+          Region,
+        },
+      ],
+    });
+    expect(etlTaskValidate.create(etlTaskCreated)).toBe(true);
+
+    const modifyResult = await tlsOpenapiService.ModifyETLTask({
+      TaskId: etlTaskCreated.TaskId,
+      Name: `test-etl-task-name-${generateRandomId()}`,
+      Description: "This is a test ETL task",
+      Script: 'f_set("key","value")',
+      TargetResources: [
+        {
+          Alias: "test",
+          TopicId: targetTopicCreated.TopicId,
+          Region,
+        },
+      ],
+    });
+    expect(etlValidate.modify(modifyResult)).toBe(true);
+
+    await tlsOpenapiService.DeleteETLTask({
+      TaskId: etlTaskCreated.TaskId,
+    });
+
+    await tlsOpenapiService.DeleteTopic({
+      TopicId: targetTopicCreated.TopicId,
+    });
+
+    await tlsOpenapiService.DeleteTopic({
+      TopicId: sourceTopicCreated.TopicId,
+    });
+
+    await tlsOpenapiService.DeleteProject({
+      ProjectId: projectCreated.ProjectId,
+    });
+  });
+
+  test("tlsOpenapi:CreateETLTask", async () => {
+    const projectCreated = await tlsOpenapiService.CreateProject({
+      ProjectName: `tls-nodejs-sdk-test-etl-project-${generateRandomId()}`,
+      Region,
+    });
+
+    const sourceTopicCreated = await tlsOpenapiService.CreateTopic({
+      ProjectId: projectCreated.ProjectId,
+      ShardCount: 1,
+      TopicName: `tls-nodejs-sdk-test-source-topic-${generateRandomId()}`,
+      Ttl: 1,
+    });
+
+    const targetTopicCreated = await tlsOpenapiService.CreateTopic({
+      ProjectId: projectCreated.ProjectId,
+      ShardCount: 1,
+      TopicName: `tls-nodejs-sdk-test-target-topic-${generateRandomId()}`,
+      Ttl: 1,
+    });
+
+    const etlTaskCreated = await tlsOpenapiService.CreateETLTask({
+      DSLType: "NORMAL",
+      Name: `tls-nodejs-sdk-test-etl-task-${generateRandomId()}`,
       Description: "Test ETL task",
       Enable: true,
       SourceTopicId: sourceTopicCreated.TopicId,
@@ -1929,25 +2281,32 @@ describeFn(describeName, () => {
 
   test("tlsOpenapi:CreateDownloadTask", async () => {
     const projectCreated = await tlsOpenapiService.CreateProject({
-      ProjectName: `tls-nodejs-sdk-test-download-task-project-${`${Math.random()}`.replace(
-        ".",
-        ""
-      )}`,
+      ProjectName: `tls-nodejs-sdk-test-download-task-project-${generateRandomId()}`,
       Region,
     });
 
     const topicCreated = await tlsOpenapiService.CreateTopic({
       ProjectId: projectCreated.ProjectId,
       ShardCount: 1,
-      TopicName: `tls-nodejs-sdk-test-download-task-topic-${`${Math.random()}`.replace(".", "")}`,
+      TopicName: `tls-nodejs-sdk-test-download-task-topic-${generateRandomId()}`,
       Ttl: 1,
     });
 
-    const startTime = Date.now() - 3600000;
-    const endTime = Date.now();
+    await tlsOpenapiService.CreateIndex({
+      TopicId: topicCreated.TopicId,
+      FullText: {
+        CaseSensitive: false,
+        Delimiter: "_",
+        IncludeChinese: false,
+      },
+    });
+
+    const now = Math.floor(Date.now() / 1000);
+    const startTime = now - 3600;
+    const endTime = now;
 
     const downloadTaskCreated = await tlsOpenapiService.CreateDownloadTask({
-      TaskName: `test-download-task-${`${Math.random()}`.replace(".", "")}`,
+      TaskName: `test-download-task-${generateRandomId()}`,
       TopicId: topicCreated.TopicId,
       Query: "*",
       StartTime: startTime,
@@ -1972,14 +2331,14 @@ describeFn(describeName, () => {
 
   test("tlsOpenapi:DescribeDownloadTasks", async () => {
     const projectCreated = await tlsOpenapiService.CreateProject({
-      ProjectName: `tls-nodejs-sdk-test-download-project-${`${Math.random()}`.replace(".", "")}`,
+      ProjectName: `tls-nodejs-sdk-test-download-project-${generateRandomId()}`,
       Region,
     });
 
     const topicCreated = await tlsOpenapiService.CreateTopic({
       ProjectId: projectCreated.ProjectId,
       ShardCount: 1,
-      TopicName: `tls-nodejs-sdk-test-download-topic-${`${Math.random()}`.replace(".", "")}`,
+      TopicName: `tls-nodejs-sdk-test-download-topic-${generateRandomId()}`,
       Ttl: 1,
     });
 
@@ -2000,20 +2359,18 @@ describeFn(describeName, () => {
   });
 
   test("tlsOpenapi:DescribeDownloadUrl", async () => {
-    // 创建一个下载任务来获取TaskId
     const projectCreated = await tlsOpenapiService.CreateProject({
-      ProjectName: `tls-nodejs-sdk-test-download-project-${`${Math.random()}`.replace(".", "")}`,
+      ProjectName: `tls-nodejs-sdk-test-download-project-${generateRandomId()}`,
       Region,
     });
 
     const topicCreated = await tlsOpenapiService.CreateTopic({
       ProjectId: projectCreated.ProjectId,
       ShardCount: 1,
-      TopicName: `tls-nodejs-sdk-test-download-topic-${`${Math.random()}`.replace(".", "")}`,
+      TopicName: `tls-nodejs-sdk-test-download-topic-${generateRandomId()}`,
       Ttl: 1,
     });
 
-    // 创建索引以便创建下载任务
     await tlsOpenapiService.CreateIndex({
       TopicId: topicCreated.TopicId,
       FullText: {
@@ -2023,21 +2380,25 @@ describeFn(describeName, () => {
       },
     });
 
-    // 首先搜索日志以创建下载任务
-    await tlsOpenapiService.SearchLogs({
-      StartTime: Math.floor(Date.now() / 1000) - 3600,
-      EndTime: Math.floor(Date.now() / 1000),
-      Limit: 1,
-      Query: "",
+    const now = Math.floor(Date.now() / 1000);
+    const startTime = now - 3600;
+    const endTime = now;
+
+    const downloadTaskCreated = await tlsOpenapiService.CreateDownloadTask({
+      TaskName: `test-download-task-${generateRandomId()}`,
       TopicId: topicCreated.TopicId,
+      Query: "*",
+      StartTime: startTime,
+      EndTime: endTime,
+      DataFormat: "csv",
+      Sort: "asc",
+      Limit: 100,
+      Compression: "gzip",
     });
+    expect(downloadTaskValidate.create(downloadTaskCreated)).toBe(true);
 
-    // 假设我们有一个TaskId用于测试
-    const testTaskId = "4a9bd4bd-53f1-43ff-b88a-64ee1be5****";
-
-    // 测试DescribeDownloadUrl接口
     const downloadUrlResult = await tlsOpenapiService.DescribeDownloadUrl({
-      TaskId: testTaskId,
+      TaskId: downloadTaskCreated.TaskId,
     });
 
     expect(downloadUrlValidate.describe(downloadUrlResult)).toBe(true);
@@ -2052,16 +2413,16 @@ describeFn(describeName, () => {
     });
   });
 
-  test("tlsOpenapi:CreateShipper", async () => {
+  testTos("tlsOpenapi:CreateShipper", async () => {
     const projectCreated = await tlsOpenapiService.CreateProject({
-      ProjectName: `tls-nodejs-sdk-test-shipper-project-${`${Math.random()}`.replace(".", "")}`,
+      ProjectName: `tls-nodejs-sdk-test-shipper-project-${generateRandomId()}`,
       Region,
     });
 
     const topicCreated = await tlsOpenapiService.CreateTopic({
       ProjectId: projectCreated.ProjectId,
       ShardCount: 1,
-      TopicName: `tls-nodejs-sdk-test-shipper-topic-${`${Math.random()}`.replace(".", "")}`,
+      TopicName: `tls-nodejs-sdk-test-shipper-topic-${generateRandomId()}`,
       Ttl: 1,
     });
 
@@ -2074,12 +2435,12 @@ describeFn(describeName, () => {
           Escape: true,
         },
       },
-      ShipperName: `tls-nodejs-sdk-test-tos-shipper-${`${Math.random()}`.replace(".", "")}`,
+      ShipperName: `tls-nodejs-sdk-test-tos-shipper-${generateRandomId()}`,
       ShipperType: "tos",
       TopicId: topicCreated.TopicId,
       TosShipperInfo: {
-        Bucket: "test-bucket",
-        Prefix: "test-prefix",
+        Bucket: TLS_TOS_BUCKET,
+        Prefix: TLS_TOS_PREFIX,
         MaxSize: 5,
         Compress: "snappy",
         Interval: 300,
@@ -2098,7 +2459,7 @@ describeFn(describeName, () => {
         Instance: "kafka-cnngbnntswg1****",
         KafkaTopic: "topic-c",
       },
-      ShipperName: `tls-nodejs-sdk-test-kafka-shipper-${`${Math.random()}`.replace(".", "")}`,
+      ShipperName: `tls-nodejs-sdk-test-kafka-shipper-${generateRandomId()}`,
       ShipperType: "kafka",
       TopicId: topicCreated.TopicId,
     });
@@ -2114,51 +2475,145 @@ describeFn(describeName, () => {
   });
 
   test("tlsOpenapi:WebTracks", async () => {
+    const now = Math.floor(Date.now() / 1000);
+    const startTime = now - 3600;
+    const endTime = now + 3600;
+
+    const topicId = "9f9a0da6-513d-4b7b-bc71-edaeb8715eeb";
+
+    await tlsOpenapiService.WebTracks({
+      ProjectId: "93b0621a-8466-4fa6-993d-d3317c537760",
+      TopicId: topicId,
+      Logs: [{ key1: "value1", key2: "value2" }],
+      Source: "test-source",
+    });
+
+    await new Promise((resolve) => setTimeout(resolve, 10000));
+
+    const searchLogsResult = await tlsOpenapiService.SearchLogs({
+      StartTime: startTime,
+      EndTime: endTime,
+      Limit: 100,
+      Query: "",
+      TopicId: topicId,
+    });
+
+    const foundLog = Array.isArray(searchLogsResult?.Logs)
+      ? searchLogsResult.Logs.find(
+          (log) =>
+            log &&
+            typeof log === "object" &&
+            log.key1 === "value1" &&
+            log.key2 === "value2" &&
+            log.__source__ === "test-source"
+        )
+      : undefined;
+
+    expect(foundLog).toBeTruthy();
+  });
+
+  test("tlsOpenapi:DeleteETLTask", async () => {
     const projectCreated = await tlsOpenapiService.CreateProject({
-      ProjectName: `tls-nodejs-sdk-test-topic-project-${`${Math.random()}`.replace(".", "")}`,
+      ProjectName: `tls-nodejs-sdk-test-delete-etl-project-${generateRandomId()}`,
+      Region,
+    });
+
+    const sourceTopicCreated = await tlsOpenapiService.CreateTopic({
+      ProjectId: projectCreated.ProjectId,
+      ShardCount: 1,
+      TopicName: `tls-nodejs-sdk-test-delete-etl-source-topic-${generateRandomId()}`,
+      Ttl: 1,
+    });
+
+    const targetTopicCreated = await tlsOpenapiService.CreateTopic({
+      ProjectId: projectCreated.ProjectId,
+      ShardCount: 1,
+      TopicName: `tls-nodejs-sdk-test-delete-etl-target-topic-${generateRandomId()}`,
+      Ttl: 1,
+    });
+
+    const etlTaskCreated = await tlsOpenapiService.CreateETLTask({
+      DSLType: "NORMAL",
+      Name: `tls-nodejs-sdk-test-delete-etl-task-${generateRandomId()}`,
+      Description: "Test ETL task for delete",
+      Enable: true,
+      SourceTopicId: sourceTopicCreated.TopicId,
+      Script: 'f_set("key", "value")',
+      TaskType: "Resident",
+      TargetResources: [
+        {
+          Alias: "test",
+          TopicId: targetTopicCreated.TopicId,
+          Region,
+        },
+      ],
+    });
+    expect(etlTaskValidate.create(etlTaskCreated)).toBe(true);
+
+    const deleteResult = await tlsOpenapiService.DeleteETLTask({
+      TaskId: etlTaskCreated.TaskId,
+    });
+    expect(etlValidate.delete(deleteResult)).toBe(true);
+
+    await tlsOpenapiService.DeleteTopic({
+      TopicId: targetTopicCreated.TopicId,
+    });
+
+    await tlsOpenapiService.DeleteTopic({
+      TopicId: sourceTopicCreated.TopicId,
+    });
+
+    await tlsOpenapiService.DeleteProject({
+      ProjectId: projectCreated.ProjectId,
+    });
+  });
+
+  testTos("tlsOpenapi:DeleteImportTask", async () => {
+    // P0: 基础功能测试 - 删除导入任务
+    const projectCreated = await tlsOpenapiService.CreateProject({
+      ProjectName: `tls-nodejs-sdk-test-delete-import-task-project-${generateRandomId()}`,
       Region,
     });
 
     const topicCreated = await tlsOpenapiService.CreateTopic({
       ProjectId: projectCreated.ProjectId,
       ShardCount: 1,
-      TopicName: `tls-nodejs-sdk-test-topic-${`${Math.random()}`.replace(".", "")}`,
+      TopicName: `tls-nodejs-sdk-test-delete-import-task-topic-${generateRandomId()}`,
       Ttl: 1,
     });
 
-    const webTracksResult = await tlsOpenapiService.WebTracks({
-      ProjectId: projectCreated.ProjectId,
-      TopicId: topicCreated.TopicId,
-      Logs: [{ key1: "value1", key2: "value2" }],
-      Source: "test-source",
+    const importTaskCreated = await tlsOpenapiService.CreateImportTask({
+      TaskName: `tls-nodejs-sdk-test-delete-import-task-${generateRandomId()}`,
+      TopicID: topicCreated.TopicId,
+      SourceType: "tos",
+      ImportSourceInfo: {
+        TosSourceInfo: {
+          Bucket: TLS_TOS_BUCKET,
+          Prefix: `${TLS_TOS_PREFIX}/import/`,
+          CompressType: "none",
+        },
+      },
+      TargetInfo: {
+        Region,
+        LogType: "json_log",
+      },
+      Description: "测试删除导入任务",
     });
-    expect(webTracksResult).toEqual({});
+
+    expect(importTaskValidate.create(importTaskCreated)).toBe(true);
+
+    const deleteResult = await tlsOpenapiService.DeleteImportTask({
+      TaskId: importTaskCreated.TaskId,
+    });
+    expect(deleteResult).toBeDefined();
 
     await tlsOpenapiService.DeleteTopic({
       TopicId: topicCreated.TopicId,
     });
+
     await tlsOpenapiService.DeleteProject({
       ProjectId: projectCreated.ProjectId,
     });
-  });
-
-  test("tlsOpenapi:DeleteETLTask", async () => {
-    const taskId = `test-etl-task-${`${Math.random()}`.replace(".", "")}`;
-
-    const deleteResult = await tlsOpenapiService.DeleteETLTask({
-      TaskId: taskId,
-    });
-    expect(etlValidate.delete(deleteResult)).toBe(true);
-  });
-
-  test("tlsOpenapi:DeleteImportTask", async () => {
-    // P0: 基础功能测试 - 删除导入任务
-    const taskId = `test-import-task-${`${Math.random()}`.replace(".", "")}`;
-
-    const deleteResult = await tlsOpenapiService.DeleteImportTask({
-      TaskId: taskId,
-    });
-    expect(deleteResult).toBeDefined();
   });
 
   test("tlsOpenapi:DeleteImportTask with empty TaskId", async () => {
