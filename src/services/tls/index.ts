@@ -609,6 +609,7 @@ export class TlsService extends Base {
     "DescribeCheckPoint",
     {
       method: "GET",
+      queryKeys: ["ProjectId", "TopicId", "ShardId"],
     }
   );
 
@@ -721,6 +722,7 @@ export class TlsService extends Base {
 
   WebTracks = this.createAPI<IWebTracksReq, IWebTracksResp>("WebTracks", {
     method: "POST",
+    queryKeys: ["ProjectId", "TopicId"],
   });
 
   ModifyETLTask = this.createAPI<IModifyETLTaskReq, IModifyETLTaskResp>("ModifyETLTask", {

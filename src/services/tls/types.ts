@@ -2879,16 +2879,15 @@ export interface IModifyConsumerGroupReq {
 
 export type IModifyConsumerGroupResp = { [key: string]: any };
 
-// DescribeCheckPoint
 export interface IDescribeCheckPointReq {
-  /** ConsumerGroup 所绑定 ProjectID。 */
-  ProjectID: string;
-  /** ConsumerGroup 所绑定 TopicID。 */
-  TopicID: string;
+  /** ConsumerGroup 所绑定 ProjectId */
+  ProjectId: string;
+  /** ConsumerGroup 所绑定 TopicId */
+  TopicId: string;
   /** 消费组名称，在同一 Topic 下唯一，可选。 */
   ConsumerGroupName?: string;
-  /** 需要获取 Checkpoint 的 ShardID。 */
-  ShardID: number;
+  /** 需要获取 Checkpoint 的 ShardId */
+  ShardId: number;
 }
 
 export interface IDescribeCheckPointResp {
