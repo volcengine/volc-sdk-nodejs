@@ -1,3 +1,10 @@
+2026-01-15 Bumped to version v1.35.0
+- tls:
+  - 新增接口与参数补齐
+  - POST 接口支持 query 传参
+  - ConsumeLogs 接口修正为 GET 接口
+  - WebTracks, DescribeCheckPoint 接口修正
+
 2025-12-22 Bumped to version v1.34.0
 - tls:
   - 新增接口与存量接口参数补齐
