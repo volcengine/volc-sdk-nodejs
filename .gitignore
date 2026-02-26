@@ -3,3 +3,4 @@ lib
 .idea/
 *.lock
 .env
+.DS_Store

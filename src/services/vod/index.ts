@@ -186,6 +186,8 @@ export class VodService extends Service {
   };
   // 直接上传
   private directUploadStream = async (buffer: Buffer, host: string, oid: string, auth: string) => {
+    // 根据实际数据大小设置 maxBodyLength，确保不会因为数据大小超过默认限制而失败
+    const maxBodyLength = Math.max(buffer.length * 1.5, MinChunkSize * 3) || Infinity;
     await axios(`https://${host}/${getEncodedUri(oid)}`, {
       method: "put",
       headers: {
@@ -193,10 +195,19 @@ export class VodService extends Service {
         Authorization: auth,
       },
       data: buffer,
-      maxBodyLength: MinChunkSize * 2,
+      maxBodyLength,
     });
   };
-  private uploadToB = async (params: types.UploadParams): Promise<{ sessionKey: string }> => {
+  private uploadToB = async (
+    params: types.UploadParams & {
+      // 断点续传扩展参数（可选）
+      checkpoint?: string | types.VodCheckpointRecord;
+      partSize?: number;
+      onProgress?: (percent: number, checkpoint: types.VodCheckpointRecord) => void;
+      onUploadEvent?: (event: types.VodUploadEvent) => void;
+      cancelToken?: any;
+    }
+  ): Promise<{ sessionKey: string }> => {
     /* 校验文件是否合法 */
     const {
       SpaceName,
@@ -206,9 +217,19 @@ export class VodService extends Service {
       FileExtension,
       maxConcurrency,
       Content, // 流内容
+      // 断点续传扩展参数
+      checkpoint,
+      partSize,
+      onProgress,
+      onUploadEvent,
+      cancelToken,
     } = params;
 
     if (Content instanceof Readable) {
+      // 如果传入了断点续传参数，给出提示
+      if (checkpoint !== undefined || onProgress !== undefined) {
+        console.warn("流方式上传暂不支持断点续传，将使用原有上传方式");
+      }
       return this.uploadToBStream(params);
     }
     const fileStat = await fsStat(FilePath);
@@ -220,29 +241,100 @@ export class VodService extends Service {
       throw new Error("invalid file type");
     }
 
-    /* 获取文件上传凭证及地址 */
-    const applyReq: types.VodApplyUploadInfoRequest = {
-      SpaceName,
-      FileType: FileType || "media",
-      FileName,
-      FileExtension,
-    };
-    const applyRes = await this.ApplyUploadInfo(applyReq);
-    if (applyRes.ResponseMetadata.Error) {
-      throw new Error(JSON.stringify(applyRes));
-    }
-    const uploadAddress = get(applyRes, "Result.Data.UploadAddress");
-    const oid = get(uploadAddress, "StoreInfos[0].StoreUri", "");
-    const auth = get(uploadAddress, "StoreInfos[0].Auth", "");
-    const sessionKey = get(uploadAddress, "SessionKey", "");
-    const host = get(uploadAddress, "UploadHosts[0]", "");
-    // const startTime = dayjs();
+    // ========== 判断是否使用断点续传 ==========
+    const useResumable = checkpoint !== undefined || onProgress !== undefined;
 
-    /* 判断文件大小,选择上传方式 */
-    if (fileSize <= MinChunkSize) {
-      await this.directUpload(FilePath, host, oid, auth, fileSize);
+    let oid: string;
+    let auth: string;
+    let sessionKey: string;
+    let host: string;
+
+    if (useResumable && fileSize > MinChunkSize) {
+      // 断点续传：优先使用 checkpoint 中的凭证，避免凭证被更新导致 uploadID 失效
+      const { loadCheckpoint } = await import("./multipart/checkpoint");
+      const checkpointInfo = await loadCheckpoint(checkpoint);
+      const checkpointRecord = checkpointInfo.record;
+
+      const hasValidCredential =
+        checkpointRecord?.upload_id &&
+        checkpointRecord?.host &&
+        checkpointRecord?.oid &&
+        checkpointRecord?.auth &&
+        checkpointRecord?.session_key;
+
+      if (hasValidCredential) {
+        host = checkpointRecord!.host;
+        oid = checkpointRecord!.oid;
+        auth = checkpointRecord!.auth;
+        sessionKey = checkpointRecord!.session_key;
+      } else {
+        // 无 checkpoint 或凭证不完整，调用 ApplyUploadInfo 获取新凭证
+        const applyReq: types.VodApplyUploadInfoRequest = {
+          SpaceName,
+          FileType: FileType || "media",
+          FileName,
+          FileExtension,
+        };
+        const applyRes = await this.ApplyUploadInfo(applyReq);
+        if (applyRes.ResponseMetadata.Error) {
+          throw new Error(JSON.stringify(applyRes));
+        }
+        const uploadAddress = get(applyRes, "Result.Data.UploadAddress");
+        oid = get(uploadAddress, "StoreInfos[0].StoreUri", "");
+        auth = get(uploadAddress, "StoreInfos[0].Auth", "");
+        sessionKey = get(uploadAddress, "SessionKey", "");
+        host = get(uploadAddress, "UploadHosts[0]", "");
+      }
+
+      // 使用断点续传上传
+      const { resumableUploadFromFile } = await import("./multipart/resumableUpload");
+      const progressCb = onProgress;
+      await resumableUploadFromFile({
+        spaceName: SpaceName,
+        filePath: FilePath,
+        fileType: FileType,
+        fileName: FileName,
+        fileExtension: FileExtension,
+        sessionKey,
+        host,
+        oid,
+        auth,
+        partSize,
+        maxConcurrency,
+        checkpoint,
+        onProgress: progressCb,
+        onUploadEvent,
+        cancelToken,
+        // 注入现有的上传方法
+        initUploadPart: this.initUploadPart.bind(this),
+        queryUploadParts: this.queryUploadParts.bind(this),
+        uploadPart: this.uploadPart.bind(this),
+        uploadMergePart: this.uploadMergePart.bind(this),
+      });
     } else {
-      await this.chunkUpload(FilePath, host, oid, auth, fileSize, true, maxConcurrency);
+      // 非断点续传：获取文件上传凭证及地址
+      const applyReq: types.VodApplyUploadInfoRequest = {
+        SpaceName,
+        FileType: FileType || "media",
+        FileName,
+        FileExtension,
+      };
+      const applyRes = await this.ApplyUploadInfo(applyReq);
+      if (applyRes.ResponseMetadata.Error) {
+        throw new Error(JSON.stringify(applyRes));
+      }
+      const uploadAddress = get(applyRes, "Result.Data.UploadAddress");
+      oid = get(uploadAddress, "StoreInfos[0].StoreUri", "");
+      auth = get(uploadAddress, "StoreInfos[0].Auth", "");
+      sessionKey = get(uploadAddress, "SessionKey", "");
+      host = get(uploadAddress, "UploadHosts[0]", "");
+
+      // 使用原有上传方式（完全向后兼容）
+      if (fileSize <= MinChunkSize) {
+        await this.directUpload(FilePath, host, oid, auth, fileSize);
+      } else {
+        await this.chunkUpload(FilePath, host, oid, auth, fileSize, true, maxConcurrency);
+      }
     }
     // const cost = dayjs().diff(startTime, "second");
     // const avgSpeed = fileSize / cost;
@@ -262,6 +354,8 @@ export class VodService extends Service {
       const bufferInit = Buffer.alloc(size);
       fd = await fsOpen(filePath, "r");
       const { buffer } = await fsRead(fd, bufferInit, 0, size, 0);
+      // 根据实际数据大小设置 maxBodyLength，确保不会因为文件大小超过默认限制而失败
+      const maxBodyLength = Math.max(size * 1.5, MinChunkSize * 3) || Infinity;
       await axios(`https://${host}/${getEncodedUri(oid)}`, {
         method: "put",
         headers: {
@@ -269,7 +363,7 @@ export class VodService extends Service {
           Authorization: auth,
         },
         data: buffer,
-        maxBodyLength: MinChunkSize * 2,
+        maxBodyLength,
       });
     } finally {
       await fsClose(fd);
@@ -280,7 +374,7 @@ export class VodService extends Service {
     host: string,
     oid: string,
     auth: string,
-    uploadId: number,
+    uploadId: string | number,
     isLargeFile: boolean,
     fd: number,
     chunkSize: number,
@@ -388,11 +482,76 @@ export class VodService extends Service {
     }
   };
 
+  /**
+   * 查询已上传的分片列表
+   * GET {tosDomain}/{oid}/{fileName}?uploadID={uploadId}
+   * 如果命中缓存，会返回已上传的分片列表
+   */
+  private queryUploadParts = async (
+    host: string,
+    oid: string,
+    auth: string,
+    uploadID: string,
+    isLargeFile: boolean,
+    fileName?: string
+  ): Promise<Array<{ partNumber: number; crc32: string; etag: string }>> => {
+    try {
+      // 拼接文件名到 URL
+      let url = `https://${host}/${getEncodedUri(oid)}`;
+      if (fileName) {
+        url += `/${getEncodedUri(fileName)}`;
+      }
+      url += `?uploadID=${uploadID}`;
+
+      const headers: any = { Authorization: auth };
+      if (isLargeFile) {
+        headers["X-Storage-Mode"] = "gateway";
+      }
+      const res = await axios(url, {
+        method: "get",
+        headers,
+      });
+      const partList = get(res, "data.payload.partList", []);
+
+      if (!Array.isArray(partList)) {
+        return [];
+      }
+      // 服务可能返回 partNumber 为 string，统一转为 number
+      // crc32 不能丢失：即使是 "0" 或 0 也是有效值，不能用 || '' 判断
+      return partList.map((part: any) => {
+        const rawPartNumber =
+          part.partNumber !== undefined && part.partNumber !== null
+            ? part.partNumber
+            : part.part_number;
+        return {
+          partNumber: Number(rawPartNumber) || 0,
+          // crc32: 如果存在（包括 0 或 "0"）就保留，否则为空字符串
+          crc32: part.crc32 !== undefined && part.crc32 !== null ? String(part.crc32) : "",
+          etag: part.etag !== undefined && part.etag !== null ? String(part.etag) : "",
+        };
+      });
+    } catch (err: any) {
+      // 如果查询失败（如 404），返回空数组，表示没有已上传的分片
+      if (err.response?.status === 404) {
+        return [];
+      }
+      // 其他错误，只记录必要的非敏感信息，避免泄露请求配置和认证信息
+      const safeLog = {
+        status: err.response?.status,
+        statusText: err.response?.statusText,
+        data: err.response && typeof err.response.data === "object" ? err.response.data : undefined,
+        logid: err.response?.headers?.["x-tt-logid"],
+      };
+      console.warn("[Warning] Failed to query upload parts:", JSON.stringify(safeLog));
+      return [];
+    }
+  };
+
   private uploadPart = async (
     host: string,
     oid: string,
     auth: string,
-    uploadID: number,
+    uploadID: string | number,
     partNumber: number,
     data: Buffer,
     isLargeFile: boolean
@@ -406,15 +565,36 @@ export class VodService extends Service {
       if (isLargeFile) {
         headers["X-Storage-Mode"] = "gateway";
       }
+      // 根据实际数据大小设置 maxBodyLength，确保不会因为分片大小超过默认限制而失败
+      // 使用数据大小的 1.5 倍作为安全边界，或者 Infinity 表示不限制
+      const maxBodyLength = Math.max(data.length * 1.5, MinChunkSize * 3) || Infinity;
+
       await axios(url, {
         method: "put",
         headers,
         data,
-        maxBodyLength: MinChunkSize * 2,
+        maxBodyLength,
       });
       return check_sum;
-    } catch (err) {
-      throw new Error("upload part error:" + err);
+    } catch (err: any) {
+      // 提供更详细的错误信息
+      let errorMessage = err.response?.data
+        ? `Request failed with status ${err.response.status}: ${JSON.stringify(err.response.data)}`
+        : err.message || String(err);
+
+      // 如果是 404 错误，可能是 uploadID 过期或 URL 构造错误
+      if (err.response?.status === 404) {
+        errorMessage +=
+          `\n提示: uploadID 可能已过期或无效。` +
+          `UploadID: ${uploadID}, ` +
+          `PartNumber: ${partNumber}, ` +
+          `URL: https://${host}/${getEncodedUri(
+            oid
+          )}?partNumber=${partNumber}&uploadID=${uploadID}` +
+          `\n如果是从 checkpoint 恢复上传，请删除 checkpoint 文件重新上传。`;
+      }
+
+      throw new Error("upload part error:" + errorMessage);
     }
   };
 
@@ -422,35 +602,83 @@ export class VodService extends Service {
     host: string,
     oid: string,
     auth: string,
-    uploadID: number,
+    uploadID: string | number,
     checkSumList: string[],
-    isLargeFile: boolean
+    isLargeFile: boolean,
+    startFromOne = false // 兼容旧版本 checkpoint：如果为 true，强制 partNumber 从 1 开始
   ) => {
     try {
+      // 验证所有分片的 CRC32 都已准备好
+      const missingParts: number[] = [];
+      checkSumList.forEach((crc, index) => {
+        if (!crc) {
+          missingParts.push(index + 1);
+        }
+      });
+      if (missingParts.length > 0) {
+        throw new Error(`Missing CRC32 for parts: ${missingParts.join(", ")}. Cannot merge.`);
+      }
       const url = `https://${host}/${getEncodedUri(oid)}?uploadID=${uploadID}`;
-      const data = this.generateMergeBody(checkSumList);
-      const headers = { Authorization: auth };
+      // 合并请求格式：
+      // - 如果 startFromOne=true，强制从 1 开始（兼容旧版本 checkpoint）
+      // - 否则，根据 isLargeFile 决定：大文件从 1 开始，非大文件从 0 开始
+      const data = this.generateMergeBody(checkSumList, isLargeFile, startFromOne);
+      const headers: any = { Authorization: auth };
       if (isLargeFile) {
         headers["X-Storage-Mode"] = "gateway";
       }
-      await axios(url, {
+      // 合并请求的数据通常较小，但为了安全起见，根据实际数据大小设置
+      const dataSize = Buffer.byteLength(data, "utf8");
+      const maxBodyLength = Math.max(dataSize * 2, MinChunkSize * 3) || Infinity;
+
+      const response = await axios(url, {
         method: "put",
         headers,
         data,
-        maxBodyLength: MinChunkSize * 3,
+        maxBodyLength,
       });
-    } catch (err) {
-      throw new Error("upload merge part error:" + err);
+
+      // 如果响应状态不是 2xx，抛出错误
+      if (response.status < 200 || response.status >= 300) {
+        throw new Error(
+          `Merge request failed with status ${response.status}: ${JSON.stringify(response.data)}`
+        );
+      }
+    } catch (err: any) {
+      // 提供更详细的错误信息
+      let errorMessage = err.response?.data
+        ? `Request failed with status ${err.response.status}: ${JSON.stringify(err.response.data)}`
+        : err.message || String(err);
+
+      // 如果是 404 错误，可能是 uploadID 过期
+      if (err.response?.status === 404) {
+        errorMessage += `\n提示: uploadID 可能已过期。如果是从 checkpoint 恢复上传，请删除 checkpoint 文件重新上传。`;
+      }
+
+      throw new Error(`upload merge part error:${errorMessage}`);
     }
   };
 
-  private generateMergeBody = (checkSumList: string[]) => {
+  private generateMergeBody = (
+    checkSumList: string[],
+    isLargeFile = false,
+    startFromOne = false
+  ) => {
     if (checkSumList.length === 0) {
       throw new Error("crc32 list empty");
     }
     const s: string[] = [];
     for (let i = 0; i < checkSumList.length; i++) {
-      s.push(`${i}:${checkSumList[i]}`);
+      // 过滤掉 undefined 和 null 值，确保所有分片都已上传
+      if (checkSumList[i]) {
+        // 确定分片编号：
+        // 1. 如果 startFromOne=true（断点续传），总是从 1 开始
+        // 2. 否则，对于大文件从 1 开始，对于非大文件从 0 开始
+        const partNumber = startFromOne || isLargeFile ? i + 1 : i;
+        s.push(`${partNumber}:${checkSumList[i]}`);
+      } else {
+        throw new Error(`Missing CRC32 for part ${i + 1}`);
+      }
     }
     return s.join(",");
   };
@@ -473,7 +701,15 @@ export class VodService extends Service {
         maxConcurrency = 4,
         FileSize, // 流大小
         Content, // 流内容
+        // ========== 断点续传扩展参数（可选）==========
+        checkpoint,
+        partSize,
+        onProgress,
+        onUploadEvent,
+        cancelToken,
+        // ========== 断点续传扩展参数结束 ==========
       } = req;
+      const progressCb = onProgress;
       const { sessionKey } = await this.uploadToB({
         SpaceName,
         FilePath,
@@ -483,6 +719,12 @@ export class VodService extends Service {
         maxConcurrency,
         FileSize, // 流大小
         Content, // 流内容
+        // 传递断点续传参数
+        checkpoint,
+        partSize,
+        onProgress: progressCb,
+        onUploadEvent,
+        cancelToken,
       });
       const commitQuery = {
         SpaceName,
@@ -514,7 +756,15 @@ export class VodService extends Service {
         maxConcurrency = 4,
         FileSize, // 流大小
         Content, // 流内容
+        // ========== 断点续传扩展参数（可选）==========
+        checkpoint,
+        partSize,
+        onProgress,
+        onUploadEvent,
+        cancelToken,
+        // ========== 断点续传扩展参数结束 ==========
       } = req;
+      const progressCb = onProgress;
       const { sessionKey } = await this.uploadToB({
         SpaceName,
         FilePath,
@@ -524,6 +774,12 @@ export class VodService extends Service {
         maxConcurrency,
         FileSize, // 流大小
         Content, // 流内容
+        // 传递断点续传参数
+        checkpoint,
+        partSize,
+        onProgress: progressCb,
+        onUploadEvent,
+        cancelToken,
       });
       const commitQuery = {
         SpaceName,

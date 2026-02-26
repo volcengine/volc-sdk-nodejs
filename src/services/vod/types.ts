@@ -26,6 +26,84 @@ export interface UploadParams {
   Content?: NodeJS.ReadableStream; // 流内容
 }
 
+/**
+ * 分片信息
+ */
+export interface VodCheckpointPart {
+  part_number: number; // 从1开始
+  part_size: number;
+  offset: number;
+  crc32: string;
+  is_completed: boolean;
+}
+/**
+ * Checkpoint 记录结构
+ */
+export interface VodCheckpointRecord {
+  // 基础信息
+  space_name: string;
+  file_path?: string;
+  file_name?: string;
+  file_extension?: string;
+  file_type: string;
+
+  // 上传信息
+  upload_id: string;
+  session_key: string;
+  host: string;
+  oid: string;
+  auth: string;
+
+  // 分片配置
+  part_size: number;
+  total_size: number;
+
+  // 文件信息（仅文件路径上传）
+  file_info?: {
+    last_modified: number; // 毫秒时间戳
+    file_size: number;
+  };
+
+  // 已上传分片信息
+  parts_info?: VodCheckpointPart[];
+
+  // 服务器查询的分片列表（原始数据，包含 etag）
+  server_part_list?: Array<{
+    partNumber: number;
+    crc32: string;
+    etag: string;
+  }>;
+}
+
+/**
+ * 上传事件类型
+ */
+export enum VodUploadEventType {
+  InitUploadPartSucceed = 1,
+  InitUploadPartFailed = 2,
+  UploadPartSucceed = 3,
+  UploadPartFailed = 4,
+  UploadPartAborted = 5,
+  UploadMergePartSucceed = 6,
+  UploadMergePartFailed = 7,
+}
+
+/**
+ * 上传事件
+ */
+export interface VodUploadEvent {
+  type: VodUploadEventType;
+  err?: Error;
+  spaceName: string;
+  uploadId: string;
+  checkpointFile?: string;
+  partInfo?: {
+    partNumber: number;
+    partSize: number;
+    offset: number;
+  };
+}
+
 // 媒资上传
 export interface VodUploadMediaRequest {
   SpaceName: string;
@@ -37,6 +115,41 @@ export interface VodUploadMediaRequest {
   maxConcurrency?: number; // 单次上传最大并发数
   FileSize?: number; // 流大小
   Content?: NodeJS.ReadableStream; // 流内容
+
+  // ========== 断点续传扩展参数（可选）==========
+  /**
+   * Checkpoint 文件路径或对象
+   * - 传入字符串：checkpoint 文件路径
+   * - 传入对象：checkpoint 记录对象
+   * - 不传：不使用断点续传
+   */
+  checkpoint?: string | VodCheckpointRecord;
+
+  /**
+   * 自定义分片大小（字节）
+   * - 默认：20MB
+   * - 最小：5MB（除最后一片）
+   * - 最大：根据文件大小自动计算
+   */
+  partSize?: number;
+
+  /**
+   * 上传进度回调（推荐）
+   * @param percent 上传进度（0-1）
+   * @param checkpoint checkpoint 记录对象
+   */
+  onProgress?: (percent: number, checkpoint: VodCheckpointRecord) => void;
+
+  /**
+   * 取消令牌（axios CancelToken）
+   */
+  cancelToken?: any; // CancelToken from axios
+
+  /**
+   * 上传事件回调
+   */
+  onUploadEvent?: (event: VodUploadEvent) => void;
+  // ========== 断点续传扩展参数结束 ==========
 }
 
 // 素材上传
