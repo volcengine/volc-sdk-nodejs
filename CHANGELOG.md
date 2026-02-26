@@ -1,3 +1,10 @@
+2026-02-25 Bumped to version v1.36.0
+- vod:
+  - 对齐 TOS 上传能力，为 Vod SDK 新增基于 Checkpoint 文件的断点续传能力（UploadMedia / UploadMaterial）
+  - Checkpoint 文件记录分片进度，上传完成后删除；文件发生变更时需废弃旧进度重新上传
+  - 提供上传进度回调 onProgress(percent, checkpoint) 与上传事件回调 onUploadEvent(event)，便于控制台/上层业务展示与排障
+  - 支持自定义分片大小 partSize，并对大文件上传过程中的边界与错误信息做更友好的处理
+
 2026-01-15 Bumped to version v1.35.0
 - tls:
   - 新增接口与参数补齐
