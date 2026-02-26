@@ -158,7 +158,7 @@ export default class Signer {
     }
     if (this.request.body) {
       let body = this.request.body;
-      if (typeof body !== "string") {
+      if (typeof body !== "string" && !Buffer.isBuffer(body)) {
         if (body instanceof URLSearchParams) {
           body = body.toString();
         } else if (body instanceof FormData) {
