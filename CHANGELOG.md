@@ -1,3 +1,7 @@
+2026-04-02 Bumped to version v1.36.1
+- tls:
+  - 新增 Producer API，用于在海量数据、高并发场景下快速发送日志数据到日志服务（TLS）。内部实现了异步发送、失败重试、优雅关闭等能力。
+  
 2026-02-25 Bumped to version v1.36.0
 - vod:
   - 对齐 TOS 上传能力，为 Vod SDK 新增基于 Checkpoint 文件的断点续传能力（UploadMedia / UploadMaterial）
