@@ -74,7 +74,9 @@ export class RetryQueue {
   private siftDown(index: number): void {
     const length = this.heap.length;
     let i = index;
-    while (true) {
+    let swapped = true;
+    while (swapped) {
+      swapped = false;
       const left = 2 * i + 1;
       const right = 2 * i + 2;
       let smallest = i;
@@ -85,9 +87,11 @@ export class RetryQueue {
       if (right < length && this.heap[right].nextRetryMs < this.heap[smallest].nextRetryMs) {
         smallest = right;
       }
-      if (smallest === i) break;
-      this.swap(i, smallest);
-      i = smallest;
+      if (smallest !== i) {
+        this.swap(i, smallest);
+        i = smallest;
+        swapped = true;
+      }
     }
   }
 
