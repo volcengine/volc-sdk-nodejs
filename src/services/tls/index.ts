@@ -839,4 +839,7 @@ export class TlsService extends Base {
     method: "GET",
   });
 }
+
 export const defaultService = new TlsService();
+
+export * from "./producer";

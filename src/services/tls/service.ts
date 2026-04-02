@@ -17,6 +17,18 @@ import {
 
 const TIMEOUT = 100000;
 
+const ANONYMOUS_IDENTITY_HEADER = "x-tls-anonymous-identity";
+
+function hasNonEmptyHeader(headers: unknown, headerName: string): boolean {
+  if (!headers || typeof headers !== "object") return false;
+  for (const [key, value] of Object.entries(headers as Record<string, unknown>)) {
+    if (key.toLowerCase() !== headerName.toLowerCase()) continue;
+    if (typeof value === "string" && value.trim()) return true;
+    if (Array.isArray(value) && value.some((v) => typeof v === "string" && v.trim())) return true;
+  }
+  return false;
+}
+
 const defaultOptions = getDefaultOption();
 
 export default class Service {
@@ -99,8 +111,17 @@ export default class Service {
 
       const version = versionFromParam || versionFromOptions;
 
-      if (!accessKeyId || !secretKey || !host)
-        throw new Error(`[tls-node-sdk] host and accessKeyId and secretKey is necessary`);
+      const anonymousIdentityEnabled =
+        hasNonEmptyHeader(axiosConfigFromCreateParams?.headers, ANONYMOUS_IDENTITY_HEADER) ||
+        hasNonEmptyHeader(config?.headers, ANONYMOUS_IDENTITY_HEADER);
+
+      if (!host) {
+        throw new Error(`[tls-node-sdk] host is necessary`);
+      }
+
+      if (!anonymousIdentityEnabled && (!accessKeyId || !secretKey)) {
+        throw new Error(`[tls-node-sdk] accessKeyId and secretKey is necessary`);
+      }
       const requestObj: any = {
         ...(axiosConfigFromCreateParams ?? {}),
         region,
@@ -137,8 +158,14 @@ export default class Service {
         requestObj.body = requestData;
         requestObj.data = requestData;
       }
-      const signer = new Signer(requestObj, serviceName as string);
-      signer.addAuthorization({ accessKeyId, secretKey, sessionToken });
+      if (!anonymousIdentityEnabled) {
+        const signer = new Signer(requestObj, serviceName as string);
+        signer.addAuthorization({
+          accessKeyId: accessKeyId as string,
+          secretKey: secretKey as string,
+          sessionToken,
+        });
+      }
       return Service.fetch<Result>(`${protocol}//${host}/${Path}`.trim(), requestObj);
     };
   }
@@ -168,12 +195,19 @@ export default class Service {
 
       const { accessKeyId, secretKey, sessionToken, host, version, protocol, serviceName, region } =
         this.options;
-      if (!accessKeyId || !secretKey || !host || !region) {
+      const anonymousIdentityEnabled = hasNonEmptyHeader(config?.headers, ANONYMOUS_IDENTITY_HEADER);
+
+      if (!host || !region) {
+        const missingParams: string[] = [];
+        if (!host) missingParams.push("host");
+        if (!region) missingParams.push("region");
+        throw new Error(`[tls-node-sdk] ${missingParams.join(" and ")} is necessary`);
+      }
+
+      if (!anonymousIdentityEnabled && (!accessKeyId || !secretKey)) {
         const missingParams: string[] = [];
         if (!accessKeyId) missingParams.push("accessKeyId");
         if (!secretKey) missingParams.push("secretKey");
-        if (!host) missingParams.push("host");
-        if (!region) missingParams.push("region");
         throw new Error(`[tls-node-sdk] ${missingParams.join(" and ")} is necessary`);
       }
 
@@ -209,8 +243,14 @@ export default class Service {
       requestObj.params = {
         TopicId,
       };
-      const signer = new Signer(requestObj, serviceName as string);
-      signer.addAuthorization({ accessKeyId, secretKey, sessionToken });
+      if (!anonymousIdentityEnabled) {
+        const signer = new Signer(requestObj, serviceName as string);
+        signer.addAuthorization({
+          accessKeyId: accessKeyId as string,
+          secretKey: secretKey as string,
+          sessionToken,
+        });
+      }
       return Service.fetch(`${protocol}//${host}/${Path}`.trim(), requestObj);
     };
   }
