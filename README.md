@@ -117,3 +117,7 @@ const signer = new Signer(openApiRequestData, "sts");
 
 const signedQueryString = signer.getSignUrl(credentials);
 ```
+
+## Security and privacy
+This project takes security seriously.
+For vulnerability reporting and supported versions, see [SECURITY.md](SECURITY.md)
