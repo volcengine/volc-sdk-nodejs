@@ -74,6 +74,24 @@ const formatUploadErrMsg = (res: UploadPutResult) => {
     .join(", ")}`;
 };
 
+const getAigcMetaHeader = (
+  enableAigcMark?: boolean,
+  aigcMetaData?: Record<string, string>
+): string | undefined => {
+  if (!enableAigcMark) {
+    return undefined;
+  }
+  if (
+    aigcMetaData === undefined ||
+    aigcMetaData === null ||
+    typeof aigcMetaData !== "object" ||
+    Array.isArray(aigcMetaData)
+  ) {
+    throw new Error("AIGCMetaData must be a plain object when EnableAIGCMark is true");
+  }
+  return Buffer.from(JSON.stringify(aigcMetaData)).toString("base64");
+};
+
 const handleErrorResponse = (error, action) => {
   // 2xx but error
   if (error.message?.includes("ImageX API")) {
@@ -140,6 +158,8 @@ export class ImagexService extends ImagexAutoService {
       ShowDuration?: boolean;
       ContentTypes?: string[];
       StorageClasses?: string[];
+      EnableAIGCMark?: boolean;
+      AIGCMetaData?: Record<string, string>;
     },
     files: string[] | NodeJS.ReadableStream[] | ArrayBuffer[] | ArrayBufferView[],
     enableChunkUpload?: boolean
@@ -215,6 +235,7 @@ export class ImagexService extends ImagexAutoService {
     const uploadAddr = applyRes.Result?.UploadAddress;
     const uploadHosts = uploadAddr?.UploadHosts ?? [];
     const storeInfos = uploadAddr?.StoreInfos ?? [];
+    const aigcMetaHeader = getAigcMetaHeader(params.EnableAIGCMark, params.AIGCMetaData);
 
     if (!uploadAddr) {
       throw Error(`no upload address found, reqId: ${reqId}`);
@@ -254,7 +275,9 @@ export class ImagexService extends ImagexAutoService {
       newStoreInfos.length ? newStoreInfos : storeInfos,
       params.ContentTypes,
       params.StorageClasses,
-      enableChunkUpload
+      enableChunkUpload,
+      params.EnableAIGCMark,
+      aigcMetaHeader
     );
     if (params.ShowDuration && putLogger) {
       putLogger.print({ endTime: dayjs().valueOf(), identifier: logIdentifier });
@@ -342,7 +365,9 @@ export class ImagexService extends ImagexAutoService {
     storeInfos: ApplyImageUploadRes["Result"]["UploadAddress"]["StoreInfos"],
     fileContentTypes?: string[],
     fileStorageClasses?: string[],
-    chunkUpload?: boolean
+    chunkUpload?: boolean,
+    enableAigcMark?: boolean,
+    aigcMetaHeader?: string
   ) => {
     const promiseArray: Promise<UploadPutResult>[] = [];
     for (let i = 0; i < files.length; i++) {
@@ -356,10 +381,17 @@ export class ImagexService extends ImagexAutoService {
         size = stat.size;
       } else if (file instanceof ArrayBuffer || ArrayBuffer.isView(file)) {
         size = file.byteLength; // 直接获取二进制数据大小
+      } else if (enableAigcMark) {
+        throw new Error("EnableAIGCMark does not support ReadableStream file input");
       }
       // ReadableStream获取不到size，此处为false，默认直传
       const enableChunkUpload = chunkUpload && size > MIN_CHUNK_SIZE;
       if (enableChunkUpload) {
+        if (enableAigcMark && size > LARGE_FILE_SIZE) {
+          throw new Error(
+            `EnableAIGCMark does not support file size larger than ${LARGE_FILE_SIZE}`
+          );
+        }
         promiseArray.push(
           this.chunkUpload({
             uploadHost,
@@ -370,6 +402,7 @@ export class ImagexService extends ImagexAutoService {
             isLargeFile: size > LARGE_FILE_SIZE,
             contentType: fileContentTypes?.[i],
             storageClass: fileStorageClasses?.[i],
+            aigcMetaHeader,
           })
         );
       } else {
@@ -381,6 +414,7 @@ export class ImagexService extends ImagexAutoService {
             file: files[i],
             contentType: fileContentTypes?.[i],
             storageClass: fileStorageClasses?.[i],
+            aigcMetaHeader,
           })
         );
       }
@@ -398,6 +432,7 @@ export class ImagexService extends ImagexAutoService {
     isLargeFile: boolean;
     contentType?: string;
     storageClass?: string;
+    aigcMetaHeader?: string;
     maxConcurrency?: number;
   }) => {
     const {
@@ -409,6 +444,7 @@ export class ImagexService extends ImagexAutoService {
       isLargeFile,
       contentType,
       storageClass,
+      aigcMetaHeader,
       maxConcurrency = 4,
     } = params;
     const limit = pLimit(maxConcurrency);
@@ -454,7 +490,8 @@ export class ImagexService extends ImagexAutoService {
               partNum,
               isLargeFile,
               contentType,
-              storageClass
+              storageClass,
+              aigcMetaHeader
             )
           ).then((checksum) => {
             parts[i] = checksum;
@@ -477,7 +514,8 @@ export class ImagexService extends ImagexAutoService {
             isLargeFile ? lastNum + 1 : lastNum,
             isLargeFile,
             contentType,
-            storageClass
+            storageClass,
+            aigcMetaHeader
           )
         ).then((checksum) => {
           parts[lastNum] = checksum;
@@ -493,7 +531,8 @@ export class ImagexService extends ImagexAutoService {
         parts,
         isLargeFile,
         contentType,
-        storageClass
+        storageClass,
+        aigcMetaHeader
       );
       return { uri: oid, success: true };
     } catch (error) {
@@ -549,7 +588,8 @@ export class ImagexService extends ImagexAutoService {
     partNum: number,
     isLargeFile: boolean,
     contentType?: string,
-    storageClass?: string
+    storageClass?: string,
+    aigcMetaHeader?: string
   ) {
     return maxLimit(async () => {
       let buffer: Buffer;
@@ -574,7 +614,8 @@ export class ImagexService extends ImagexAutoService {
         buffer,
         isLargeFile,
         contentType,
-        storageClass
+        storageClass,
+        aigcMetaHeader
       );
     });
   }
@@ -618,7 +659,8 @@ export class ImagexService extends ImagexAutoService {
     data: Buffer,
     isLargeFile: boolean,
     contentType: string | undefined,
-    storageClass: string | undefined
+    storageClass: string | undefined,
+    aigcMetaHeader?: string
   ) => {
     const url = `https://${host}/${getEncodedUri(
       oid
@@ -633,6 +675,9 @@ export class ImagexService extends ImagexAutoService {
     }
     if (storageClass) {
       headers["X-Veimagex-Storage-Class"] = storageClass;
+    }
+    if (aigcMetaHeader) {
+      headers["X-Upload-AIGC-Meta"] = aigcMetaHeader;
     }
     await axios(url, {
       method: "put",
@@ -651,7 +696,8 @@ export class ImagexService extends ImagexAutoService {
     checkSumList: string[],
     isLargeFile: boolean,
     contentType: string | undefined,
-    storageClass: string | undefined
+    storageClass: string | undefined,
+    aigcMetaHeader?: string
   ) => {
     const url = `https://${host}/${getEncodedUri(oid)}?uploadID=${uploadID}`;
     const data = this.generateMergeBody(checkSumList);
@@ -664,6 +710,9 @@ export class ImagexService extends ImagexAutoService {
     }
     if (storageClass) {
       headers["X-Veimagex-Storage-Class"] = storageClass;
+    }
+    if (aigcMetaHeader) {
+      headers["X-Upload-AIGC-Meta"] = aigcMetaHeader;
     }
     await axios(url, {
       method: "put",
@@ -691,8 +740,9 @@ export class ImagexService extends ImagexAutoService {
     file: string | NodeJS.ReadableStream | ArrayBuffer | ArrayBufferView;
     contentType?: string;
     storageClass?: string;
+    aigcMetaHeader?: string;
   }): Promise<UploadPutResult> => {
-    const { uploadHost, oid, auth, file, contentType, storageClass } = params;
+    const { uploadHost, oid, auth, file, contentType, storageClass, aigcMetaHeader } = params;
     let fileCopy = file;
     if (Object.prototype.toString.call(fileCopy) === "[object String]") {
       try {
@@ -717,6 +767,9 @@ export class ImagexService extends ImagexAutoService {
     }
     if (storageClass) {
       headers["X-Veimagex-Storage-Class"] = storageClass;
+    }
+    if (aigcMetaHeader) {
+      headers["X-Upload-AIGC-Meta"] = aigcMetaHeader;
     }
     try {
       await axios(`https://${uploadHost}/${getEncodedUri(oid)}`, {
