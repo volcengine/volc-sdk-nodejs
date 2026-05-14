@@ -287,6 +287,7 @@ export interface ApplySmsSignatureParams {
   Source: string;
   Domain: string;
   Desc: string;
+  Id: number;
   UploadFileKey: string;
 }
 export interface ApplySmsSignatureResponse {
@@ -305,4 +306,55 @@ export interface DeleteSignatureParams {
 export interface DeleteSignatureResponse {
   ResponseMetadata: BaseMetaData & BaseError;
   Result: SmsSignatureInfo;
+}
+
+/** 批量导入签名*/
+
+export interface ApplySignatureIdentParams {
+  Id: number; // 资质id，重新编辑需要提供之前的id
+  Purpose: number; // 资质用途； 1.自用，2.他用
+  MaterialName: string; // 资质名称
+  BusinessInfo: string; // 企业信息
+  OperatorPersonInfo: string; // 经办人信息
+  ResponsiblePersonInfo: string; // 责任人信息
+  PowerOfAttorney: string; // 授权书
+  OtherMaterials: string; // 其他材料
+  EffectSignatures: string;
+}
+export interface ApplySignatureIdentResponse {
+  ResponseMetadata: BaseMetaData & BaseError;
+  Result: {
+    Id: number;
+  };
+}
+
+export interface GetSignatureIdentListParams {
+  Id: number; // 资质id，重新编辑需要提供之前的id
+  Purpose: number; // 资质用途； 1.自用，2.他用
+  MaterialName: string; // 资质名称
+  BusinessInfo: string; // 企业信息
+  OperatorPersonInfo: string; // 经办人信息
+  ResponsiblePersonInfo: string; // 责任人信息
+  PowerOfAttorney: string; // 授权书
+  OtherMaterials: string; // 其他材料
+  EffectSignatures: string;
+}
+export interface GetSignatureIdentListResponse {
+  ResponseMetadata: BaseMetaData & BaseError;
+  Result: {
+    Id: number;
+  };
+}
+
+export interface BatchBindSignatureIdentParams {
+  SubAccount: string;
+  Signatures: string;
+  Id: number;
+}
+
+export interface BatchBindSignatureIdentResponse {
+  ResponseMetadata: BaseMetaData & BaseError;
+  Result: {
+    Message: string;
+  };
 }

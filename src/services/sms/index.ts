@@ -33,6 +33,12 @@ import {
   DeleteSignatureResponse,
   GetSignatureAndOrderListParams,
   GetSignatureAndOrderListResponse,
+  ApplySignatureIdentParams,
+  ApplySignatureIdentResponse,
+  GetSignatureIdentListParams,
+  GetSignatureIdentListResponse,
+  BatchBindSignatureIdentParams,
+  BatchBindSignatureIdentResponse,
 } from "./types";
 enum HttpMethod {
   GET = "GET",
@@ -208,6 +214,35 @@ export class SmsService extends Service {
     }
   );
   /* signature end*/
+
+  /*batch import signatures*/
+
+  ApplySignatureIdent = this.createAPI<ApplySignatureIdentParams, ApplySignatureIdentResponse>(
+    "ApplySignatureIdent",
+    {
+      method: HttpMethod.POST,
+      contentType: "json",
+      Version: ServiceVersion20210111,
+    }
+  );
+
+  GetSignatureIdentList = this.createAPI<
+    GetSignatureIdentListParams,
+    GetSignatureIdentListResponse
+  >("GetSignatureIdentList", {
+    method: HttpMethod.GET,
+    contentType: "json",
+    Version: ServiceVersion20210111,
+  });
+
+  BatchBindSignatureIdent = this.createAPI<
+    BatchBindSignatureIdentParams,
+    BatchBindSignatureIdentResponse
+  >("BatchBindSignatureIdent", {
+    method: HttpMethod.POST,
+    contentType: "json",
+    Version: ServiceVersion20210111,
+  });
 }
 
 export const defaultService = new SmsService();
