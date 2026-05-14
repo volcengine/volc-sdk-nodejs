@@ -308,6 +308,37 @@ export interface DeleteSignatureResponse {
   Result: SmsSignatureInfo;
 }
 
+/**
+ * @name 签名更新接口参数
+ */
+enum PurposeType {
+  self = 1,
+  other = 2,
+}
+export interface UpdateSmsSignatureParams {
+  SubAccount: string;
+  Content: string;
+  Source: string;
+  Domain: string;
+  Desc: string;
+  UploadFileKey: string;
+  Purpose: PurposeType;
+  UploadFileList: Array<{
+    fileType: number;
+    FileContent: string;
+    fileSuffix: string;
+    JSONField: string;
+  }>;
+  appIcp: string;
+  trademark: string;
+  signatureIdentificationID: string;
+  scene: number;
+}
+
+export interface UpdateSmsSignatureResponse {
+  ResponseMetadata: BaseMetaData & BaseError;
+  Result: SmsSignatureInfo;
+}
 /** 批量导入签名*/
 
 export interface ApplySignatureIdentParams {

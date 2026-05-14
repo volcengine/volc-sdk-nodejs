@@ -33,6 +33,8 @@ import {
   DeleteSignatureResponse,
   GetSignatureAndOrderListParams,
   GetSignatureAndOrderListResponse,
+  UpdateSmsSignatureParams,
+  UpdateSmsSignatureResponse,
   ApplySignatureIdentParams,
   ApplySignatureIdentResponse,
   GetSignatureIdentListParams,
@@ -209,6 +211,15 @@ export class SmsService extends Service {
     "DeleteSignature",
     {
       method: HttpMethod.POST,
+      contentType: "json",
+      Version: ServiceVersion20210111,
+    }
+  );
+
+  UpdateSmsSignature = this.createAPI<UpdateSmsSignatureParams, UpdateSmsSignatureResponse>(
+    "UpdateSmsSignature",
+    {
+      method: HttpMethod.PUT,
       contentType: "json",
       Version: ServiceVersion20210111,
     }
